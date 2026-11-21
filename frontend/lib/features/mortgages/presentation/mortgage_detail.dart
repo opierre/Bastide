@@ -4,22 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
 import '../domain/mortgage.dart';
 import '../domain/schedule_row.dart';
-import 'mortgage_form_modal.dart';
+import 'loan_summary_item.dart';
 import 'mortgage_labels.dart';
 import 'schedule_table.dart';
 
-/// One loan in full (`12-credits.md` frame ②): the header, the cost row with the
-/// indicative TAEG, and the amortisation table.
+/// One loan in full (`12-credits.md` § Loan detail): the summary line, the
+/// cost line, then the amortisation table. The crumb, the loan's name and
+/// « Modifier » live in the title bar.
 ///
-/// No amortisation curve here — the frames reject it: the table carries the
-/// numbers and the list's trajectory chart already carries the shape.
+/// No amortisation curve here: the table carries the numbers and the list's
+/// trajectory chart the shape.
 class MortgageDetailPanel extends ConsumerWidget {
   const MortgageDetailPanel({super.key, required this.mortgageId});
 
@@ -30,59 +29,41 @@ class MortgageDetailPanel extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final detail = ref.watch(mortgageDetailProvider(mortgageId));
 
-    return Column(
+    return KeyedSubtree(
       key: const Key('mortgageDetail'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // A link, not a 38 px button: the frame budgets the whole detail —
-        // header, cost row, twelve dense rows and the foot — into 900 px.
-        Align(
-          alignment: Alignment.centerLeft,
-          child: InkWell(
-            key: const Key('mortgageDetailBack'),
-            borderRadius: BorderRadius.circular(AppRadii.sm),
-            onTap: () => ref.read(selectedMortgageProvider.notifier).close(),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.arrow_back_rounded,
-                    size: 16,
-                    color: context.colors.accent,
-                  ),
-                  const SizedBox(width: AppSpacing.xs + 2),
-                  Text(
-                    l10n.mortgageDetailBack,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: context.colors.accent,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+      child: switch (detail) {
+        AsyncData(:final value) => MortgageDetailBody(view: value),
+        AsyncError() => ErrorStateView(
+          message: l10n.mortgageDetailLoadFailed,
+          messageKey: const Key('mortgageDetailErrorText'),
+          retryLabel: l10n.mortgagesRetry,
+          retryKey: const Key('mortgageDetailRetryButton'),
+          onRetry: () => ref.invalidate(mortgageDetailProvider(mortgageId)),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        Expanded(
-          child: switch (detail) {
-            AsyncData(:final value) => MortgageDetailBody(view: value),
-            AsyncError() => ErrorStateView(
-              message: l10n.mortgageDetailLoadFailed,
-              messageKey: const Key('mortgageDetailErrorText'),
-              retryLabel: l10n.mortgagesRetry,
-              retryKey: const Key('mortgageDetailRetryButton'),
-              onRetry: () => ref.invalidate(mortgageDetailProvider(mortgageId)),
-            ),
-            _ => const SkeletonList(
-              key: Key('mortgageDetailLoading'),
-              itemCount: 3,
-              itemHeight: 92,
-            ),
-          },
-        ),
-      ],
+        _ => const _DetailLoading(),
+      },
+    );
+  }
+}
+
+/// The detail's silhouette: two summary lines and the table.
+class _DetailLoading extends StatelessWidget {
+  const _DetailLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SkeletonPulse(
+      key: Key('mortgageDetailLoading'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SkeletonBlock(height: AppSpacing.xxl * 2),
+          SizedBox(height: AppSpacing.section),
+          SkeletonBlock(height: AppSpacing.xxl * 1.5),
+          SizedBox(height: AppSpacing.section),
+          Expanded(child: SkeletonBlock(height: double.infinity)),
+        ],
+      ),
     );
   }
 }
@@ -99,20 +80,23 @@ class MortgageDetailBody extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _HeaderCard(detail: view.detail),
-        const SizedBox(height: AppSpacing.gridGap),
-        _CostRow(view: view),
-        const SizedBox(height: AppSpacing.gridGap),
+        _DetailSummaryLine(detail: view.detail),
+        const SizedBox(height: AppSpacing.section),
+        _CostLine(view: view),
+        const SizedBox(height: AppSpacing.section),
         Expanded(
-          child: ScheduleTableCard(years: ScheduleYears.of(view.detail, today)),
+          child: ScheduleSection(years: ScheduleYears.of(view.detail, today)),
         ),
       ],
     );
   }
 }
 
-class _HeaderCard extends StatelessWidget {
-  const _HeaderCard({required this.detail});
+/// « Échéance totale » leads at 40 px, then « Capital restant dû » and
+/// « Prochaine échéance » at 20 px; on the right, two 12 `textSecondary`
+/// lines naming the loan's terms.
+class _DetailSummaryLine extends StatelessWidget {
+  const _DetailSummaryLine({required this.detail});
 
   final MortgageDetail detail;
 
@@ -120,7 +104,9 @@ class _HeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    final textTheme = Theme.of(context).textTheme;
+    final secondary = tabularNumberStyle(
+      Theme.of(context).textTheme.bodySmall!,
+    ).copyWith(color: context.colors.textSecondary);
     final mortgage = detail.mortgage;
 
     String money(int minor) => formatAmount(
@@ -129,109 +115,91 @@ class _HeaderCard extends StatelessWidget {
       locale: locale,
     );
 
-    final kind = mortgageKindLabel(l10n, mortgage.kind);
     final firstPayment = mortgageDateFormat(
       locale,
     ).format(mortgage.firstPaymentDate);
-    final subline = mortgage.upfrontFeesMinor > 0
-        ? l10n.mortgageDetailSublineFees(
-            kind,
-            mortgage.lender,
-            money(mortgage.principalMinor),
-            mortgage.termMonths,
-            firstPayment,
-            money(mortgage.upfrontFeesMinor),
-          )
-        : l10n.mortgageDetailSubline(
-            kind,
-            mortgage.lender,
-            money(mortgage.principalMinor),
-            mortgage.termMonths,
-            firstPayment,
-          );
 
-    return AppCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 26,
-        vertical: AppSpacing.cardPadding,
-      ),
+    return IntrinsicHeight(
+      key: const Key('mortgageDetailSummaryLine'),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          InstitutionAvatar(name: mortgage.lender, size: 48),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  mortgage.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.titleLarge?.copyWith(fontSize: 20),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  subline,
-                  key: const Key('mortgageDetailSubline'),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: context.colors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.lg),
-          // Flexible rather than natural width: French captions run long, and
-          // a header that ellipsizes a caption beats one that overflows.
           Flexible(
-            flex: 2,
-            child: _HeaderStat(
+            child: LoanSummaryItem(
+              lead: true,
               label: l10n.mortgageDetailInstalmentLabel,
-              value: money(mortgage.totalInstalmentMinor),
-              valueKey: const Key('mortgageDetailInstalment'),
+              figure: money(mortgage.totalInstalmentMinor),
+              figureKey: const Key('mortgageDetailInstalment'),
               caption: mortgage.insuranceMonthlyMinor > 0
                   ? l10n.mortgageDetailInstalmentCaption(
                       money(mortgage.monthlyPaymentMinor),
                       money(mortgage.insuranceMonthlyMinor),
                     )
                   : l10n.mortgageDetailInstalmentNoInsurance,
+              captionKey: const Key('mortgageDetailInstalmentCaption'),
             ),
           ),
-          const SizedBox(width: AppSpacing.lg),
+          const LoanSummaryHairline(),
           Flexible(
-            flex: 2,
-            child: _HeaderStat(
+            child: LoanSummaryItem(
               label: l10n.mortgagesOutstandingLabel,
-              value: money(mortgage.outstandingPrincipalMinor),
-              valueKey: const Key('mortgageDetailOutstanding'),
+              figure: money(mortgage.outstandingPrincipalMinor),
+              figureKey: const Key('mortgageDetailOutstanding'),
               caption: l10n.mortgageDetailOutstandingCaption(
                 formatBps(mortgage.paidPrincipalBps, locale),
                 mortgage.remainingMonths,
               ),
             ),
           ),
-          const SizedBox(width: AppSpacing.lg),
+          const LoanSummaryHairline(),
           Flexible(
-            flex: 2,
-            child: _HeaderStat(
+            child: LoanSummaryItem(
               label: l10n.mortgageNextLabel,
-              value: switch (mortgage.nextPaymentOn) {
-                final next? => mortgageDateFormat(locale).format(next),
+              figure: switch (mortgage.nextPaymentOn) {
+                final next? => mortgageLongDateFormat(locale).format(next),
                 null => '—',
               },
-              valueKey: const Key('mortgageDetailNext'),
-              // The lender, not an account: a declared loan is never linked to
-              // the ledger, so there is no account to name.
+              figureKey: const Key('mortgageDetailNext'),
+              // The spec names the paying account here; a declared loan is
+              // not linked to an account, so the lender stands in for it.
               caption: mortgage.lender,
             ),
           ),
-          const SizedBox(width: AppSpacing.lg),
-          OutlinedButton(
-            key: const Key('mortgageDetailEdit'),
-            onPressed: () => showMortgageForm(context, initial: mortgage),
-            child: Text(l10n.mortgageDetailEdit),
+          const SizedBox(width: AppSpacing.xxl),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  l10n.mortgageDetailFacts(
+                    mortgageKindLabel(l10n, mortgage.kind),
+                    mortgage.lender,
+                    money(mortgage.principalMinor),
+                    mortgage.termMonths,
+                  ),
+                  key: const Key('mortgageDetailFacts'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style: secondary,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  mortgage.upfrontFeesMinor > 0
+                      ? l10n.mortgageDetailFirstPaymentFees(
+                          firstPayment,
+                          money(mortgage.upfrontFeesMinor),
+                        )
+                      : l10n.mortgageDetailFirstPayment(firstPayment),
+                  key: const Key('mortgageDetailFirstPayment'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style: secondary,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -239,60 +207,11 @@ class _HeaderCard extends StatelessWidget {
   }
 }
 
-class _HeaderStat extends StatelessWidget {
-  const _HeaderStat({
-    required this.label,
-    required this.value,
-    required this.valueKey,
-    required this.caption,
-  });
-
-  final String label;
-  final String value;
-  final Key valueKey;
-  final String caption;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label.toUpperCase(),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textStyles.sectionLabel.copyWith(
-            fontSize: 10.5,
-            letterSpacing: 1,
-          ),
-        ),
-        const SizedBox(height: 3),
-        Text(
-          value,
-          key: valueKey,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: tabularNumberStyle(
-            Theme.of(context).textTheme.titleSmall!,
-          ).copyWith(fontSize: 15),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          caption,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textStyles.helper.copyWith(fontSize: 11),
-        ),
-      ],
-    );
-  }
-}
-
-/// Frame ②'s four cost cards. The TAEG carries its « INDICATIF » marker on the
-/// label itself: a real TAEG includes fees the app never sees.
-class _CostRow extends StatelessWidget {
-  const _CostRow({required this.view});
+/// The cost line, a second summary line at 20 px: nominal rate, indicative
+/// TAEG, total interest and total cost. « TAEG indicatif » says so in its
+/// label: a real TAEG includes fees the app never sees.
+class _CostLine extends StatelessWidget {
+  const _CostLine({required this.view});
 
   final MortgageDetailView view;
 
@@ -310,109 +229,49 @@ class _CostRow extends StatelessWidget {
     );
 
     return IntrinsicHeight(
+      key: const Key('mortgageCostLine'),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: _CostCard(
-              label: Text(
-                l10n.mortgageRateLabel.toUpperCase(),
-                style: context.textStyles.statLabel,
-              ),
-              value: formatBps(mortgage.annualRateBps, locale, digits: 2),
-              valueKey: const Key('mortgageCostRate'),
+          Flexible(
+            child: LoanSummaryItem(
+              label: l10n.mortgageRateLabel,
+              figure: formatBps(mortgage.annualRateBps, locale, digits: 2),
+              figureKey: const Key('mortgageCostRate'),
               caption: l10n.mortgageCostRateCaption,
             ),
           ),
-          const SizedBox(width: AppSpacing.gridGap),
-          Expanded(
-            child: _CostCard(
-              label: Text(
-                l10n.mortgageCostTaegLabel.toUpperCase(),
-                style: context.textStyles.statLabel,
-              ),
-              value: formatBps(detail.taegBps, locale, digits: 2),
-              valueKey: const Key('mortgageCostTaeg'),
+          const LoanSummaryHairline(),
+          Flexible(
+            child: LoanSummaryItem(
+              label: l10n.mortgageCostTaegLabel,
+              figure: formatBps(detail.taegBps, locale, digits: 2),
+              figureKey: const Key('mortgageCostTaeg'),
               caption: l10n.mortgageCostTaegCaption,
             ),
           ),
-          const SizedBox(width: AppSpacing.gridGap),
-          Expanded(
-            child: _CostCard(
-              label: Text(
-                l10n.mortgageCostInterestLabel.toUpperCase(),
-                style: context.textStyles.statLabel,
-              ),
-              value: money(detail.totalInterestMinor),
-              valueKey: const Key('mortgageCostInterest'),
+          const LoanSummaryHairline(),
+          Flexible(
+            child: LoanSummaryItem(
+              label: l10n.mortgageCostInterestLabel,
+              figure: money(detail.totalInterestMinor),
+              figureKey: const Key('mortgageCostInterest'),
               caption: l10n.mortgageCostInterestCaption(
                 money(view.interestStillDueMinor),
               ),
             ),
           ),
-          const SizedBox(width: AppSpacing.gridGap),
-          Expanded(
-            child: _CostCard(
-              label: Text(
-                l10n.mortgageCostTotalLabel.toUpperCase(),
-                style: context.textStyles.statLabel,
-              ),
-              value: money(detail.totalCostMinor),
-              valueKey: const Key('mortgageCostTotal'),
+          const LoanSummaryHairline(),
+          Flexible(
+            child: LoanSummaryItem(
+              label: l10n.mortgageCostTotalLabel,
+              figure: money(detail.totalCostMinor),
+              figureKey: const Key('mortgageCostTotal'),
               caption: l10n.mortgageCostTotalCaption(
                 money(detail.totalInsuranceMinor),
                 money(mortgage.upfrontFeesMinor),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CostCard extends StatelessWidget {
-  const _CostCard({
-    required this.label,
-    required this.value,
-    required this.valueKey,
-    required this.caption,
-  });
-
-  final Widget label;
-  final String value;
-  final Key valueKey;
-  final String caption;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.cardPadding,
-        vertical: 16,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          label,
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            value,
-            key: valueKey,
-            maxLines: 1,
-            style: tabularNumberStyle(
-              Theme.of(context).textTheme.displayMedium!,
-            ).copyWith(fontSize: 24),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          // Two lines at most: the detail budgets its cost row so the year's
-          // table and foot still fit a 900 px frame below it.
-          Text(
-            caption,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: context.textStyles.helper,
           ),
         ],
       ),

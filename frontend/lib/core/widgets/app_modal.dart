@@ -24,6 +24,7 @@ class AppModal extends StatelessWidget {
     required this.actions,
     this.subtitle,
     this.leading,
+    this.leadingAction,
   });
 
   final String title;
@@ -42,6 +43,10 @@ class AppModal extends StatelessWidget {
   /// Footer buttons, laid out right-aligned in order. Cancel first, confirm
   /// last — the confirm action sits nearest the natural reading exit.
   final List<Widget> actions;
+
+  /// A tertiary action set apart on the footer's left: a ghost « Supprimer »
+  /// in an edit form (`08-categories-rules.md`, `12-credits.md`).
+  final Widget? leadingAction;
 
   @override
   Widget build(BuildContext context) {
@@ -114,12 +119,22 @@ class AppModal extends StatelessWidget {
               // 480 px modal has no room to spare. Identical to a row while the
               // actions fit, and it drops to a second line instead of
               // overflowing when they don't.
-              child: Wrap(
-                alignment: WrapAlignment.end,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: actions,
+              child: Row(
+                children: [
+                  if (leadingAction != null) ...[
+                    leadingAction!,
+                    const SizedBox(width: AppSpacing.sm),
+                  ],
+                  Expanded(
+                    child: Wrap(
+                      alignment: WrapAlignment.end,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: actions,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

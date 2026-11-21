@@ -170,7 +170,6 @@ class FakeMortgagesController extends MortgagesController {
   final createCalls = <LoanDraft>[];
   final updateCalls = <(String, LoanDraft)>[];
   final archiveCalls = <String>[];
-  final declaredIncomes = <int>[];
   Object? errorOnSave;
 
   @override
@@ -206,10 +205,5 @@ class FakeMortgagesController extends MortgagesController {
         ],
       ),
     );
-  }
-
-  @override
-  Future<void> declareIncome(int monthlyIncomeMinor) async {
-    declaredIncomes.add(monthlyIncomeMinor);
   }
 }

@@ -88,12 +88,12 @@ void main() {
     expect(_text(tester, 'scheduleFootTotal'), _money(1468644));
     expect(
       _text(tester, 'scheduleFootOutstanding'),
-      'au 31/12/2026 : ${_money(21862220)}',
+      'au 31 déc. 2026 : ${_money(21862220)}',
     );
     expect(find.text('Total 2026'), findsOneWidget);
     expect(
       _text(tester, 'scheduleSubtitle'),
-      "Année 4 sur 26 · 12 échéances · l'assurance est comptée à part",
+      'Année 4 sur 26 · 12 échéances · l’assurance est comptée à part',
     );
   });
 
@@ -114,14 +114,7 @@ void main() {
         expect(tester.getSize(find.byWidget(element.widget)).height, 28);
       }
 
-      // No scrollable wraps the table: the foot is laid out inside the frame.
-      expect(
-        find.ancestor(
-          of: find.byKey(const Key('scheduleTable')),
-          matching: find.byType(Scrollable),
-        ),
-        findsNothing,
-      );
+      // The foot is laid out inside the frame, with nothing to scroll.
       expect(
         tester.getRect(find.byKey(const Key('scheduleFoot'))).bottom,
         lessThanOrEqualTo(_frame.height),
@@ -166,17 +159,19 @@ void main() {
 
     expect(_text(tester, 'yearSwitcherLabel'), '2026');
     expect(requested, [2026]);
-    for (final year in [2023, 2024, 2025, 2026, 2027]) {
-      expect(find.byKey(Key('yearSwitcherYear-$year')), findsOneWidget);
-    }
-    expect(find.text('… 2048'), findsOneWidget);
+    expect(find.byKey(const Key('yearSwitcherSelect')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('yearSwitcherNext')));
     await tester.pumpAndSettle();
     expect(_text(tester, 'yearSwitcherLabel'), '2027');
     expect(find.text('Total 2027'), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('yearSwitcherYear-2024')));
+    // The select lists every year of the loan, first to last.
+    await tester.tap(find.byKey(const Key('yearSwitcherSelect')));
+    await tester.pumpAndSettle();
+    expect(find.text('2023'), findsOneWidget);
+    expect(find.text('2048'), findsOneWidget);
+    await tester.tap(find.text('2024'));
     await tester.pumpAndSettle();
     expect(_text(tester, 'yearSwitcherLabel'), '2024');
     expect(requested, [2026, 2027, 2024]);

@@ -3406,33 +3406,22 @@ class AppLocalizationsFr extends AppLocalizations {
       other: '$count échéances le $date',
       one: '1 échéance le $date',
     );
-    return '$_temp0 · assurance comprise';
+    return '$_temp0, assurance comprise';
   }
 
   @override
-  String get mortgagesChargeCaptionNoNext => 'assurance comprise';
+  String get mortgagesChargeCaptionNoNext => 'Assurance comprise';
 
   @override
   String get mortgagesOutstandingLabel => 'Capital restant dû';
 
   @override
-  String mortgagesOutstandingCaption(String principal, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count crédits',
-      one: '1 crédit',
-    );
-    return 'sur $principal empruntés · $_temp0';
+  String mortgagesOutstandingCaption(String principal, String percent) {
+    return 'sur $principal · $percent remboursés';
   }
 
   @override
-  String mortgagesRepaidLine(String amount, String percent) {
-    return '$amount remboursés · $percent';
-  }
-
-  @override
-  String get mortgagesRatioLabel => 'Taux d\'endettement';
+  String get mortgagesRatioLabel => 'Taux d’endettement';
 
   @override
   String mortgagesRatioReference(String percent) {
@@ -3444,46 +3433,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String mortgagesRatioCaptionDeclared(String charge, String income) {
-    return 'Charge $charge sur un revenu déclaré de $income';
+    return '$charge sur un revenu déclaré de $income.';
   }
 
   @override
   String mortgagesRatioCaptionLedger(String charge, String income) {
-    return 'Charge $charge sur un revenu médian constaté de $income (12 mois du grand livre). Le ménage perçoit peut-être des revenus hors application : un revenu déclaré remplace cette lecture.';
+    return '$charge sur un revenu médian constaté de $income (12 mois). Un revenu déclaré remplace cette lecture.';
   }
 
   @override
   String get mortgagesRatioUnknown =>
-      'Aucun revenu connu : le grand livre ne contient pas de revenus réguliers et aucun revenu n\'est déclaré. Sans revenu, il n\'y a pas de taux à calculer.';
+      'Aucun revenu connu. Sans revenu, il n’y a pas de taux à calculer.';
 
   @override
   String get mortgagesRatioDeclareLink => 'Déclarer un revenu';
 
   @override
-  String get mortgagesRatioDeclareButton => 'Déclarer un revenu';
-
-  @override
   String get mortgagesRatioCaveat =>
       'Lecture indicative, qui n’engage aucun prêteur.';
-
-  @override
-  String get mortgagesIncomeTitle => 'Déclarer un revenu';
-
-  @override
-  String get mortgagesIncomeBody =>
-      'Le revenu mensuel net du ménage sur lequel lire le taux d\'endettement. Il remplace le revenu médian du grand livre.';
-
-  @override
-  String get mortgagesIncomeLabel => 'Revenu mensuel';
-
-  @override
-  String get mortgagesIncomeInvalid => 'Saisissez un montant supérieur à zéro.';
-
-  @override
-  String get mortgagesIncomeSubmit => 'Enregistrer';
-
-  @override
-  String get mortgagesIncomeFailed => 'Le revenu n\'a pas pu être enregistré.';
 
   @override
   String get mortgageKindMortgage => 'Crédit immobilier';
@@ -3504,37 +3471,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mortgageRepaymentInterestOnly => 'In fine';
 
   @override
-  String mortgageCardSubline(String kind, String lender, int months) {
-    return '$kind · $lender · $months mois';
-  }
-
-  @override
-  String get mortgageCardPerMonth => '/ mois';
-
-  @override
-  String get mortgageCardOutstandingLabel => 'Capital restant dû';
-
-  @override
-  String mortgageCardOutstandingOf(String principal) {
-    return 'sur $principal';
-  }
-
-  @override
-  String get mortgageCardRepaid => 'remboursé';
-
-  @override
-  String mortgageCardRemaining(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count échéances restantes',
-      one: '1 échéance restante',
-      zero: 'aucune échéance restante',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get mortgageRateLabel => 'Taux nominal';
 
   @override
@@ -3544,18 +3480,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mortgageNextLabel => 'Prochaine échéance';
 
   @override
-  String mortgageInsurancePerMonth(String amount) {
-    return '$amount / mois';
-  }
-
-  @override
-  String get mortgagesChartTitle => 'Trajectoire du capital restant dû';
-
-  @override
-  String get mortgagesChartLegendTotal => 'Capital restant dû total';
-
-  @override
-  String get mortgagesChartLegendToday => 'aujourd\'hui';
+  String get mortgagesChartTitle =>
+      'Capital restant dû jusqu’au dernier remboursement';
 
   @override
   String mortgagesChartToday(String month, String amount) {
@@ -3563,45 +3489,19 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String mortgagesChartLoanEnd(String kind, String month) {
-    return 'fin $kind · $month';
+  String mortgagesChartLoanEnd(String kind) {
+    return 'fin du $kind';
   }
-
-  @override
-  String get mortgageDetailBack => 'Retour aux crédits';
 
   @override
   String get mortgageDetailLoadFailed => 'Impossible de charger ce crédit.';
-
-  @override
-  String mortgageDetailSubline(
-    String kind,
-    String lender,
-    String principal,
-    int months,
-    String date,
-  ) {
-    return '$kind · $lender · $principal sur $months mois · 1re échéance le $date';
-  }
-
-  @override
-  String mortgageDetailSublineFees(
-    String kind,
-    String lender,
-    String principal,
-    int months,
-    String date,
-    String fees,
-  ) {
-    return '$kind · $lender · $principal sur $months mois · 1re échéance le $date · frais de dossier $fees';
-  }
 
   @override
   String get mortgageDetailInstalmentLabel => 'Échéance totale';
 
   @override
   String mortgageDetailInstalmentCaption(String payment, String insurance) {
-    return '$payment + $insurance assurance';
+    return '$payment + $insurance d’assurance';
   }
 
   @override
@@ -3628,7 +3528,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mortgageCostTaegLabel => 'TAEG indicatif';
 
   @override
-  String get mortgageCostTaegCaption => 'taux, assurance et frais inclus';
+  String get mortgageCostTaegCaption => 'taux, assurance et frais';
 
   @override
   String get mortgageCostInterestLabel => 'Intérêts totaux';
@@ -3651,10 +3551,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mortgageFormEditTitle => 'Modifier le crédit';
-
-  @override
-  String get mortgageFormSubtitle =>
-      'La mensualité est calculée à partir du capital, du taux et de la durée.';
 
   @override
   String get mortgageFormLabel => 'Libellé';
@@ -3706,7 +3602,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mortgageFormCalendar => 'Choisir une date';
 
   @override
-  String get mortgageFormInsurance => 'Assurance / mois';
+  String get mortgageFormInsurance => 'Assurance par mois';
 
   @override
   String get mortgageFormAmountOptionalInvalid =>
@@ -3741,13 +3637,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mortgageFormCancel => 'Annuler';
 
   @override
-  String get mortgageFormSubmit => 'Ajouter le crédit';
-
-  @override
   String get mortgageFormSave => 'Enregistrer';
 
   @override
-  String get mortgageFormDelete => 'Supprimer le crédit';
+  String get mortgageFormDelete => 'Supprimer';
 
   @override
   String get mortgageDeleteTitle => 'Supprimer ce crédit ?';
@@ -3780,7 +3673,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mortgageErrorGeneric => 'Une erreur est survenue. Réessayez.';
 
   @override
-  String get mortgageScheduleTitle => 'Tableau d\'amortissement';
+  String get mortgageScheduleTitle => 'Tableau d’amortissement';
 
   @override
   String mortgageScheduleSubtitle(int position, int total, int count) {
@@ -3790,7 +3683,7 @@ class AppLocalizationsFr extends AppLocalizations {
       other: '$count échéances',
       one: '1 échéance',
     );
-    return 'Année $position sur $total · $_temp0 · l\'assurance est comptée à part';
+    return 'Année $position sur $total · $_temp0 · l’assurance est comptée à part';
   }
 
   @override
@@ -3835,6 +3728,67 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get mortgageScheduleLoadFailed =>
       'Impossible de charger le tableau d\'amortissement.';
+
+  @override
+  String get mortgagesTableLoan => 'Crédit';
+
+  @override
+  String get mortgagesTableLender => 'Prêteur';
+
+  @override
+  String get mortgagesTableRate => 'Taux';
+
+  @override
+  String get mortgagesTableInsurance => 'Assurance';
+
+  @override
+  String get mortgagesTableRepaid => 'Remboursé';
+
+  @override
+  String get mortgagesTableEnd => 'Fin';
+
+  @override
+  String get mortgagesTableInstalment => 'Échéance';
+
+  @override
+  String mortgagesTableLenderTerm(String lender, int months) {
+    return '$lender · $months mois';
+  }
+
+  @override
+  String mortgagesTableRepaidCaption(String percent, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count échéances restantes',
+      one: '1 échéance restante',
+      zero: 'aucune échéance restante',
+    );
+    return '$percent · $_temp0';
+  }
+
+  @override
+  String mortgageDetailFacts(
+    String kind,
+    String lender,
+    String principal,
+    int months,
+  ) {
+    return '$kind · $lender · $principal sur $months mois';
+  }
+
+  @override
+  String mortgageDetailFirstPayment(String date) {
+    return '1re échéance le $date';
+  }
+
+  @override
+  String mortgageDetailFirstPaymentFees(String date, String fees) {
+    return '1re échéance le $date · frais de dossier $fees';
+  }
+
+  @override
+  String get mortgageScheduleYearSelect => 'Année';
 
   @override
   String get simulatorLoadFailed => 'Impossible de charger le simulateur.';

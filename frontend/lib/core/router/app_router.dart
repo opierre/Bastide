@@ -73,6 +73,7 @@ TopBarTitleBuilder? _topBarTitle(String path) => switch (path) {
   // An open series is a state of the panel, so its crumb and name come from
   // the panel's own title widget rather than from a route.
   '/subscriptions' => (context) => const SubscriptionsTitle(),
+  '/mortgages' => (context) => const MortgagesTitle(),
   _ => switch (AccountDetailScreen.idFromPath(path)) {
     final id? => (context) => AccountDetailTitle(accountId: id),
     null => null,

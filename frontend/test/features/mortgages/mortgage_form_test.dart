@@ -1,6 +1,7 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/app_button.dart';
 import 'package:bastide/features/mortgages/application/mortgages_controller.dart';
 import 'package:bastide/features/mortgages/data/mortgages_repository.dart';
 import 'package:bastide/features/mortgages/domain/mortgage.dart';
@@ -331,6 +332,21 @@ void main() {
             .text,
         '3,45',
       );
+
+      // A ghost « Supprimer » set apart on the footer's left, before
+      // « Annuler » and « Enregistrer ».
+      final delete = tester.widget<AppButton>(
+        find.byKey(const Key('mortgageFormDelete')),
+      );
+      expect(delete.variant, AppButtonVariant.ghost);
+      expect(delete.label, 'Supprimer');
+      expect(
+        tester.getCenter(find.byKey(const Key('mortgageFormDelete'))).dx,
+        lessThan(
+          tester.getCenter(find.byKey(const Key('mortgageFormCancel'))).dx,
+        ),
+      );
+      expect(find.text('Enregistrer'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('mortgageFormDelete')));
       await tester.pumpAndSettle();

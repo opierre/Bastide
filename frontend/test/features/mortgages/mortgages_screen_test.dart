@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/app_button.dart';
 import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/mortgages/application/mortgages_controller.dart';
 import 'package:bastide/features/mortgages/domain/mortgage.dart';
+import 'package:bastide/features/mortgages/presentation/mortgage_labels.dart';
 import 'package:bastide/features/mortgages/presentation/mortgages_screen.dart';
 import 'package:bastide/features/mortgages/presentation/trajectory_chart.dart';
 import 'package:bastide/l10n/app_localizations.dart';
@@ -14,6 +16,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../support/mortgages_fixtures.dart';
 
@@ -22,10 +25,46 @@ import '../../support/mortgages_fixtures.dart';
 String _money(int amountMinor, {String locale = 'fr'}) =>
     formatAmount(amountMinor: amountMinor, currency: 'EUR', locale: locale);
 
+/// The panel's own percent formatting, for the same reason.
+String _pct(int bps, {int digits = 1}) => formatBps(bps, 'fr', digits: digits);
+
+const _caveat = 'Lecture indicative, qui n’engage aucun prêteur.';
+
+/// The panel as the shell lays it out: the title and the title-bar controls
+/// above the content region. Routed, so « Déclarer un revenu » can leave for
+/// Paramètres.
 Widget _wrap({
   required FakeMortgagesController controller,
   Locale locale = const Locale('fr'),
+  ThemeData? theme,
 }) {
+  final router = GoRouter(
+    initialLocation: MortgagesScreen.path,
+    routes: [
+      GoRoute(
+        path: MortgagesScreen.path,
+        builder: (context, state) => const Scaffold(
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(child: MortgagesTitle()),
+                  MortgagesTopBarActions(),
+                ],
+              ),
+              Expanded(child: MortgagesScreen()),
+            ],
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) =>
+            const Scaffold(body: SizedBox(key: Key('settingsRoute'))),
+      ),
+    ],
+  );
   return ProviderScope(
     overrides: [
       mortgagesControllerProvider.overrideWith(() => controller),
@@ -41,27 +80,19 @@ Widget _wrap({
         (ref, window) async => testScheduleYear(year: window.year),
       ),
     ],
-    child: MaterialApp(
+    child: MaterialApp.router(
+      routerConfig: router,
       locale: locale,
-      theme: AppTheme.dark,
+      theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            MortgagesTopBarActions(),
-            Expanded(child: MortgagesScreen()),
-          ],
-        ),
-      ),
     ),
   );
 }
 
 /// The 1440×900 desktop frame the design targets.
-void _useDesktopSurface(WidgetTester tester) {
-  tester.view.physicalSize = const Size(1440, 900);
+void _useDesktopSurface(WidgetTester tester, {double width = 1440}) {
+  tester.view.physicalSize = Size(width, 900);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 }
@@ -75,103 +106,167 @@ FakeMortgagesController _twoLoans({MortgageSummary? summary}) =>
 String? _text(WidgetTester tester, String key) =>
     tester.widget<Text>(find.byKey(Key(key))).data;
 
+String _richText(WidgetTester tester, String key) =>
+    tester.widget<Text>(find.byKey(Key(key))).textSpan!.toPlainText();
+
 class _PendingController extends FakeMortgagesController {
   @override
   Future<MortgagesState> build() => Completer<MortgagesState>().future;
 }
 
 void main() {
-  group('loan cards', () {
-    testWidgets('print neutral figures, formatted in French', (tester) async {
-      _useDesktopSurface(tester);
-      await tester.pumpWidget(_wrap(controller: _twoLoans()));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('mortgageCard-m1')), findsOneWidget);
-      expect(find.byKey(const Key('mortgageCard-m2')), findsOneWidget);
-      expect(
-        _text(tester, 'mortgageCardSubline-m1'),
-        'Crédit immobilier · BNP · 300 mois',
-      );
-      expect(
-        _text(tester, 'mortgageCardSubline-m2'),
-        'Prêt travaux · Crédit Agricole · 60 mois',
-      );
-
-      // A scheduled charge, not a booked transaction: never the ledger's red.
-      final instalment = tester.widget<AmountText>(
-        find.byKey(const Key('mortgageCardInstalment-m1')),
-      );
-      expect(instalment.amountMinor, 122387);
-      expect(instalment.colorize, isFalse);
-      final outstanding = tester.widget<AmountText>(
-        find.byKey(const Key('mortgageCardOutstanding-m1')),
-      );
-      expect(outstanding.amountMinor, 22254270);
-      expect(outstanding.colorize, isFalse);
-
-      expect(_text(tester, 'mortgageCardRate-m1'), startsWith('3,45'));
-      expect(_text(tester, 'mortgageCardRepaid-m1'), startsWith('7,3'));
-      expect(
-        _text(tester, 'mortgageCardRemaining-m1'),
-        '267 échéances restantes',
-      );
-      expect(
-        _text(tester, 'mortgageCardInsurance-m1'),
-        '${_money(2880)} / mois',
-      );
-      expect(_text(tester, 'mortgageCardInsurance-m2'), '—');
-      expect(_text(tester, 'mortgageCardNext-m1'), '01/06/2026');
-    });
-
-    testWidgets('print the same figures in English', (tester) async {
-      _useDesktopSurface(tester);
-      await tester.pumpWidget(
-        _wrap(controller: _twoLoans(), locale: const Locale('en')),
-      );
-      await tester.pumpAndSettle();
-
-      expect(
-        _text(tester, 'mortgageCardSubline-m1'),
-        'Home loan · BNP · 300 months',
-      );
-      expect(_text(tester, 'mortgageCardRate-m1'), '3.45%');
-      expect(_text(tester, 'mortgageCardRepaid-m1'), '7.3%');
-      expect(_text(tester, 'mortgageCardRemaining-m1'), '267 instalments left');
-      expect(
-        _text(tester, 'mortgageCardInsurance-m1'),
-        '${_money(2880, locale: 'en')} / month',
-      );
-      expect(_text(tester, 'mortgageCardNext-m1'), '6/1/2026');
-    });
-
-    testWidgets('a card opens the loan detail', (tester) async {
-      _useDesktopSurface(tester);
-      await tester.pumpWidget(_wrap(controller: _twoLoans()));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('mortgageCard-m1')));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('mortgageDetail')), findsOneWidget);
-      expect(find.text('TAEG INDICATIF'), findsOneWidget);
-    });
-  });
-
-  group('debt ratio card', () {
-    testWidgets('a declared income draws the gauge and names its source', (
+  group('summary line', () {
+    testWidgets('leads with the charge, then the outstanding principal', (
       tester,
     ) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(_wrap(controller: _twoLoans()));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('ratioGauge')), findsOneWidget);
-      expect(find.byKey(const Key('ratioOverLimitPill')), findsNothing);
-      expect(_text(tester, 'ratioValue'), startsWith('32,7'));
+      expect(_text(tester, 'mortgagesMonthlyCharge'), _money(150625));
       expect(
-        _text(tester, 'ratioCaption'),
-        'Charge ${_money(150625)} sur un revenu déclaré de ${_money(460000)}',
+        _text(tester, 'mortgagesChargeCaption'),
+        '2 échéances le 1 juin 2026, assurance comprise',
+      );
+      expect(_text(tester, 'mortgagesTotalOutstanding'), _money(23412921));
+      expect(
+        _text(tester, 'mortgagesOutstandingCaption'),
+        'sur ${_money(25500000)} · ${_pct(818)} remboursés',
+      );
+      // No tinted hero, no card: the figures are set in type.
+      expect(find.byKey(const Key('debtRatioCard')), findsNothing);
+    });
+  });
+
+  group('loans table', () {
+    testWidgets('prints neutral figures, formatted in French', (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(controller: _twoLoans()));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('loanRow-m1')), findsOneWidget);
+      expect(find.byKey(const Key('loanRow-m2')), findsOneWidget);
+      expect(_text(tester, 'loanName-m1'), 'Appartement Lyon 3e');
+      expect(_text(tester, 'loanLender-m1'), 'BNP · 300 mois');
+      expect(_text(tester, 'loanLender-m2'), 'Crédit Agricole · 60 mois');
+      expect(_text(tester, 'loanRate-m1'), _pct(345, digits: 2));
+      expect(_text(tester, 'loanInsurance-m1'), _money(2880));
+      expect(_text(tester, 'loanInsurance-m2'), '—');
+      expect(
+        _text(tester, 'loanRepaid-m1'),
+        '${_pct(727)} · 267 échéances restantes',
+      );
+      expect(_text(tester, 'loanOutstanding-m1'), _money(22254270));
+      expect(_text(tester, 'loanEnd-m1'), 'août 2048');
+      expect(_text(tester, 'loanEnd-m2'), 'févr. 2030');
+      expect(_text(tester, 'loanInstalment-m1'), _money(122387));
+
+      final meter = tester.widget<RepereMeter>(
+        find.byKey(const Key('loanRepaidMeter-m1')),
+      );
+      expect(meter.fraction, closeTo(0.0727, 1e-9));
+      expect(meter.markFraction, isNull);
+
+      // A scheduled amount, not a booked transaction: never the ledger's red.
+      final instalment = tester.widget<Text>(
+        find.byKey(const Key('loanInstalment-m1')),
+      );
+      expect(instalment.style?.color, isNull);
+    });
+
+    testWidgets('prints the same figures in English', (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(controller: _twoLoans(), locale: const Locale('en')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(_text(tester, 'loanLender-m1'), 'BNP · 300 months');
+      expect(_text(tester, 'loanRate-m1'), '3.45%');
+      expect(_text(tester, 'loanRepaid-m1'), '7.3% · 267 instalments left');
+      expect(_text(tester, 'loanEnd-m1'), 'Aug 2048');
+      expect(
+        _text(tester, 'mortgagesChargeCaption'),
+        '2 instalments on June 1, 2026, insurance included',
+      );
+    });
+
+    testWidgets('a row opens the loan detail with its crumb and « Modifier »', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(controller: _twoLoans()));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('addMortgageButton')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('loanRow-m1')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('mortgageDetail')), findsOneWidget);
+      expect(find.byKey(const Key('mortgageDetailTitle')), findsOneWidget);
+      expect(_text(tester, 'titleBarCrumb'), 'Crédits');
+      expect(_text(tester, 'titleBarTitle'), 'Appartement Lyon 3e');
+      expect(find.byKey(const Key('addMortgageButton')), findsNothing);
+      final edit = tester.widget<AppButton>(
+        find.byKey(const Key('mortgageDetailEdit')),
+      );
+      expect(edit.variant, AppButtonVariant.secondary);
+      expect(edit.label, 'Modifier');
+
+      // The crumb leads back to the list.
+      await tester.tap(find.byKey(const Key('titleBarCrumb')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('loansTable')), findsOneWidget);
+    });
+  });
+
+  group('loan detail', () {
+    testWidgets('sets the instalment, the cost line and the terms in type', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(controller: _twoLoans()));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('loanRow-m1')));
+      await tester.pumpAndSettle();
+
+      expect(_text(tester, 'mortgageDetailInstalment'), _money(122387));
+      expect(
+        _text(tester, 'mortgageDetailInstalmentCaption'),
+        '${_money(119507)} + ${_money(2880)} d’assurance',
+      );
+      expect(_text(tester, 'mortgageDetailNext'), '1 juin 2026');
+      expect(
+        _text(tester, 'mortgageDetailFacts'),
+        'Crédit immobilier · BNP · ${_money(24000000)} sur 300 mois',
+      );
+      expect(
+        _text(tester, 'mortgageDetailFirstPayment'),
+        '1re échéance le 1 sept. 2023 · frais de dossier ${_money(145000)}',
+      );
+      expect(find.text('TAEG indicatif'), findsOneWidget);
+      expect(find.text('taux, assurance et frais'), findsOneWidget);
+      expect(_text(tester, 'mortgageCostRate'), _pct(345, digits: 2));
+      expect(_text(tester, 'mortgageCostTaeg'), _pct(379, digits: 2));
+      expect(_text(tester, 'mortgageCostTotal'), _money(12861100));
+      expect(find.byKey(const Key('scheduleTable')), findsOneWidget);
+    });
+  });
+
+  group('debt ratio', () {
+    testWidgets('a declared income draws the repère and names its source', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(controller: _twoLoans()));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('ratioOverLimit')), findsNothing);
+      expect(_text(tester, 'ratioValue'), _pct(3274));
+      expect(
+        _richText(tester, 'ratioCaption'),
+        '${_money(150625)} sur un revenu déclaré de ${_money(460000)}. '
+        '$_caveat',
       );
       final meter = tester.widget<RepereMeter>(
         find.byKey(const Key('ratioGauge')),
@@ -179,12 +274,14 @@ void main() {
       expect(meter.fraction, closeTo(3274 / 6000, 1e-9));
       expect(meter.tone, RepereTone.normal);
       expect(meter.markFraction, closeTo(3500 / 6000, 1e-9));
-      // Body content, not a tooltip.
+      expect(meter.markLabel, 'repère HCSF ${_pct(3500, digits: 0)}');
       expect(
-        _text(tester, 'ratioCaveat'),
-        'Lecture indicative, qui n’engage aucun prêteur.',
+        tester.getSize(find.byKey(const Key('debtRatioItem'))).width,
+        AppLoans.ratioWidth,
       );
+      // Body text, never a tooltip.
       expect(find.byType(Tooltip), findsNothing);
+      expect(find.byKey(const Key('ratioDeclareIncomeLink')), findsNothing);
     });
 
     testWidgets(
@@ -205,103 +302,119 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final pill = tester.widget<StatusText>(
-          find.byKey(const Key('ratioOverLimitPill')),
+        final status = tester.widget<StatusText>(
+          find.byKey(const Key('ratioOverLimit')),
         );
-        expect(pill.tone, StatusTone.warning);
-        expect(pill.label, 'Au-dessus du repère');
+        expect(status.tone, StatusTone.warning);
+        expect(status.label, 'Au-dessus du repère');
         final meter = tester.widget<RepereMeter>(
           find.byKey(const Key('ratioGauge')),
         );
         expect(meter.tone, RepereTone.over);
         expect(
-          _text(tester, 'ratioCaption'),
-          contains('revenu médian constaté'),
+          _richText(tester, 'ratioCaption'),
+          '${_money(150625)} sur un revenu médian constaté de '
+          '${_money(285000)} (12 mois). Un revenu déclaré remplace cette '
+          'lecture. $_caveat',
         );
-        expect(find.byKey(const Key('ratioDeclareIncomeLink')), findsOneWidget);
+        // The figure stays neutral: the status text carries the warning.
+        final value = tester.widget<Text>(find.byKey(const Key('ratioValue')));
+        expect(value.style?.color, AppColors.dark.text);
 
-        // Information, never a block: creating a loan and opening one still work.
+        // Information, never a block: creating and opening a loan still work.
         await tester.tap(find.byKey(const Key('addMortgageButton')));
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('mortgageFormSubmit')), findsOneWidget);
         await tester.tap(find.byKey(const Key('mortgageFormCancel')));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.byKey(const Key('mortgageCard-m2')));
+        // « Déclarer un revenu » opens Paramètres, where the income is edited.
+        await tester.tap(find.byKey(const Key('ratioDeclareIncomeLink')));
         await tester.pumpAndSettle();
-        expect(find.byKey(const Key('mortgageDetail')), findsOneWidget);
+        expect(find.byKey(const Key('settingsRoute')), findsOneWidget);
       },
     );
 
-    testWidgets('an unknown income draws no gauge and offers to declare one', (
+    testWidgets('an unknown income draws no repère and offers to declare one', (
       tester,
     ) async {
       _useDesktopSurface(tester);
-      final controller = _twoLoans(
-        summary: testMortgageSummary(
-          incomeSource: IncomeSource.unknown,
-          debtRatioBps: null,
-          monthlyIncomeMinor: null,
+      await tester.pumpWidget(
+        _wrap(
+          controller: _twoLoans(
+            summary: testMortgageSummary(
+              incomeSource: IncomeSource.unknown,
+              debtRatioBps: null,
+              monthlyIncomeMinor: null,
+            ),
+          ),
         ),
       );
-      await tester.pumpWidget(_wrap(controller: controller));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('ratioGauge')), findsNothing);
       expect(_text(tester, 'ratioValue'), '—');
-      expect(find.byKey(const Key('ratioUnknownText')), findsOneWidget);
-      expect(find.byKey(const Key('ratioCaveat')), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('ratioValue'))).style?.color,
+        AppColors.dark.textTertiary,
+      );
+      // The HCSF sentence stays.
+      expect(
+        _richText(tester, 'ratioCaption'),
+        'Aucun revenu connu. Sans revenu, il n’y a pas de taux à calculer. '
+        '$_caveat',
+      );
 
+      final declare = tester.widget<AppButton>(
+        find.byKey(const Key('ratioDeclareIncomeButton')),
+      );
+      expect(declare.variant, AppButtonVariant.secondary);
       await tester.tap(find.byKey(const Key('ratioDeclareIncomeButton')));
       await tester.pumpAndSettle();
-      await tester.enterText(
-        find.byKey(const Key('declareIncomeAmount')),
-        '4600',
-      );
-      await tester.tap(find.byKey(const Key('declareIncomeSubmit')));
-      await tester.pumpAndSettle();
-
-      expect(controller.declaredIncomes, [460000]);
+      expect(find.byKey(const Key('settingsRoute')), findsOneWidget);
     });
 
-    testWidgets(
-      'a ratio past 60 % clamps the fill and still prints the exact figure',
-      (tester) async {
-        _useDesktopSurface(tester);
-        await tester.pumpWidget(
-          _wrap(
-            controller: _twoLoans(
-              summary: testMortgageSummary(debtRatioBps: 7200, overLimit: true),
-            ),
+    testWidgets('past 60 % the fill clamps and the figure stays exact', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: _twoLoans(
+            summary: testMortgageSummary(debtRatioBps: 7200, overLimit: true),
           ),
-        );
-        await tester.pumpAndSettle();
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        // The meter clamps its fill; it is handed the exact position.
-        final meter = tester.widget<RepereMeter>(
-          find.byKey(const Key('ratioGauge')),
-        );
-        expect(meter.fraction, closeTo(7200 / 6000, 1e-9));
-        expect(_text(tester, 'ratioValue'), startsWith('72,0'));
-      },
-    );
+      // The meter clamps its fill; it is handed the exact position.
+      final meter = tester.widget<RepereMeter>(
+        find.byKey(const Key('ratioGauge')),
+      );
+      expect(meter.fraction, closeTo(7200 / 6000, 1e-9));
+      expect(_text(tester, 'ratioValue'), _pct(7200));
+    });
   });
 
   testWidgets(
-    'the trajectory chart draws the API series with today and each end',
+    'the trajectory draws the API series with today and each loan end',
     (tester) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(_wrap(controller: _twoLoans()));
       await tester.pumpAndSettle();
 
+      expect(
+        find.text('Capital restant dû jusqu’au dernier remboursement'),
+        findsOneWidget,
+      );
       final plot = tester.widget<TrajectoryPlot>(
         find.byKey(const Key('trajectoryPlot')),
       );
       expect(plot.values, [24000000, 25500000, 23412921, 19000000, 0]);
       expect(plot.annotations.map((annotation) => annotation.label), [
         'mai 2026 · ${_money(23412921)}',
-        'fin prêt travaux · 02/2030',
-        'fin crédit immobilier · 08/2048',
+        'fin du prêt travaux',
+        'fin du crédit immobilier',
       ]);
       expect(plot.annotations.first.isToday, isTrue);
     },
@@ -341,6 +454,36 @@ void main() {
     },
   );
 
+  testWidgets('renders in the light theme and in English, sidebar collapsed', (
+    tester,
+  ) async {
+    // The content region beside the 56 px collapsed sidebar.
+    _useDesktopSurface(tester, width: 1440 - AppSizes.sidebarCollapsed);
+    await tester.pumpWidget(
+      _wrap(
+        controller: _twoLoans(
+          summary: testMortgageSummary(
+            incomeSource: IncomeSource.ledger,
+            monthlyIncomeMinor: 285000,
+            debtRatioBps: 5285,
+            overLimit: true,
+          ),
+        ),
+        locale: const Locale('en'),
+        theme: AppTheme.light,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Monthly charge'), findsOneWidget);
+    expect(find.text('Above the reference'), findsOneWidget);
+    final meter = tester.widget<RepereMeter>(
+      find.byKey(const Key('ratioGauge')),
+    );
+    expect(meter.markLabel, 'HCSF reference 35%');
+  });
+
   testWidgets('no loans shows the empty state without summary or chart', (
     tester,
   ) async {
@@ -350,9 +493,16 @@ void main() {
 
     expect(find.byKey(const Key('mortgagesEmptyState')), findsOneWidget);
     expect(find.text('Aucun crédit enregistré'), findsOneWidget);
+    expect(
+      find.text(
+        'Ajoutez un emprunt pour suivre son coût, son échéancier et votre '
+        'taux d’endettement.',
+      ),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('mortgagesEmptyCta')), findsOneWidget);
-    expect(find.byKey(const Key('debtRatioCard')), findsNothing);
-    expect(find.byKey(const Key('trajectoryChartCard')), findsNothing);
+    expect(find.byKey(const Key('mortgagesSummaryLine')), findsNothing);
+    expect(find.byKey(const Key('trajectorySection')), findsNothing);
   });
 
   testWidgets('loading shows the skeleton silhouettes', (tester) async {

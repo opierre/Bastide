@@ -19,11 +19,17 @@ String repaymentTypeLabel(AppLocalizations l10n, RepaymentType type) =>
       RepaymentType.interestOnly => l10n.mortgageRepaymentInterestOnly,
     };
 
-/// « 01/06/2026 » — the locale's short numeric date.
-DateFormat mortgageDateFormat(String locale) => DateFormat.yMd(locale);
+/// « 1 juin 2026 » — a due date in a summary line or a caption.
+DateFormat mortgageLongDateFormat(String locale) => DateFormat.yMMMMd(locale);
 
-/// « 02/2030 » — a month on the trajectory chart's end markers.
-DateFormat mortgageMonthFormat(String locale) => DateFormat.yM(locale);
+/// « 1 sept. 2023 » — a date in a table cell or a secondary line.
+DateFormat mortgageDateFormat(String locale) => DateFormat.yMMMd(locale);
+
+/// « août 2048 » — the month a loan ends, in the loans table.
+DateFormat mortgageMonthFormat(String locale) => DateFormat.yMMM(locale);
+
+/// « mai 2026 » — today's annotation on the trajectory chart.
+DateFormat mortgageLongMonthFormat(String locale) => DateFormat.yMMMM(locale);
 
 /// A basis-point figure printed as the locale's percent — « 32,7 % », « 3.45% ».
 ///

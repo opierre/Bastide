@@ -2,12 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' show DateFormat, NumberFormat;
+import 'package:intl/intl.dart' show NumberFormat;
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/chart_scale.dart';
 import '../../../core/widgets/chart_style.dart';
 import '../../../core/widgets/chart_tooltip.dart';
@@ -41,15 +40,15 @@ class TrajectoryAnnotation {
   int get hashCode => Object.hash(month, label, isToday);
 }
 
-/// « Trajectoire du capital restant dû » (`12-credits.md` §3): the combined
-/// outstanding principal of all active loans, month by month to the last
-/// instalment, with today and each loan's end annotated.
+/// « Capital restant dû jusqu’au dernier remboursement » (`12-credits.md` §3):
+/// the combined outstanding principal of all active loans, month by month to
+/// the last instalment, with today and each loan's end annotated. A section,
+/// not a card: the heading, then the plot taking the height it is given.
 ///
-/// What the cards cannot show — when each debt ends, and the step a second loan
-/// adds. The series is the API's (`outstanding_series`); no schedule is summed
-/// here.
-class TrajectoryChartCard extends StatelessWidget {
-  const TrajectoryChartCard({
+/// One series, so no legend (`00` §9). The series is the API's
+/// (`outstanding_series`); no schedule is summed here.
+class TrajectorySection extends StatelessWidget {
+  const TrajectorySection({
     super.key,
     required this.state,
     required this.today,
@@ -73,7 +72,7 @@ class TrajectoryChartCard extends StatelessWidget {
             month: point.month,
             isToday: true,
             label: l10n.mortgagesChartToday(
-              DateFormat.yMMMM(locale).format(point.month),
+              mortgageLongMonthFormat(locale).format(point.month),
               formatAmount(
                 amountMinor: point.outstandingMinor,
                 currency: summary.currency,
@@ -84,83 +83,65 @@ class TrajectoryChartCard extends StatelessWidget {
       for (final end in summary.loanEnds)
         TrajectoryAnnotation(
           month: end.month,
-          label: l10n.mortgagesChartLoanEnd(switch (state.kindOf(
-            end.mortgageId,
-          )) {
-            final kind? => mortgageKindLabel(l10n, kind).toLowerCase(),
+          label: switch (state.kindOf(end.mortgageId)) {
+            final kind? => l10n.mortgagesChartLoanEnd(
+              mortgageKindLabel(l10n, kind).toLowerCase(),
+            ),
             null => end.label,
-          }, mortgageMonthFormat(locale).format(end.month)),
+          },
         ),
     ];
 
-    return AppCard(
-      key: const Key('trajectoryChartCard'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 22,
-        vertical: AppSpacing.cardPadding,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      key: const Key('trajectorySection'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.smPlus),
+          child: Text(
+            l10n.mortgagesChartTitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.titleSmall,
+          ),
+        ),
+        Expanded(
+          child: TrajectoryPlot(
+            key: const Key('trajectoryPlot'),
+            months: [for (final point in series) point.month],
+            values: [for (final point in series) point.outstandingMinor],
+            annotations: annotations,
+            yLabel: (minor) => NumberFormat.compactSimpleCurrency(
+              locale: locale,
+              name: summary.currency,
+              decimalDigits: 0,
+            ).format(minor / 100),
+            labelStyle: ChartPaints.labelStyle(context),
+            // The month and what is still owed then: a neutral figure, like
+            // every amount on this panel.
+            tooltips: [
+              for (final point in series)
+                TextSpan(
                   children: [
-                    Text(
-                      l10n.mortgagesChartTitle,
-                      style: textTheme.titleMedium,
+                    TextSpan(
+                      text:
+                          '${_capitalize(mortgageLongMonthFormat(locale).format(point.month))}\n',
+                      style: tabularNumberStyle(textTheme.labelSmall!),
+                    ),
+                    TextSpan(
+                      text: formatAmount(
+                        amountMinor: point.outstandingMinor,
+                        currency: summary.currency,
+                        locale: locale,
+                      ),
+                      style: tabularNumberStyle(textTheme.bodySmall!),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              _LegendItem(label: l10n.mortgagesChartLegendTotal, dashed: false),
-              const SizedBox(width: AppSpacing.md),
-              _LegendItem(label: l10n.mortgagesChartLegendToday, dashed: true),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          Expanded(
-            child: TrajectoryPlot(
-              key: const Key('trajectoryPlot'),
-              months: [for (final point in series) point.month],
-              values: [for (final point in series) point.outstandingMinor],
-              annotations: annotations,
-              yLabel: (minor) => NumberFormat.compactSimpleCurrency(
-                locale: locale,
-                name: summary.currency,
-                decimalDigits: 0,
-              ).format(minor / 100),
-              labelStyle: ChartPaints.labelStyle(context),
-              // The month and what is still owed then — a neutral figure, like
-              // every amount on this panel.
-              tooltips: [
-                for (final point in series)
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text:
-                            '${_capitalize(DateFormat.yMMMM(locale).format(point.month))}\n',
-                        style: tabularNumberStyle(textTheme.labelSmall!),
-                      ),
-                      TextSpan(
-                        text: formatAmount(
-                          amountMinor: point.outstandingMinor,
-                          currency: summary.currency,
-                          locale: locale,
-                        ),
-                        style: tabularNumberStyle(textTheme.bodySmall!),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -168,71 +149,8 @@ class TrajectoryChartCard extends StatelessWidget {
 String _capitalize(String value) =>
     value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
 
-class _LegendItem extends StatelessWidget {
-  const _LegendItem({required this.label, required this.dashed});
-
-  final String label;
-  final bool dashed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 16,
-          height: 10,
-          child: CustomPaint(
-            painter: _LegendSwatchPainter(
-              colors: context.colors,
-              dashed: dashed,
-            ),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.xs + 2),
-        Text(label, style: context.textStyles.helper),
-      ],
-    );
-  }
-}
-
-/// A legend mark drawn exactly as the plot draws what it names: the shared
-/// curve stroke, or today's dashed vertical laid on its side.
-class _LegendSwatchPainter extends CustomPainter {
-  /// The active theme's colours.
-  final AppColors colors;
-
-  const _LegendSwatchPainter({required this.colors, required this.dashed});
-
-  final bool dashed;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final y = size.height / 2;
-    if (!dashed) {
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        ChartPaints.stroke(colors.accent),
-      );
-      return;
-    }
-    ChartPaints.baseline(
-      colors,
-      canvas,
-      Offset(0, y),
-      Offset(size.width, y),
-      color: TrajectoryPlot.todayColor(colors),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_LegendSwatchPainter oldDelegate) =>
-      oldDelegate.colors != colors || oldDelegate.dashed != dashed;
-}
-
 /// The plot itself, in the shared curve style ([AppChart]): labelled y
-/// gridlines on clean ticks from zero (see [ChartScale]), the iris area line,
+/// gridlines on clean ticks from zero (see [ChartScale]), the `accent` area line,
 /// five-yearly x labels and the dashed annotations. Not animated — charts
 /// appear drawn.
 ///
@@ -265,10 +183,13 @@ class TrajectoryPlot extends StatefulWidget {
   final List<InlineSpan>? tooltips;
 
   /// Today's dashed vertical, a step brighter than the end markers.
-  static Color todayColor(AppColors colors) => colors.textSecondary;
+  static Color todayColor(AppColors colors) => colors.textTertiary;
 
-  /// A loan end's dashed vertical and label.
-  static Color endColor(AppColors colors) => colors.textTertiary;
+  /// A loan end's dashed vertical.
+  static Color endColor(AppColors colors) => colors.lineStrong;
+
+  /// A loan end's label; today's is `text` (`12-credits.md` §3).
+  static Color endLabelColor(AppColors colors) => colors.textTertiary;
 
   @override
   State<TrajectoryPlot> createState() => _TrajectoryPlotState();
@@ -506,14 +427,19 @@ class _TrajectoryPainter extends CustomPainter {
         labelStyle.copyWith(
           color: annotation.isToday
               ? colors.text
-              : TrajectoryPlot.endColor(colors),
+              : TrajectoryPlot.endLabelColor(colors),
         ),
       );
       // Set right of its line, or left of it when that would run off the plot.
       final x = point.dx + _annotationLabelGap + label.width > plot.right
           ? point.dx - _annotationLabelGap - label.width
           : point.dx + _annotationLabelGap;
-      label.paint(canvas, Offset(x, plot.top - label.height));
+      // Today's label sits in the band above the plot; an end's a row lower,
+      // inside it, so the two never collide when the months are close.
+      final y = annotation.isToday
+          ? plot.top - label.height
+          : plot.top + _annotationLabelGap;
+      label.paint(canvas, Offset(x, y));
     }
 
     if (hovered case final hovered? when hovered < points.length) {
