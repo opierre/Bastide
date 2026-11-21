@@ -570,7 +570,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         children=(
             CategorySeed(
                 "category.children.childcare",
-                "Garde d'enfants",
+                "Garde d’enfants",
                 "Childcare",
                 "expense",
                 "child_friendly",
@@ -587,7 +587,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
             CategorySeed(
                 "category.children.activities",
                 "Activités enfants",
-                "Kids' activities",
+                "Kids’ activities",
                 "expense",
                 "toys",
                 _AUTRES_EPARGNE,
