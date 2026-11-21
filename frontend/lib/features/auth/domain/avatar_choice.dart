@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 
-/// The preset plates a user can pick in Settings › Profil. The names are the
-/// wire keys (`preset:<name>`); the hue each one paints is
-/// `CategoryColors.forAvatarPreset`'s.
-enum AvatarPreset { cyan, blue, teal, pink, amber, lime, green, iris }
+/// The preset plates a user can pick in Settings › Profil: the six category
+/// slots `cat1`–`cat6` (`09-settings.md` §Profil). The names are the wire keys
+/// (`preset:<name>`) and the `CategorySlot` names the theme paints them in.
+enum AvatarPreset { cat1, cat2, cat3, cat4, cat5, cat6 }
 
 /// What the user's avatar shows: their initials monogram, their initials on a
 /// preset plate, or a picture they uploaded.

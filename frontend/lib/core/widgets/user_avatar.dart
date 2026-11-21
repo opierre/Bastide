@@ -33,10 +33,7 @@ class UserAvatar extends StatelessWidget {
       MonogramChoice() => monogram,
       PresetChoice(:final preset) => _InitialsPlate(
         name: name,
-        hue: context.categoryColors.forAvatarPreset(
-          preset.name,
-          context.colors,
-        ),
+        hue: context.categoryColors.forSlot(CategorySlot.fromWire(preset.name)),
         size: size,
       ),
       PictureChoice() when image != null => ClipOval(

@@ -187,7 +187,7 @@ void main() {
   group('ProfilePictureController', () {
     Future<ProviderContainer> container() async {
       final c = ProviderContainer(
-        overrides: overrides(_user(const PresetChoice(AvatarPreset.teal))),
+        overrides: overrides(_user(const PresetChoice(AvatarPreset.cat3))),
       );
       addTearDown(c.dispose);
       await c.read(authControllerProvider.future);
@@ -275,7 +275,7 @@ void main() {
       );
       expect(
         c.read(authControllerProvider).value?.avatar,
-        const PresetChoice(AvatarPreset.teal),
+        const PresetChoice(AvatarPreset.cat3),
       );
     });
   });
@@ -426,7 +426,7 @@ void main() {
       ).thenAnswer((_) async => _served());
       when(
         () => api.delete('/auth/me/avatar'),
-      ).thenAnswer((_) async => {'user': _userJson('preset:pink')});
+      ).thenAnswer((_) async => {'user': _userJson('preset:cat5')});
       await tester.pumpWidget(wrap(_user(const PictureChoice())));
       await tester.pumpAndSettle();
       expect(previewPicture(), findsOneWidget);

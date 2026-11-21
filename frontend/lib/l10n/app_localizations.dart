@@ -7580,11 +7580,11 @@ abstract class AppLocalizations {
   /// **'Monogramme'**
   String get settingsAvatarMonogram;
 
-  /// Tooltip and accessible name of a preset avatar option: the user's initials on a plate of this hue.
+  /// Tooltip and accessible name of a preset avatar option: the user's initials on a plate of this category slot, named by the hue it shows.
   ///
   /// In fr, this message translates to:
-  /// **'{hue, select, cyan{Pastille cyan} blue{Pastille bleue} teal{Pastille sarcelle} pink{Pastille rose} amber{Pastille ambre} lime{Pastille citron vert} green{Pastille verte} iris{Pastille iris} other{Pastille}}'**
-  String settingsAvatarPreset(String hue);
+  /// **'{slot, select, cat1{Pastille bleue} cat2{Pastille orange} cat3{Pastille verte} cat4{Pastille ambre} cat5{Pastille rose} cat6{Pastille violette} other{Pastille}}'**
+  String settingsAvatarPreset(String slot);
 
   /// Banner in the avatar card when the choice could not be saved.
   ///
