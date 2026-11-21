@@ -73,7 +73,7 @@ void main() {
       tester.getSize(find.byKey(const Key('loginSubmitButton'))).height,
       AppSizes.buttonLarge,
     );
-    expect(find.text('Adresse e-mail'), findsOneWidget);
+    expect(find.text("E-mail ou nom d'utilisateur"), findsOneWidget);
     expect(find.text('Mot de passe'), findsOneWidget);
     expect(find.text('Créer un compte'), findsOneWidget);
     expect(find.text('Mot de passe oublié'), findsOneWidget);
@@ -112,7 +112,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Untouched, the form shows no error and the button is enabled.
-    expect(find.text("L'e-mail est requis."), findsNothing);
+    expect(
+      find.text("L'e-mail ou le nom d'utilisateur est requis."),
+      findsNothing,
+    );
     expect(
       tester
           .widget<PrimaryButton>(find.byKey(const Key('loginSubmitButton')))
@@ -123,7 +126,10 @@ void main() {
     await tester.tap(find.byKey(const Key('loginSubmitButton')));
     await tester.pumpAndSettle();
 
-    expect(find.text("L'e-mail est requis."), findsOneWidget);
+    expect(
+      find.text("L'e-mail ou le nom d'utilisateur est requis."),
+      findsOneWidget,
+    );
     expect(find.text('Le mot de passe est requis.'), findsOneWidget);
     expect(controller.loginCalls, isEmpty);
   });
@@ -145,18 +151,42 @@ void main() {
       await tester.tap(find.byKey(const Key('loginSubmitButton')));
       await tester.pumpAndSettle();
 
-      expect(find.text('E-mail ou mot de passe incorrect.'), findsOneWidget);
+      expect(
+        find.text('Identifiant ou mot de passe incorrect.'),
+        findsOneWidget,
+      );
       expect(_borderColor(tester, 'loginIdentifierField'), negative);
       expect(_borderColor(tester, 'loginPasswordField'), negative);
       // Under the password field, not above the form.
       expect(
-        tester.getTopLeft(find.text('E-mail ou mot de passe incorrect.')).dy,
+        tester
+            .getTopLeft(find.text('Identifiant ou mot de passe incorrect.'))
+            .dy,
         greaterThan(
           tester.getBottomLeft(find.byKey(const Key('loginPasswordField'))).dy,
         ),
       );
     },
   );
+
+  testWidgets('a rejected pair is reported in English too', (tester) async {
+    final controller = FakeAuthController(
+      loginError: const ApiFailure(
+        code: 'INVALID_CREDENTIALS',
+        message: 'invalid credentials',
+      ),
+    );
+    await tester.pumpWidget(
+      _wrap(controller: controller, locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+
+    await _type(tester, 'ada.lovelace', 'wrong');
+    await tester.tap(find.byKey(const Key('loginSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wrong email, username or password.'), findsOneWidget);
+  });
 
   testWidgets('loading: spinner label, fields disabled, same width', (
     tester,
@@ -257,7 +287,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Your data stays on this computer.'), findsOneWidget);
-    expect(find.text('Email address'), findsOneWidget);
+    expect(find.text('Email or username'), findsOneWidget);
     expect(find.text('Log in'), findsOneWidget);
     expect(find.text('Create an account'), findsOneWidget);
     expect(find.text('Forgot password'), findsOneWidget);

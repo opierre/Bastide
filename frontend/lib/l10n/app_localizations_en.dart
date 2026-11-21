@@ -384,9 +384,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authDisplayNameLabel => 'Username';
 
   @override
-  String get authRegisterDisplayNameLabel => 'Display name';
-
-  @override
   String get authPreferencesNote =>
       'You can change the language in Settings. The currency is permanent and applies to all your accounts.';
 
@@ -470,13 +467,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authGoToLoginLink => 'Log in';
 
   @override
-  String get authEmailRequired => 'Email is required.';
-
-  @override
   String get authPasswordRequired => 'Password is required.';
 
   @override
-  String get authErrorInvalidCredentials => 'Incorrect email or password.';
+  String get authErrorInvalidCredentials =>
+      'Wrong email, username or password.';
 
   @override
   String get authErrorEmailTaken =>

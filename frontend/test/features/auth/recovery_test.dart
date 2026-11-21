@@ -175,6 +175,15 @@ void main() {
       expect(container.read(pendingRecoveryCodeProvider), isNull);
     });
 
+    testWidgets('the identifier field is labelled like the login one', (
+      tester,
+    ) async {
+      await tester.pumpWidget(wrap(const ForgotPasswordScreen()));
+      await tester.pumpAndSettle();
+
+      expect(find.text("E-mail ou nom d'utilisateur"), findsOneWidget);
+    });
+
     testWidgets('a short new password keeps the submit disabled', (
       tester,
     ) async {
@@ -199,6 +208,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.text('Email or username'), findsOneWidget);
       expect(find.text('Confirm password'), findsOneWidget);
       expect(find.text('Back to sign in'), findsOneWidget);
       expect(find.text('Your data stays on this computer.'), findsOneWidget);
