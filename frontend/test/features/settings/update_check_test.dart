@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
@@ -40,6 +42,12 @@ void main() {
   void stubStatus(Map<String, dynamic> json) {
     when(
       () => apiClient.get('/settings/updates'),
+    ).thenAnswer((_) async => json);
+  }
+
+  void stubCheck(Map<String, dynamic> json) {
+    when(
+      () => apiClient.post('/settings/updates/check'),
     ).thenAnswer((_) async => json);
   }
 
@@ -115,6 +123,37 @@ void main() {
       final state = container.read(updateCheckControllerProvider).value!;
       expect(state.status.enabled, isFalse);
       expect(state.isBusy, isFalse);
+    });
+
+    test('checking now forces a check and shows its result', () async {
+      stubStatus(_status(latest: '0.1.0'));
+      stubCheck(_status(latest: '0.2.0', available: true));
+      await container.read(updateCheckControllerProvider.future);
+
+      await container.read(updateCheckControllerProvider.notifier).checkNow();
+
+      verify(() => apiClient.post('/settings/updates/check')).called(1);
+      verify(() => apiClient.get('/settings/updates')).called(1);
+      final state = container.read(updateCheckControllerProvider).value!;
+      expect(state.status.latestVersion, '0.2.0');
+      expect(state.status.updateAvailable, isTrue);
+      expect(state.isBusy, isFalse);
+      expect(state.isChecking, isFalse);
+    });
+
+    test('a check the sidecar refuses keeps what was shown', () async {
+      stubStatus(_status(latest: '0.1.0'));
+      when(
+        () => apiClient.post('/settings/updates/check'),
+      ).thenThrow(Exception('sidecar down'));
+      await container.read(updateCheckControllerProvider.future);
+
+      await container.read(updateCheckControllerProvider.notifier).checkNow();
+
+      final state = container.read(updateCheckControllerProvider).value!;
+      expect(state.status.latestVersion, '0.1.0');
+      expect(state.isBusy, isFalse);
+      expect(state.isChecking, isFalse);
     });
   });
 
@@ -215,7 +254,7 @@ void main() {
       expect(find.byKey(const Key('settingsUpdateAvailable')), findsOneWidget);
     });
 
-    testWidgets('« Vérifier maintenant » reads the status again', (
+    testWidgets('« Vérifier maintenant » forces a check and shows it', (
       tester,
     ) async {
       useDesktopSurface(tester);
@@ -225,12 +264,66 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Vous utilisez la dernière version.'), findsOneWidget);
 
-      stubStatus(_status(latest: '0.2.0', available: true));
+      stubCheck(_status(latest: '0.2.0', available: true));
       await tester.tap(find.byKey(const Key('settingsUpdateCheckNow')));
       await tester.pumpAndSettle();
 
-      verify(() => apiClient.get('/settings/updates')).called(2);
+      verify(() => apiClient.post('/settings/updates/check')).called(1);
+      verify(() => apiClient.get('/settings/updates')).called(1);
       expect(find.text('Bastide 0.2.0 est disponible'), findsOneWidget);
+    });
+
+    testWidgets('« Vérifier maintenant » spins while the check runs', (
+      tester,
+    ) async {
+      useDesktopSurface(tester);
+      stubStatus(_status(latest: '0.1.0'));
+      final pending = Completer<Map<String, dynamic>>();
+      when(
+        () => apiClient.post('/settings/updates/check'),
+      ).thenAnswer((_) => pending.future);
+
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('settingsUpdateCheckNow')));
+      await tester.pump();
+
+      final button = find.byKey(const Key('settingsUpdateCheckNow'));
+      expect(
+        find.descendant(
+          of: button,
+          matching: find.byType(CircularProgressIndicator),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Vérification…'), findsOneWidget);
+
+      pending.complete(_status(latest: '0.1.0'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: button,
+          matching: find.byType(CircularProgressIndicator),
+        ),
+        findsNothing,
+      );
+      expect(find.text('Vous utilisez la dernière version.'), findsOneWidget);
+    });
+
+    testWidgets('a forced check that cannot reach GitHub says so', (
+      tester,
+    ) async {
+      useDesktopSurface(tester);
+      stubStatus(_status(latest: '0.1.0'));
+      stubCheck(_status(latest: '0.1.0', reachable: false));
+
+      await tester.pumpWidget(wrap(locale: const Locale('en')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('settingsUpdateCheckNow')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('GitHub could not be reached.'), findsOneWidget);
     });
 
     testWidgets('a sidecar that cannot be asked says so', (tester) async {

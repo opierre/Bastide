@@ -8,7 +8,8 @@ import '../domain/user_settings.dart';
 
 /// Calls `/settings`, the runtime probe at `/settings/inference/health`, the
 /// Ollama detection at `/settings/inference/ollama`, the update check at
-/// `/settings/updates` and the data location at `/settings/data-location`.
+/// `/settings/updates` (and its forced `/settings/updates/check`) and the data
+/// location at `/settings/data-location`.
 /// The only place that knows those wire shapes.
 class SettingsRepository {
   SettingsRepository(this._apiClient);
@@ -75,6 +76,14 @@ class SettingsRepository {
   /// once a day, and only when the user turned the check on.
   Future<UpdateStatus> updateStatus() async {
     final json = await _apiClient.get('/settings/updates');
+    return UpdateStatus.fromJson(json as Map<String, dynamic>);
+  }
+
+  /// « Vérifier maintenant »: asks GitHub now, skipping the daily limit. The
+  /// backend reuses a check under a minute old, and asks nothing while the
+  /// check is off.
+  Future<UpdateStatus> checkForUpdates() async {
+    final json = await _apiClient.post('/settings/updates/check');
     return UpdateStatus.fromJson(json as Map<String, dynamic>);
   }
 
