@@ -66,4 +66,30 @@ void main() {
       expect(_trends([big, big]).averageSavedMinor, big);
     });
   });
+
+  group('inProgress', () {
+    // Twelve invented months, January to December 2025.
+    final year = [for (var i = 0; i < 12; i++) 1000];
+    DashboardTrends withCurrent(DateTime? current) => DashboardTrends(
+      savingsSeries: _trends(year).savingsSeries,
+      currency: 'EUR',
+      currentMonth: current,
+    );
+
+    test('is the last month when the window ends on the current one', () {
+      expect(withCurrent(DateTime(2025, 12)).inProgress, {11});
+    });
+
+    test('is a month inside the window when it is the current one', () {
+      expect(withCurrent(DateTime(2025, 7)).inProgress, {6});
+    });
+
+    test('is empty when the window ends before the current month', () {
+      expect(withCurrent(DateTime(2026, 3)).inProgress, isEmpty);
+    });
+
+    test('is empty when the current month is unknown', () {
+      expect(withCurrent(null).inProgress, isEmpty);
+    });
+  });
 }

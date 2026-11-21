@@ -88,6 +88,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get settingsSavingsGoalTitle => 'Savings-rate goal';
+
+  @override
+  String get settingsSavingsGoalNote => 'The mark shown on the dashboard.';
+
+  @override
   String get settingsIncomeTitle => 'Declared income';
 
   @override
@@ -1599,12 +1605,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardSavingsTrendAverage => 'on average over 12 months';
-
-  @override
-  String get dashboardSavingsViewBars => 'Bars';
-
-  @override
-  String get dashboardSavingsViewLine => 'Line';
 
   @override
   String get dashboardRecentActivityTitle => 'Recent activity';

@@ -128,7 +128,11 @@ class _SavingsItem extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
     final colors = context.colors;
-    final goal = formatRatioPct(savingsRateGoal, locale, decimalDigits: 0);
+    final goal = formatRatioPct(
+      summary.savingsRateGoal,
+      locale,
+      decimalDigits: 0,
+    );
     final hasRate = summary.hasSavingsRate;
     final rate = formatRatioPct(summary.savingsRate, locale);
     final secondary = textTheme.bodySmall!.copyWith(

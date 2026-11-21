@@ -34,6 +34,7 @@ class SettingsRepository {
     String? modelTag,
     double? confidenceThreshold,
     bool? updateCheckEnabled,
+    int? savingsRateGoalPercent,
   }) async {
     final json = await _apiClient.patch(
       '/settings',
@@ -43,6 +44,7 @@ class SettingsRepository {
         'model_tag': ?modelTag,
         'confidence_threshold': ?confidenceThreshold,
         'update_check_enabled': ?updateCheckEnabled,
+        'savings_rate_goal_percent': ?savingsRateGoalPercent,
       },
     );
     return UserSettings.fromJson(json as Map<String, dynamic>);

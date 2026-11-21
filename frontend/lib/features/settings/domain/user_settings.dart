@@ -14,7 +14,15 @@ class UserSettings {
     required this.confidenceThreshold,
     this.lastBackupAt,
     this.declaredMonthlyIncomeMinor,
+    this.savingsRateGoalPercent = defaultSavingsRateGoalPercent,
   });
+
+  /// The goal a user has before choosing one, the backend's own default.
+  static const defaultSavingsRateGoalPercent = 20;
+
+  /// The slider's range for [savingsRateGoalPercent] (`09-settings.md`).
+  static const minSavingsRateGoalPercent = 1;
+  static const maxSavingsRateGoalPercent = 50;
 
   factory UserSettings.fromJson(Map<String, dynamic> json) => UserSettings(
     aiEnabled: json['ai_enabled'] as bool,
@@ -26,7 +34,12 @@ class UserSettings {
       _ => null,
     },
     declaredMonthlyIncomeMinor: json['declared_monthly_income_minor'] as int?,
+    savingsRateGoalPercent: json['savings_rate_goal_percent'] as int,
   );
+
+  /// The savings rate the dashboard measures a month against, in whole
+  /// percent, `1..50`.
+  final int savingsRateGoalPercent;
 
   /// The monthly income the debt ratio runs on, in minor units; `null` when
   /// none is declared and the ratio falls back to the observed median.
@@ -66,6 +79,7 @@ class UserSettings {
     String? modelTag,
     double? confidenceThreshold,
     DateTime? lastBackupAt,
+    int? savingsRateGoalPercent,
   }) => UserSettings(
     aiEnabled: aiEnabled ?? this.aiEnabled,
     inferenceBaseUrl: inferenceBaseUrl ?? this.inferenceBaseUrl,
@@ -73,6 +87,8 @@ class UserSettings {
     confidenceThreshold: confidenceThreshold ?? this.confidenceThreshold,
     lastBackupAt: lastBackupAt ?? this.lastBackupAt,
     declaredMonthlyIncomeMinor: declaredMonthlyIncomeMinor,
+    savingsRateGoalPercent:
+        savingsRateGoalPercent ?? this.savingsRateGoalPercent,
   );
 
   /// These settings with [minor] as the declared income; `null` clears it,
@@ -84,6 +100,7 @@ class UserSettings {
     confidenceThreshold: confidenceThreshold,
     lastBackupAt: lastBackupAt,
     declaredMonthlyIncomeMinor: minor,
+    savingsRateGoalPercent: savingsRateGoalPercent,
   );
 
   @override
@@ -95,7 +112,8 @@ class UserSettings {
           other.modelTag == modelTag &&
           other.confidenceThreshold == confidenceThreshold &&
           other.lastBackupAt == lastBackupAt &&
-          other.declaredMonthlyIncomeMinor == declaredMonthlyIncomeMinor);
+          other.declaredMonthlyIncomeMinor == declaredMonthlyIncomeMinor &&
+          other.savingsRateGoalPercent == savingsRateGoalPercent);
 
   @override
   int get hashCode => Object.hash(
@@ -105,6 +123,7 @@ class UserSettings {
     confidenceThreshold,
     lastBackupAt,
     declaredMonthlyIncomeMinor,
+    savingsRateGoalPercent,
   );
 }
 

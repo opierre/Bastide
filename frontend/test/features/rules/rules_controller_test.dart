@@ -265,7 +265,7 @@ void main() {
         () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
       ).thenAnswer((_) async => _summaryJson());
       when(
-        () => apiClient.get('/dashboard/trends'),
+        () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
       ).thenAnswer((_) async => _trendsJson());
     });
 
@@ -337,6 +337,7 @@ Map<String, dynamic> _summaryJson() => {
   'expense_delta_pct': 0.0,
   'net_delta_pct': 0.0,
   'savings_rate_delta_pct': 0.0,
+  'savings_rate_goal_percent': 20,
   'by_category': <dynamic>[],
   'currency': 'EUR',
 };

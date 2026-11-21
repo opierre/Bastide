@@ -230,6 +230,18 @@ abstract class AppLocalizations {
   /// **'{code}, {name} ({symbol})'**
   String settingsCurrencyValue(String code, String name, String symbol);
 
+  /// Settings › Préférences: name of the savings-rate goal row.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif de taux d’épargne'**
+  String get settingsSavingsGoalTitle;
+
+  /// Settings › Préférences: description of the savings-rate goal row; the goal is the mark on the dashboard's savings-rate meter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le repère affiché sur le tableau de bord.'**
+  String get settingsSavingsGoalNote;
+
   /// Settings › Préférences: name of the declared monthly income row.
   ///
   /// In fr, this message translates to:
@@ -2604,18 +2616,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'en moyenne sur 12 mois'**
   String get dashboardSavingsTrendAverage;
-
-  /// Savings chart view switch: one bar per month.
-  ///
-  /// In fr, this message translates to:
-  /// **'Barres'**
-  String get dashboardSavingsViewBars;
-
-  /// Savings chart view switch: the same months joined as a line.
-  ///
-  /// In fr, this message translates to:
-  /// **'Courbe'**
-  String get dashboardSavingsViewLine;
 
   /// Title of the recent-transactions card.
   ///

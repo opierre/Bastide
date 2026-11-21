@@ -66,6 +66,7 @@ DashboardSummary specSummary({
   double netDeltaPct = -6.1,
   double savingsRateDeltaPct = 1.9,
   List<CategoryBreakdown> byCategory = specCategories,
+  double savingsRateGoal = defaultSavingsRateGoal,
 }) => DashboardSummary(
   incomeMinor: incomeMinor,
   expenseMinor: expenseMinor,
@@ -77,6 +78,7 @@ DashboardSummary specSummary({
   savingsRateDeltaPct: savingsRateDeltaPct,
   byCategory: byCategory,
   currency: 'EUR',
+  savingsRateGoal: savingsRateGoal,
 );
 
 /// The trend series exactly as `docs/design/04-dashboard.md` draws them.
@@ -101,6 +103,7 @@ DashboardTrends specTrends() => DashboardTrends(
     SavingsPoint(month: DateTime(2026, 5), savedMinor: 63565),
   ],
   currency: 'EUR',
+  currentMonth: DateTime(2026, 5),
 );
 
 /// The four activity rows exactly as `docs/design/04-dashboard.md` tabulates them.

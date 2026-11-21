@@ -28,6 +28,7 @@ Map<String, dynamic> _settingsJson({
   'inference_base_url': baseUrl,
   'model_tag': modelTag,
   'confidence_threshold': threshold,
+  'savings_rate_goal_percent': 20,
 };
 
 Map<String, dynamic> _healthJson({

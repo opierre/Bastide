@@ -34,10 +34,11 @@ async def get_summary(
 async def get_trends(
     service: Annotated[DashboardService, Depends(_service)],
     user: Annotated[User, Depends(get_current_user)],
+    month: Annotated[str | None, Query(pattern=r"^\d{4}-\d{2}$")] = None,
 ) -> DashboardTrends:
-    """The caller's recent trend series.
+    """The caller's trend series.
 
-    Deliberately takes no `month`: both windows end with the *current* month, so paging the
-    dashboard's month picker back doesn't move them.
+    The savings series ends with `month` (default: the current one); the monthly bars always
+    end with the current month.
     """
-    return service.trends(user.id, user.currency, date.today())
+    return service.trends(user.id, user.currency, date.today(), month)

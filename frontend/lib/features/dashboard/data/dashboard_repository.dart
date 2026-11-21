@@ -29,18 +29,26 @@ class DashboardRepository {
     return _parse(json);
   }
 
-  /// The savings series behind « Épargne mensuelle ».
+  /// The savings series behind « Épargne mensuelle »: the 12 months ending with [month].
   ///
-  /// Takes no month: the window ends at the current one, so this is fetched once and survives
-  /// the month picker.
-  Future<DashboardTrends> trends() async {
+  /// [currentMonth] is the calendar month at the time of the call; the result carries it so
+  /// the chart can hatch the month in progress when the window includes it.
+  Future<DashboardTrends> trends(
+    DateTime month, {
+    required DateTime currentMonth,
+  }) async {
     final json =
-        await _apiClient.get('/dashboard/trends') as Map<String, dynamic>;
+        await _apiClient.get(
+              '/dashboard/trends',
+              query: {'month': _monthParam.format(month)},
+            )
+            as Map<String, dynamic>;
     return DashboardTrends(
       savingsSeries: (json['savings_series'] as List<dynamic>)
           .map((entry) => _parseSavingsPoint(entry as Map<String, dynamic>))
           .toList(),
       currency: json['currency'] as String,
+      currentMonth: DateTime(currentMonth.year, currentMonth.month),
     );
   }
 
@@ -123,6 +131,8 @@ class DashboardRepository {
     expenseDeltaPct: (json['expense_delta_pct'] as num).toDouble(),
     netDeltaPct: (json['net_delta_pct'] as num).toDouble(),
     savingsRateDeltaPct: (json['savings_rate_delta_pct'] as num).toDouble(),
+    // A whole percent on the wire, a ratio like `savings_rate` in the domain.
+    savingsRateGoal: (json['savings_rate_goal_percent'] as int) / 100,
     byCategory: (json['by_category'] as List<dynamic>)
         .map((entry) => _parseCategory(entry as Map<String, dynamic>))
         .toList(),

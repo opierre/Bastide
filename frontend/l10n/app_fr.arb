@@ -112,6 +112,14 @@
       }
     }
   },
+  "settingsSavingsGoalTitle": "Objectif de taux d’épargne",
+  "@settingsSavingsGoalTitle": {
+    "description": "Settings › Préférences: name of the savings-rate goal row."
+  },
+  "settingsSavingsGoalNote": "Le repère affiché sur le tableau de bord.",
+  "@settingsSavingsGoalNote": {
+    "description": "Settings › Préférences: description of the savings-rate goal row; the goal is the mark on the dashboard's savings-rate meter."
+  },
   "settingsIncomeTitle": "Revenu déclaré",
   "@settingsIncomeTitle": {
     "description": "Settings › Préférences: name of the declared monthly income row."
@@ -2000,14 +2008,6 @@
   "dashboardSavingsTrendAverage": "en moyenne sur 12 mois",
   "@dashboardSavingsTrendAverage": {
     "description": "Follows the signed 12-month average on the right of the « Épargne mensuelle » heading."
-  },
-  "dashboardSavingsViewBars": "Barres",
-  "@dashboardSavingsViewBars": {
-    "description": "Savings chart view switch: one bar per month."
-  },
-  "dashboardSavingsViewLine": "Courbe",
-  "@dashboardSavingsViewLine": {
-    "description": "Savings chart view switch: the same months joined as a line."
   },
   "dashboardRecentActivityTitle": "Activité récente",
   "@dashboardRecentActivityTitle": {

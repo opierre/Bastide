@@ -3,6 +3,7 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/app_card.dart';
+import 'package:bastide/core/widgets/app_segmented.dart';
 import 'package:bastide/core/widgets/app_shell.dart';
 import 'package:bastide/core/widgets/bar_charts.dart';
 import 'package:bastide/core/widgets/institution_avatar.dart';
@@ -162,6 +163,31 @@ void main() {
       expect(
         tester.widget<RepereMeter>(_byKey('dashboardSavingsGoalBar')).tone,
         RepereTone.normal,
+      );
+    });
+
+    testWidgets('the mark and the status follow the user\'s goal', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        _state(summary: specSummary(savingsRate: 0.223, savingsRateGoal: 0.30)),
+      );
+
+      final meter = tester.widget<RepereMeter>(
+        _byKey('dashboardSavingsGoalBar'),
+      );
+      expect(
+        meter.markLabel,
+        'objectif ${formatRatioPct(0.3, 'fr', decimalDigits: 0)}',
+      );
+      expect(meter.fraction, closeTo(0.223 / 0.6, 0.0001));
+      expect(meter.tone, RepereTone.normal);
+      expect(_byKey('dashboardSavingsGoalReached'), findsNothing);
+      expect(
+        tester.widget<Text>(_byKey('dashboardSavingsDelta')).data,
+        'Objectif ${formatRatioPct(0.3, 'fr', decimalDigits: 0)} en cours'
+        ' · +1,9 pt depuis avril',
       );
     });
 
@@ -361,15 +387,20 @@ void main() {
   });
 
   group('épargne mensuelle', () {
-    testWidgets('bars by default, the month in progress hatched', (
-      tester,
-    ) async {
+    testWidgets('bars only, the month in progress hatched', (tester) async {
       await _pump(tester, _state());
 
       final chart = tester.widget<SignedBarChart>(find.byType(SignedBarChart));
       expect(chart.values, hasLength(12));
       expect(chart.provisional, {11});
-      expect(find.byType(SavingsLineChart), findsNothing);
+      // No view switch: the chart is bars only.
+      expect(
+        find.descendant(
+          of: _byKey('dashboardMonthlySavings'),
+          matching: find.byWidgetPredicate((w) => w is AppSegmented),
+        ),
+        findsNothing,
+      );
       expect(
         tester.widget<AmountText>(_byKey('dashboardAverageSaved')).amountMinor,
         specTrends().averageSavedMinor,
@@ -377,20 +408,24 @@ void main() {
       expect(find.text('en moyenne sur 12 mois'), findsOneWidget);
     });
 
-    testWidgets('the line view draws the same values', (tester) async {
-      await _pump(tester, _state());
-
-      await tester.tap(_byKey('savingsViewLine'));
-      await tester.pumpAndSettle();
-
-      final line = tester.widget<SavingsLineChart>(
-        find.byType(SavingsLineChart),
+    testWidgets('an earlier month hatches nothing', (tester) async {
+      // The window ends on May 2026, but the calendar has moved on to July.
+      final trends = specTrends();
+      await _pump(
+        tester,
+        _state(
+          trends: DashboardTrends(
+            savingsSeries: trends.savingsSeries,
+            currency: trends.currency,
+            currentMonth: DateTime(2026, 7),
+          ),
+        ),
       );
-      expect(line.values, [
-        for (final p in specTrends().savingsSeries) p.savedMinor,
-      ]);
-      expect(line.provisional, {11});
-      expect(find.byType(SignedBarChart), findsNothing);
+
+      expect(
+        tester.widget<SignedBarChart>(find.byType(SignedBarChart)).provisional,
+        isEmpty,
+      );
     });
 
     testWidgets('hovering a month names its signed amount', (tester) async {

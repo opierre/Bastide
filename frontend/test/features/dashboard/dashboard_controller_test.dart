@@ -17,6 +17,7 @@ Map<String, dynamic> _summaryJson({
   double netDeltaPct = -6.1,
   double savingsRateDeltaPct = 1.9,
   List<Map<String, dynamic>> byCategory = const [],
+  int savingsRateGoalPercent = 20,
 }) => {
   'income_minor': incomeMinor,
   'expense_minor': expenseMinor,
@@ -26,6 +27,7 @@ Map<String, dynamic> _summaryJson({
   'expense_delta_pct': expenseDeltaPct,
   'net_delta_pct': netDeltaPct,
   'savings_rate_delta_pct': savingsRateDeltaPct,
+  'savings_rate_goal_percent': savingsRateGoalPercent,
   'by_category': byCategory,
   'currency': 'EUR',
 };
@@ -134,7 +136,7 @@ void main() {
         ),
       );
       when(
-        () => apiClient.get('/dashboard/trends'),
+        () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
       ).thenAnswer((_) async => _trendsJson());
       when(
         () => apiClient.get('/accounts'),
@@ -153,6 +155,45 @@ void main() {
     },
   );
 
+  test('reloadSummary re-reads the shown month and its goal', () async {
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer((_) async => _transactionsPageJson(['2026-03-14']));
+    when(
+      () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+    ).thenAnswer((_) async => _summaryJson());
+    when(
+      () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
+    ).thenAnswer((_) async => _trendsJson());
+    when(
+      () => apiClient.get('/accounts'),
+    ).thenAnswer((_) async => _accountsJson());
+    final controller = container.read(dashboardControllerProvider.notifier);
+    await container.read(dashboardControllerProvider.future);
+    await controller.changeMonth(DateTime(2026, 2));
+    expect(
+      container
+          .read(dashboardControllerProvider)
+          .value!
+          .summary
+          .savingsRateGoal,
+      closeTo(0.20, 1e-9),
+    );
+
+    when(
+      () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+    ).thenAnswer((_) async => _summaryJson(savingsRateGoalPercent: 35));
+    await controller.reloadSummary();
+
+    final state = container.read(dashboardControllerProvider).value!;
+    // The month the user paged to stays; only the goal moved.
+    expect(state.month, DateTime(2026, 2));
+    expect(state.summary.savingsRateGoal, closeTo(0.35, 1e-9));
+    verify(
+      () => apiClient.get('/dashboard/summary', query: {'month': '2026-02'}),
+    ).called(2);
+  });
+
   test(
     'build falls back to the current month when there are no transactions',
     () async {
@@ -163,7 +204,7 @@ void main() {
         () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
       ).thenAnswer((_) async => _summaryJson());
       when(
-        () => apiClient.get('/dashboard/trends'),
+        () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
       ).thenAnswer((_) async => _trendsJson());
       when(
         () => apiClient.get('/accounts'),
@@ -184,7 +225,7 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
     when(
-      () => apiClient.get('/dashboard/trends'),
+      () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
     ).thenAnswer((_) async => _trendsJson());
     when(
       () => apiClient.get('/accounts'),
@@ -202,7 +243,7 @@ void main() {
     ).called(1);
   });
 
-  test('the trend series survive a month change and are not re-fetched', () async {
+  test('build asks for the trends ending on the selected month', () async {
     when(
       () => apiClient.get('/transactions', query: any(named: 'query')),
     ).thenAnswer((_) async => _transactionsPageJson(['2026-05-14']));
@@ -210,25 +251,80 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
     when(
-      () => apiClient.get('/dashboard/trends'),
+      () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
     ).thenAnswer((_) async => _trendsJson());
     when(
       () => apiClient.get('/accounts'),
     ).thenAnswer((_) async => _accountsJson());
 
-    await container.read(dashboardControllerProvider.future);
-    await container
-        .read(dashboardControllerProvider.notifier)
-        .changeMonth(DateTime(2026, 1));
+    final state = await container.read(dashboardControllerProvider.future);
 
-    final state = container.read(dashboardControllerProvider).value!;
-    expect(state.month, DateTime(2026, 1));
-    // Both windows end at the *current* month, so paging back to January leaves them alone —
-    // and re-requesting a series that cannot have changed would be wasted work.
-    expect(state.trends.savingsSeries.last.savedMinor, -11840);
+    verify(
+      () => apiClient.get('/dashboard/trends', query: {'month': '2026-05'}),
+    ).called(1);
     // The mean of 73 710 and −11 840, rounded to the cent.
     expect(state.trends.averageSavedMinor, 30935);
-    verify(() => apiClient.get('/dashboard/trends')).called(1);
+  });
+
+  test(
+    'the trend series follow a month change; the activity list does not',
+    () async {
+      when(
+        () => apiClient.get('/transactions', query: any(named: 'query')),
+      ).thenAnswer((_) async => _transactionsPageJson(['2026-05-14']));
+      when(
+        () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+      ).thenAnswer((_) async => _summaryJson());
+      when(
+        () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
+      ).thenAnswer((_) async => _trendsJson());
+      when(
+        () => apiClient.get('/accounts'),
+      ).thenAnswer((_) async => _accountsJson());
+
+      await container.read(dashboardControllerProvider.future);
+      await container
+          .read(dashboardControllerProvider.notifier)
+          .changeMonth(DateTime(2026, 1));
+
+      final state = container.read(dashboardControllerProvider).value!;
+      expect(state.month, DateTime(2026, 1));
+      verify(
+        () => apiClient.get('/dashboard/trends', query: {'month': '2026-01'}),
+      ).called(1);
+      // « Activité récente » is not keyed to the month: read once, at build.
+      verify(() => apiClient.get('/accounts')).called(1);
+    },
+  );
+
+  test('the trends carry the calendar month the clock reads', () async {
+    final pinned = ProviderContainer(
+      overrides: [
+        apiClientProvider.overrideWithValue(apiClient),
+        dashboardTodayProvider.overrideWithValue(
+          () => DateTime(2026, 5, 20, 9, 30),
+        ),
+      ],
+    );
+    addTearDown(pinned.dispose);
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer((_) async => _transactionsPageJson(['2026-05-14']));
+    when(
+      () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
+    ).thenAnswer((_) async => _summaryJson());
+    when(
+      () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
+    ).thenAnswer((_) async => _trendsJson());
+    when(
+      () => apiClient.get('/accounts'),
+    ).thenAnswer((_) async => _accountsJson());
+
+    final state = await pinned.read(dashboardControllerProvider.future);
+
+    expect(state.trends.currentMonth, DateTime(2026, 5));
+    // May, the last point of the fixture, is the month in progress.
+    expect(state.trends.inProgress, {1});
   });
 
   test('refresh does re-fetch the trends', () async {
@@ -239,7 +335,7 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
     when(
-      () => apiClient.get('/dashboard/trends'),
+      () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
     ).thenAnswer((_) async => _trendsJson());
     when(
       () => apiClient.get('/accounts'),
@@ -248,7 +344,9 @@ void main() {
     await container.read(dashboardControllerProvider.future);
     await container.read(dashboardControllerProvider.notifier).refresh();
 
-    verify(() => apiClient.get('/dashboard/trends')).called(2);
+    verify(
+      () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
+    ).called(2);
   });
 
   test('a failed month change surfaces as an AsyncError', () async {
@@ -259,7 +357,7 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
     when(
-      () => apiClient.get('/dashboard/trends'),
+      () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
     ).thenAnswer((_) async => _trendsJson());
     when(
       () => apiClient.get('/accounts'),
@@ -289,7 +387,7 @@ void main() {
       () => apiClient.get('/dashboard/summary', query: any(named: 'query')),
     ).thenAnswer((_) async => _summaryJson());
     when(
-      () => apiClient.get('/dashboard/trends'),
+      () => apiClient.get('/dashboard/trends', query: any(named: 'query')),
     ).thenAnswer((_) async => _trendsJson());
     when(
       () => apiClient.get('/accounts'),
@@ -301,16 +399,5 @@ void main() {
     verify(
       () => apiClient.get('/dashboard/summary', query: {'month': '2026-05'}),
     ).called(2);
-  });
-
-  test('the savings chart opens on bars and keeps the view it is given', () {
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
-
-    expect(container.read(savingsChartViewProvider), SavingsChartView.bars);
-    container
-        .read(savingsChartViewProvider.notifier)
-        .set(SavingsChartView.line);
-    expect(container.read(savingsChartViewProvider), SavingsChartView.line);
   });
 }

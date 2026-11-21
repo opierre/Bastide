@@ -88,6 +88,13 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get settingsSavingsGoalTitle => 'Objectif de taux d’épargne';
+
+  @override
+  String get settingsSavingsGoalNote =>
+      'Le repère affiché sur le tableau de bord.';
+
+  @override
   String get settingsIncomeTitle => 'Revenu déclaré';
 
   @override
@@ -1606,12 +1613,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dashboardSavingsTrendAverage => 'en moyenne sur 12 mois';
-
-  @override
-  String get dashboardSavingsViewBars => 'Barres';
-
-  @override
-  String get dashboardSavingsViewLine => 'Courbe';
 
   @override
   String get dashboardRecentActivityTitle => 'Activité récente';
