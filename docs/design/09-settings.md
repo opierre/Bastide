@@ -51,12 +51,12 @@ session stays open and every other session of the user is signed out.
 | | Formats · « Dates et montants suivent la langue choisie. » | Key/value list: Date « 14 mai 2026 · 14/05/2026 »; Montant « −1 234,56 € ». |
 | | Barre latérale · « Réduite, elle ne garde que les icônes. » | Segmented « Étendue · Réduite ». |
 | Argent | Devise · « Choisie à l’inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version. » | Read-only value: `lock` + « EUR, euro (€) ». |
-| | Objectif de taux d’épargne · « Le repère affiché sur le tableau de bord. » | Slider 0–50 %, step 1, value printed (« 20 % »). |
+| | Objectif de taux d’épargne · « Le repère affiché sur le tableau de bord. » | Slider 1–50 %, step 1, value printed (« 20 % »). |
 | | Revenu déclaré · « Sert au taux d’endettement des panneaux Crédits et Simulateur. Sans lui, Bastide prend le revenu médian constaté. » | Amount field 140 px + « par mois »; empty means "not declared". |
 
 Two rows change what exists today and need more than a restyle:
 - « Objectif de taux d’épargne » is a stored per-user value (`savings_rate_goal_percent`,
-  default 20). The Dashboard summary carries it, so the repère's mark and the goal status
+  1–50 %, default 20). The Dashboard summary carries it, so the repère's mark and the goal status
   follow it.
 - « Revenu déclaré » exists: it is edited today from the « Déclarer un revenu » dialog of
   Crédits. This row edits the same value, and the Crédits and Simulateur links open this row.

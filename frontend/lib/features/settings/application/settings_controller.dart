@@ -201,7 +201,10 @@ class SettingsController extends AsyncNotifier<SettingsState> {
   /// The dashboard's savings-rate goal, a whole percent off the Préférences
   /// slider. Debounced like the threshold, so a drag sends one patch.
   void setSavingsRateGoalPercent(int percent) {
-    final goal = percent.clamp(0, UserSettings.maxSavingsRateGoalPercent);
+    final goal = percent.clamp(
+      UserSettings.minSavingsRateGoalPercent,
+      UserSettings.maxSavingsRateGoalPercent,
+    );
     _pendingSavingsGoal = goal;
     _edit((settings) => settings.copyWith(savingsRateGoalPercent: goal));
   }

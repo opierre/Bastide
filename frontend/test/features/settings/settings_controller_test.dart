@@ -460,7 +460,21 @@ void main() {
       },
     );
 
-    test('keeps the goal within the slider\'s 0–50 %', () async {
+    test('never sends a goal below the slider\'s 1 %', () async {
+      stubSettings(_settingsJson());
+      stubPatch(_settingsJson(savingsGoal: 1));
+      await load();
+
+      controller().setSavingsRateGoalPercent(0);
+      await Future<void>.delayed(settingsPatchDebounce * 2);
+
+      final body = verify(
+        () => apiClient.patch('/settings', body: captureAny(named: 'body')),
+      ).captured.single;
+      expect(body, {'savings_rate_goal_percent': 1});
+    });
+
+    test('keeps the goal within the slider\'s 1–50 %', () async {
       stubSettings(_settingsJson());
       stubPatch(_settingsJson(savingsGoal: 50));
       await load();

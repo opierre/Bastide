@@ -189,7 +189,7 @@ def test_patch_sets_the_savings_rate_goal_and_keeps_it(client: TestClient) -> No
     assert nulled.json()["savings_rate_goal_percent"] == 35
 
 
-@pytest.mark.parametrize("goal", [0, 50])
+@pytest.mark.parametrize("goal", [1, 50])
 def test_patch_accepts_the_savings_rate_goal_bounds(client: TestClient, goal: int) -> None:
     headers = _register(client)
 
@@ -201,7 +201,7 @@ def test_patch_accepts_the_savings_rate_goal_bounds(client: TestClient, goal: in
     assert response.json()["savings_rate_goal_percent"] == goal
 
 
-@pytest.mark.parametrize("goal", [-1, 51, 20.5])
+@pytest.mark.parametrize("goal", [0, -1, 51, 20.5])
 def test_patch_rejects_a_savings_rate_goal_outside_the_slider(
     client: TestClient, goal: float
 ) -> None:

@@ -108,10 +108,9 @@ class DashboardSummary {
 
   /// The rate's position on the repère, whose scale runs from 0 to twice the
   /// goal (`00` §8). The meter clamps the fill; a negative rate draws none.
-  /// A 0 % goal leaves no scale to divide by: any saving fills the bar.
-  double get savingsRateMeterFraction => savingsRateGoal <= 0
-      ? (savingsRate > 0 ? 1.0 : 0.0)
-      : (savingsRate / (savingsRateGoal * 2)).clamp(0.0, 1.0);
+  /// The goal is at least 1 %, so the scale is never empty.
+  double get savingsRateMeterFraction =>
+      (savingsRate / (savingsRateGoal * 2)).clamp(0.0, 1.0);
 
   /// Where the goal's mark stands on that scale: always halfway.
   static const savingsGoalMarkFraction = 0.5;

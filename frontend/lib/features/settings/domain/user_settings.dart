@@ -21,6 +21,7 @@ class UserSettings {
   static const defaultSavingsRateGoalPercent = 20;
 
   /// The slider's range for [savingsRateGoalPercent] (`09-settings.md`).
+  static const minSavingsRateGoalPercent = 1;
   static const maxSavingsRateGoalPercent = 50;
 
   factory UserSettings.fromJson(Map<String, dynamic> json) => UserSettings(
@@ -37,7 +38,7 @@ class UserSettings {
   );
 
   /// The savings rate the dashboard measures a month against, in whole
-  /// percent, `0..50`.
+  /// percent, `1..50`.
   final int savingsRateGoalPercent;
 
   /// The monthly income the debt ratio runs on, in minor units; `null` when

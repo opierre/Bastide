@@ -43,7 +43,7 @@ InferenceBaseUrl = Annotated[
     str, Field(min_length=1, max_length=255), AfterValidator(_validate_loopback_url)
 ]
 ConfidenceThreshold = Annotated[float, Field(ge=0, le=1)]
-SavingsRateGoalPercent = Annotated[int, Field(ge=0, le=50)]
+SavingsRateGoalPercent = Annotated[int, Field(ge=1, le=50)]
 
 
 class SettingsUpdate(BaseModel):
@@ -61,7 +61,7 @@ class SettingsUpdate(BaseModel):
     #: the ratio falls back to the ledger median.
     declared_monthly_income_minor: int | None = Field(default=None, gt=0)
     update_check_enabled: bool | None = None
-    #: The dashboard's savings-rate goal in whole percent, the Préférences slider's 0–50 range.
+    #: The dashboard's savings-rate goal in whole percent, the Préférences slider's 1–50 range.
     savings_rate_goal_percent: SavingsRateGoalPercent | None = None
 
 

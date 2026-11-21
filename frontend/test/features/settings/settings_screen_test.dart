@@ -188,7 +188,7 @@ void main() {
     );
   });
 
-  testWidgets('the savings-rate goal is a 0–50 % slider with its value', (
+  testWidgets('the savings-rate goal is a 1–50 % slider with its value', (
     tester,
   ) async {
     useDesktopSurface(tester);
@@ -204,9 +204,9 @@ void main() {
       find.byKey(const Key('settingsSavingsGoalSlider')),
     );
     expect(slider.value, 35);
-    expect(slider.min, 0);
+    expect(slider.min, 1);
     expect(slider.max, 50);
-    expect(slider.divisions, 50);
+    expect(slider.divisions, 49);
     expect(
       tester
           .widget<Text>(find.byKey(const Key('settingsSavingsGoalValue')))

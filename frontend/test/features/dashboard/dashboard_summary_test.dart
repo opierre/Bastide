@@ -74,27 +74,6 @@ void main() {
       );
     });
 
-    test('a 0 % goal fills the bar with any saving and never divides by 0', () {
-      expect(
-        specSummary(
-          savingsRate: 0.05,
-          savingsRateGoal: 0,
-        ).savingsRateMeterFraction,
-        1,
-      );
-      expect(
-        specSummary(
-          savingsRate: -0.1,
-          savingsRateGoal: 0,
-        ).savingsRateMeterFraction,
-        0,
-      );
-      expect(
-        specSummary(savingsRate: 0, savingsRateGoal: 0).savingsGoalReached,
-        isTrue,
-      );
-    });
-
     test('has no value without income', () {
       final summary = specSummary(incomeMinor: 0, savingsRate: 0);
       expect(summary.hasSavingsRate, isFalse);

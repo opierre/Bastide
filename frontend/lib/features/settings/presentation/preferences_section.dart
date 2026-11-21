@@ -273,7 +273,7 @@ class _FormatsList extends StatelessWidget {
   }
 }
 
-/// The savings-rate goal: a slider from 0 to 50 %, step 1, its value printed
+/// The savings-rate goal: a slider from 1 to 50 %, step 1, its value printed
 /// beside it. Saved with the settings debounce, so a drag sends one patch.
 class _SavingsGoal extends ConsumerWidget {
   const _SavingsGoal();
@@ -305,8 +305,11 @@ class _SavingsGoal extends ConsumerWidget {
           AppSlider(
             key: const Key('settingsSavingsGoalSlider'),
             value: goal.toDouble(),
+            min: UserSettings.minSavingsRateGoalPercent.toDouble(),
             max: UserSettings.maxSavingsRateGoalPercent.toDouble(),
-            divisions: UserSettings.maxSavingsRateGoalPercent,
+            divisions:
+                UserSettings.maxSavingsRateGoalPercent -
+                UserSettings.minSavingsRateGoalPercent,
             width: SettingRowMetrics.sliderWidth,
             onChanged: (value) => ref
                 .read(settingsControllerProvider.notifier)

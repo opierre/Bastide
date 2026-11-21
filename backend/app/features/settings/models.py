@@ -34,7 +34,7 @@ class UserSettings(Base):
     last_backup_at: Mapped[datetime | None] = mapped_column(UtcDateTime(), nullable=True)
     # Monthly income the debt ratio runs on. Null = derive it from the ledger.
     declared_monthly_income_minor: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    # The dashboard's savings-rate goal, a whole percent in [0, 50] (the Préférences slider).
+    # The dashboard's savings-rate goal, a whole percent in [1, 50] (the Préférences slider).
     savings_rate_goal_percent: Mapped[int] = mapped_column(
         Integer, default=DEFAULT_SAVINGS_RATE_GOAL_PERCENT
     )
