@@ -4153,25 +4153,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get simulatorErrorGeneric => 'Something went wrong. Try again.';
 
   @override
-  String get simulatorIncomeTitle => 'Declare an income';
-
-  @override
-  String get simulatorIncomeBody =>
-      'The declared monthly income is the basis of the debt ratio and the borrowing capacity.';
-
-  @override
-  String get simulatorIncomeLabel => 'Net monthly income';
-
-  @override
-  String get simulatorIncomeInvalid => 'Enter an amount above zero.';
-
-  @override
-  String get simulatorIncomeSubmit => 'Declare';
-
-  @override
-  String get simulatorIncomeFailed => 'Couldn’t save this income. Try again.';
-
-  @override
   String get simulatorCancel => 'Cancel';
 
   @override

@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/app_modal.dart';
-import '../../../core/widgets/inline_banner.dart';
-import '../../../core/widgets/labeled_field.dart';
-import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../settings/presentation/settings_screen.dart';
 import '../application/simulator_controller.dart';
 import '../domain/simulation.dart';
 import 'simulator_labels.dart';
@@ -545,118 +542,11 @@ class _UnknownIncomeBlock extends StatelessWidget {
         AppButton(
           key: const Key('hcsfDeclareIncome'),
           label: l10n.simulatorDeclareIncome,
-          onPressed: () => showDialog<void>(
-            context: context,
-            builder: (_) => const SimulatorIncomeModal(),
-          ),
+          // Paramètres → Préférences holds the one field that edits the
+          // income (`09-settings.md` §Préférences).
+          onPressed: () => context.go(SettingsScreen.incomePath),
         ),
       ],
-    );
-  }
-}
-
-/// « Déclarer un revenu », opened from the unknown-income block. The income
-/// becomes the ratio's denominator, and the reading recomputes behind it.
-class SimulatorIncomeModal extends ConsumerStatefulWidget {
-  const SimulatorIncomeModal({super.key});
-
-  /// The same width as the save dialog (`14` §States).
-  static const width = 420.0;
-
-  @override
-  ConsumerState<SimulatorIncomeModal> createState() =>
-      _SimulatorIncomeModalState();
-}
-
-class _SimulatorIncomeModalState extends ConsumerState<SimulatorIncomeModal> {
-  final _formKey = GlobalKey<FormState>();
-  final _amount = TextEditingController();
-  bool _isSubmitting = false;
-  String? _errorText;
-
-  @override
-  void dispose() {
-    _amount.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    final locale = Localizations.localeOf(context).toString();
-    final amount = parseMoneyMinor(_amount.text, locale);
-    if (amount == null || amount <= 0) return;
-
-    setState(() {
-      _isSubmitting = true;
-      _errorText = null;
-    });
-    try {
-      await ref
-          .read(simulatorControllerProvider.notifier)
-          .declareIncome(amount);
-      if (!mounted) return;
-      Navigator.of(context).pop();
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _isSubmitting = false;
-        _errorText = AppLocalizations.of(context)!.simulatorIncomeFailed;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final currency =
-        ref.watch(simulatorControllerProvider).value?.household.currency ?? '';
-
-    return AppModal(
-      title: l10n.simulatorIncomeTitle,
-      subtitle: Text(l10n.simulatorIncomeBody),
-      width: SimulatorIncomeModal.width,
-      actions: [
-        AppButton(
-          label: l10n.simulatorCancel,
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-        ),
-        AppButton(
-          key: const Key('simulatorIncomeSubmit'),
-          label: l10n.simulatorIncomeSubmit,
-          variant: AppButtonVariant.primary,
-          isLoading: _isSubmitting,
-          onPressed: _isSubmitting ? null : _submit,
-        ),
-      ],
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_errorText != null) ...[
-              InlineBanner(message: _errorText!),
-              const SizedBox(height: AppSpacing.fieldGap),
-            ],
-            LabeledField(
-              label: l10n.simulatorIncomeLabel,
-              child: MoneyField(
-                key: const Key('simulatorIncomeAmount'),
-                controller: _amount,
-                currency: currency,
-                autofocus: true,
-                textAlign: TextAlign.end,
-                validator: (value) {
-                  final locale = Localizations.localeOf(context).toString();
-                  final amount = parseMoneyMinor(value ?? '', locale);
-                  return amount == null || amount <= 0
-                      ? l10n.simulatorIncomeInvalid
-                      : null;
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

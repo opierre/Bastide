@@ -11,6 +11,7 @@ import 'package:bastide/features/mortgages/domain/mortgage.dart';
 import 'package:bastide/features/mortgages/presentation/mortgage_labels.dart';
 import 'package:bastide/features/mortgages/presentation/mortgages_screen.dart';
 import 'package:bastide/features/mortgages/presentation/trajectory_chart.dart';
+import 'package:bastide/features/settings/presentation/settings_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -60,8 +61,11 @@ Widget _wrap({
       ),
       GoRoute(
         path: '/settings',
-        builder: (context, state) =>
-            const Scaffold(body: SizedBox(key: Key('settingsRoute'))),
+        // Prints the location it was opened at, so a test can tell the
+        // Revenu déclaré deep link from a plain visit.
+        builder: (context, state) => Scaffold(
+          body: Text(state.uri.toString(), key: const Key('settingsRoute')),
+        ),
       ),
     ],
   );
@@ -328,10 +332,10 @@ void main() {
         await tester.tap(find.byKey(const Key('mortgageFormCancel')));
         await tester.pumpAndSettle();
 
-        // « Déclarer un revenu » opens Paramètres, where the income is edited.
+        // « Déclarer un revenu » opens Paramètres on the Revenu déclaré field.
         await tester.tap(find.byKey(const Key('ratioDeclareIncomeLink')));
         await tester.pumpAndSettle();
-        expect(find.byKey(const Key('settingsRoute')), findsOneWidget);
+        expect(_text(tester, 'settingsRoute'), SettingsScreen.incomePath);
       },
     );
 
@@ -371,7 +375,7 @@ void main() {
       expect(declare.variant, AppButtonVariant.secondary);
       await tester.tap(find.byKey(const Key('ratioDeclareIncomeButton')));
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('settingsRoute')), findsOneWidget);
+      expect(_text(tester, 'settingsRoute'), SettingsScreen.incomePath);
     });
 
     testWidgets('past 60 % the fill clamps and the figure stays exact', (

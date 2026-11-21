@@ -4173,26 +4173,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get simulatorErrorGeneric => 'Une erreur est survenue. Réessayez.';
 
   @override
-  String get simulatorIncomeTitle => 'Déclarer un revenu';
-
-  @override
-  String get simulatorIncomeBody =>
-      'Le revenu mensuel déclaré sert de base au taux d’endettement et à la capacité d’emprunt.';
-
-  @override
-  String get simulatorIncomeLabel => 'Revenu mensuel net';
-
-  @override
-  String get simulatorIncomeInvalid => 'Saisissez un montant supérieur à zéro.';
-
-  @override
-  String get simulatorIncomeSubmit => 'Déclarer';
-
-  @override
-  String get simulatorIncomeFailed =>
-      'Impossible d’enregistrer ce revenu. Réessayez.';
-
-  @override
   String get simulatorCancel => 'Annuler';
 
   @override

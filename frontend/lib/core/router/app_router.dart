@@ -190,7 +190,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: SettingsScreen.path,
-            builder: (context, state) => const SettingsScreen(),
+            builder: (context, state) => SettingsScreen(
+              focusIncome:
+                  state.uri.queryParameters[SettingsScreen.focusParam] ==
+                  SettingsScreen.focusIncomeValue,
+            ),
           ),
         ],
       ),

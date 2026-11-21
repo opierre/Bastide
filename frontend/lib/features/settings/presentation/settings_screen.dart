@@ -23,9 +23,21 @@ const _bodyMaxWidth = 900.0;
 /// nav on the left and the section body, grouped rows separated by hairlines,
 /// scrolling on its own on the right.
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.focusIncome = false});
 
   static const path = '/settings';
+
+  /// The query parameter, and its value, that open Préférences on the
+  /// Revenu déclaré field.
+  static const focusParam = 'focus';
+  static const focusIncomeValue = 'income';
+
+  /// Where every « Déclarer un revenu » action leads: Préférences, scrolled to
+  /// Revenu déclaré with its field focused (`09-settings.md` §Préférences).
+  static const incomePath = '$path?$focusParam=$focusIncomeValue';
+
+  /// Whether to bring the Revenu déclaré field into view and focus it.
+  final bool focusIncome;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -59,7 +71,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 constraints: const BoxConstraints(maxWidth: _bodyMaxWidth),
                 child: switch (_section) {
                   SettingsSection.profile => const ProfileSection(),
-                  SettingsSection.preferences => const PreferencesSection(),
+                  SettingsSection.preferences => PreferencesSection(
+                    focusIncome: widget.focusIncome,
+                  ),
                   SettingsSection.data => const DataSection(),
                   SettingsSection.about => const AboutSection(),
                 },

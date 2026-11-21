@@ -393,25 +393,6 @@ void main() {
         },
       );
     });
-
-    test('declaring an income re-reads the household and recomputes', () async {
-      when(() => repository.declareIncome(any())).thenAnswer((_) async {});
-      await container.read(simulatorControllerProvider.future);
-      typeFrameInputs();
-      await _settle();
-
-      when(
-        () => repository.household(),
-      ).thenAnswer((_) async => testHousehold(monthlyIncomeMinor: 520000));
-      await notifier().declareIncome(520000);
-      await _settle();
-
-      verify(() => repository.declareIncome(520000)).called(1);
-      expect(current().household.monthlyIncomeMinor, 520000);
-      verify(
-        () => repository.compute(testTerms, includeExistingLoans: false),
-      ).called(2);
-    });
   });
 
   group('repository', () {

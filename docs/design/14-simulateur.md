@@ -75,7 +75,7 @@ au plus. Décochez-en un pour ajouter {name}. »
 | Simulation in progress | As above, `accent` repères. |
 | Above the reference, current loans included | Toggle on; ratio repère `over`; status text; capacity caption names the cause. Nothing else turns `warning`. |
 | Comparison of up to 3 | The comparison pane. |
-| Income unknown | Ratio and capacity columns merge into one block: « — » `textTertiary`, « Aucun revenu connu. Sans revenu, ni taux ni capacité ne peuvent être lus. », secondary « Déclarer un revenu ». Duration column unchanged. |
+| Income unknown | Ratio and capacity columns merge into one block: « — » `textTertiary`, « Aucun revenu connu. Sans revenu, ni taux ni capacité ne peuvent être lus. », secondary « Déclarer un revenu » (opens Paramètres → Préférences → Revenu déclaré, field focused). Duration column unchanged. |
 | Empty, no scenario | Fields show placeholders (« 0,00 € », « — % »), price focused. Summary figures « — » with the caption « Renseignez un prix et un taux pour voir l’échéance. » The chart block shows the note « Renseignez un prix et un taux : la répartition par année s’affiche ici. » The scenarios block shows the note « Aucun scénario enregistré. » and no compare button. |
 | Save dialog | Modal 420 px: Nom, prefilled « {lieu}, {prix} k€ ». « Annuler » · « Enregistrer ». |
 | English | Same geometry. |

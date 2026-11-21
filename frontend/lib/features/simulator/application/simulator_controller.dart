@@ -421,18 +421,6 @@ class SimulatorController extends AsyncNotifier<SimulatorState> {
     state = AsyncValue.data(current.copyWith(comparison: null));
   }
 
-  /// Declares the income the ratio runs on, then re-reads the household and
-  /// recomputes. Rethrown to the modal that asked for it.
-  Future<void> declareIncome(int monthlyIncomeMinor) async {
-    await _repository.declareIncome(monthlyIncomeMinor);
-    final household = await _repository.household();
-    final current = state.value;
-    if (current == null || !ref.mounted) return;
-    state = AsyncValue.data(current.copyWith(household: household));
-    _schedule();
-    await _refreshComparison();
-  }
-
   void clearActionError() {
     final current = state.value;
     if (current == null) return;
