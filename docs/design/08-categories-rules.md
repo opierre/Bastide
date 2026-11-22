@@ -70,6 +70,11 @@ The import and export sheets keep their content and become modals (560 px) built
 standard table, checkbox and note components. The built-in pack button hides once that pack is
 imported.
 
+The export modal opens on its privacy warning as a Banner (`00` §7) with a `triangle-alert`
+icon in `warning`, not a Note: « Relisez avant d’enregistrer. Un motif peut contenir des
+informations personnelles, comme le nom de votre propriétaire : « VIR LOYER DUPONT ». » It has
+no action and no close. The JSON preview below it is unchanged.
+
 ### Other modals (`00` §7)
 - **Delete a rule** (480 px), destructive confirmation: « Supprimer la règle « {motif} » ? »,
   lead « Les opérations qu’elle a déjà classées gardent leur catégorie. »
