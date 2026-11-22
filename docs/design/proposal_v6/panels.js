@@ -504,7 +504,7 @@ MD.form = () => modal(480, 'Modifier la catégorie', '', `
   ${F('Catégorie parente', selF('Aucune (catégorie principale)'))}`,
   `<span class="lead-act">${B('Supprimer', 'ghost')}</span>${CANCEL}${B('Enregistrer', 'pri')}`);
 MD.confirm = () => modal(420, 'Archiver ce compte ?', 'Vous pourrez toujours consulter son historique, mais il n’apparaîtra plus dans votre liste de comptes.', '', CANCEL + B('Archiver', 'pri'), { cls: 'nobody' });
-MD.destructive = () => modal(480, 'Supprimer cette règle ?', 'Les opérations qu’elle a déjà classées gardent leur catégorie.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
+MD.destructive = () => modal(480, 'Supprimer cette règle ?', 'Les opérations qu’elle a déjà classées gardent leur catégorie.', '', B('Annuler', 'focus') + B('Supprimer', 'dsolid'), { cls: 'nobody' });
 MD.fieldError = () => modal(420, 'Changer de nom d’utilisateur', 'Le nouveau nom remplace l’ancien pour vous connecter.', `
   ${F('Nom d’utilisateur', inp('camille', 'err focus'), 'Ce nom d’utilisateur est déjà pris.', { err: 1 })}`, CANCEL + B('Enregistrer', 'pri'));
 MD.failed = () => modal(480, 'Règle de prélèvement de la carte', '', `
@@ -575,9 +575,9 @@ MD.recoveryAsk = () => modal(480, 'Nouveau code de récupération', 'Confirmez v
 MD.recoveryShown = () => modal(480, 'Nouveau code de récupération', 'Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.', `
   <div class="code"><span class="mono" style="font-size:16px;letter-spacing:0">K7QM-2XRA-9DWT-F4HN</span></div>
   <div class="row">${B('Copier', 'focus', 'copy')}${B('Enregistrer dans un fichier', '', 'download')}</div>`, B('Terminé', 'pri'));
-const cropBody = (lead, w, h, pic, guide = false) => `<span class="t2">${lead}</span>
-  <div class="crop" style="width:${w}px;height:${h}px">${pic}${guide ? '<span class="guide"></span>' : ''}</div>`;
-MD.avatarCrop = () => modal(420, 'Recadrer la photo', '', cropBody('Faites glisser et zoomez pour cadrer votre avatar.', 320, 320, PHOTO, true), CANCEL + B('Utiliser cette photo', 'pri'));
+const cropBody = (w, h, pic, guide = false) => `<div class="crop" style="width:${w}px;height:${h}px" tabindex="0" aria-label="Cadrage">${pic}${guide ? '<span class="guide"></span>' : ''}</div>
+  <div class="row" style="gap:10px;width:${w}px;margin:0 auto" role="group" aria-label="Zoom">${I('zoom-out', 's14 t3')}<div class="range" style="flex:1" role="slider" aria-label="Zoom" aria-valuemin="1" aria-valuemax="5" aria-valuenow="2.2"><i style="width:30%"></i><b style="left:30%"></b></div>${I('zoom-in', 's14 t3')}<span class="sm t2" style="width:40px;text-align:right">2,2 ×</span></div>`;
+MD.avatarCrop = () => modal(420, 'Recadrer la photo', 'Faites glisser l’image pour cadrer votre avatar.', cropBody(320, 320, PHOTO, true), CANCEL + B('Utiliser cette photo', 'pri'));
 
 /* ── settings data ── */
 const COUNTS = [['Comptes', '4'], ['Transactions', '1 284'], ['Catégories', '31'], ['Règles', '22'], ['Abonnements', '8'], ['Objectifs', '6'], ['Crédits', '2'], ['Biens', '2'], ['Simulations', '4']];
@@ -592,13 +592,14 @@ MD.reset = (typed = 'SUPPR') => modal(500, 'Réinitialiser la base de données ?
   ${F('Saisissez SUPPRIMER pour confirmer', inp(typed, 'mono focus'))}`, `<span class="lead-act">${B('Exporter d’abord', 'ghost', 'download')}</span>` + CANCEL + `<span class="btn dsolid" ${typed === 'SUPPRIMER' ? '' : 'style="opacity:.45"'}>Tout supprimer</span>`);
 
 /* ── categories ── */
+const ICON_FR = {"house": "Maison", "key-round": "Clé", "zap": "Énergie", "wrench": "Travaux", "sofa": "Ameublement", "soup": "Repas", "shopping-cart": "Courses", "utensils": "Restaurant", "coffee": "Café", "car": "Voiture", "bus": "Bus", "fuel": "Carburant", "plane": "Avion", "star": "Étoile", "ticket": "Billet", "gamepad-2": "Jeux", "book-open": "Livres", "dumbbell": "Sport", "refresh-cw": "Renouvellement", "smartphone": "Téléphone", "wifi": "Internet", "cross": "Soins", "pill": "Pharmacie", "coins": "Pièces", "piggy-bank": "Tirelire", "credit-card": "Carte bancaire", "landmark": "Banque", "trending-up": "Placements", "receipt": "Reçu", "arrow-up": "Hausse", "briefcase": "Travail", "gift": "Cadeau", "shirt": "Vêtements", "shopping-bag": "Achats", "graduation-cap": "Études", "baby": "Enfants", "paw-print": "Animaux", "hand-heart": "Dons"};
 const ICONS = ['house', 'key-round', 'zap', 'wrench', 'sofa', 'soup', 'shopping-cart', 'utensils', 'coffee', 'car', 'bus', 'fuel', 'plane', 'star', 'ticket', 'gamepad-2', 'book-open', 'dumbbell', 'refresh-cw', 'smartphone', 'wifi', 'cross', 'pill', 'coins', 'piggy-bank', 'credit-card', 'landmark', 'trending-up', 'receipt', 'arrow-up', 'briefcase', 'gift', 'shirt', 'shopping-bag', 'graduation-cap', 'baby', 'paw-print', 'hand-heart'];
 MD.categoryNew = () => modal(480, 'Nouvelle catégorie', '', `
   ${F('Nom', inp('Épargne projet', 'focus'))}
   ${F('Type', `<span class="seg" style="justify-self:start"><span class="on">Dépense</span><span>Revenu</span><span>Transfert</span></span>`, 'Une dépense sort de vos comptes, un revenu y entre, un transfert circule entre eux.')}
   ${F('Catégorie parente', selF('Aucune (catégorie principale)'))}
-  ${F('Icône', `<div class="icg">${ICONS.map(n => `<span class="${n === 'piggy-bank' ? 'on' : ''}" title="${n}">${I(n)}</span>`).join('')}</div>`)}
-  ${F('Couleur', `<div class="sw20">${['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c0'].map(c => `<span class="${c === 'c0' ? 'on' : ''}" style="--c:var(--${c})"></span>`).join('')}</div>`, 'La couleur suit la catégorie partout : graphiques, légendes et étiquettes.')}`, CANCEL + B('Enregistrer', 'pri'));
+  ${F('Icône', `<div class="icg">${ICONS.map(n => `<span class="${n === 'piggy-bank' ? 'on' : ''}" role="radio" aria-checked="${n === 'piggy-bank'}" title="${ICON_FR[n]}" aria-label="${ICON_FR[n]}">${I(n)}</span>`).join('')}</div>`)}
+  ${F('Couleur', `<div class="sw20">${[['c1', 'Bleu'], ['c2', 'Orange'], ['c3', 'Vert'], ['c4', 'Ambre'], ['c5', 'Rose'], ['c6', 'Violet'], ['c0', 'Gris']].map(([c, n]) => `<span class="${c === 'c0' ? 'on' : ''}" style="--c:var(--${c})" role="radio" aria-checked="${c === 'c0'}" title="${n}" aria-label="${n}">${c === 'c0' ? I('check') : ''}</span>`).join('')}</div>`, 'La couleur suit la catégorie partout : graphiques, légendes et étiquettes.')}`, CANCEL + B('Enregistrer', 'pri'));
 MD.categorySub = () => modal(480, 'Nouvelle catégorie', cat('Logement'), `
   ${F('Nom', inp('Travaux', 'focus'))}
   ${F('Catégorie parente', selF(cat('Logement')))}`, CANCEL + B('Enregistrer', 'pri'));
@@ -616,7 +617,7 @@ MD.ruleEdit = (o = {}) => modal(520, o.isNew ? 'Nouvelle règle' : 'Modifier la 
   <span class="row"><span class="tog on"></span>Active</span>`,
   `${o.isNew ? '' : `<span class="lead-act">${B('Supprimer', 'ghost')}</span>`}${CANCEL}${B('Enregistrer', 'pri')}`);
 MD.ruleDelete = MD.destructive;
-MD.ruleLogoCrop = () => modal(420, 'Recadrer le logo', '', cropBody('Faites glisser et zoomez pour cadrer le logo.', 320, 320, LOGO), CANCEL + B('Utiliser ce logo', 'pri'));
+MD.ruleLogoCrop = () => modal(420, 'Recadrer le logo', 'Faites glisser l’image pour cadrer le logo.', cropBody(320, 320, LOGO), CANCEL + B('Utiliser ce logo', 'pri'));
 MD.ruleLogoUrl = (err = false) => modal(420, 'Logo depuis une adresse', 'Collez l’adresse d’une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.', `
   ${F('Adresse de l’image', inp(err ? 'https://exemple.org/logo' : 'https://…', `mono ${err ? 'err' : 'ph focus'}`), err ? 'Cette adresse ne mène pas à une image.' : '', { err })}`, CANCEL + B('Télécharger', 'pri'));
 MD.packExport = () => modal(560, 'Exporter mes règles', '', `
@@ -701,7 +702,7 @@ MD.allocation = () => modal(440, 'Nouvelle allocation', 'Voyage Japon', `
   ${F('Date', dateF('01/05/2026'))}
   ${F('Note (optionnelle)', inp('Ex. Virement mensuel', 'ph'))}`, CANCEL + B('Ajouter', 'pri'));
 MD.allocationDelete = () => modal(440, 'Supprimer cette allocation ?', 'Le montant mis de côté baisse de 400,00 €. Vos comptes ne sont pas modifiés.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
-MD.goalCrop = () => modal(440, 'Recadrer l’image', '', cropBody('Faites glisser et zoomez pour cadrer la bannière.', 392, 169, FUJI), CANCEL + B('Utiliser cette image', 'pri'));
+MD.goalCrop = () => modal(440, 'Recadrer l’image', 'Faites glisser l’image pour cadrer la bannière.', cropBody(392, 169, FUJI), CANCEL + B('Utiliser cette image', 'pri'));
 
 /* ── loans ── */
 MD.loanForm = (edit = true) => modal(600, edit ? 'Modifier le crédit' : 'Nouveau crédit', '', `
@@ -767,16 +768,17 @@ P['m-frame'] = galleryM('Cadre commun des modales', 'Toutes les modales de l’a
     <dt>Corps</dt><dd>padding 0 24 ; champs à 14 px les uns des autres ; deux champs côte à côte s’alignent sur leur saisie, une aide sous l’un ne décale pas l’autre. Seul le corps défile ; quand il défile, un filet line le sépare de l’en-tête et du pied, à 14 px de son contenu.</dd>
     <dt>Pied</dt><dd>padding 24 ; actions à droite, secondaire puis principale, 8 px d’écart, passant à la ligne plutôt que de déborder ; une action tertiaire fantôme (« Supprimer », « Retour à l’aperçu ») se place seule à gauche. Une navigation n’est pas une action du pied : elle devient un lien dans le corps.</dd>
     <dt>Fermeture</dt><dd>Échap et un clic sur le voile valent « Annuler », sauf pendant un enregistrement et sur une modale sans issue (code de récupération affiché).</dd>
+    <dt>Clavier</dt><dd>Le focus reste dans la modale (Tab boucle). Il arrive sur le premier champ d’un formulaire, sur « Annuler » dans une confirmation destructive, sur l’action principale dans une confirmation réversible, sur « Copier » dans une modale sans issue. Entrée valide un formulaire depuis un champ d’une ligne. À la fermeture, le focus revient sur ce qui a ouvert la modale. La modale est nommée par son titre et décrite par son chapeau.</dd>
     <dt>Apparition</dt><dd>opacité, 120 ms ease-out ; aucune avec « réduire les animations ».</dd></dl>`,
   `<h2>Largeurs</h2><p class="t2" style="margin-bottom:12px">Huit largeurs, fixées par le contenu. La modale ne s’élargit jamais pour un libellé.</p>
   <div class="col" style="gap:4px">${[[420, 'nom d’utilisateur, mot de passe, période, logo (recadrage, adresse), photo, scénario, nouvelle estimation, archivage d’un compte'], [440, 'objectif, allocation, suppression d’allocation, bannière, suppression d’un crédit, placements (toutes leurs modales)'], [480, 'compte, carte, règle de prélèvement, code de récupération, catégorie et sa suppression, suppression d’une règle, paiement récurrent, refus et logos d’un pack'], [500, 'restauration, réinitialisation'], [520, 'règle, « Toujours catégoriser ainsi », marquer comme récurrent'], [560, 'packs de règles, ajout d’opérations à une série, historique déclaré'], [600, 'crédit'], [620, 'bien']].map(([w, u]) => `<div class="wbar"><span class="mono" style="width:44px">${w}</span><i style="width:${w / 2}px"></i><span class="sm t2">${u}</span></div>`).join('')}</div>`,
   `<h2>Variantes</h2>`,
   itemM('Formulaire', '480 · action tertiaire à gauche', MD.form(), 'Un formulaire d’édition porte « Supprimer » en bouton fantôme à gauche du pied ; sa confirmation est une modale destructive.'),
   itemM('Confirmation', '420 · sans corps', MD.confirm(), 'Le titre pose la question, le chapeau dit ce qui change. L’action principale reprend le verbe du titre ou nomme son effet (« Remplacer mes données »). Sans champ, le corps est vide et le pied suit le chapeau à 24 px.'),
-  itemM('Confirmation destructive', '480 · bouton plein negative', MD.destructive(), 'Seule place du bouton plein negative (libellé bg). Ni icône ni pastille devant le titre : le verbe et la couleur du bouton suffisent.'),
+  itemM('Confirmation destructive', '480 · bouton plein negative', MD.destructive(), 'Seule place du bouton plein negative (libellé bg). Ni icône ni pastille devant le titre : le verbe et la couleur du bouton suffisent. Le focus arrive sur « Annuler » : Entrée ne supprime rien par mégarde.'),
   itemM('Sans issue', '480 · une seule action', MD.recoveryShown(), 'Ce qui ne sera plus jamais affiché : une seule action de fermeture, Échap et le voile ne ferment pas. Le focus arrive sur « Copier », pas sur « Terminé » : Entrée ne peut pas faire disparaître le code. « Enregistrer dans un fichier » l’écrit sur cet ordinateur.'),
   itemM('Abandonner les modifications ?', '420 · sur un formulaire modifié', MD.discard(), 'Un formulaire qui contient une saisie ne se ferme pas d’un clic sur le voile. Échap et « Annuler » posent cette question ; Échap ici revient au formulaire.'),
-  itemM('Recadrage carré', '420 · fenêtre 320 × 320', MD.ruleLogoCrop(), 'Glisser pour déplacer, molette ou pincement pour zoomer (1 à 5 ×). Fenêtre rayon 8, filet line, centrée sous le chapeau.'),
+  itemM('Recadrage carré', '420 · fenêtre 320 × 320', MD.ruleLogoCrop(), 'Glisser pour déplacer, molette, pincement ou curseur « Zoom » pour zoomer (1 à 5 ×, valeur affichée). Au clavier, la fenêtre prend le focus : flèches pour déplacer, + et − pour zoomer. Fenêtre rayon 8, filet line, centrée sous le chapeau ; le curseur a la largeur de la fenêtre.'),
   itemM('Recadrage bannière', '440 · fenêtre 392 × 169 (44:19)', MD.goalCrop(), 'Même geste ; la fenêtre prend toute la largeur du corps.'),
   itemM('Agrandissement', '240 × 240 · sans cadre', MD.logoZoom(), 'L’image seule, rayon 12, ombre, sur le voile. Un clic n’importe où ou Échap la ferme.'),
   `<h2>États</h2>`,

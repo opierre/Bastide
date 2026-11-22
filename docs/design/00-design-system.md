@@ -190,6 +190,9 @@ Navigation icons (Lucide): `layout-dashboard`, `wallet`, `arrow-left-right`, `do
 
 Every control has: rest, hover, focus, pressed, disabled. Focus is always visible: 2 px `accent`
 outline, 1 px offset; text fields instead take an `accent` border and a 3 px `accentSoft` ring.
+A field in error keeps its `negative` border when focused and takes the ring in `negative` at
+14 %. A control drawn only as an icon or a swatch has an accessible name and a tooltip in the
+user's language (« Tirelire », « Bleu »), never an internal identifier.
 Disabled is 45 % opacity and not focusable.
 
 | Control | Recipe |
@@ -237,8 +240,8 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
 - **Frame:** `surface`, radius 12, `shadow`, no border, centred on `scrim`; at most the window
   height minus 24 px above and below.
 - **Header:** padding 24 24 14; title 16/600; optional lead 13 `textSecondary` 4 px under it.
-  No icon or glyph plate before the title, no close button. A long title wraps; it never
-  truncates and never widens the modal.
+  No icon or glyph plate before the title, no close button. A long title wraps, its lines
+  balanced; it never truncates and never widens the modal.
 - **Body:** padding 0 24, fields 14 px apart, two-column grids with a 16 px gutter. Fields in
   a row align by their input: a helper under one does not push its neighbour down. A grid
   leaves no empty cell before its last row. Only the body scrolls; while it does, a `line`
@@ -258,6 +261,11 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
   and Escape or « Annuler » asks « Abandonner les modifications ? » (420 px, lead naming the
   form; « Continuer la saisie » · ink « Abandonner »; its own Escape returns to the form).
   Nothing closes while a save is running, nor a modal with a single way out.
+- **Keyboard:** focus stays inside the modal (Tab cycles header, body, footer, left to right).
+  It lands on the first field of a form, on « Annuler » in a destructive confirmation, on the
+  primary action in a reversible one, and on the copy action in a single way out. Enter
+  submits a form from a single-line field. On close, focus returns to what opened the modal.
+  The modal is named by its title and described by its lead.
 - **Variants:**
   - Confirmation: the title asks the question, the lead says what changes, the primary action
     repeats the title's verb (« Archiver ») or names its effect when the verb alone would be
@@ -272,10 +280,12 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
     primary « Fermer »; Escape and the scrim close it.
   - List editor: a modal that edits a list in place (Historique déclaré); the entry row in the
     body carries the primary action, the footer has a single secondary « Fermer ».
-  - Crop: lead, then the window the picture shows through, centred, radius 8, 1 px `line`:
+  - Crop: the lead says what to do, then the body holds the window the picture shows through, centred, radius 8, 1 px `line`:
     320 × 320 for a square crop, the body's full width at the target ratio otherwise (44:19 for
-    a goal banner). Drag moves, wheel or pinch zooms from 1 to 5 ×. The avatar crop draws the
-    round avatar's circle and veils the corners.
+    a goal banner). Under it, as wide as the window, a « Zoom » slider (§6) between `zoom-out`
+    and `zoom-in` icons, 1 to 5 ×, value printed (« 2,2 × »). Drag moves, wheel, pinch or the
+    slider zooms; with the window focused, arrow keys move and + / − zoom. The avatar crop
+    draws the round avatar's circle and veils the corners.
   - Zoom: the picture alone, 240 × 240, radius 12, `shadow`, on `scrim`; any click or Escape
     closes it.
 - **States:** a refused field takes the field error of §6; a failed save shows a Banner with

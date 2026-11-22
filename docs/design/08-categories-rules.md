@@ -59,8 +59,10 @@ confirmed) · « Annuler » · « Enregistrer ».
 
 ### Category form (modal, 480 px)
 Nom · Type (Dépense, Revenu, Transfert) · Parent (select, optional) · Icône (a grid of the
-curated Lucide set, 32 px cells, selected cell `hover` + `accent` outline) · Couleur (the seven
-category slots as 20 px squares). With a parent set, Type, Icône and Couleur are hidden and the
+curated Lucide set, 32 px cells, selected cell `hover` + `accent` outline; each cell is named in
+French, « Tirelire » for `piggy-bank`) · Couleur (the seven category slots as 20 px squares, named
+Bleu, Orange, Vert, Ambre, Rose, Violet, Gris; the selected one takes the `accent` outline and a
+12 px `check` in `bg`). With a parent set, Type, Icône and Couleur are hidden and the
 modal's lead repeats the parent's category label.
 
 ### Rule packs
