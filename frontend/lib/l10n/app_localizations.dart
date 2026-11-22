@@ -1477,6 +1477,12 @@ abstract class AppLocalizations {
   /// **'Import…'**
   String get importSubmitting;
 
+  /// Primary action, shown when the selected file holds several statements, that imports every statement whose destination is settled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer tout'**
+  String get importAll;
+
   /// Banner shown when the statement's bank matches several accounts and nothing in the file separates them; the user picks the destination.
   ///
   /// In fr, this message translates to:

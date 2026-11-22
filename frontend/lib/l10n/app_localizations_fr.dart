@@ -925,6 +925,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importSubmitting => 'Import…';
 
   @override
+  String get importAll => 'Importer tout';
+
+  @override
   String importDetectedAccountAmbiguous(String account) {
     return 'Ce relevé vient de $account, mais plusieurs comptes y correspondent. Choisissez la destination.';
   }

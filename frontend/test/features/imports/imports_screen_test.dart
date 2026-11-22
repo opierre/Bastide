@@ -922,6 +922,144 @@ void main() {
     await _settleTimers(tester);
   });
 
+  testWidgets('« Importer tout » imports every statement in one click', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final imports = FakeImportsController(
+      importResults: [
+        _batch(id: 'b1', accountId: 'a1', newCount: 2, duplicateCount: 0),
+        _batch(id: 'b2', accountId: 'a2', newCount: 1, duplicateCount: 1),
+      ],
+    );
+    await tester.pumpWidget(
+      _wrap(
+        imports: imports,
+        accounts: FakeAccountsController(
+          initialAccounts: [
+            _bound(_account, _statement),
+            _bound(_savings, '0007654321'),
+          ],
+        ),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _multiOfxBytes),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+
+    // « Importer tout » takes the primary; each line keeps its own action.
+    final importAll = find.byKey(const Key('importAllButton'));
+    expect(importAll, findsOneWidget);
+    expect(find.text('Importer tout'), findsOneWidget);
+    expect(
+      tester.widget<AppButton>(find.byKey(_submit)).variant,
+      AppButtonVariant.secondary,
+    );
+
+    await tester.tap(importAll);
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      imports.importCalls.map((call) => (call.accountId, call.statement)),
+      [('a1', _statement), ('a2', '0007654321')],
+    );
+    expect(
+      find.byKey(const Key('importStatementLine-$_statement')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('importStatementLine-0007654321')),
+      findsNothing,
+    );
+    expect(importAll, findsNothing);
+    // One toast for the whole run, with the counts summed.
+    expect(
+      find.text('3 nouvelles opérations · 1 doublon ignoré'),
+      findsOneWidget,
+    );
+    await _settleTimers(tester);
+  });
+
+  testWidgets('« Importer tout » leaves statements still waiting on a choice', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final imports = FakeImportsController(importResult: _batch());
+    // Only the checking statement is bound; the savings one finds two
+    // Boursorama candidates and has to ask.
+    final other = Account(
+      id: 'a3',
+      name: 'Livret bis',
+      type: AccountType.savings,
+      institution: 'Boursorama',
+      currency: 'EUR',
+      openingBalanceMinor: 0,
+      balanceMinor: 0,
+      archived: false,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );
+    await tester.pumpWidget(
+      _wrap(
+        imports: imports,
+        accounts: FakeAccountsController(
+          initialAccounts: [_bound(_account, _statement), _savings, other],
+        ),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _multiOfxBytes),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+    expect(
+      find.byKey(const Key('importAmbiguousAccountBanner-0007654321')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('importAllButton')));
+    await tester.pump();
+    await tester.pump();
+
+    expect(imports.importCalls.map((call) => call.statement), [_statement]);
+    expect(
+      find.byKey(const Key('importStatementLine-0007654321')),
+      findsOneWidget,
+    );
+    // One line left: « Importer tout » goes, and the line's own button takes
+    // the primary back, waiting for the answer.
+    expect(find.byKey(const Key('importAllButton')), findsNothing);
+    final remaining = tester.widget<AppButton>(
+      find.byKey(const Key('importSubmitButton-0007654321')),
+    );
+    expect(remaining.variant, AppButtonVariant.primary);
+    expect(remaining.onPressed, isNull);
+    await _settleTimers(tester);
+  });
+
+  testWidgets('a single-statement file has no « Importer tout »', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        imports: FakeImportsController(importResult: _batch()),
+        accounts: FakeAccountsController(
+          initialAccounts: [_bound(_account, _statement)],
+        ),
+        file: PickedImportFile(name: 'releve.ofx', bytes: _ofxBytes),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _stageFile(tester);
+
+    expect(find.byKey(const Key('importAllButton')), findsNothing);
+    expect(
+      tester.widget<AppButton>(find.byKey(_submit)).variant,
+      AppButtonVariant.primary,
+    );
+  });
+
   testWidgets('two statements may not be sent to the same account', (
     tester,
   ) async {
