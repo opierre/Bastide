@@ -1837,12 +1837,6 @@ abstract class AppLocalizations {
   /// **'La date de fin précède la date de début.'**
   String get transactionsDateRangeOrder;
 
-  /// Cancel button of the date range modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get transactionsDateRangeCancel;
-
   /// Confirm button of the date range modal, applying the chosen range.
   ///
   /// In fr, this message translates to:

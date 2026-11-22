@@ -1,7 +1,9 @@
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/features/transactions/presentation/date_range_modal.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _wrap({
@@ -32,6 +34,7 @@ Future<(DateTime?, DateTime?)?> _openAndSubmit(
   Future<void> Function(WidgetTester tester) fill, {
   DateTime? from,
   DateTime? to,
+  bool submitWithEnter = false,
 }) async {
   (DateTime?, DateTime?)? result;
   await tester.pumpWidget(
@@ -60,7 +63,11 @@ Future<(DateTime?, DateTime?)?> _openAndSubmit(
   await tester.pumpAndSettle();
 
   await fill(tester);
-  await tester.tap(find.byKey(const Key('transactionsDateRangeApply')));
+  if (submitWithEnter) {
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+  } else {
+    await tester.tap(find.byKey(const Key('transactionsDateRangeApply')));
+  }
   await tester.pumpAndSettle();
   return result;
 }
@@ -110,11 +117,73 @@ void main() {
     await tester.tap(find.byKey(const Key('transactionsDateRangeApply')));
     await tester.pumpAndSettle();
 
+    // The error sits under « Au » alone; « Du » keeps its place beside it.
+    final error = find.text('La date de fin précède la date de début.');
+    expect(error, findsOneWidget);
+    final to = tester.getRect(find.byKey(const Key('transactionsDateRangeTo')));
+    final from = tester.getRect(
+      find.byKey(const Key('transactionsDateRangeFrom')),
+    );
+    expect(from.top, to.top);
+    expect(tester.getTopLeft(error).dx, greaterThanOrEqualTo(to.left));
+    expect(find.byType(DateRangeModal), findsOneWidget);
+  });
+
+  testWidgets('sits on the 420 px frame with « Annuler » · « Appliquer »', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+
     expect(
-      find.text('La date de fin précède la date de début.'),
+      tester.getSize(find.byKey(const Key('appModalFrame'))).width,
+      AppModalSizes.w420,
+    );
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.text('Période'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('transactionsDateRangeCancel')),
+        matching: find.text('Annuler'),
+      ),
       findsOneWidget,
     );
-    expect(find.byType(DateRangeModal), findsOneWidget);
+    expect(find.text('Appliquer'), findsOneWidget);
+  });
+
+  testWidgets('« Du » takes the focus when the modal opens', (tester) async {
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+
+    final editable = tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(const Key('transactionsDateRangeFrom')),
+        matching: find.byType(EditableText),
+      ),
+    );
+    expect(editable.focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('Enter in a field applies the range', (tester) async {
+    final result = await _openAndSubmit(tester, (t) async {
+      await _type(t, 'From', '01/03/2026');
+      await _type(t, 'To', '31/03/2026');
+    }, submitWithEnter: true);
+
+    expect(result, (DateTime(2026, 3, 1), DateTime(2026, 3, 31)));
+  });
+
+  testWidgets('Escape on an edited range asks before dropping it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+
+    await _type(tester, 'From', '01/03/2026');
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('appModalDiscard')), findsOneWidget);
   });
 
   testWidgets('refuses one date without the other', (tester) async {

@@ -1160,9 +1160,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'La date de fin précède la date de début.';
 
   @override
-  String get transactionsDateRangeCancel => 'Annuler';
-
-  @override
   String get transactionsDateRangeApply => 'Appliquer';
 
   @override

@@ -322,7 +322,6 @@
   "transactionsDateRangeInvalid": "Invalid date.",
   "transactionsDateRangeIncomplete": "Fill in both dates, or neither.",
   "transactionsDateRangeOrder": "The end date comes before the start date.",
-  "transactionsDateRangeCancel": "Cancel",
   "transactionsDateRangeApply": "Apply",
   "transactionsPager": "{from} – {to} of {total}",
   "transactionsTabAll": "All",

@@ -1153,9 +1153,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The end date comes before the start date.';
 
   @override
-  String get transactionsDateRangeCancel => 'Cancel';
-
-  @override
   String get transactionsDateRangeApply => 'Apply';
 
   @override

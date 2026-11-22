@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/date_field.dart';
-import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -23,8 +23,11 @@ Future<(DateTime?, DateTime?)?> showTransactionDateRange(
   );
 }
 
-/// The « Période » modal: two [DateField]s, so the range is typed or picked
-/// from the very calendar the goal and allocation forms open.
+/// The « Période » modal (`proposal_v6` `m-transactions`): 420 px, no
+/// lead, « Du » · « Au » side by side, « Annuler » · ink « Appliquer ». A
+/// reversed range puts the error under « Au » alone. Two [DateField]s, so
+/// the range is typed or picked from the very calendar the goal and
+/// allocation forms open.
 ///
 /// Material's own [showDateRangePicker] is a full-screen surface with its own
 /// header and typography, none of which the app's theme reaches — a second
@@ -50,6 +53,12 @@ class _DateRangeModalState extends State<DateRangeModal> {
   /// only available once the widget is mounted.
   bool _filled = false;
 
+  /// The text both fields opened with: the form is dirty once either leaves
+  /// it, and Escape then asks before dropping the range.
+  String _initialFrom = '';
+  String _initialTo = '';
+  bool _dirty = false;
+
   /// The calendar's bounds — the same decade back and year forward the filter
   /// has always offered, since a range is asked of history, not of the future.
   static final _now = DateTime.now();
@@ -69,6 +78,15 @@ class _DateRangeModalState extends State<DateRangeModal> {
     if (widget.to case final date?) {
       _toController.text = format.format(date);
     }
+    _initialFrom = _fromController.text;
+    _initialTo = _toController.text;
+  }
+
+  void _onChanged() {
+    final dirty =
+        _fromController.text != _initialFrom ||
+        _toController.text != _initialTo;
+    if (dirty != _dirty) setState(() => _dirty = dirty);
   }
 
   @override
@@ -119,14 +137,13 @@ class _DateRangeModalState extends State<DateRangeModal> {
     final l10n = AppLocalizations.of(context)!;
 
     return AppModal(
+      key: const Key('transactionsDateRangeModal'),
       title: l10n.transactionsDateRangeTitle,
-      width: AppTransactions.periodModalWidth,
+      width: AppModalSizes.w420,
+      dirty: _dirty,
+      onSubmit: _apply,
       actions: [
-        AppButton(
-          key: const Key('transactionsDateRangeCancel'),
-          label: l10n.transactionsDateRangeCancel,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(key: Key('transactionsDateRangeCancel')),
         PrimaryButton(
           key: const Key('transactionsDateRangeApply'),
           label: l10n.transactionsDateRangeApply,
@@ -135,42 +152,32 @@ class _DateRangeModalState extends State<DateRangeModal> {
       ],
       child: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: LabeledField(
-                    label: l10n.transactionsDateRangeFromLabel,
-                    child: DateField(
-                      key: const Key('transactionsDateRangeFrom'),
-                      controller: _fromController,
-                      firstDate: _firstDate,
-                      lastDate: _lastDate,
-                      calendarTooltip: l10n.transactionsDateRangePickFrom,
-                      validator: (value) => _validate(value, isFrom: true),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.smPlus),
-                Expanded(
-                  child: LabeledField(
-                    label: l10n.transactionsDateRangeToLabel,
-                    child: DateField(
-                      key: const Key('transactionsDateRangeTo'),
-                      controller: _toController,
-                      firstDate: _firstDate,
-                      lastDate: _lastDate,
-                      calendarTooltip: l10n.transactionsDateRangePickTo,
-                      validator: (value) => _validate(value, isFrom: false),
-                    ),
-                  ),
-                ),
-              ],
+        onChanged: _onChanged,
+        // « Du » · « Au » aligned by their input: the error under « Au »
+        // never pushes « Du » down (`00` §7 « Modal », Body).
+        child: ModalFieldRow(
+          start: ModalFieldCell(
+            label: l10n.transactionsDateRangeFromLabel,
+            input: DateField(
+              key: const Key('transactionsDateRangeFrom'),
+              controller: _fromController,
+              firstDate: _firstDate,
+              lastDate: _lastDate,
+              calendarTooltip: l10n.transactionsDateRangePickFrom,
+              validator: (value) => _validate(value, isFrom: true),
             ),
-          ],
+          ),
+          end: ModalFieldCell(
+            label: l10n.transactionsDateRangeToLabel,
+            input: DateField(
+              key: const Key('transactionsDateRangeTo'),
+              controller: _toController,
+              firstDate: _firstDate,
+              lastDate: _lastDate,
+              calendarTooltip: l10n.transactionsDateRangePickTo,
+              validator: (value) => _validate(value, isFrom: false),
+            ),
+          ),
         ),
       ),
     );
