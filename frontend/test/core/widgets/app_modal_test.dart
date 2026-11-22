@@ -583,6 +583,55 @@ void main() {
     });
   });
 
+  group('acknowledgement', () {
+    Widget ack(BuildContext context) => const AppModal(
+      title: 'Pack refusé',
+      width: AppModalSizes.w480,
+      kind: AppModalKind.acknowledgement,
+      actions: [AppModalClose()],
+      child: Text('Ce fichier n’est pas un pack de règles.'),
+    );
+
+    testWidgets('one primary « Fermer », focused; Escape closes it', (
+      tester,
+    ) async {
+      await openModal(tester, ack);
+      final close = find.byKey(const Key('appModalClose'));
+      expect(find.text('Fermer'), findsOneWidget);
+      expect(_focused(tester, close), isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.byKey(_frame), findsNothing);
+    });
+
+    testWidgets('« Close » in English closes it', (tester) async {
+      await openModal(tester, ack, locale: const Locale('en'));
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(_frame), findsNothing);
+    });
+
+    testWidgets('a list editor footer has a secondary « Fermer »', (
+      tester,
+    ) async {
+      await openModal(
+        tester,
+        (context) => const AppModal(
+          title: 'Historique déclaré',
+          width: AppModalSizes.w560,
+          kind: AppModalKind.listEditor,
+          actions: [AppModalClose(primary: false)],
+          child: TextField(key: _field),
+        ),
+      );
+      final button = tester.widget<AppButton>(
+        find.byKey(const Key('appModalClose')),
+      );
+      expect(button.variant, AppButtonVariant.secondary);
+      expect(_focused(tester, find.byKey(_field)), isTrue);
+    });
+  });
+
   group('copy', () {
     for (final (locale, title, cancel) in [
       (const Locale('fr'), 'Abandonner les modifications ?', 'Annuler'),

@@ -531,6 +531,22 @@ class AppModalCancel extends StatelessWidget {
   );
 }
 
+/// « Fermer »: the one primary action of an [AppModalKind.acknowledgement],
+/// or the single secondary of an [AppModalKind.listEditor]'s footer.
+class AppModalClose extends StatelessWidget {
+  const AppModalClose({super.key, this.primary = true});
+
+  final bool primary;
+
+  @override
+  Widget build(BuildContext context) => AppButton(
+    key: key == null ? const Key('appModalClose') : null,
+    label: AppLocalizations.of(context)!.modalClose,
+    variant: primary ? AppButtonVariant.primary : AppButtonVariant.secondary,
+    onPressed: () => AppModal.cancel(context),
+  );
+}
+
 /// « Abandonner les modifications ? »: 420 px, the lead names the form,
 /// « Continuer la saisie » · ink « Abandonner ». Resolves to `true` when the
 /// input is to be dropped; its own Escape returns to the form.
