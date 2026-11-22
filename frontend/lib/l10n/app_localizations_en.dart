@@ -4785,11 +4785,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authDisplayNameHelper =>
-      'Also used to sign in. 3 to 32 characters: letters, digits, ’.’, ’_’ or ’-’.';
+      'Also used to sign in. 3 to 32 characters: letters, digits, spaces, ’.’, ’_’ or ’-’.';
 
   @override
   String get authDisplayNameInvalid =>
-      '3 to 32 characters: unaccented letters, digits, ’.’, ’_’ or ’-’.';
+      '3 to 32 characters: unaccented letters, digits, spaces, ’.’, ’_’ or ’-’.';
 
   @override
   String get authDisplayNameTaken => 'This username is already taken.';

@@ -10,14 +10,25 @@ from app.features.auth.models import AVATAR_MONOGRAM, AVATAR_PRESET_PREFIX
 
 # The display name doubles as the username. No "@" is allowed, so a login identifier that holds
 # one is an email and anything else is a display name.
-DISPLAY_NAME_PATTERN = re.compile(r"[a-z0-9._-]{3,32}")
+DISPLAY_NAME_PATTERN = re.compile(r"[A-Za-z0-9._ -]{3,32}")
+
+_INNER_SPACES = re.compile(r" {2,}")
+
+
+def collapse_display_name(value: str) -> str:
+    """Trim a display name and collapse each run of inner spaces to one.
+
+    Registration, a rename and sign-in all go through it, so « camille  dubois » and
+    « camille dubois » are one username.
+    """
+    return _INNER_SPACES.sub(" ", value.strip())
 
 
 def _normalize_display_name(value: str) -> str:
-    name = value.strip().lower()
+    name = collapse_display_name(value)
     if DISPLAY_NAME_PATTERN.fullmatch(name) is None:
         raise ValueError(
-            "Display name must be 3 to 32 characters: letters, digits, '.', '_' or '-'."
+            "Display name must be 3 to 32 characters: letters, digits, spaces, '.', '_' or '-'."
         )
     return name
 
@@ -31,7 +42,7 @@ PASSWORD_MIN_LENGTH = 12
 #: rather than FastAPI's default request-validation 422.
 _PASSWORD_SCHEMA_EXTRA = {"minLength": PASSWORD_MIN_LENGTH}
 
-# Stored lowercased, so lookups are case-insensitive by construction.
+# Stored with the case the user typed; uniqueness and sign-in ignore case (`models.User`).
 DisplayName = Annotated[str, AfterValidator(_normalize_display_name)]
 
 # Practical subset of active ISO-4217 currency codes (national currencies a user would

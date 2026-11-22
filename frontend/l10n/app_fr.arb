@@ -6192,11 +6192,11 @@
   "@authIdentifierRequired": {
     "description": "Validation error when the login/reset identifier field is empty."
   },
-  "authDisplayNameHelper": "Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, « . », « _ » ou « - ».",
+  "authDisplayNameHelper": "Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, espaces, « . », « _ » ou « - ».",
   "@authDisplayNameHelper": {
     "description": "Helper under the username field: what it's for and its format."
   },
-  "authDisplayNameInvalid": "3 à 32 caractères : lettres sans accent, chiffres, « . », « _ » ou « - ».",
+  "authDisplayNameInvalid": "3 à 32 caractères : lettres sans accent, chiffres, espaces, « . », « _ » ou « - ».",
   "@authDisplayNameInvalid": {
     "description": "Error when the typed username breaks the format."
   },

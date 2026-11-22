@@ -324,7 +324,7 @@ erDiagram
         text id PK
         text email UK
         text password_hash
-        text display_name UK
+        text display_name
         text locale
         text currency
         datetime created_at
@@ -455,3 +455,7 @@ erDiagram
 
 - unique `(account_id, fitid)`
 - `rule_id` → `categorization_rules` on delete set null
+
+### `users`
+
+- unique `lower(display_name)`

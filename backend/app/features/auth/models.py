@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import ForeignKey, LargeBinary, String
+from sqlalchemy import ForeignKey, Index, LargeBinary, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base, UtcDateTime
@@ -25,8 +25,9 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     # Null for users created before recovery codes existed, until they generate one.
     recovery_code_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    # Doubles as the username: unique, stored lowercased (see `schemas.DisplayName`).
-    display_name: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    # Doubles as the username, stored with the case the user typed (see `schemas.DisplayName`).
+    # Unique regardless of case: see the `lower(display_name)` index below.
+    display_name: Mapped[str] = mapped_column(String(255))
     locale: Mapped[str] = mapped_column(String(5))
     currency: Mapped[str] = mapped_column(String(3))
     # `monogram`, `preset:<key>` (see `schemas.AVATAR_PRESETS`) or `image` (a `UserAvatar` row).
@@ -39,6 +40,11 @@ class User(Base):
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
     )
+
+
+# « Camille Dubois » and « camille dubois » are one username: the uniqueness, and the lookup at
+# sign-in, ignore case. An expression index works on SQLite and PostgreSQL alike.
+Index("ix_users_display_name_lower", func.lower(User.display_name), unique=True)
 
 
 class UserAvatar(Base):

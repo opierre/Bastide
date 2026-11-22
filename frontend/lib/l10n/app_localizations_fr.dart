@@ -4810,11 +4810,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get authDisplayNameHelper =>
-      'Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, « . », « _ » ou « - ».';
+      'Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, espaces, « . », « _ » ou « - ».';
 
   @override
   String get authDisplayNameInvalid =>
-      '3 à 32 caractères : lettres sans accent, chiffres, « . », « _ » ou « - ».';
+      '3 à 32 caractères : lettres sans accent, chiffres, espaces, « . », « _ » ou « - ».';
 
   @override
   String get authDisplayNameTaken => 'Ce nom d’utilisateur est déjà pris.';

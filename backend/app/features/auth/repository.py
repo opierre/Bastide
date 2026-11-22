@@ -1,6 +1,6 @@
 """Data access for `User` and `AuthToken` rows. The only place that queries these tables."""
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.features.auth.models import AVATAR_IMAGE, AuthToken, User, UserAvatar
@@ -16,7 +16,10 @@ class AuthRepository:
         return self._db.scalar(select(User).where(User.email == email))
 
     def get_user_by_display_name(self, display_name: str) -> User | None:
-        return self._db.scalar(select(User).where(User.display_name == display_name))
+        """The user with this display name, whatever its case."""
+        return self._db.scalar(
+            select(User).where(func.lower(User.display_name) == display_name.lower())
+        )
 
     def get_user_by_id(self, user_id: str) -> User | None:
         return self._db.get(User, user_id)

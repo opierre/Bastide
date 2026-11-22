@@ -11,10 +11,12 @@ import os
 import subprocess
 import sys
 import tempfile
+import warnings
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import Engine, create_engine, inspect
+from sqlalchemy import Engine, create_engine, inspect, text
+from sqlalchemy.exc import SAWarning
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 OUTPUT = BACKEND_DIR.parent / "docs" / "database.md"
@@ -72,14 +74,37 @@ def render(engine: Engine) -> str:
 
 def _reflect(inspector: Any, table: str) -> dict[str, Any]:
     """Everything the document prints about one table."""
-    return {
-        "columns": inspector.get_columns(table),
-        "pk": set(inspector.get_pk_constraint(table)["constrained_columns"]),
-        "fks": inspector.get_foreign_keys(table),
-        "uniques": inspector.get_unique_constraints(table),
-        "indexes": inspector.get_indexes(table),
-        "checks": inspector.get_check_constraints(table),
-    }
+    with warnings.catch_warnings():
+        # SQLite reflection skips expression indexes; `_expression_uniques` reads them instead.
+        warnings.filterwarnings("ignore", "Skipped unsupported reflection", SAWarning)
+        return {
+            "columns": inspector.get_columns(table),
+            "pk": set(inspector.get_pk_constraint(table)["constrained_columns"]),
+            "fks": inspector.get_foreign_keys(table),
+            "uniques": inspector.get_unique_constraints(table),
+            "indexes": inspector.get_indexes(table),
+            "expression_uniques": _expression_uniques(inspector.bind, table),
+            "checks": inspector.get_check_constraints(table),
+        }
+
+
+def _expression_uniques(engine: Engine, table: str) -> list[str]:
+    """The expressions of the table's unique expression indexes, e.g. `lower(display_name)`.
+
+    SQLAlchemy can't reflect them on SQLite, so they are read off `sqlite_master`.
+    """
+    query = text(
+        "SELECT sql FROM sqlite_master WHERE type = 'index' AND tbl_name = :table"
+        " AND sql LIKE 'CREATE UNIQUE INDEX%'"
+    )
+    with engine.connect() as connection:
+        statements = connection.execute(query, {"table": table}).scalars().all()
+    expressions = []
+    for sql in statements:
+        columns = sql[sql.index("(") + 1 : sql.rindex(")")].strip()
+        if "(" in columns:
+            expressions.append(columns)
+    return sorted(expressions)
 
 
 def _single_column_uniques(info: dict[str, Any]) -> set[str]:
@@ -136,6 +161,8 @@ def _constraints(name: str, info: dict[str, Any]) -> list[str]:
     for index in info["indexes"]:
         if index["unique"] and len(index["column_names"]) > 1:
             items.append(f"unique `({', '.join(index['column_names'])})`")
+    for expression in info["expression_uniques"]:
+        items.append(f"unique `{expression}`")
     for check in sorted(info["checks"], key=lambda check: check["sqltext"]):
         items.append(f"check `{' '.join(check['sqltext'].split())}`")
     for fk in info["fks"]:

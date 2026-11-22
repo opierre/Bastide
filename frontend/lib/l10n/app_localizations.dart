@@ -7625,13 +7625,13 @@ abstract class AppLocalizations {
   /// Helper under the username field: what it's for and its format.
   ///
   /// In fr, this message translates to:
-  /// **'Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, « . », « _ » ou « - ».'**
+  /// **'Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, espaces, « . », « _ » ou « - ».'**
   String get authDisplayNameHelper;
 
   /// Error when the typed username breaks the format.
   ///
   /// In fr, this message translates to:
-  /// **'3 à 32 caractères : lettres sans accent, chiffres, « . », « _ » ou « - ».'**
+  /// **'3 à 32 caractères : lettres sans accent, chiffres, espaces, « . », « _ » ou « - ».'**
   String get authDisplayNameInvalid;
 
   /// Error when the username (display name) is already used by another account.

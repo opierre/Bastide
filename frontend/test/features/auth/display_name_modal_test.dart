@@ -24,6 +24,11 @@ const _user = AuthUser(
   currency: 'EUR',
 );
 
+/// The French format error, with its no-break spaces.
+const _formatError =
+    '3 à 32 caractères : lettres sans accent, chiffres, espaces, '
+    '« . », « _ » ou « - ».';
+
 Map<String, dynamic> _userJson(String displayName) => {
   'id': 'u1',
   'email': 'ada@example.com',
@@ -133,23 +138,52 @@ void main() {
     expect(find.text("Ce nom d’utilisateur est déjà pris."), findsOneWidget);
   });
 
+  testWidgets('a name with spaces is saved with its inner spaces collapsed', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+    when(
+      () => apiClient.patch('/auth/me', body: any(named: 'body')),
+    ).thenAnswer((_) async => {'user': _userJson('Ada Lovelace')});
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await openAndType(tester, ' Ada   Lovelace ');
+    expect(find.text(_formatError), findsNothing);
+    await tester.tap(find.byKey(const Key('displayNameModalSave')));
+    await tester.pumpAndSettle();
+
+    verify(
+      () => apiClient.patch('/auth/me', body: {'display_name': 'Ada Lovelace'}),
+    ).called(1);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('settingsDisplayName'))).data,
+      'Ada Lovelace',
+    );
+  });
+
+  testWidgets('a change of case alone can be saved', (tester) async {
+    useDesktopSurface(tester);
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await openAndType(tester, 'Ada');
+
+    expect(saveEnabled(tester), isTrue);
+  });
+
   testWidgets('a malformed or unchanged name cannot be saved', (tester) async {
     useDesktopSurface(tester);
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await openAndType(tester, 'a b');
+    await openAndType(tester, 'ada@home');
     expect(saveEnabled(tester), isFalse);
-    expect(
-      find.text(
-        '3 à 32 caractères : lettres sans accent, chiffres, « . », « _ » ou « - ».',
-      ),
-      findsOneWidget,
-    );
+    expect(find.text(_formatError), findsOneWidget);
 
     await tester.enterText(
       find.byKey(const Key('displayNameModalField')),
-      'ADA',
+      '  ada ',
     );
     await tester.pump();
     expect(saveEnabled(tester), isFalse);
