@@ -181,6 +181,13 @@ class _AppModalState extends State<AppModal> {
     canRequestFocus: false,
     skipTraversal: true,
   );
+  // The right-aligned actions without the leading ghost one, so « Annuler »
+  // is the first of them even when « Exporter d’abord » sits on its left.
+  final _actions = FocusNode(
+    debugLabel: 'AppModal actions',
+    canRequestFocus: false,
+    skipTraversal: true,
+  );
 
   final _scroll = ScrollController();
   bool _scrolls = false;
@@ -207,6 +214,7 @@ class _AppModalState extends State<AppModal> {
     _scope.dispose();
     _body.dispose();
     _footer.dispose();
+    _actions.dispose();
     _scroll.dispose();
     super.dispose();
   }
@@ -221,7 +229,8 @@ class _AppModalState extends State<AppModal> {
       AppModalKind.form ||
       AppModalKind.listEditor ||
       AppModalKind.singleWayOut => body.firstOrNull ?? footer.lastOrNull,
-      AppModalKind.destructive => footer.firstOrNull,
+      AppModalKind.destructive =>
+        _actions.traversalDescendants.firstOrNull ?? footer.firstOrNull,
       AppModalKind.confirmation ||
       AppModalKind.acknowledgement => footer.lastOrNull,
     };
@@ -366,12 +375,15 @@ class _AppModalState extends State<AppModal> {
             // English counterparts. Identical to a row while the actions
             // fit, it drops to a second line instead of overflowing.
             Expanded(
-              child: Wrap(
-                alignment: WrapAlignment.end,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: actions,
+              child: Focus(
+                focusNode: _actions,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: actions,
+                ),
               ),
             ),
           ],

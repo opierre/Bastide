@@ -463,6 +463,26 @@ void main() {
       expect(_focused(tester, find.byKey(const Key('appModalCancel'))), isTrue);
     });
 
+    testWidgets('a destructive confirmation opens on « Annuler », not on the '
+        'ghost action on its left', (tester) async {
+      await openModal(
+        tester,
+        (context) => AppModal(
+          title: 'Restaurer cette sauvegarde ?',
+          width: AppModalSizes.w500,
+          kind: AppModalKind.destructive,
+          leadingAction: AppButton(
+            key: const Key('exportFirst'),
+            label: 'Exporter d’abord',
+            variant: AppButtonVariant.ghost,
+            onPressed: () {},
+          ),
+          actions: [const AppModalCancel(), _primaryButton(context)],
+        ),
+      );
+      expect(_focused(tester, find.byKey(const Key('appModalCancel'))), isTrue);
+    });
+
     testWidgets('a reversible confirmation opens on its primary action', (
       tester,
     ) async {
