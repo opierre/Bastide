@@ -70,7 +70,13 @@ Flush panel, two panes: **list** (flexible, padding 24 32) · **inspector** (440
 
 ### Modals
 - **New / edit goal** (440 px): Nom · Montant cible · Échéance (facultative, a month) ·
-  Image (facultative, same picker). Footer « Annuler » · « Enregistrer ».
+  Image (facultative, same picker). Footer « Annuler » · « Enregistrer ». Editing puts the
+  ghost « Supprimer » on the left of the footer, as for a placement.
+- **Delete goal** (440 px): title « Supprimer l’objectif « {name} » ? », lead « Ses
+  allocations et son image seront supprimées. Pour garder son historique, archivez-le
+  plutôt. Vos comptes ne sont pas modifiés. » Footer « Annuler » · destructive
+  « Supprimer ». The edit modal closes with it and the inspector falls back to the first
+  goal.
 - **Allocation** (440 px): title « Nouvelle allocation », lead = the goal's name. Montant
   (helper « Un montant négatif retire de l’objectif. ») · Date · Note (facultative). Footer
   « Annuler » · « Ajouter ». One signed amount field; no deposit/withdraw modes.
