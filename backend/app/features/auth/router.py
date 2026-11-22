@@ -12,6 +12,8 @@ from app.features.auth.deps import bearer_token, get_current_user
 from app.features.auth.models import User
 from app.features.auth.repository import AuthRepository
 from app.features.auth.schemas import (
+    AvailabilityCheck,
+    AvailabilityResponse,
     AvatarChoiceUpdate,
     EmailChange,
     MeResponse,
@@ -49,6 +51,14 @@ async def register(
     return RegisterResponse(
         token=token, user=UserRead.model_validate(user), recovery_code=recovery_code
     )
+
+
+@router.post("/availability", response_model=AvailabilityResponse)
+async def check_availability(
+    payload: AvailabilityCheck, service: Annotated[AuthService, Depends(_service)]
+) -> AvailabilityResponse:
+    """Tell whether an email and a display name are still free to register."""
+    return service.check_availability(payload)
 
 
 @router.post("/login", response_model=TokenResponse)

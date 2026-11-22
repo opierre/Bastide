@@ -20,6 +20,8 @@ from app.features.auth.schemas import (
     EMAIL_MAX_LENGTH,
     EMAIL_PATTERN,
     PASSWORD_MIN_LENGTH,
+    AvailabilityCheck,
+    AvailabilityResponse,
     EmailChange,
     PasswordChange,
     PasswordReset,
@@ -136,6 +138,23 @@ class AuthService:
         self._repository.add_user(user)
         token = self._issue_token(user)
         return user, token, recovery_code
+
+    def check_availability(self, data: AvailabilityCheck) -> AvailabilityResponse:
+        """Tell whether an email and a display name are still free, as ``register`` decides it.
+
+        The display name is matched like at registration: collapsed spaces, any case. Revealing
+        this is no more than ``register`` already tells, and the sidecar is loopback-only.
+        """
+        email_available = None
+        if data.email is not None:
+            email_available = self._repository.get_user_by_email(data.email) is None
+        display_name_available = None
+        if data.display_name is not None:
+            name = collapse_display_name(data.display_name)
+            display_name_available = self._repository.get_user_by_display_name(name) is None
+        return AvailabilityResponse(
+            email_available=email_available, display_name_available=display_name_available
+        )
 
     def login(self, data: UserLogin) -> tuple[User, str]:
         """Verify credentials and issue a new session token.

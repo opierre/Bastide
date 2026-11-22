@@ -235,6 +235,24 @@ class UserRegister(BaseModel):
         return code
 
 
+class AvailabilityCheck(BaseModel):
+    """What « Inscription » asks while the user types: either field may be left out.
+
+    The values are checked as typed, not validated: the form flags a malformed one itself, and
+    a malformed value can't belong to anyone.
+    """
+
+    email: str | None = Field(default=None, max_length=255)
+    display_name: str | None = Field(default=None, max_length=255)
+
+
+class AvailabilityResponse(BaseModel):
+    """Whether each asked value is free to register; ``None`` for a field not asked."""
+
+    email_available: bool | None
+    display_name_available: bool | None
+
+
 class UserLogin(BaseModel):
     """Login payload: the identifier is either the email or the display name."""
 

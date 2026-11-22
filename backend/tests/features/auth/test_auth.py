@@ -130,6 +130,37 @@ def test_register_duplicate_display_name_any_case_returns_409(client: TestClient
     assert response.json()["error"]["code"] == "DISPLAY_NAME_TAKEN"
 
 
+def test_availability_reports_both_fields_free_before_anyone_registers(
+    client: TestClient,
+) -> None:
+    response = client.post(
+        "/api/v1/auth/availability",
+        json={"email": "amelie@example.com", "display_name": "Amelie"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"email_available": True, "display_name_available": True}
+
+
+def test_availability_reports_both_taken_fields_at_once(client: TestClient) -> None:
+    client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
+
+    response = client.post(
+        "/api/v1/auth/availability",
+        json={"email": REGISTER_PAYLOAD["email"], "display_name": " AMELIE "},
+    )
+
+    assert response.json() == {"email_available": False, "display_name_available": False}
+
+
+def test_availability_answers_only_the_field_asked(client: TestClient) -> None:
+    client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
+
+    response = client.post("/api/v1/auth/availability", json={"display_name": "Camille"})
+
+    assert response.json() == {"email_available": None, "display_name_available": True}
+
+
 @pytest.mark.parametrize("taken", ["camille dubois", "CAMILLE  DUBOIS", " Camille Dubois "])
 def test_register_name_differing_by_case_or_spaces_returns_409(
     client: TestClient, taken: str

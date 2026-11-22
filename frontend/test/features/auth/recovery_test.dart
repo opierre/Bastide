@@ -83,12 +83,16 @@ void main() {
     addTearDown(container.dispose);
   });
 
-  Widget wrap(Widget child, {Locale locale = const Locale('fr')}) {
+  Widget wrap(
+    Widget child, {
+    Locale locale = const Locale('fr'),
+    ThemeData? theme,
+  }) {
     return UncontrolledProviderScope(
       container: container,
       child: MaterialApp(
         locale: locale,
-        theme: AppTheme.dark,
+        theme: theme ?? AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: child),
@@ -314,6 +318,50 @@ void main() {
       expect(find.text('Copy'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
+
+    for (final (name, theme) in [
+      ('dark', AppTheme.dark),
+      ('light', AppTheme.light),
+    ]) {
+      testWidgets('keeps the code on one line above « Copier » ($name)', (
+        tester,
+      ) async {
+        // The test font sets every glyph one em wide; measure the real face.
+        final mono = FontLoader('Geist Mono')
+          ..addFont(
+            rootBundle.load(
+              'assets/fonts/GeistMono/static/GeistMono-Regular.ttf',
+            ),
+          );
+        await mono.load();
+
+        container.read(pendingRecoveryCodeProvider.notifier).show(_code);
+        await tester.pumpWidget(wrap(const RecoveryCodeScreen(), theme: theme));
+        await tester.pumpAndSettle();
+
+        final editable = tester
+            .state<EditableTextState>(
+              find.descendant(
+                of: find.byKey(const Key('recoveryCodeText')),
+                matching: find.byType(EditableText),
+              ),
+            )
+            .renderEditable;
+        // The whole code fits the well's width, so nothing wraps or scrolls.
+        expect(
+          editable.getMaxIntrinsicWidth(double.infinity),
+          lessThanOrEqualTo(editable.size.width),
+        );
+
+        final well = tester.getRect(find.byKey(const Key('recoveryCodeWell')));
+        final copy = tester.getRect(
+          find.byKey(const Key('recoveryCodeCopyButton')),
+        );
+        expect(copy.top, greaterThanOrEqualTo(well.bottom));
+        expect(copy.left, well.left);
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 
   group('router', () {
