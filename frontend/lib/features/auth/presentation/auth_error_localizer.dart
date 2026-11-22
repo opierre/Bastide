@@ -14,6 +14,8 @@ String localizeAuthError(AppLocalizations l10n, Object? error) {
         return l10n.authErrorInvalidRecoveryCode;
       case 'EMAIL_TAKEN':
         return l10n.authErrorEmailTaken;
+      case 'EMAIL_INVALID':
+        return l10n.authEmailInvalid;
       case 'DISPLAY_NAME_TAKEN':
         return l10n.authDisplayNameTaken;
       case 'PASSWORD_TOO_SHORT':

@@ -154,7 +154,7 @@ class RegisterAvailabilityController extends Notifier<RegisterAvailability> {
   }
 
   void emailChanged(String email) =>
-      _schedule(RegisterField.email, email.trim(), isPlausibleEmail);
+      _schedule(RegisterField.email, email.trim(), isValidEmail);
 
   void displayNameChanged(String displayName) => _schedule(
     RegisterField.displayName,

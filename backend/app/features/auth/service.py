@@ -17,9 +17,12 @@ from app.features.auth.avatar import AVATAR_CONTENT_TYPE, normalize_avatar
 from app.features.auth.models import AVATAR_IMAGE, AVATAR_MONOGRAM, AuthToken, User, UserAvatar
 from app.features.auth.repository import AuthRepository
 from app.features.auth.schemas import (
+    EMAIL_MAX_LENGTH,
+    EMAIL_PATTERN,
     PASSWORD_MIN_LENGTH,
     AvailabilityCheck,
     AvailabilityResponse,
+    EmailChange,
     PasswordChange,
     PasswordReset,
     ProfileUpdate,
@@ -52,6 +55,12 @@ class EmailTakenError(ConflictError):
     """Raised when registering with an email that's already in use."""
 
     code = "EMAIL_TAKEN"
+
+
+class EmailInvalidError(ValidationError):
+    """Raised when a new email is not a well-formed address."""
+
+    code = "EMAIL_INVALID"
 
 
 class DisplayNameTakenError(ConflictError):
@@ -233,6 +242,31 @@ class AuthService:
         )
         for session_id in dropped:
             self._live_sessions.revoke_session(session_id)
+
+    def change_email(self, user: User, data: EmailChange) -> User:
+        """Change the user's email, also a login identifier, after re-checking the password.
+
+        The password is asked so an unattended open session can't move the login elsewhere, and
+        it is checked before the address is looked up, so the call can't probe which emails have
+        an account. Sessions stay open: the password is unchanged.
+
+        Raises:
+            EmailInvalidError: the address is malformed or longer than ``EMAIL_MAX_LENGTH``.
+            InvalidCredentialsError: the current password is wrong.
+            EmailTakenError: another user already has this email.
+        """
+        email = data.email.strip()
+        # Checked first: it says nothing about the password or the other users.
+        if len(email) > EMAIL_MAX_LENGTH or EMAIL_PATTERN.fullmatch(email) is None:
+            raise EmailInvalidError("Enter a valid email address.")
+        if not verify_password(data.current_password, user.password_hash):
+            raise InvalidCredentialsError("Incorrect password.")
+        owner = self._repository.get_user_by_email(email)
+        if owner is not None and owner.id != user.id:
+            raise EmailTakenError("A user with this email already exists.")
+
+        user.email = email
+        return self._repository.save_user(user)
 
     def update_profile(self, user: User, data: ProfileUpdate) -> User:
         """Change the user's display name, which is also their username.

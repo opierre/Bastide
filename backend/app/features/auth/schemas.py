@@ -260,6 +260,24 @@ class UserLogin(BaseModel):
     password: str
 
 
+#: The longest email the ``users.email`` column holds.
+EMAIL_MAX_LENGTH = 255
+
+#: One "@" between a local part and a dotted domain, no whitespace: the app's own check.
+EMAIL_PATTERN = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
+
+
+class EmailChange(BaseModel):
+    """Change the caller's email, which is also a login identifier.
+
+    The service checks the address, so a malformed one gets ``EMAIL_INVALID`` in the error
+    envelope rather than FastAPI's default request-validation 422.
+    """
+
+    email: str = Field(min_length=1)
+    current_password: str
+
+
 class ProfileUpdate(BaseModel):
     """Change the caller's profile."""
 

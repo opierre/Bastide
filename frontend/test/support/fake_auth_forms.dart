@@ -55,7 +55,7 @@ class FakeRegisterAvailabilityController
   void emailChanged(String email) {
     final value = email.trim();
     state = RegisterAvailability(
-      email: !isPlausibleEmail(value)
+      email: !isValidEmail(value)
           ? Availability.unknown
           : takenEmails.contains(value)
           ? Availability.taken

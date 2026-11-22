@@ -73,7 +73,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   /// still being checked: one submit is then enough.
   bool get _isValid =>
       isValidDisplayName(_displayNameController.text) &&
-      isPlausibleEmail(_emailController.text.trim()) &&
+      isValidEmail(_emailController.text.trim()) &&
       isLongEnoughPassword(_passwordController.text) &&
       !ref.read(registerAvailabilityProvider).blocksSubmit;
 
@@ -119,7 +119,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return l10n.authEmailTaken;
     }
     final email = _emailController.text.trim();
-    if (email.isNotEmpty && !isPlausibleEmail(email)) {
+    if (email.isNotEmpty && !isValidEmail(email)) {
       return l10n.authEmailInvalid;
     }
     return null;
