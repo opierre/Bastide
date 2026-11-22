@@ -237,6 +237,9 @@ label.f small.err{color:var(--neg)}
 .sel.f{height:32px;width:100%}
 .sel.f .sp{flex:1}
 .g2m{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+/* one row of fields whose label may wrap: label, input and helper share rows, so the inputs stay in line */
+.g2m.ia{grid-template-rows:auto auto auto;row-gap:5px}
+.g2m.ia>label.f{grid-row:span 3;grid-template-rows:subgrid;align-items:end}
 .g3m{display:grid;grid-template-columns:1fr 1fr 96px;gap:16px}
 .span2{grid-column:1/3}
 .crop{position:relative;margin:0 auto;border:1px solid var(--line);border-radius:var(--r-box);overflow:hidden}

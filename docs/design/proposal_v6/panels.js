@@ -735,7 +735,7 @@ MD.investmentForm = (edit = false) => modal(440, edit ? 'Modifier le placement' 
   ${F('Nom', inp('PEA', edit ? '' : 'focus'))}
   ${F('Enveloppe', selF('Plan d’épargne en actions (PEA)'))}
   <div class="g2m">${F('Établissement', inp(`${mg('BD')}Boursorama`))}${F('Date d’ouverture', dateF('14/03/2023'))}</div>
-  ${edit ? '' : `<div class="g2m">${F('Valeur actuelle (facultative)', inp('0,00 €', 'r ph'))}${F('Versements déjà effectués (facultatif)', inp('0,00 €', 'r ph'), 'Comptés comme un versement à l’ouverture.')}</div>`}`,
+  ${edit ? '' : `<div class="g2m ia">${F('Valeur actuelle (facultative)', inp('0,00 €', 'r ph'))}${F('Versements déjà effectués (facultatif)', inp('0,00 €', 'r ph'), 'Comptés comme un versement à l’ouverture.')}</div>`}`,
   `${edit ? `<span class="lead-act">${B('Supprimer', 'ghost')}</span>` : ''}${CANCEL}${B('Enregistrer', 'pri')}`);
 MD.investmentValue = () => modal(440, 'Saisir la valeur', 'PEA', `
   ${F('Valeur', inp('31 840,00 €', 'r focus'), 'Recopiez la valeur totale indiquée sur votre relevé.')}
@@ -764,7 +764,7 @@ P['m-frame'] = galleryM('Cadre commun des modales', 'Toutes les modales de l’a
   `<h2>Anatomie</h2><dl class="spec">
     <dt>Cadre</dt><dd>surface, rayon 12, ombre, sans bordure ; sur le voile (scrim), centré ; hauteur au plus celle de la fenêtre moins 24 px en haut et en bas.</dd>
     <dt>En-tête</dt><dd>padding 24 24 14 ; titre 16/600 ; chapeau facultatif 13 textSecondary, 4 px sous le titre. Pas d’icône devant le titre, pas de croix de fermeture.</dd>
-    <dt>Corps</dt><dd>padding 0 24 ; champs à 14 px les uns des autres ; deux champs côte à côte s’alignent sur leur saisie, une aide sous l’un ne décale pas l’autre. Seul le corps défile ; quand il défile, un filet line le sépare de l’en-tête et du pied, à 14 px de son contenu.</dd>
+    <dt>Corps</dt><dd>padding 0 24 ; champs à 14 px les uns des autres ; deux champs côte à côte s’alignent sur leur saisie, une aide sous l’un ne décale pas l’autre, un libellé sur deux lignes descend les deux saisies ensemble. Seul le corps défile ; quand il défile, un filet line le sépare de l’en-tête et du pied, à 14 px de son contenu.</dd>
     <dt>Pied</dt><dd>padding 24 ; actions à droite, secondaire puis principale, 8 px d’écart, passant à la ligne plutôt que de déborder ; une action tertiaire fantôme (« Supprimer », « Retour à l’aperçu ») se place seule à gauche. Une navigation n’est pas une action du pied : elle devient un lien dans le corps.</dd>
     <dt>Fermeture</dt><dd>Échap et un clic sur le voile valent « Annuler », sauf pendant un enregistrement et sur une modale sans issue (code de récupération affiché).</dd>
     <dt>Clavier</dt><dd>Le focus reste dans la modale (Tab boucle). Il arrive sur le premier champ d’un formulaire, sur « Annuler » dans une confirmation destructive, sur l’action principale dans une confirmation réversible, sur « Copier » dans une modale sans issue. Entrée valide un formulaire depuis un champ d’une ligne. À la fermeture, le focus revient sur ce qui a ouvert la modale. La modale est nommée par son titre et décrite par son chapeau.</dd>

@@ -248,7 +248,8 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
   balanced; it never truncates and never widens the modal. The lead
   never leaves one word alone on its last line.
 - **Body:** padding 0 24, fields 14 px apart, two-column grids with a 16 px gutter. Fields in
-  a row align by their input: a helper under one does not push its neighbour down. A grid
+  a row align by their input: a helper under one does not push its neighbour down, and a
+  label on two lines moves both inputs down together. A grid
   leaves no empty cell before its last row. Only the body scrolls; while it does, a `line`
   hairline separates it from the header and the footer, 14 px from the body's content. An
   introductory sentence is the header's lead, not the body's first line. List rows inside a
