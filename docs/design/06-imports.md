@@ -31,6 +31,11 @@ Standard padding. Two blocks, 24 px apart:
 | Two statements to one account | `circle-x` `negative` « Deux relevés vont vers le même compte. Choisissez une destination différente. » |
 | Unreadable file | `circle-x` `negative` « Fichier illisible. Rien n’a été modifié. » Only « Retirer ». |
 
+- **Several statements:** 10 px under the last line, right-aligned, primary « Importer tout »
+  imports, one after the other, every statement whose destination is settled. Each line's
+  « Importer » then turns secondary (one primary per view). Lines still waiting on an answer
+  stay; the button is disabled when no line can go, or while an import runs. One toast sums
+  the run.
 - While importing: the primary button shows the spinner and « Import… »; the line cannot be
   removed.
 - After import the line disappears and the new batch appears as the first history row,
