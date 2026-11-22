@@ -1,4 +1,4 @@
-"""Backup endpoints: export an archive, inspect one, restore one."""
+"""Backup endpoints: export an archive, inspect one, restore one, and summarise the live data."""
 
 from typing import Annotated
 
@@ -10,7 +10,7 @@ from app.core.db import get_db
 from app.features.auth.deps import get_current_user
 from app.features.auth.models import User
 from app.features.backup.repository import BackupRepository
-from app.features.backup.schemas import BackupSummary
+from app.features.backup.schemas import BackupSummary, CurrentDataSummary
 from app.features.backup.service import BackupService
 from app.features.settings.repository import SettingsRepository
 from app.features.settings.service import SettingsService
@@ -41,6 +41,15 @@ async def export_backup(
             SUMMARY_HEADER: summary.model_dump_json(),
         },
     )
+
+
+@router.get("/current", response_model=CurrentDataSummary)
+async def read_current(
+    service: Annotated[BackupService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> CurrentDataSummary:
+    """The caller's data as it stands, for the restore confirmation to compare an archive with."""
+    return service.current(user)
 
 
 @router.post("/inspect", response_model=BackupSummary)

@@ -124,6 +124,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | Method | Path | Query | Body | Response |
 |--------|------|-------|------|----------|
 | `POST` | `/backup/export` |  |  | 200 |
+| `GET` | `/backup/current` |  |  | 200 `CurrentDataSummary` |
 | `POST` | `/backup/inspect` |  | multipart | 200 `BackupSummary` |
 | `POST` | `/backup/restore` |  | multipart | 200 `BackupSummary` |
 

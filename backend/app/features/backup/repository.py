@@ -6,6 +6,7 @@ for both features.
 """
 
 from collections.abc import Iterator, Sequence
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import delete, func, insert, select
@@ -47,6 +48,22 @@ class BackupRepository:
             query = query.order_by(target.c.settlement_account_id.is_not(None))
         for row in self._db.execute(query).mappings():
             yield {key: encode(value) for key, value in row.items()}
+
+    def count_rows(self, name: str, user_id: str) -> int:
+        """How many rows of one table the user owns."""
+        count = self._db.scalar(
+            select(func.count()).select_from(table(name)).where(owned_by(name, user_id))
+        )
+        return count or 0
+
+    def latest_import_at(self, user_id: str) -> datetime | None:
+        """When the user's newest import ran; a failed one brought no data and does not count."""
+        batches = table("import_batches")
+        return self._db.scalar(
+            select(func.max(batches.c.imported_at)).where(
+                owned_by("import_batches", user_id), batches.c.status != "failed"
+            )
+        )
 
     def system_category_ids(self) -> set[str]:
         categories = table("categories")

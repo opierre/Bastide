@@ -3,15 +3,16 @@
 import io
 import json
 import zipfile
-from datetime import date
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
+from app import __version__
 from app.features.accounts.models import Account
 from app.features.auth.models import User
 from app.features.categories.models import Category
@@ -773,3 +774,117 @@ def test_restore_rejects_a_movement_linked_to_a_missing_transaction(
     assert response.json()["error"]["code"] == "BACKUP_INVALID"
     with _session(tmp_path) as db:
         assert len(db.scalars(select(InvestmentMovement)).all()) == 2
+
+
+def _add_import(db: Session, user_id: str, at: datetime, *, status: str = "success") -> None:
+    """One more import batch on the user's first account, run at `at`."""
+    account = db.scalars(select(Account).where(Account.user_id == user_id)).first()
+    assert account is not None
+    db.add(
+        ImportBatch(
+            user_id=user_id,
+            account_id=account.id,
+            source_format="ofx",
+            file_name="releve-2.ofx",
+            file_hash=at.isoformat().ljust(64, "0")[:64],
+            period_start=date(2026, 9, 1),
+            period_end=date(2026, 9, 30),
+            transaction_count=0,
+            new_count=0,
+            duplicate_count=0,
+            status=status,
+            imported_at=at,
+        )
+    )
+    db.commit()
+
+
+def _date_imports(db: Session, at: datetime) -> None:
+    """Move every import batch so far to `at`, so the test decides which one is latest."""
+    db.execute(update(ImportBatch).values(imported_at=at))
+    db.commit()
+
+
+def test_export_and_inspect_carry_the_latest_import(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client, "amelie@example.com")
+    with _session(tmp_path) as db:
+        ids = _seed(db, "amelie@example.com")
+        _date_imports(db, datetime(2026, 9, 2, 8, tzinfo=UTC))
+        _add_import(db, ids["user"], datetime(2026, 9, 18, 9, 30, tzinfo=UTC))
+        # A failed import brought no data: it is not the latest import.
+        _add_import(db, ids["user"], datetime(2026, 9, 20, tzinfo=UTC), status="failed")
+
+    response = client.post("/api/v1/backup/export", headers=headers)
+
+    summary = json.loads(response.headers["x-backup-summary"])
+    assert summary["last_import_at"].startswith("2026-09-18T09:30:00")
+    manifest = json.loads(zipfile.ZipFile(io.BytesIO(response.content)).read("manifest.json"))
+    assert manifest["last_import_at"].startswith("2026-09-18T09:30:00")
+    inspected = _upload(client, "inspect", headers, response.content).json()
+    assert inspected["last_import_at"].startswith("2026-09-18T09:30:00")
+
+
+def test_export_without_imports_has_no_latest_import(client: TestClient) -> None:
+    headers = _register(client, "amelie@example.com")
+
+    content = _export(client, headers)
+
+    assert _upload(client, "inspect", headers, content).json()["last_import_at"] is None
+
+
+def test_inspect_of_an_archive_without_the_latest_import(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client, "amelie@example.com")
+    with _session(tmp_path) as db:
+        _seed(db, "amelie@example.com")
+    manifest = json.loads(
+        zipfile.ZipFile(io.BytesIO(_export(client, headers))).read("manifest.json")
+    )
+    del manifest["last_import_at"]
+    content = _rewrite(_export(client, headers), manifest_json=json.dumps(manifest).encode())
+
+    response = _upload(client, "inspect", headers, content)
+
+    assert response.status_code == 200
+    assert response.json()["last_import_at"] is None
+
+
+def test_current_summarises_the_live_data(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client, "amelie@example.com")
+    _register(client, "bruno@example.com")
+    with _session(tmp_path) as db:
+        ids = _seed(db, "amelie@example.com")
+        _date_imports(db, datetime(2026, 9, 2, 8, tzinfo=UTC))
+        _add_import(db, ids["user"], datetime(2026, 9, 18, 9, 30, tzinfo=UTC))
+        # Another user's later import is not the caller's.
+        _seed(db, "bruno@example.com")
+
+    response = client.get("/api/v1/backup/current", headers=headers)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["app_version"] == __version__
+    assert body["last_import_at"].startswith("2026-09-18T09:30:00")
+    # Counted as an archive of the same data would be, and only the caller's rows.
+    assert (
+        body["counts"]
+        == json.loads(
+            client.post("/api/v1/backup/export", headers=headers).headers["x-backup-summary"]
+        )["counts"]
+    )
+    assert body["counts"]["transactions"] == 1
+    assert body["counts"]["accounts"] == 1
+
+
+def test_current_of_an_empty_profile(client: TestClient) -> None:
+    headers = _register(client, "amelie@example.com")
+
+    body = client.get("/api/v1/backup/current", headers=headers).json()
+
+    assert body["last_import_at"] is None
+    assert set(body["counts"].values()) == {0}
+
+
+def test_current_requires_auth(client: TestClient) -> None:
+    assert client.get("/api/v1/backup/current").status_code == 401

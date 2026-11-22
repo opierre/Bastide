@@ -30,12 +30,27 @@ from app.features.backup.repository import (
     ColumnSpec,
     describe,
 )
-from app.features.backup.schemas import BackupCounts, BackupSummary
+from app.features.backup.schemas import BackupCounts, BackupSummary, CurrentDataSummary
 from app.features.categories.hues import slot_for
 from app.features.settings.service import SettingsService
 
 # Rows the restore buffers before inserting, so a large table never sits in memory whole.
 _RESTORE_BATCH = 500
+
+#: Each count of `BackupCounts`, and the archived table it counts. A table absent from an
+#: older manifest (the patrimoine tables before format 2, placements before 7) counts zero.
+_COUNTED_TABLES: dict[str, str] = {
+    "accounts": "accounts",
+    "transactions": "transactions",
+    "categories": "categories",
+    "rules": "categorization_rules",
+    "recurring": "recurring_series",
+    "goals": "goals",
+    "mortgages": "mortgages",
+    "properties": "properties",
+    "simulations": "mortgage_simulations",
+    "investments": "investments",
+}
 
 
 class BackupService:
@@ -56,12 +71,15 @@ class BackupService:
         # Materialised first so every archive carries a settings row to restore.
         self._settings.get_or_create(user.id)
         exported_at = self._clock()
+        last_import_at = self._repository.latest_import_at(user.id)
         manifest = {
             "format": FORMAT_MARKER,
             "format_version": FORMAT_VERSION,
             "app_version": __version__,
             "exported_at": exported_at.isoformat(),
             "currency": user.currency,
+            # Optional: an older build reads past it, and an archive without it shows no date.
+            "last_import_at": last_import_at.isoformat() if last_import_at else None,
         }
         content = write_archive(
             manifest,
@@ -70,6 +88,19 @@ class BackupService:
         # Stamped after the archive exists, so a failed build never reports a backup.
         self._settings.record_backup(user.id, exported_at)
         return content, self._summary(ArchiveReader(content).manifest())
+
+    def current(self, user: User) -> CurrentDataSummary:
+        """The user's data as it stands, counted as an archive of it would be."""
+        return CurrentDataSummary(
+            app_version=__version__,
+            last_import_at=self._repository.latest_import_at(user.id),
+            counts=BackupCounts(
+                **{
+                    key: self._repository.count_rows(name, user.id)
+                    for key, name in _COUNTED_TABLES.items()
+                }
+            ),
+        )
 
     def inspect(self, user: User, content: bytes) -> BackupSummary:
         """Report what an archive holds, refusing one this build or this user cannot restore.
@@ -168,19 +199,9 @@ class BackupService:
                 app_version=manifest["app_version"],
                 exported_at=manifest["exported_at"],
                 currency=manifest["currency"],
+                last_import_at=manifest.get("last_import_at"),
                 counts=BackupCounts(
-                    accounts=tables.get("accounts", 0),
-                    transactions=tables.get("transactions", 0),
-                    categories=tables.get("categories", 0),
-                    rules=tables.get("categorization_rules", 0),
-                    recurring=tables.get("recurring_series", 0),
-                    goals=tables.get("goals", 0),
-                    # Absent from a format-1 manifest, which predates these tables.
-                    mortgages=tables.get("mortgages", 0),
-                    properties=tables.get("properties", 0),
-                    simulations=tables.get("mortgage_simulations", 0),
-                    # Absent before format 7.
-                    investments=tables.get("investments", 0),
+                    **{key: tables.get(name, 0) for key, name in _COUNTED_TABLES.items()}
                 ),
             )
         except (KeyError, TypeError, ValueError) as exc:
