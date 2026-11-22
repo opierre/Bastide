@@ -4165,31 +4165,53 @@
   "@goalAllocationDelete": {
     "description": "Trailing action of an allocation row in the inspector; opens the confirmation."
   },
-  "goalAllocationDeleteTitle": "Supprimer cette allocation ?",
+  "goalAllocationDeleteTitle": "Supprimer l’allocation du {date} ?",
   "@goalAllocationDeleteTitle": {
-    "description": "Title of the confirmation before deleting an allocation line."
+    "description": "Title of the confirmation before deleting an allocation line, naming its date (goalAllocationDeleteDate).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
-  "goalAllocationDeleteLeadDown": "Le montant mis de côté baisse de {amount}. Vos comptes ne sont pas modifiés.",
+  "goalAllocationDeleteDate": "{day, plural, =1{1er} other{{day}}} {month} {year}",
+  "@goalAllocationDeleteDate": {
+    "description": "The allocation's date in the delete title, written out: « 1er mai 2026 », « 12 mai 2026 ». month is the locale's full month name.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "goalAllocationDeleteLeadDown": "Le montant mis de côté pour « {goal} » baisse de {amount}. Vos comptes ne sont pas modifiés.",
   "@goalAllocationDeleteLeadDown": {
     "description": "Lead of the confirmation when the deleted line put money aside.",
     "placeholders": {
+      "goal": {
+        "type": "String"
+      },
       "amount": {
         "type": "String"
       }
     }
   },
-  "goalAllocationDeleteLeadUp": "Le montant mis de côté remonte de {amount}. Vos comptes ne sont pas modifiés.",
+  "goalAllocationDeleteLeadUp": "Le montant mis de côté pour « {goal} » remonte de {amount}. Vos comptes ne sont pas modifiés.",
   "@goalAllocationDeleteLeadUp": {
     "description": "Lead of the confirmation when the deleted line was a withdrawal (negative).",
     "placeholders": {
+      "goal": {
+        "type": "String"
+      },
       "amount": {
         "type": "String"
       }
     }
-  },
-  "goalAllocationDeleteCancel": "Annuler",
-  "@goalAllocationDeleteCancel": {
-    "description": "Dismisses the delete confirmation."
   },
   "goalAllocationDeleteSubmit": "Supprimer",
   "@goalAllocationDeleteSubmit": {

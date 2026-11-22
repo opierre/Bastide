@@ -3327,20 +3327,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalAllocationDelete => 'Delete allocation';
 
   @override
-  String get goalAllocationDeleteTitle => 'Delete this allocation?';
-
-  @override
-  String goalAllocationDeleteLeadDown(String amount) {
-    return 'The saved amount goes down by $amount. Your accounts are not changed.';
+  String goalAllocationDeleteTitle(String date) {
+    return 'Delete the allocation of $date?';
   }
 
   @override
-  String goalAllocationDeleteLeadUp(String amount) {
-    return 'The saved amount goes back up by $amount. Your accounts are not changed.';
+  String goalAllocationDeleteDate(int day, String month, String year) {
+    return '$month $day, $year';
   }
 
   @override
-  String get goalAllocationDeleteCancel => 'Cancel';
+  String goalAllocationDeleteLeadDown(String goal, String amount) {
+    return 'The amount set aside for “$goal” goes down by $amount. Your accounts are not changed.';
+  }
+
+  @override
+  String goalAllocationDeleteLeadUp(String goal, String amount) {
+    return 'The amount set aside for “$goal” goes back up by $amount. Your accounts are not changed.';
+  }
 
   @override
   String get goalAllocationDeleteSubmit => 'Delete';

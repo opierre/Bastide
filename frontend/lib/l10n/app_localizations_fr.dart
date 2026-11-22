@@ -3341,20 +3341,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get goalAllocationDelete => 'Supprimer l’allocation';
 
   @override
-  String get goalAllocationDeleteTitle => 'Supprimer cette allocation ?';
-
-  @override
-  String goalAllocationDeleteLeadDown(String amount) {
-    return 'Le montant mis de côté baisse de $amount. Vos comptes ne sont pas modifiés.';
+  String goalAllocationDeleteTitle(String date) {
+    return 'Supprimer l’allocation du $date ?';
   }
 
   @override
-  String goalAllocationDeleteLeadUp(String amount) {
-    return 'Le montant mis de côté remonte de $amount. Vos comptes ne sont pas modifiés.';
+  String goalAllocationDeleteDate(int day, String month, String year) {
+    String _temp0 = intl.Intl.pluralLogic(
+      day,
+      locale: localeName,
+      other: '$day',
+      one: '1er',
+    );
+    return '$_temp0 $month $year';
   }
 
   @override
-  String get goalAllocationDeleteCancel => 'Annuler';
+  String goalAllocationDeleteLeadDown(String goal, String amount) {
+    return 'Le montant mis de côté pour « $goal » baisse de $amount. Vos comptes ne sont pas modifiés.';
+  }
+
+  @override
+  String goalAllocationDeleteLeadUp(String goal, String amount) {
+    return 'Le montant mis de côté pour « $goal » remonte de $amount. Vos comptes ne sont pas modifiés.';
+  }
 
   @override
   String get goalAllocationDeleteSubmit => 'Supprimer';

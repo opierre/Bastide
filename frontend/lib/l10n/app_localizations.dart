@@ -5219,29 +5219,29 @@ abstract class AppLocalizations {
   /// **'Supprimer l’allocation'**
   String get goalAllocationDelete;
 
-  /// Title of the confirmation before deleting an allocation line.
+  /// Title of the confirmation before deleting an allocation line, naming its date (goalAllocationDeleteDate).
   ///
   /// In fr, this message translates to:
-  /// **'Supprimer cette allocation ?'**
-  String get goalAllocationDeleteTitle;
+  /// **'Supprimer l’allocation du {date} ?'**
+  String goalAllocationDeleteTitle(String date);
+
+  /// The allocation's date in the delete title, written out: « 1er mai 2026 », « 12 mai 2026 ». month is the locale's full month name.
+  ///
+  /// In fr, this message translates to:
+  /// **'{day, plural, =1{1er} other{{day}}} {month} {year}'**
+  String goalAllocationDeleteDate(int day, String month, String year);
 
   /// Lead of the confirmation when the deleted line put money aside.
   ///
   /// In fr, this message translates to:
-  /// **'Le montant mis de côté baisse de {amount}. Vos comptes ne sont pas modifiés.'**
-  String goalAllocationDeleteLeadDown(String amount);
+  /// **'Le montant mis de côté pour « {goal} » baisse de {amount}. Vos comptes ne sont pas modifiés.'**
+  String goalAllocationDeleteLeadDown(String goal, String amount);
 
   /// Lead of the confirmation when the deleted line was a withdrawal (negative).
   ///
   /// In fr, this message translates to:
-  /// **'Le montant mis de côté remonte de {amount}. Vos comptes ne sont pas modifiés.'**
-  String goalAllocationDeleteLeadUp(String amount);
-
-  /// Dismisses the delete confirmation.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get goalAllocationDeleteCancel;
+  /// **'Le montant mis de côté pour « {goal} » remonte de {amount}. Vos comptes ne sont pas modifiés.'**
+  String goalAllocationDeleteLeadUp(String goal, String amount);
 
   /// Destructive button of the delete confirmation.
   ///
