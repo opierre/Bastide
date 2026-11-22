@@ -73,12 +73,17 @@ Two rows change what exists today and need more than a restyle:
 | Réinitialisation | Réinitialiser la base de données · « Supprime opérations, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens, placements et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées. » | Danger button « Réinitialiser… » (`trash-2`). |
 
 Modals (all 500 px):
-- **Restore confirmation:** title « Restaurer cette sauvegarde ? », the file name in Geist
-  Mono, a key/value list (Exporté le, Version de l’application, then one count per kind of
-  data), a Banner with a `warning` icon « Toutes vos données actuelles seront remplacées.
-  Exportez-les d’abord si besoin. », footer: ghost « Exporter d’abord » (`download`) on the left · « Annuler » · solid `negative`
-  button « Remplacer mes données ». « Exporter d’abord » runs the export and its save dialog
-  without closing the modal.
+- **Restore confirmation:** title « Restaurer cette sauvegarde ? », lead « Les données
+  exportées le {date} remplacent toutes vos données actuelles. » (long date, « 11 mai 2026 »),
+  the file name in Geist Mono, then a comparison key/value list (`00` §7) with two columns
+  « Sauvegarde · Actuel »: Version de l’application, Dernier import (long date), then one
+  count per kind of data. When the backup was exported before the latest import, status text
+  `warning` `triangle-alert` under the list: « Cette sauvegarde est antérieure à votre dernier
+  import du {date}. »; nothing otherwise. Footer: ghost « Exporter d’abord » (`download`) on
+  the left · « Annuler » · solid `negative` button « Remplacer mes données ». « Exporter
+  d’abord » runs the export and its save dialog without closing the modal; once the file is
+  saved, status text `positive` `check` « Sauvegarde enregistrée » takes the button's place
+  (`00` §7 « Modal », States).
 - **Restore refused:** a Banner with a `negative` icon inside the Sauvegarde group, under the
   restore row: « Restauration impossible. Ce fichier provient d’une version plus récente de
   Bastide. Mettez l’application à jour pour le restaurer. »
@@ -107,6 +112,8 @@ Modals (all 500 px):
 ## States
 Each section: populated · loading (row silhouettes). Données: AI on/connected, AI on/no engine,
 AI off, export in progress (button spinner, « Préparation de l’archive… »), restore refused.
+Restore confirmation: backup as recent as the latest import, backup older (warning), export
+done (« Sauvegarde enregistrée »).
 À propos: up to date, update available, offline, check disabled. English for all four.
 
 ## Behaviour (kept)
