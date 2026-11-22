@@ -29,7 +29,7 @@ Future<Rule?> showRuleEditor(
   Rule? initial,
   String? initialCategoryId,
 }) {
-  return showDialog<Rule>(
+  return showAppModal<Rule>(
     context: context,
     builder: (_) =>
         RuleEditorModal(initial: initial, initialCategoryId: initialCategoryId),
@@ -176,7 +176,7 @@ class _RuleEditorModalState extends ConsumerState<RuleEditorModal> {
   /// Asks before the rule goes: deleting it cannot be undone.
   Future<bool> _confirmDelete() async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppModal<bool>(
       context: context,
       builder: (dialogContext) => AppModal(
         title: l10n.ruleDeleteConfirmTitle,

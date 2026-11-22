@@ -21,7 +21,7 @@ Future<void> showMovementModal(
   required Investment investment,
   InvestmentMovement? initial,
 }) {
-  return showDialog<void>(
+  return showAppModal<void>(
     context: context,
     builder: (_) => MovementModal(investment: investment, initial: initial),
   );

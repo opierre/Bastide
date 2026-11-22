@@ -20,7 +20,7 @@ Future<GoalAllocation?> showAllocationModal(
   BuildContext context, {
   required Goal goal,
 }) {
-  return showDialog<GoalAllocation>(
+  return showAppModal<GoalAllocation>(
     context: context,
     builder: (_) => AllocationModal(goal: goal),
   );

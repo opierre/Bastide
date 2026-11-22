@@ -25,7 +25,7 @@ Future<void> showDeclaredBalances(
   BuildContext context, {
   required String currency,
 }) {
-  return showDialog<void>(
+  return showAppModal<void>(
     context: context,
     builder: (_) => DeclaredBalancesModal(currency: currency),
   );

@@ -27,7 +27,7 @@ Future<void> startRulePackExport(BuildContext context, WidgetRef ref) async {
         .read(rulePacksControllerProvider.notifier)
         .prepareExport();
     if (!context.mounted) return;
-    await showDialog<void>(
+    await showAppModal<void>(
       context: context,
       builder: (_) => RulePackExportSheet(export: export),
     );

@@ -29,7 +29,7 @@ Future<AppCategory?> showCategoryForm(
   AppCategory? initial,
   AppCategory? parent,
 }) {
-  return showDialog<AppCategory>(
+  return showAppModal<AppCategory>(
     context: context,
     builder: (_) => CategoryFormModal(initial: initial, parent: parent),
   );

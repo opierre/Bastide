@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/picture_crop_modal.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/goal_image_controller.dart';
@@ -39,7 +40,7 @@ Future<void> pickGoalImage(
     return;
   }
   if (!context.mounted) return;
-  await showDialog<void>(
+  await showAppModal<void>(
     context: context,
     builder: (_) => GoalImageCropModal(
       image: image,
@@ -61,7 +62,7 @@ Future<Uint8List?> pickGoalImageBytes(
   final image = await controller.pick();
   if (image == null || !context.mounted) return null;
   Uint8List? png;
-  await showDialog<void>(
+  await showAppModal<void>(
     context: context,
     builder: (_) => GoalImageCropModal(
       image: image,

@@ -37,7 +37,7 @@ Future<Account?> showAccountForm(
   AccountPrefill? prefill,
   bool offerSettlementRule = true,
 }) async {
-  final created = await showDialog<Account>(
+  final created = await showAppModal<Account>(
     context: context,
     builder: (_) => AccountForm(initial: initial, prefill: prefill),
   );

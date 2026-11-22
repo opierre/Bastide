@@ -23,7 +23,7 @@ import 'transaction_check_row.dart';
 Future<void> showAddChargesDialog(
   BuildContext context,
   RecurringSeries series,
-) => showDialog<void>(
+) => showAppModal<void>(
   context: context,
   builder: (_) => AddChargesDialog(series: series),
 );

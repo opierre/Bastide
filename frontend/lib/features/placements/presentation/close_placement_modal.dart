@@ -18,7 +18,7 @@ Future<void> showClosePlacementModal(
   BuildContext context, {
   required Investment investment,
 }) {
-  return showDialog<void>(
+  return showAppModal<void>(
     context: context,
     builder: (_) => ClosePlacementModal(investment: investment),
   );

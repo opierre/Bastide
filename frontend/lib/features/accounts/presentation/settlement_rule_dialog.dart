@@ -25,7 +25,7 @@ Future<bool> showSettlementRuleDialog(
   // be rebuilt away by the time the rule is saved.
   final overlay = Overlay.maybeOf(context, rootOverlay: true);
   final l10n = AppLocalizations.of(context)!;
-  final moved = await showDialog<int>(
+  final moved = await showAppModal<int>(
     context: context,
     builder: (_) => SettlementRuleDialog(card: card),
   );

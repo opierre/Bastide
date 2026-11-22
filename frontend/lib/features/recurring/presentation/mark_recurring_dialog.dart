@@ -34,7 +34,7 @@ Future<void> showMarkRecurringDialog(
   WidgetRef ref, {
   required String transactionId,
 }) async {
-  final result = await showDialog<MarkRecurringResult>(
+  final result = await showAppModal<MarkRecurringResult>(
     context: context,
     builder: (_) => MarkRecurringDialog(transactionId: transactionId),
   );

@@ -25,7 +25,7 @@ Future<Property?> showPropertyForm(
   required String currency,
   Property? initial,
 }) {
-  return showDialog<Property>(
+  return showAppModal<Property>(
     context: context,
     builder: (_) => PropertyFormModal(currency: currency, initial: initial),
   );
@@ -33,7 +33,7 @@ Future<Property?> showPropertyForm(
 
 /// Opens the « Nouvelle estimation » modal for [property].
 Future<Property?> showRevalueForm(BuildContext context, Property property) {
-  return showDialog<Property>(
+  return showAppModal<Property>(
     context: context,
     builder: (_) => PropertyRevalueModal(property: property),
   );

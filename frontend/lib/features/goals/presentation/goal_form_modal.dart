@@ -23,7 +23,7 @@ import 'goal_labels.dart';
 /// Opens the create/edit goal modal. Resolves to the saved goal, or `null` when
 /// the user cancelled.
 Future<Goal?> showGoalForm(BuildContext context, {Goal? initial}) {
-  return showDialog<Goal>(
+  return showAppModal<Goal>(
     context: context,
     builder: (_) => GoalFormModal(initial: initial),
   );

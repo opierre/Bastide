@@ -20,7 +20,7 @@ Future<void> showValuationModal(
   required Investment investment,
   InvestmentValuation? initial,
 }) {
-  return showDialog<void>(
+  return showAppModal<void>(
     context: context,
     builder: (_) => ValuationModal(investment: investment, initial: initial),
   );

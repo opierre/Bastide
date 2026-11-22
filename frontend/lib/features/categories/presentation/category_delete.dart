@@ -18,7 +18,7 @@ Future<bool> confirmCategoryDelete(
   AppCategory category,
 ) async {
   final l10n = AppLocalizations.of(context)!;
-  final confirmed = await showDialog<bool>(
+  final confirmed = await showAppModal<bool>(
     context: context,
     builder: (dialogContext) => AppModal(
       title: l10n.categoryDeleteConfirmTitle,
