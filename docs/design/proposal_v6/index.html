@@ -253,6 +253,8 @@ label.f small.err{color:var(--neg)}
 .sw20{display:flex;gap:8px}.sw20 span{width:20px;height:20px;border-radius:4px;background:var(--c)}
 .sw20 span.on{outline:2px solid var(--ac);outline-offset:2px}
 .sw20 span{display:grid;place-items:center;color:var(--bg)}
+/* the check stays dark on every slot: bg in dark, text in light (white fails 3:1 on the light slots) */
+.app[data-theme=light] .sw20 span{color:var(--tx)}
 .sw20 span svg{width:12px!important;height:12px!important;stroke-width:2.5}
 .sk{background:var(--hover);border-radius:4px;height:12px}
 .mtable td{height:36px}
