@@ -35,6 +35,13 @@ Avatar picking opens the crop modal (420 px): the square crop with the avatar's 
 
 Neither row shows a date: nothing records when the password or the code last changed.
 
+**Username modal** (420 px): title « Changer de nom d’utilisateur », lead « Le nouveau nom
+remplace l’ancien pour vous connecter. »; one field « Nom d’utilisateur » with the helper
+« Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, espaces, « . », « _ » ou
+« - ». »; footer « Annuler » · primary « Enregistrer ». The rule is the one of `03-register.md`:
+spaces are allowed, so a name such as « Camille Dubois » passes. A name already in use gives
+« Ce nom d’utilisateur est déjà pris. » under the field.
+
 **Password modal** (420 px): title « Changer le mot de passe », lead « Votre code de récupération
 reste valable. »; fields « Mot de passe actuel », « Nouveau mot de passe » (with the new-password
 helper of `03-register.md`) and « Confirmer le mot de passe »; footer « Annuler » · primary
