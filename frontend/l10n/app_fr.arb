@@ -918,10 +918,6 @@
   "@settlementRuleSaveFailed": {
     "description": "Shown in the settlement-rule dialog when saving fails."
   },
-  "accountFormCancel": "Annuler",
-  "@accountFormCancel": {
-    "description": "Cancel action on the account form and archive confirmation dialogs."
-  },
   "accountArchiveConfirmTitle": "Archiver ce compte ?",
   "@accountArchiveConfirmTitle": {
     "description": "Title of the archive confirmation dialog."
@@ -1033,10 +1029,6 @@
   "accountOpeningBalanceLabel": "Solde initial",
   "@accountOpeningBalanceLabel": {
     "description": "Label for the opening balance field on the account form, when editing an account: the figure the account started from."
-  },
-  "accountCurrentBalanceLabel": "Solde actuel",
-  "@accountCurrentBalanceLabel": {
-    "description": "Label for the same balance field when creating an account: with no history behind it yet, what the user enters is the balance the account holds today."
   },
   "accountBalanceAsOfLabel": "Solde au {date}",
   "@accountBalanceAsOfLabel": {

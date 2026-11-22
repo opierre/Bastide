@@ -766,9 +766,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible d’enregistrer la règle. Réessayez.';
 
   @override
-  String get accountFormCancel => 'Annuler';
-
-  @override
   String get accountArchiveConfirmTitle => 'Archiver ce compte ?';
 
   @override
@@ -858,9 +855,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountOpeningBalanceLabel => 'Solde initial';
-
-  @override
-  String get accountCurrentBalanceLabel => 'Solde actuel';
 
   @override
   String accountBalanceAsOfLabel(DateTime date) {
