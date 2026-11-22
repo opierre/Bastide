@@ -243,10 +243,14 @@ class ModalFieldCell {
     required this.input,
     this.helper,
     this.errorText,
+    this.trailing,
   });
 
   final String label;
   final Widget input;
+
+  /// A reading set right of the label, as [LabeledField.trailing].
+  final Widget? trailing;
   final String? helper;
 
   /// Takes precedence over [helper], as in [LabeledField].
@@ -275,7 +279,13 @@ class ModalFieldRow extends StatelessWidget {
 
     Widget label(ModalFieldCell cell) => Padding(
       padding: const EdgeInsets.only(bottom: _labelGap),
-      child: Text(cell.label, style: labelStyle),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(child: Text(cell.label, style: labelStyle)),
+          ?cell.trailing,
+        ],
+      ),
     );
 
     Widget below(ModalFieldCell cell) => switch (cell) {
