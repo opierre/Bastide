@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 /// The value range a chart draws on, and the gridline values inside it. Shared by the
-/// charts that plot money ([AreaLine], « Patrimoine net »), so they frame a series alike.
+/// charts that plot money ([LineAreaChart], « Patrimoine net »), so they frame a series alike.
 ///
 /// An axis that starts and ends on the series' own min and max puts those two points on the
 /// plot's edges, where they are hardest to read. The range is instead padded by a share of

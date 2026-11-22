@@ -135,85 +135,104 @@ class _ChartFrameState extends State<ChartFrame> {
     final tooltips = widget.tooltips;
     final count = widget.labels.length;
 
-    return Column(
-      children: [
-        Expanded(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              RepaintBoundary(
-                child: CustomPaint(
-                  painter: _FramePainter(
-                    colors: context.colors,
-                    geometryFor: (size) => _geometry(size, scale, gutter),
-                    levels: levels,
-                    labelStyle: labelStyle,
-                    hovered: _hovered,
-                    paintSeries: widget.paintSeries,
+    // The axis is a fixed band under a flexible plot, so a box shorter than
+    // the band would overflow. There the band gives way instead: a clipped
+    // axis is a worse chart, an overflow is a broken one.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final axisHeight = constraints.hasBoundedHeight
+            ? math.min(AppChart.axisHeight, constraints.maxHeight)
+            : AppChart.axisHeight;
+
+        return Column(
+          children: [
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  RepaintBoundary(
+                    child: CustomPaint(
+                      painter: _FramePainter(
+                        colors: context.colors,
+                        geometryFor: (size) => _geometry(size, scale, gutter),
+                        levels: levels,
+                        labelStyle: labelStyle,
+                        hovered: _hovered,
+                        paintSeries: widget.paintSeries,
+                      ),
+                    ),
                   ),
-                ),
+                  MouseRegion(
+                    onExit: (_) => setState(() => _hovered = null),
+                    child: Row(
+                      children: [
+                        SizedBox(width: gutter),
+                        for (var i = 0; i < count; i++)
+                          Expanded(
+                            child: MouseRegion(
+                              key: Key('${widget.slotKeyPrefix}-$i'),
+                              onEnter: (_) => setState(() => _hovered = i),
+                              child: Semantics(
+                                label: tooltips == null || i >= tooltips.length
+                                    ? null
+                                    : tooltips[i].toPlainText(),
+                                child: const SizedBox.expand(),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if ((_hovered, tooltips) case (
+                    final hovered?,
+                    final tooltips?,
+                  ) when hovered < tooltips.length && hovered < count)
+                    LineChartTooltip(
+                      cardKey: widget.tooltipKey,
+                      message: tooltips[hovered],
+                      points: (size) =>
+                          widget.anchors(_geometry(size, scale, gutter)),
+                      marks: widget.marks == null
+                          ? null
+                          : (size) =>
+                                widget.marks!(_geometry(size, scale, gutter)),
+                      joinsNext: widget.joinsLine ? null : (_) => false,
+                      hovered: hovered,
+                      pointRadius: AppChart.dotReach,
+                      leftBound: gutter,
+                    ),
+                ],
               ),
-              MouseRegion(
-                onExit: (_) => setState(() => _hovered = null),
-                child: Row(
-                  children: [
-                    SizedBox(width: gutter),
-                    for (var i = 0; i < count; i++)
-                      Expanded(
-                        child: MouseRegion(
-                          key: Key('${widget.slotKeyPrefix}-$i'),
-                          onEnter: (_) => setState(() => _hovered = i),
-                          child: Semantics(
-                            label: tooltips == null || i >= tooltips.length
-                                ? null
-                                : tooltips[i].toPlainText(),
-                            child: const SizedBox.expand(),
+            ),
+            SizedBox(
+              height: axisHeight,
+              child: ClipRect(
+                child: OverflowBox(
+                  alignment: Alignment.topCenter,
+                  minHeight: AppChart.axisHeight,
+                  maxHeight: AppChart.axisHeight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      SizedBox(width: gutter),
+                      for (final label in widget.labels)
+                        Expanded(
+                          child: Text(
+                            label,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: labelStyle,
                           ),
                         ),
-                      ),
-                  ],
-                ),
-              ),
-              if ((_hovered, tooltips) case (
-                final hovered?,
-                final tooltips?,
-              ) when hovered < tooltips.length && hovered < count)
-                LineChartTooltip(
-                  cardKey: widget.tooltipKey,
-                  message: tooltips[hovered],
-                  points: (size) =>
-                      widget.anchors(_geometry(size, scale, gutter)),
-                  marks: widget.marks == null
-                      ? null
-                      : (size) => widget.marks!(_geometry(size, scale, gutter)),
-                  joinsNext: widget.joinsLine ? null : (_) => false,
-                  hovered: hovered,
-                  pointRadius: AppChart.dotReach,
-                  leftBound: gutter,
-                ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: AppChart.axisHeight,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              SizedBox(width: gutter),
-              for (final label in widget.labels)
-                Expanded(
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: labelStyle,
+                    ],
                   ),
                 ),
-            ],
-          ),
-        ),
-      ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
