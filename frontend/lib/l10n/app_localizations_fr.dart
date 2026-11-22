@@ -4937,6 +4937,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsProfileNameModalSave => 'Enregistrer';
 
   @override
+  String get settingsEmailButton => 'Modifier';
+
+  @override
+  String get settingsEmailModalTitle => 'Changer d’adresse e-mail';
+
+  @override
+  String get settingsEmailModalLead =>
+      'La nouvelle adresse remplace l’ancienne pour vous connecter.';
+
+  @override
+  String get settingsEmailNewLabel => 'Nouvelle adresse e-mail';
+
+  @override
+  String get settingsEmailModalSave => 'Enregistrer';
+
+  @override
+  String get settingsEmailTaken => 'Cette adresse e-mail est déjà utilisée.';
+
+  @override
   String get startupPrivacy => 'Vos données restent sur cet ordinateur.';
 
   @override

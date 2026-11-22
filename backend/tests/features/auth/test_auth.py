@@ -22,9 +22,17 @@ from app.core.security import (
 )
 from app.features.auth.models import User
 from app.features.auth.repository import AuthRepository
-from app.features.auth.schemas import PASSWORD_MIN_LENGTH, PasswordChange, PasswordReset
+from app.features.auth.schemas import (
+    EMAIL_MAX_LENGTH,
+    PASSWORD_MIN_LENGTH,
+    EmailChange,
+    PasswordChange,
+    PasswordReset,
+)
 from app.features.auth.service import (
     AuthService,
+    EmailInvalidError,
+    InvalidCredentialsError,
     InvalidRecoveryCodeError,
     PasswordTooShortError,
 )
@@ -120,6 +128,37 @@ def test_register_duplicate_display_name_any_case_returns_409(client: TestClient
 
     assert response.status_code == 409
     assert response.json()["error"]["code"] == "DISPLAY_NAME_TAKEN"
+
+
+def test_availability_reports_both_fields_free_before_anyone_registers(
+    client: TestClient,
+) -> None:
+    response = client.post(
+        "/api/v1/auth/availability",
+        json={"email": "amelie@example.com", "display_name": "Amelie"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"email_available": True, "display_name_available": True}
+
+
+def test_availability_reports_both_taken_fields_at_once(client: TestClient) -> None:
+    client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
+
+    response = client.post(
+        "/api/v1/auth/availability",
+        json={"email": REGISTER_PAYLOAD["email"], "display_name": " AMELIE "},
+    )
+
+    assert response.json() == {"email_available": False, "display_name_available": False}
+
+
+def test_availability_answers_only_the_field_asked(client: TestClient) -> None:
+    client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
+
+    response = client.post("/api/v1/auth/availability", json={"display_name": "Camille"})
+
+    assert response.json() == {"email_available": None, "display_name_available": True}
 
 
 @pytest.mark.parametrize("taken", ["camille dubois", "CAMILLE  DUBOIS", " Camille Dubois "])
@@ -773,3 +812,149 @@ def test_change_password_closes_the_connections_of_the_dropped_sessions() -> Non
         "session-a",
         "session-b",
     ]
+
+
+# Changing the email, a login identifier: re-checks the password, keeps the sessions.
+
+NEW_EMAIL = "amelie.r@example.org"
+
+
+def _change_email(client: TestClient, token: str, email: str, current: str | None = None):
+    return client.put(
+        "/api/v1/auth/me/email",
+        json={
+            "email": email,
+            "current_password": REGISTER_PAYLOAD["password"] if current is None else current,
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+
+def _login_as(client: TestClient, identifier: str):
+    return client.post(
+        "/api/v1/auth/login",
+        json={"identifier": identifier, "password": REGISTER_PAYLOAD["password"]},
+    )
+
+
+def test_change_email_replaces_the_login_email(client: TestClient) -> None:
+    body = _register(client)
+
+    response = _change_email(client, body["token"], NEW_EMAIL)
+
+    assert response.status_code == 200
+    assert response.json()["user"]["email"] == NEW_EMAIL
+    assert _login_as(client, NEW_EMAIL).status_code == 200
+    assert _login_as(client, REGISTER_PAYLOAD["email"]).status_code == 401
+
+
+def test_change_email_trims_the_address(client: TestClient) -> None:
+    body = _register(client)
+
+    response = _change_email(client, body["token"], f"  {NEW_EMAIL} ")
+
+    assert response.json()["user"]["email"] == NEW_EMAIL
+
+
+def test_change_email_keeps_the_sessions_open(client: TestClient) -> None:
+    body = _register(client)
+    other_token = _login_as(client, REGISTER_PAYLOAD["email"]).json()["token"]
+
+    _change_email(client, body["token"], NEW_EMAIL)
+
+    for token in (body["token"], other_token):
+        me = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+        assert me.status_code == 200
+
+
+def test_change_email_to_its_own_address_succeeds(client: TestClient) -> None:
+    body = _register(client)
+
+    response = _change_email(client, body["token"], REGISTER_PAYLOAD["email"])
+
+    assert response.status_code == 200
+
+
+def test_change_email_taken_returns_409(client: TestClient) -> None:
+    body = _register(client)
+    client.post(
+        "/api/v1/auth/register",
+        json={**REGISTER_PAYLOAD, "email": "bruno@example.com", "display_name": "bruno"},
+    )
+
+    response = _change_email(client, body["token"], "bruno@example.com")
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "EMAIL_TAKEN"
+    assert _login_as(client, REGISTER_PAYLOAD["email"]).status_code == 200
+
+
+@pytest.mark.parametrize(
+    "email",
+    ["amelie", "amelie@example", "amelie@@example.com", "ame lie@example.com", " "],
+)
+def test_change_email_malformed_returns_422_envelope(client: TestClient, email: str) -> None:
+    body = _register(client)
+
+    response = _change_email(client, body["token"], email)
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "EMAIL_INVALID"
+
+
+def test_change_email_too_long_returns_422_envelope(client: TestClient) -> None:
+    body = _register(client)
+    email = "a" * (EMAIL_MAX_LENGTH - len("@example.com") + 1) + "@example.com"
+
+    response = _change_email(client, body["token"], email)
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "EMAIL_INVALID"
+
+
+def test_change_email_wrong_password_returns_401(client: TestClient) -> None:
+    body = _register(client)
+
+    response = _change_email(client, body["token"], NEW_EMAIL, current="not-the-password")
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "INVALID_CREDENTIALS"
+    assert _login_as(client, REGISTER_PAYLOAD["email"]).status_code == 200
+
+
+def test_change_email_requires_auth(client: TestClient) -> None:
+    response = client.put(
+        "/api/v1/auth/me/email",
+        json={"email": NEW_EMAIL, "current_password": REGISTER_PAYLOAD["password"]},
+    )
+
+    assert response.status_code == 401
+
+
+def test_change_email_checks_the_password_before_looking_the_address_up() -> None:
+    user = User(
+        id="user-a",
+        email=REGISTER_PAYLOAD["email"],
+        password_hash=hash_password(REGISTER_PAYLOAD["password"]),
+    )
+    repository = Mock(spec=AuthRepository)
+    service = AuthService(repository)
+
+    with pytest.raises(InvalidCredentialsError):
+        service.change_email(user, EmailChange(email=NEW_EMAIL, current_password="wrong"))
+    repository.get_user_by_email.assert_not_called()
+    repository.save_user.assert_not_called()
+
+
+def test_change_email_checks_the_address_before_the_password() -> None:
+    user = User(
+        id="user-a",
+        email=REGISTER_PAYLOAD["email"],
+        password_hash=hash_password(REGISTER_PAYLOAD["password"]),
+    )
+    repository = Mock(spec=AuthRepository)
+    service = AuthService(repository)
+
+    with pytest.raises(EmailInvalidError):
+        service.change_email(user, EmailChange(email="amelie", current_password="wrong"))
+    repository.save_user.assert_not_called()

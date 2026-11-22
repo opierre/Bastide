@@ -28,4 +28,17 @@ void main() {
       'The password must be at least 12 characters long.',
     );
   });
+
+  test('EMAIL_INVALID is localized in French and English', () {
+    const invalid = ApiFailure(code: 'EMAIL_INVALID', message: 'Invalid.');
+
+    expect(
+      localizeAuthError(lookupAppLocalizations(const Locale('fr')), invalid),
+      'Saisissez une adresse e-mail valide.',
+    );
+    expect(
+      localizeAuthError(lookupAppLocalizations(const Locale('en')), invalid),
+      'Enter a valid email address.',
+    );
+  });
 }

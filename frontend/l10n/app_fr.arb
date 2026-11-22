@@ -6353,6 +6353,30 @@
   "@settingsProfileNameModalSave": {
     "description": "Button saving the new username."
   },
+  "settingsEmailButton": "Modifier",
+  "@settingsEmailButton": {
+    "description": "Secondary button on the email row of Settings › Profil, opening the change-email modal."
+  },
+  "settingsEmailModalTitle": "Changer d’adresse e-mail",
+  "@settingsEmailModalTitle": {
+    "description": "Title of the modal that changes the email address."
+  },
+  "settingsEmailModalLead": "La nouvelle adresse remplace l’ancienne pour vous connecter.",
+  "@settingsEmailModalLead": {
+    "description": "Lead sentence in the change-email modal."
+  },
+  "settingsEmailNewLabel": "Nouvelle adresse e-mail",
+  "@settingsEmailNewLabel": {
+    "description": "Label of the new email field in the change-email modal."
+  },
+  "settingsEmailModalSave": "Enregistrer",
+  "@settingsEmailModalSave": {
+    "description": "Button saving the new email address."
+  },
+  "settingsEmailTaken": "Cette adresse e-mail est déjà utilisée.",
+  "@settingsEmailTaken": {
+    "description": "Error under the email field when another account already uses the address."
+  },
   "startupPrivacy": "Vos données restent sur cet ordinateur.",
   "@startupPrivacy": {
     "description": "The privacy promise under the product name on the startup screen."

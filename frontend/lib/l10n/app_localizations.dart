@@ -7760,6 +7760,42 @@ abstract class AppLocalizations {
   /// **'Enregistrer'**
   String get settingsProfileNameModalSave;
 
+  /// Secondary button on the email row of Settings › Profil, opening the change-email modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get settingsEmailButton;
+
+  /// Title of the modal that changes the email address.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer d’adresse e-mail'**
+  String get settingsEmailModalTitle;
+
+  /// Lead sentence in the change-email modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'La nouvelle adresse remplace l’ancienne pour vous connecter.'**
+  String get settingsEmailModalLead;
+
+  /// Label of the new email field in the change-email modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle adresse e-mail'**
+  String get settingsEmailNewLabel;
+
+  /// Button saving the new email address.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get settingsEmailModalSave;
+
+  /// Error under the email field when another account already uses the address.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette adresse e-mail est déjà utilisée.'**
+  String get settingsEmailTaken;
+
   /// The privacy promise under the product name on the startup screen.
   ///
   /// In fr, this message translates to:

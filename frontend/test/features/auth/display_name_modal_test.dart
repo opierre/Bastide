@@ -261,7 +261,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Username'), findsOneWidget);
-    expect(find.text('Change'), findsOneWidget);
+    expect(find.text('Change'), findsNWidgets(2));
     expect(find.text('Log out'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });

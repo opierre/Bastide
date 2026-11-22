@@ -1,4 +1,4 @@
-"""Auth endpoints: register, login, logout, me, profile, avatar, password change and recovery."""
+"""Auth endpoints: register, login, logout, me, profile, email, avatar, password and recovery."""
 
 from typing import Annotated
 
@@ -12,7 +12,10 @@ from app.features.auth.deps import bearer_token, get_current_user
 from app.features.auth.models import User
 from app.features.auth.repository import AuthRepository
 from app.features.auth.schemas import (
+    AvailabilityCheck,
+    AvailabilityResponse,
     AvatarChoiceUpdate,
+    EmailChange,
     MeResponse,
     PasswordChange,
     PasswordReset,
@@ -48,6 +51,14 @@ async def register(
     return RegisterResponse(
         token=token, user=UserRead.model_validate(user), recovery_code=recovery_code
     )
+
+
+@router.post("/availability", response_model=AvailabilityResponse)
+async def check_availability(
+    payload: AvailabilityCheck, service: Annotated[AuthService, Depends(_service)]
+) -> AvailabilityResponse:
+    """Tell whether an email and a display name are still free to register."""
+    return service.check_availability(payload)
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -105,6 +116,16 @@ async def update_me(
 ) -> MeResponse:
     """Change the authenticated user's profile."""
     return MeResponse(user=UserRead.model_validate(service.update_profile(user, payload)))
+
+
+@router.put("/me/email", response_model=MeResponse)
+async def change_email(
+    payload: EmailChange,
+    service: Annotated[AuthService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> MeResponse:
+    """Change the caller's email, a login identifier, after re-checking their password."""
+    return MeResponse(user=UserRead.model_validate(service.change_email(user, payload)))
 
 
 @router.put("/me/password", status_code=status.HTTP_204_NO_CONTENT)

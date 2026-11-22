@@ -22,12 +22,14 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | Method | Path | Query | Body | Response |
 |--------|------|-------|------|----------|
 | `POST` | `/auth/register` |  | `UserRegister` | 201 `RegisterResponse` |
+| `POST` | `/auth/availability` |  | `AvailabilityCheck` | 200 `AvailabilityResponse` |
 | `POST` | `/auth/login` |  | `UserLogin` | 200 `TokenResponse` |
 | `POST` | `/auth/password-reset` |  | `PasswordReset` | 200 `PasswordResetResponse` |
 | `POST` | `/auth/recovery-code` |  | `RecoveryCodeRegenerate` | 200 `RecoveryCodeResponse` |
 | `POST` | `/auth/logout` |  |  | 204 |
 | `GET` | `/auth/me` |  |  | 200 `MeResponse` |
 | `PATCH` | `/auth/me` |  | `ProfileUpdate` | 200 `MeResponse` |
+| `PUT` | `/auth/me/email` |  | `EmailChange` | 200 `MeResponse` |
 | `PUT` | `/auth/me/password` |  | `PasswordChange` | 204 |
 | `GET` | `/auth/me/avatar` |  |  | 200 |
 | `PUT` | `/auth/me/avatar` |  | multipart | 200 `MeResponse` |

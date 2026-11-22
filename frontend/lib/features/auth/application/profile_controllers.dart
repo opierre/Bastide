@@ -32,6 +32,35 @@ final displayNameControllerProvider =
       DisplayNameController.new,
     );
 
+/// Changes the email from Settings › Profil. Separate from [AuthController]
+/// so a taken address or a wrong password errors the modal alone, not the
+/// whole session.
+class EmailChangeController extends AsyncNotifier<void> {
+  @override
+  // Synchronous, so the modal opens idle rather than loading for a frame.
+  FutureOr<void> build() {}
+
+  Future<void> save({
+    required String email,
+    required String currentPassword,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final user = await ref
+          .read(authRepositoryProvider)
+          .changeEmail(email: email, currentPassword: currentPassword);
+      ref.read(authControllerProvider.notifier).replaceUser(user);
+    });
+  }
+}
+
+/// Auto-disposed with the modal, so a stale error doesn't greet its next
+/// opening.
+final emailChangeControllerProvider =
+    AsyncNotifierProvider.autoDispose<EmailChangeController, void>(
+      EmailChangeController.new,
+    );
+
 /// Changes the password from Settings › Profil. Separate from
 /// [AuthController] so a wrong current password errors the modal alone, not
 /// the whole session.

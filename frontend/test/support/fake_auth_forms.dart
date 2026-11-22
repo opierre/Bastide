@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:bastide/features/auth/application/auth_form_controllers.dart';
+import 'package:bastide/features/auth/domain/availability.dart';
+import 'package:bastide/features/auth/domain/display_name.dart';
+import 'package:bastide/features/auth/domain/email_address.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A no-network « Connexion » submission double: records each call and, when
@@ -31,6 +34,47 @@ class FakeLoginController extends LoginController {
     if (error case final error?) {
       state = AsyncValue.error(error, StackTrace.current);
     }
+  }
+}
+
+/// A no-network availability double that answers at once, without the
+/// debounce: every well-formed value is free unless listed as taken.
+class FakeRegisterAvailabilityController
+    extends RegisterAvailabilityController {
+  FakeRegisterAvailabilityController({
+    this.takenEmails = const {},
+    this.takenNames = const {},
+  });
+
+  final Set<String> takenEmails;
+
+  /// Matched ignoring case, as the backend does.
+  final Set<String> takenNames;
+
+  @override
+  void emailChanged(String email) {
+    final value = email.trim();
+    state = RegisterAvailability(
+      email: !isValidEmail(value)
+          ? Availability.unknown
+          : takenEmails.contains(value)
+          ? Availability.taken
+          : Availability.available,
+      displayName: state.displayName,
+    );
+  }
+
+  @override
+  void displayNameChanged(String displayName) {
+    final value = normalizeDisplayName(displayName).toLowerCase();
+    state = RegisterAvailability(
+      email: state.email,
+      displayName: !isValidDisplayName(value)
+          ? Availability.unknown
+          : takenNames.map((name) => name.toLowerCase()).contains(value)
+          ? Availability.taken
+          : Availability.available,
+    );
   }
 }
 

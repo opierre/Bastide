@@ -56,6 +56,24 @@ class AuthRepository {
     return _parseSession(json as Map<String, dynamic>);
   }
 
+  /// Whether [email] and [displayName] are still free to register. Either
+  /// may be left out; its answer is then `null`.
+  Future<({bool? email, bool? displayName})> checkAvailability({
+    String? email,
+    String? displayName,
+  }) async {
+    final json =
+        await _apiClient.post(
+              '/auth/availability',
+              body: {'email': ?email, 'display_name': ?displayName},
+            )
+            as Map<String, dynamic>;
+    return (
+      email: json['email_available'] as bool?,
+      displayName: json['display_name_available'] as bool?,
+    );
+  }
+
   /// Signs in with [identifier]: the email or the display name.
   Future<AuthSession> login({
     required String identifier,
@@ -109,6 +127,21 @@ class AuthRepository {
       '/auth/me/password',
       body: {'current_password': currentPassword, 'new_password': newPassword},
     );
+  }
+
+  /// Changes the signed-in user's email, which is also a login identifier,
+  /// after re-checking [currentPassword]. Every session stays open.
+  Future<AuthUser> changeEmail({
+    required String email,
+    required String currentPassword,
+  }) async {
+    final json =
+        await _apiClient.put(
+              '/auth/me/email',
+              body: {'email': email, 'current_password': currentPassword},
+            )
+            as Map<String, dynamic>;
+    return _parseUser(json['user'] as Map<String, dynamic>);
   }
 
   /// Changes the signed-in user's display name, which is also their username.

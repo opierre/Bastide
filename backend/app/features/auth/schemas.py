@@ -235,11 +235,47 @@ class UserRegister(BaseModel):
         return code
 
 
+class AvailabilityCheck(BaseModel):
+    """What « Inscription » asks while the user types: either field may be left out.
+
+    The values are checked as typed, not validated: the form flags a malformed one itself, and
+    a malformed value can't belong to anyone.
+    """
+
+    email: str | None = Field(default=None, max_length=255)
+    display_name: str | None = Field(default=None, max_length=255)
+
+
+class AvailabilityResponse(BaseModel):
+    """Whether each asked value is free to register; ``None`` for a field not asked."""
+
+    email_available: bool | None
+    display_name_available: bool | None
+
+
 class UserLogin(BaseModel):
     """Login payload: the identifier is either the email or the display name."""
 
     identifier: str = Field(min_length=1)
     password: str
+
+
+#: The longest email the ``users.email`` column holds.
+EMAIL_MAX_LENGTH = 255
+
+#: One "@" between a local part and a dotted domain, no whitespace: the app's own check.
+EMAIL_PATTERN = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
+
+
+class EmailChange(BaseModel):
+    """Change the caller's email, which is also a login identifier.
+
+    The service checks the address, so a malformed one gets ``EMAIL_INVALID`` in the error
+    envelope rather than FastAPI's default request-validation 422.
+    """
+
+    email: str = Field(min_length=1)
+    current_password: str
 
 
 class ProfileUpdate(BaseModel):

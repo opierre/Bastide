@@ -17,7 +17,12 @@ from app.features.auth.avatar import AVATAR_CONTENT_TYPE, normalize_avatar
 from app.features.auth.models import AVATAR_IMAGE, AVATAR_MONOGRAM, AuthToken, User, UserAvatar
 from app.features.auth.repository import AuthRepository
 from app.features.auth.schemas import (
+    EMAIL_MAX_LENGTH,
+    EMAIL_PATTERN,
     PASSWORD_MIN_LENGTH,
+    AvailabilityCheck,
+    AvailabilityResponse,
+    EmailChange,
     PasswordChange,
     PasswordReset,
     ProfileUpdate,
@@ -50,6 +55,12 @@ class EmailTakenError(ConflictError):
     """Raised when registering with an email that's already in use."""
 
     code = "EMAIL_TAKEN"
+
+
+class EmailInvalidError(ValidationError):
+    """Raised when a new email is not a well-formed address."""
+
+    code = "EMAIL_INVALID"
 
 
 class DisplayNameTakenError(ConflictError):
@@ -127,6 +138,23 @@ class AuthService:
         self._repository.add_user(user)
         token = self._issue_token(user)
         return user, token, recovery_code
+
+    def check_availability(self, data: AvailabilityCheck) -> AvailabilityResponse:
+        """Tell whether an email and a display name are still free, as ``register`` decides it.
+
+        The display name is matched like at registration: collapsed spaces, any case. Revealing
+        this is no more than ``register`` already tells, and the sidecar is loopback-only.
+        """
+        email_available = None
+        if data.email is not None:
+            email_available = self._repository.get_user_by_email(data.email) is None
+        display_name_available = None
+        if data.display_name is not None:
+            name = collapse_display_name(data.display_name)
+            display_name_available = self._repository.get_user_by_display_name(name) is None
+        return AvailabilityResponse(
+            email_available=email_available, display_name_available=display_name_available
+        )
 
     def login(self, data: UserLogin) -> tuple[User, str]:
         """Verify credentials and issue a new session token.
@@ -214,6 +242,31 @@ class AuthService:
         )
         for session_id in dropped:
             self._live_sessions.revoke_session(session_id)
+
+    def change_email(self, user: User, data: EmailChange) -> User:
+        """Change the user's email, also a login identifier, after re-checking the password.
+
+        The password is asked so an unattended open session can't move the login elsewhere, and
+        it is checked before the address is looked up, so the call can't probe which emails have
+        an account. Sessions stay open: the password is unchanged.
+
+        Raises:
+            EmailInvalidError: the address is malformed or longer than ``EMAIL_MAX_LENGTH``.
+            InvalidCredentialsError: the current password is wrong.
+            EmailTakenError: another user already has this email.
+        """
+        email = data.email.strip()
+        # Checked first: it says nothing about the password or the other users.
+        if len(email) > EMAIL_MAX_LENGTH or EMAIL_PATTERN.fullmatch(email) is None:
+            raise EmailInvalidError("Enter a valid email address.")
+        if not verify_password(data.current_password, user.password_hash):
+            raise InvalidCredentialsError("Incorrect password.")
+        owner = self._repository.get_user_by_email(email)
+        if owner is not None and owner.id != user.id:
+            raise EmailTakenError("A user with this email already exists.")
+
+        user.email = email
+        return self._repository.save_user(user)
 
     def update_profile(self, user: User, data: ProfileUpdate) -> User:
         """Change the user's display name, which is also their username.

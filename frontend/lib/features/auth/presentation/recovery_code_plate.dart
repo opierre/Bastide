@@ -9,9 +9,10 @@ import '../../../l10n/app_localizations.dart';
 /// A freshly issued recovery code (`02-login.md`, Behaviour): the code in
 /// Geist Mono 16 on a `field` well, and a « Copier » secondary button.
 ///
-/// Shared by the signed-out recovery code screen and the Settings
-/// regeneration modal, so the code reads the same wherever the user first
-/// meets it.
+/// The well takes the full column width and the button sits under it, as in
+/// the Settings regeneration modal: beside a button, the 320 px auth column
+/// leaves the code too little room and it wraps onto two lines. The code is
+/// kept on one line so its groups never split.
 class RecoveryCodePlate extends StatefulWidget {
   const RecoveryCodePlate({super.key, required this.code});
 
@@ -35,40 +36,44 @@ class _RecoveryCodePlateState extends State<RecoveryCodePlate> {
     final l10n = AppLocalizations.of(context)!;
     final colors = context.colors;
 
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: Container(
-            constraints: const BoxConstraints(minHeight: AppSizes.formField),
-            alignment: AlignmentDirectional.centerStart,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm + AppSpacing.xxs,
-              vertical: AppSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: colors.field,
-              borderRadius: BorderRadius.circular(AppRadii.control),
-              border: Border.all(color: colors.lineStrong),
-            ),
-            child: SelectableText(
-              widget.code,
-              key: const Key('recoveryCodeText'),
-              style: context.textStyles.mono.copyWith(
-                fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
-                fontWeight: FontWeight.w400,
-                color: colors.text,
-              ),
+        Container(
+          key: const Key('recoveryCodeWell'),
+          constraints: const BoxConstraints(minHeight: AppSizes.formField),
+          alignment: AlignmentDirectional.centerStart,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm + AppSpacing.xxs,
+            vertical: AppSpacing.xs,
+          ),
+          decoration: BoxDecoration(
+            color: colors.field,
+            borderRadius: BorderRadius.circular(AppRadii.control),
+            border: Border.all(color: colors.lineStrong),
+          ),
+          child: SelectableText(
+            widget.code,
+            key: const Key('recoveryCodeText'),
+            maxLines: 1,
+            style: context.textStyles.mono.copyWith(
+              fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
+              fontWeight: FontWeight.w400,
+              color: colors.text,
             ),
           ),
         ),
-        const SizedBox(width: AppSpacing.sm),
-        AppButton(
-          key: const Key('recoveryCodeCopyButton'),
-          label: _copied
-              ? l10n.authRecoveryCodeCopied
-              : l10n.authRecoveryCodeCopy,
-          icon: _copied ? LucideIcons300.check : LucideIcons300.copy,
-          onPressed: _copy,
+        const SizedBox(height: AppSpacing.fieldGap),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: AppButton(
+            key: const Key('recoveryCodeCopyButton'),
+            label: _copied
+                ? l10n.authRecoveryCodeCopied
+                : l10n.authRecoveryCodeCopy,
+            icon: _copied ? LucideIcons300.check : LucideIcons300.copy,
+            onPressed: _copy,
+          ),
         ),
       ],
     );
