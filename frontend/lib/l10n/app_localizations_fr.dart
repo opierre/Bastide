@@ -2732,7 +2732,33 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsBackupConfirmTitle => 'Restaurer cette sauvegarde ?';
 
   @override
-  String get settingsBackupConfirmExportedAt => 'Exporté le';
+  String settingsBackupConfirmLead(String date) {
+    return 'Les données exportées le $date remplacent toutes vos données actuelles.';
+  }
+
+  @override
+  String get settingsBackupConfirmBackupColumn => 'Sauvegarde';
+
+  @override
+  String get settingsBackupConfirmCurrentColumn => 'Actuel';
+
+  @override
+  String get settingsBackupConfirmLastImport => 'Dernier import';
+
+  @override
+  String settingsBackupConfirmOlder(String date) {
+    return 'Cette sauvegarde est antérieure à votre dernier import du $date.';
+  }
+
+  @override
+  String get settingsBackupConfirmCurrentError =>
+      'Impossible de lire vos données actuelles.';
+
+  @override
+  String get settingsBackupExportFirst => 'Exporter d’abord';
+
+  @override
+  String get settingsBackupSaved => 'Sauvegarde enregistrée';
 
   @override
   String get settingsBackupConfirmVersion => 'Version de l’application';
@@ -2763,13 +2789,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsBackupConfirmSimulations => 'Simulations';
-
-  @override
-  String get settingsBackupConfirmWarning =>
-      'Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.';
-
-  @override
-  String get settingsBackupCancel => 'Annuler';
 
   @override
   String get settingsBackupReplace => 'Remplacer mes données';
@@ -3521,12 +3540,16 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les catégories fournies, vos préférences et le réglage IA sont conservés.';
 
   @override
-  String get settingsResetConfirmWord => 'SUPPRIMER';
+  String get settingsResetConfirmWord => 'supprimer';
 
   @override
   String settingsResetConfirmLabel(String word) {
-    return 'Saisissez $word pour confirmer';
+    return 'Saisissez « $word » pour confirmer';
   }
+
+  @override
+  String get settingsResetConfirmHelper =>
+      'Majuscules ou minuscules, peu importe.';
 
   @override
   String get settingsResetConfirmSubmit => 'Tout supprimer';

@@ -48,6 +48,7 @@ class BackupSummary {
     required this.exportedAt,
     required this.currency,
     required this.counts,
+    this.lastImportAt,
   });
 
   factory BackupSummary.fromJson(Map<String, dynamic> json) => BackupSummary(
@@ -55,6 +56,7 @@ class BackupSummary {
     appVersion: json['app_version'] as String,
     exportedAt: DateTime.parse(json['exported_at'] as String),
     currency: json['currency'] as String,
+    lastImportAt: _parseInstant(json['last_import_at']),
     counts: BackupCounts.fromJson(json['counts'] as Map<String, dynamic>),
   );
 
@@ -64,8 +66,42 @@ class BackupSummary {
   final String appVersion;
   final DateTime exportedAt;
   final String currency;
+
+  /// When the newest import in the file ran: `null` for a profile that never
+  /// imported, and for a file written before archives carried it.
+  final DateTime? lastImportAt;
+  final BackupCounts counts;
+
+  /// Whether this backup was exported before [latestImport], the latest
+  /// import of the data it would replace: restoring it would lose that import.
+  bool predates(DateTime? latestImport) =>
+      latestImport != null && exportedAt.isBefore(latestImport);
+}
+
+/// The data as it stands, in the terms of [BackupSummary]: the « Actuel »
+/// column the restore confirmation sets beside the file's.
+@immutable
+class CurrentData {
+  const CurrentData({
+    required this.appVersion,
+    required this.counts,
+    this.lastImportAt,
+  });
+
+  factory CurrentData.fromJson(Map<String, dynamic> json) => CurrentData(
+    appVersion: json['app_version'] as String,
+    lastImportAt: _parseInstant(json['last_import_at']),
+    counts: BackupCounts.fromJson(json['counts'] as Map<String, dynamic>),
+  );
+
+  /// The running backend's version, spelled as an archive records it.
+  final String appVersion;
+  final DateTime? lastImportAt;
   final BackupCounts counts;
 }
+
+DateTime? _parseInstant(Object? value) =>
+    value == null ? null : DateTime.parse(value as String);
 
 /// A built archive, ready to be written where the user chose.
 @immutable

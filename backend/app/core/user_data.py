@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import Column, ColumnElement, Table, select
+from sqlalchemy import Column, ColumnElement, Select, Table, func, select
 from sqlalchemy.sql.schema import ScalarElementColumnDefault
 
 from app.core.db import Base
@@ -99,6 +99,18 @@ def owned_by(name: str, user_id: str) -> ColumnElement[bool]:
         parent = table(parent_name)
         return target.c[column].in_(select(parent.c.id).where(parent.c.user_id == user_id))
     return target.c.user_id == user_id
+
+
+def latest_import(user_id: str) -> Select[tuple[datetime | None]]:
+    """When the user's newest import ran; a failed one brought no data and does not count.
+
+    Shared because a backup's manifest records it and the live summary reports it, and the
+    restore confirmation sets one beside the other.
+    """
+    batches = table("import_batches")
+    return select(func.max(batches.c.imported_at)).where(
+        owned_by("import_batches", user_id), batches.c.status != "failed"
+    )
 
 
 def describe(name: str) -> list[ColumnSpec]:

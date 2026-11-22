@@ -9,6 +9,7 @@ from collections.abc import Callable
 
 from sqlalchemy.orm import Session
 
+from app import __version__
 from app.core.seed import ensure_system_categories
 from app.features.auth.models import User
 from app.features.database.errors import ResetRunActiveError
@@ -28,8 +29,8 @@ class DatabaseService:
         self._reseed = reseed
 
     def summary(self, user: User) -> DatabaseSummary:
-        """The live counts the confirmation lists — read at the moment it is shown."""
-        return DatabaseSummary(counts=DatabaseCounts(**self._repository.count_rows(user.id)))
+        """The live data the confirmations show — read at the moment they are shown."""
+        return self._summary(user, DatabaseCounts(**self._repository.count_rows(user.id)))
 
     def reset(self, user: User, db: Session) -> DatabaseSummary:
         """Delete everything the user owns, atomically, and report what went.
@@ -42,7 +43,7 @@ class DatabaseService:
         """
         if self._repository.has_active_run(user.id):
             raise ResetRunActiveError("A categorisation run is in progress.")
-        counts = DatabaseCounts(**self._repository.count_rows(user.id))
+        before = self.summary(user)
 
         try:
             self._repository.delete_user_data(user.id)
@@ -54,4 +55,11 @@ class DatabaseService:
         except BaseException:
             self._repository.rollback()
             raise
-        return DatabaseSummary(counts=counts)
+        return before
+
+    def _summary(self, user: User, counts: DatabaseCounts) -> DatabaseSummary:
+        return DatabaseSummary(
+            app_version=__version__,
+            last_import_at=self._repository.latest_import_at(user.id),
+            counts=counts,
+        )

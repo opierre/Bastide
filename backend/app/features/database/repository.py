@@ -4,10 +4,12 @@ Scoped by `app.core.user_data`, so the reset covers exactly the rows a backup wo
 archived — minus `user_settings`, which is the profile's preferences rather than its contents.
 """
 
+from datetime import datetime
+
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
-from app.core.user_data import USER_DATA_TABLES, owned_by, table
+from app.core.user_data import USER_DATA_TABLES, latest_import, owned_by, table
 
 #: Deleted by a reset, in insert order; deletion runs it backwards. `user_settings` is absent:
 #: the locale, the AI configuration and the last-backup stamp survive a reset by design
@@ -47,6 +49,9 @@ class DatabaseRepository:
             )
             for key, names in COUNTED_TABLES.items()
         }
+
+    def latest_import_at(self, user_id: str) -> datetime | None:
+        return self._db.scalar(latest_import(user_id))
 
     def has_active_run(self, user_id: str) -> bool:
         runs = table("categorization_runs")

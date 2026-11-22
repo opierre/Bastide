@@ -3396,9 +3396,47 @@
   "@settingsBackupConfirmTitle": {
     "description": "Title of the restore confirmation modal."
   },
-  "settingsBackupConfirmExportedAt": "Exporté le",
-  "@settingsBackupConfirmExportedAt": {
-    "description": "Summary row: when the backup was exported."
+  "settingsBackupConfirmLead": "Les données exportées le {date} remplacent toutes vos données actuelles.",
+  "@settingsBackupConfirmLead": {
+    "description": "Lead of the restore confirmation; the date is the long export date (« 11 mai 2026 »).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsBackupConfirmBackupColumn": "Sauvegarde",
+  "@settingsBackupConfirmBackupColumn": {
+    "description": "Header of the restore comparison's column for the chosen file."
+  },
+  "settingsBackupConfirmCurrentColumn": "Actuel",
+  "@settingsBackupConfirmCurrentColumn": {
+    "description": "Header of the restore comparison's column for the data as it stands."
+  },
+  "settingsBackupConfirmLastImport": "Dernier import",
+  "@settingsBackupConfirmLastImport": {
+    "description": "Comparison row: the date of the latest import on each side."
+  },
+  "settingsBackupConfirmOlder": "Cette sauvegarde est antérieure à votre dernier import du {date}.",
+  "@settingsBackupConfirmOlder": {
+    "description": "Warning status text when the backup was exported before the latest import; long date.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsBackupConfirmCurrentError": "Impossible de lire vos données actuelles.",
+  "@settingsBackupConfirmCurrentError": {
+    "description": "Banner when the current data to compare with could not load."
+  },
+  "settingsBackupExportFirst": "Exporter d’abord",
+  "@settingsBackupExportFirst": {
+    "description": "Ghost action of the restore and reset confirmations: exports without closing the modal."
+  },
+  "settingsBackupSaved": "Sauvegarde enregistrée",
+  "@settingsBackupSaved": {
+    "description": "Positive status text replacing « Exporter d’abord » once the file is saved."
   },
   "settingsBackupConfirmVersion": "Version de l’application",
   "@settingsBackupConfirmVersion": {
@@ -3439,14 +3477,6 @@
   "settingsBackupConfirmSimulations": "Simulations",
   "@settingsBackupConfirmSimulations": {
     "description": "Summary row: number of saved loan simulator scenarios."
-  },
-  "settingsBackupConfirmWarning": "Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.",
-  "@settingsBackupConfirmWarning": {
-    "description": "Warning callout in the restore modal."
-  },
-  "settingsBackupCancel": "Annuler",
-  "@settingsBackupCancel": {
-    "description": "Dismisses the restore modal without changing anything."
   },
   "settingsBackupReplace": "Remplacer mes données",
   "@settingsBackupReplace": {
@@ -4416,11 +4446,11 @@
   "@settingsResetConfirmNote": {
     "description": "Note under the reset counts listing what survives the reset."
   },
-  "settingsResetConfirmWord": "SUPPRIMER",
+  "settingsResetConfirmWord": "supprimer",
   "@settingsResetConfirmWord": {
-    "description": "The word that must be typed exactly to enable the reset. Uppercase."
+    "description": "The word to type to enable the reset. Matched in any case."
   },
-  "settingsResetConfirmLabel": "Saisissez {word} pour confirmer",
+  "settingsResetConfirmLabel": "Saisissez « {word} » pour confirmer",
   "@settingsResetConfirmLabel": {
     "description": "Label of the typed-confirmation field.",
     "placeholders": {
@@ -4428,6 +4458,10 @@
         "type": "String"
       }
     }
+  },
+  "settingsResetConfirmHelper": "Majuscules ou minuscules, peu importe.",
+  "@settingsResetConfirmHelper": {
+    "description": "Helper under the typed-confirmation field."
   },
   "settingsResetConfirmSubmit": "Tout supprimer",
   "@settingsResetConfirmSubmit": {

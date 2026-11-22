@@ -6,6 +6,7 @@ for both features.
 """
 
 from collections.abc import Iterator, Sequence
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import delete, func, insert, select
@@ -16,6 +17,7 @@ from app.core.user_data import (
     ColumnSpec,
     describe,
     encode,
+    latest_import,
     owned_by,
     table,
 )
@@ -47,6 +49,9 @@ class BackupRepository:
             query = query.order_by(target.c.settlement_account_id.is_not(None))
         for row in self._db.execute(query).mappings():
             yield {key: encode(value) for key, value in row.items()}
+
+    def latest_import_at(self, user_id: str) -> datetime | None:
+        return self._db.scalar(latest_import(user_id))
 
     def system_category_ids(self) -> set[str]:
         categories = table("categories")

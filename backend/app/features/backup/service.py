@@ -56,12 +56,15 @@ class BackupService:
         # Materialised first so every archive carries a settings row to restore.
         self._settings.get_or_create(user.id)
         exported_at = self._clock()
+        last_import_at = self._repository.latest_import_at(user.id)
         manifest = {
             "format": FORMAT_MARKER,
             "format_version": FORMAT_VERSION,
             "app_version": __version__,
             "exported_at": exported_at.isoformat(),
             "currency": user.currency,
+            # Optional: an older build reads past it, and an archive without it shows no date.
+            "last_import_at": last_import_at.isoformat() if last_import_at else None,
         }
         content = write_archive(
             manifest,
@@ -168,6 +171,7 @@ class BackupService:
                 app_version=manifest["app_version"],
                 exported_at=manifest["exported_at"],
                 currency=manifest["currency"],
+                last_import_at=manifest.get("last_import_at"),
                 counts=BackupCounts(
                     accounts=tables.get("accounts", 0),
                     transactions=tables.get("transactions", 0),

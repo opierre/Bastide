@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
+import '../domain/backup.dart';
 import '../domain/database_reset.dart';
 
 /// Calls `/database`. The only place that knows its
@@ -14,6 +15,14 @@ class DatabaseRepository {
   /// How many rows this profile holds, read fresh each time the confirmation is
   /// shown — the modal states counts, so they must not be a cached claim.
   Future<DatabaseCounts> summary() => _counts('/database/summary', post: false);
+
+  /// The same summary as the restore confirmation's « Actuel » column: the
+  /// running version and the latest import beside the counts, keyed as an
+  /// archive's manifest keys them.
+  Future<CurrentData> current() async {
+    final json = await _apiClient.get('/database/summary');
+    return CurrentData.fromJson(json as Map<String, dynamic>);
+  }
 
   /// Deletes everything this profile owns, and reports what went.
   Future<DatabaseCounts> reset() => _counts('/database/reset', post: true);

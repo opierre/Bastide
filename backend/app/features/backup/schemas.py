@@ -27,4 +27,7 @@ class BackupSummary(BaseModel):
     app_version: str
     exported_at: datetime
     currency: str
+    #: When the newest import in the archive ran; `None` for a profile that never imported, and
+    #: for an archive written before the manifest carried it.
+    last_import_at: datetime | None = None
     counts: BackupCounts

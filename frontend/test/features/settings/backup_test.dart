@@ -6,6 +6,8 @@ import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/l10n/date_display.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/app_modal.dart';
+import 'package:bastide/core/widgets/inline_banner.dart';
 import 'package:bastide/features/settings/application/backup_controller.dart';
 import 'package:bastide/features/settings/application/settings_controller.dart';
 import 'package:bastide/features/settings/domain/backup.dart';
@@ -40,6 +42,22 @@ class FakeBackupFiles implements BackupFiles {
 
 final _exportedAt = DateTime.utc(2026, 9, 11, 12, 32);
 
+Map<String, dynamic> _countsJson({
+  int transactions = 1284,
+  int accounts = 4,
+  int rules = 30,
+}) => {
+  'accounts': accounts,
+  'transactions': transactions,
+  'categories': 12,
+  'rules': rules,
+  'recurring': 5,
+  'goals': 2,
+  'mortgages': 1,
+  'properties': 1,
+  'simulations': 3,
+};
+
 Map<String, dynamic> _summaryJson({
   int transactions = 1284,
   int accounts = 4,
@@ -48,17 +66,17 @@ Map<String, dynamic> _summaryJson({
   'app_version': '0.1.0',
   'exported_at': _exportedAt.toIso8601String(),
   'currency': 'EUR',
-  'counts': {
-    'accounts': accounts,
-    'transactions': transactions,
-    'categories': 12,
-    'rules': 30,
-    'recurring': 5,
-    'goals': 2,
-    'mortgages': 1,
-    'properties': 1,
-    'simulations': 3,
-  },
+  'last_import_at': '2026-09-04T08:00:00Z',
+  'counts': _countsJson(transactions: transactions, accounts: accounts),
+};
+
+/// The data as it stands: one more import since the backup, on 18 September.
+Map<String, dynamic> _currentJson({
+  String? lastImportAt = '2026-09-18T08:00:00Z',
+}) => {
+  'app_version': '0.2.0',
+  'last_import_at': lastImportAt,
+  'counts': _countsJson(transactions: 1342, rules: 31),
 };
 
 Map<String, dynamic> _settingsJson({String? lastBackupAt}) => {
@@ -87,6 +105,9 @@ void main() {
     when(
       () => apiClient.get('/settings'),
     ).thenAnswer((_) async => _settingsJson());
+    when(
+      () => apiClient.get('/database/summary'),
+    ).thenAnswer((_) async => _currentJson());
   });
 
   void stubExport() {
@@ -322,10 +343,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Restaurer cette sauvegarde ?'), findsOneWidget);
-      expect(find.textContaining('bastide-2026-09-11.bastide'), findsOneWidget);
-      expect(find.text('0.1.0'), findsOneWidget);
-      expect(find.text('30'), findsOneWidget);
-      expect(find.byKey(const Key('backupConfirmWarning')), findsOneWidget);
+      expect(
+        find.text(
+          'Les données exportées le 11\u00a0septembre 2026 remplacent toutes vos '
+          'données actuelles.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('bastide-2026-09-11.bastide'), findsOneWidget);
+      // No banner any more: the stake is the lead, the comparison the body.
+      expect(find.byType(InlineBanner), findsNothing);
       verifyNever(
         () => apiClient.postMultipart(
           '/backup/restore',
@@ -359,9 +386,185 @@ void main() {
       await tester.tap(find.byKey(const Key('backupConfirmReplace')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('backupConfirmError')), findsOneWidget);
+      expect(find.byKey(const Key('appModalSaveError')), findsOneWidget);
       expect(
         find.textContaining('catégorisation est en cours'),
+        findsOneWidget,
+      );
+    });
+
+    Future<void> openModal(
+      WidgetTester tester, {
+      Locale locale = const Locale('fr'),
+    }) async {
+      useDesktopSurface(tester);
+      files.picked = (name: 'bastide-2026-09-11.bastide', bytes: _archive);
+      stubUpload('/backup/inspect');
+      await tester.pumpWidget(wrap(locale: locale));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('settingsBackupRestoreButton')));
+      await tester.pumpAndSettle();
+    }
+
+    String valueOf(WidgetTester tester, String label, int column) {
+      final row = find.ancestor(
+        of: find.text(label),
+        matching: find.byType(Table),
+      );
+      final table = tester.widget<Table>(row);
+      for (final tableRow in table.children) {
+        final texts = [
+          for (final cell in tableRow.children)
+            ...find
+                .descendant(
+                  of: find.byWidget(cell),
+                  matching: find.byType(Text),
+                )
+                .evaluate()
+                .map((e) => (e.widget as Text).data),
+        ];
+        if (texts.isNotEmpty && texts.first == label) return texts[column]!;
+      }
+      throw StateError('no row $label');
+    }
+
+    testWidgets('compares the backup with the data as it stands', (
+      tester,
+    ) async {
+      await openModal(tester);
+
+      final summary = find.byKey(const Key('backupConfirmSummary'));
+      for (final header in ['Sauvegarde', 'Actuel']) {
+        expect(
+          find.descendant(of: summary, matching: find.text(header)),
+          findsOneWidget,
+        );
+      }
+      expect(valueOf(tester, 'Version de l’application', 1), '0.1.0');
+      expect(valueOf(tester, 'Version de l’application', 2), '0.2.0');
+      expect(valueOf(tester, 'Dernier import', 1), '4\u00a0septembre 2026');
+      expect(valueOf(tester, 'Dernier import', 2), '18\u00a0septembre 2026');
+      expect(valueOf(tester, 'Transactions', 1), '1\u202f284');
+      expect(valueOf(tester, 'Transactions', 2), '1\u202f342');
+      expect(valueOf(tester, 'Règles', 1), '30');
+      expect(valueOf(tester, 'Règles', 2), '31');
+    });
+
+    testWidgets('warns when the backup predates the latest import', (
+      tester,
+    ) async {
+      await openModal(tester);
+
+      expect(find.byKey(const Key('backupConfirmOlder')), findsOneWidget);
+      expect(
+        find.text(
+          'Cette sauvegarde est antérieure à votre dernier import du '
+          '18\u00a0septembre 2026.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('says nothing when the backup is as recent as the latest '
+        'import', (tester) async {
+      when(() => apiClient.get('/database/summary')).thenAnswer(
+        (_) async => _currentJson(lastImportAt: '2026-09-04T08:00:00Z'),
+      );
+      await openModal(tester);
+
+      expect(find.byKey(const Key('backupConfirmOlder')), findsNothing);
+    });
+
+    testWidgets('says nothing for a profile that never imported', (
+      tester,
+    ) async {
+      when(
+        () => apiClient.get('/database/summary'),
+      ).thenAnswer((_) async => _currentJson(lastImportAt: null));
+      await openModal(tester);
+
+      expect(find.byKey(const Key('backupConfirmOlder')), findsNothing);
+      expect(valueOf(tester, 'Dernier import', 2), '—');
+    });
+
+    testWidgets('current data that cannot load offers a retry', (tester) async {
+      when(
+        () => apiClient.get('/database/summary'),
+      ).thenThrow(failure('INTERNAL'));
+      await openModal(tester);
+
+      expect(find.byKey(const Key('modalLoadError')), findsOneWidget);
+      expect(valueOf(tester, 'Transactions', 2), '—');
+
+      when(
+        () => apiClient.get('/database/summary'),
+      ).thenAnswer((_) async => _currentJson());
+      await tester.tap(find.byKey(const Key('modalLoadErrorRetry')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('modalLoadError')), findsNothing);
+      expect(valueOf(tester, 'Transactions', 2), '1\u202f342');
+    });
+
+    testWidgets('opens on « Annuler »', (tester) async {
+      await openModal(tester);
+
+      final focused = FocusManager.instance.primaryFocus?.context;
+      expect(
+        focused?.findAncestorWidgetOfExactType<AppModalCancel>(),
+        isNotNull,
+      );
+    });
+
+    testWidgets('« Exporter d’abord » saves without closing, then says so', (
+      tester,
+    ) async {
+      stubExport();
+      await openModal(tester);
+
+      await tester.tap(find.byKey(const Key('exportFirstButton')));
+      await tester.pumpAndSettle();
+
+      expect(files.written, {'C:/sauvegardes/bastide.bastide': _archive});
+      expect(find.text('Restaurer cette sauvegarde ?'), findsOneWidget);
+      expect(find.byKey(const Key('exportFirstButton')), findsNothing);
+      expect(find.byKey(const Key('modalInPlaceDone')), findsOneWidget);
+      expect(find.text('Sauvegarde enregistrée'), findsOneWidget);
+      // It stands in for the toast.
+      expect(find.textContaining('Sauvegarde enregistrée ·'), findsNothing);
+    });
+
+    testWidgets('a cancelled save dialog keeps « Exporter d’abord »', (
+      tester,
+    ) async {
+      files.savePath = null;
+      await openModal(tester);
+
+      await tester.tap(find.byKey(const Key('exportFirstButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('exportFirstButton')), findsOneWidget);
+      expect(find.byKey(const Key('modalInPlaceDone')), findsNothing);
+    });
+
+    testWidgets('the modal renders in English', (tester) async {
+      await openModal(tester, locale: const Locale('en'));
+
+      expect(find.text('Restore this backup?'), findsOneWidget);
+      expect(
+        find.text(
+          'The data exported on September\u00a011, 2026 replaces all your current '
+          'data.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Current'), findsOneWidget);
+      expect(find.text('Latest import'), findsOneWidget);
+      expect(find.text('Export first'), findsOneWidget);
+      expect(
+        find.text(
+          'This backup predates your latest import on September\u00a018, 2026.',
+        ),
         findsOneWidget,
       );
     });

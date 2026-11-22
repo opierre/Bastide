@@ -4374,11 +4374,53 @@ abstract class AppLocalizations {
   /// **'Restaurer cette sauvegarde ?'**
   String get settingsBackupConfirmTitle;
 
-  /// Summary row: when the backup was exported.
+  /// Lead of the restore confirmation; the date is the long export date (« 11 mai 2026 »).
   ///
   /// In fr, this message translates to:
-  /// **'Exporté le'**
-  String get settingsBackupConfirmExportedAt;
+  /// **'Les données exportées le {date} remplacent toutes vos données actuelles.'**
+  String settingsBackupConfirmLead(String date);
+
+  /// Header of the restore comparison's column for the chosen file.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde'**
+  String get settingsBackupConfirmBackupColumn;
+
+  /// Header of the restore comparison's column for the data as it stands.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actuel'**
+  String get settingsBackupConfirmCurrentColumn;
+
+  /// Comparison row: the date of the latest import on each side.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernier import'**
+  String get settingsBackupConfirmLastImport;
+
+  /// Warning status text when the backup was exported before the latest import; long date.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette sauvegarde est antérieure à votre dernier import du {date}.'**
+  String settingsBackupConfirmOlder(String date);
+
+  /// Banner when the current data to compare with could not load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de lire vos données actuelles.'**
+  String get settingsBackupConfirmCurrentError;
+
+  /// Ghost action of the restore and reset confirmations: exports without closing the modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter d’abord'**
+  String get settingsBackupExportFirst;
+
+  /// Positive status text replacing « Exporter d’abord » once the file is saved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde enregistrée'**
+  String get settingsBackupSaved;
 
   /// Summary row: the app version that wrote the backup.
   ///
@@ -4439,18 +4481,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Simulations'**
   String get settingsBackupConfirmSimulations;
-
-  /// Warning callout in the restore modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.'**
-  String get settingsBackupConfirmWarning;
-
-  /// Dismisses the restore modal without changing anything.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get settingsBackupCancel;
 
   /// Destructive confirm button of the restore modal.
   ///
@@ -5567,17 +5597,23 @@ abstract class AppLocalizations {
   /// **'Les catégories fournies, vos préférences et le réglage IA sont conservés.'**
   String get settingsResetConfirmNote;
 
-  /// The word that must be typed exactly to enable the reset. Uppercase.
+  /// The word to type to enable the reset. Matched in any case.
   ///
   /// In fr, this message translates to:
-  /// **'SUPPRIMER'**
+  /// **'supprimer'**
   String get settingsResetConfirmWord;
 
   /// Label of the typed-confirmation field.
   ///
   /// In fr, this message translates to:
-  /// **'Saisissez {word} pour confirmer'**
+  /// **'Saisissez « {word} » pour confirmer'**
   String settingsResetConfirmLabel(String word);
+
+  /// Helper under the typed-confirmation field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Majuscules ou minuscules, peu importe.'**
+  String get settingsResetConfirmHelper;
 
   /// Destructive confirm action of the reset modal.
   ///
