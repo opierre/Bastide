@@ -100,7 +100,7 @@ wheels = [
 
 [[package]]
 name = "bastide-backend"
-version = "0.2.0.dev33"
+version = "0.2.0.dev34"
 source = { editable = "." }
 dependencies = [
     { name = "alembic" },
