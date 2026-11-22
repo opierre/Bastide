@@ -6,20 +6,19 @@ import '../../../core/widgets/app_checkbox.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/inline_banner.dart';
-import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../categories/domain/category.dart';
-import '../../categories/presentation/category_color.dart';
 import '../../rules/application/rule_preview_controller.dart';
 import '../../rules/application/rules_controller.dart';
 import '../../rules/domain/rule.dart';
 import '../../rules/presentation/rule_error_localizer.dart';
 import '../../rules/presentation/rule_labels.dart';
 import '../../rules/presentation/rule_match_preview_banner.dart';
+import '../../rules/presentation/rule_row.dart';
 import '../application/transactions_controller.dart';
 import '../domain/transaction.dart';
 
@@ -328,7 +327,7 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
                   AppSelectItem(
                     value: category.id,
                     label: categoryPath(l10n, category, categories),
-                    leading: _CategoryDot(category: category),
+                    leading: RuleCategoryDot(category: category),
                   ),
               ],
             ),
@@ -345,26 +344,6 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
           gap,
           RuleMatchPreviewBanner(state: previewState),
         ],
-      ),
-    );
-  }
-}
-
-/// The category label's 8 px dot (`00` §7) in front of each category of the
-/// select, so the closed field reads as the label the mockup draws.
-class _CategoryDot extends StatelessWidget {
-  const _CategoryDot({required this.category});
-
-  final AppCategory category;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: CategoryLabel.dotSize,
-      height: CategoryLabel.dotSize,
-      decoration: BoxDecoration(
-        color: context.categoryColors.forSlot(categorySlot(category)),
-        borderRadius: BorderRadius.circular(AppRadii.bar),
       ),
     );
   }
