@@ -132,7 +132,19 @@ void main() {
     await _openPicker(tester);
 
     expect(find.text('Ajouter à « Streamco »'), findsOneWidget);
+    expect(
+      find.text(
+        'Les opérations qui ne font partie d’aucune série, '
+        'les plus proches en premier.',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Revolut — Compte joint'), findsOneWidget);
+    // Two lines, the account under the label: 48 px.
+    expect(
+      tester.getSize(find.byKey(const Key('chargePickerTick-c2'))).height,
+      48,
+    );
 
     await tester.tap(find.byKey(const Key('chargePickerTick-c3')));
     await tester.tap(find.byKey(const Key('chargePickerTick-c1')));
@@ -255,10 +267,33 @@ void main() {
 
     expect(find.text('Impossible de charger les opérations.'), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('chargePickerRetry')));
+    await tester.tap(find.byKey(const Key('modalLoadErrorRetry')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('chargePickerTick-c1')), findsOneWidget);
+  });
+
+  testWidgets('a long series name wraps in the title, the width holds', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await _pumpDetail(
+      tester,
+      repository: repository,
+      series: testSeries(
+        id: 's1',
+        label:
+            'Logiciel de retouche, offre photographie avec stockage en ligne',
+      ),
+    );
+    await _openPicker(tester);
+
+    final title = find.byKey(const Key('appModalTitle'));
+    final lineHeight = 16 * 1.45;
+    expect(tester.getSize(title).height, greaterThan(lineHeight * 1.5));
+    expect(tester.getSize(find.byKey(const Key('appModalFrame'))).width, 560);
   });
 
   testWidgets('a dismissed series offers no picker', (tester) async {

@@ -782,6 +782,13 @@ abstract final class AppTransactions {
   static const reviewActionsColumn = 380.0;
 }
 
+/// The Abonnements panel of `docs/design/10-subscriptions.md`.
+abstract final class AppSubscriptions {
+  /// The date column of a charge list in the subscription modals, its 12 px
+  /// gap to the label included (`proposal_v6` `m-subscriptions`).
+  static const chargeDateColumn = 96.0;
+}
+
 /// v1: the 38 px control pill some panels still put in the title bar, kept
 /// until each panel's v2 ticket moves it to the 28 px controls of [AppSizes].
 abstract final class AppChrome {

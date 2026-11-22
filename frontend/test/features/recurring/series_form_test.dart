@@ -114,7 +114,7 @@ void main() {
     await tester.tap(find.byKey(const Key('seriesFormSubmit')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('seriesFormError')), findsOneWidget);
+    expect(find.byKey(const Key('appModalSaveError')), findsOneWidget);
     expect(find.byKey(const Key('seriesFormName')), findsOneWidget);
   });
 
@@ -131,7 +131,7 @@ void main() {
     expect(find.text('Enregistrer'), findsOneWidget);
   });
 
-  testWidgets('the fields read Nom, Compte, Montant, Cadence, Catégorie', (
+  testWidgets('the fields read Nom, Compte, Montant and Cadence, Catégorie', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1440, 900);
@@ -140,13 +140,32 @@ void main() {
     await tester.pumpWidget(_wrap(controller: FakeSubscriptionsController()));
     await tester.pumpAndSettle();
 
-    final labels = ['Nom', 'Compte', 'Montant', 'Cadence', 'Catégorie'];
+    final labels = ['Nom', 'Compte', 'Montant', 'Catégorie'];
     final tops = [
       for (final label in labels) tester.getTopLeft(find.text(label)).dy,
     ];
     for (var i = 1; i < tops.length; i++) {
       expect(tops[i], greaterThan(tops[i - 1]), reason: labels[i]);
     }
+    // Montant and Cadence side by side, aligned on their inputs.
+    final amount = tester.getTopLeft(find.byKey(const Key('seriesFormAmount')));
+    final cadence = tester.getTopLeft(
+      find.byKey(const Key('seriesFormCadence')),
+    );
+    expect(cadence.dy, amount.dy);
+    expect(cadence.dx, greaterThan(amount.dx));
     expect(find.text('Annuler'), findsOneWidget);
+  });
+
+  testWidgets('an edited form asks before dropping the input', (tester) async {
+    await tester.pumpWidget(_wrap(controller: FakeSubscriptionsController()));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('seriesFormName')), 'Gym');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('seriesFormCancel')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('appModalDiscard')), findsOneWidget);
   });
 }

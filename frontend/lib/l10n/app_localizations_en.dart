@@ -3217,9 +3217,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionFormCategoryNone => 'None';
 
   @override
-  String get subscriptionFormCancel => 'Cancel';
-
-  @override
   String get subscriptionFormSave => 'Save';
 
   @override
@@ -5253,10 +5250,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get markRecurringReasonNoRhythm => 'No regular rhythm';
 
   @override
-  String get markRecurringLowWarning =>
-      'No regular rhythm was found. You can still save the series: it will be irregular.';
-
-  @override
   String get markRecurringCadenceLabel => 'Proposed cadence';
 
   @override
@@ -5275,8 +5268,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String markRecurringTickedRange(String from, String to) {
-    return 'from $from to $to';
+  String markRecurringTickedRange(int count, String from, String to) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions ticked',
+      one: '1 transaction ticked',
+    );
+    return '$_temp0 · from $from to $to';
   }
 
   @override
@@ -5287,13 +5286,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get markRecurringSave => 'Save series';
 
   @override
-  String get markRecurringCancel => 'Cancel';
-
-  @override
-  String get markRecurringLoadError => 'The preview could not be prepared.';
-
-  @override
-  String get markRecurringRetry => 'Retry';
+  String get markRecurringLoadError =>
+      'The preview could not be prepared. Nothing was changed.';
 
   @override
   String get subscriptionErrorPreviewInflow =>
@@ -5313,7 +5307,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get markRecurringViewSeries => 'View series';
+  String markRecurringViewSeries(String label) {
+    return 'View the “$label” series';
+  }
 
   @override
   String get markRecurringAddToSeries => 'Add to this series';

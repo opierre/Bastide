@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
+import '../../../core/l10n/date_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/inline_banner.dart';
+import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/primary_button.dart';
-import '../../../core/widgets/state_views.dart';
 import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/add_to_series_controller.dart';
@@ -19,9 +21,9 @@ import '../domain/recurring_series.dart';
 import '../domain/series_preview.dart';
 import 'recurring_error_localizer.dart';
 import 'recurring_labels.dart';
+import 'recurring_modal_parts.dart';
 import 'series_picker.dart';
 import 'subscriptions_screen.dart';
-import 'transaction_check_row.dart';
 
 /// Opens « Marquer comme récurrent » for [transactionId].
 ///
@@ -83,8 +85,17 @@ final class OpenExistingSeries extends MarkRecurringResult {
   const OpenExistingSeries(super.series);
 }
 
-/// The 520 px preview dialog: the matching transactions as a checklist, the
-/// confidence chip with its reasons, and the proposed cadence and amount.
+/// The 520 px « Marquer comme récurrent » modal (`docs/design/10` § Other
+/// modals, `proposal_v6` `m-subscriptions`), in each of its variants:
+///
+/// - the preview: the series name with its confidence as status text, the
+///   reasons on one line, the proposed cadence and amount, the checkable
+///   charges with their summary, and the « Ajouter à une série existante… »
+///   link; low confidence says so in the status text alone, no banner;
+/// - a merchant already tracked: the lead names the series, the body lists
+///   the charges it lacks and links to it;
+/// - the series picker, with « Retour à l’aperçu » as the left ghost action;
+/// - the loading silhouette and the load error, both without a lead.
 class MarkRecurringDialog extends ConsumerStatefulWidget {
   const MarkRecurringDialog({super.key, required this.transactionId});
 
@@ -97,7 +108,7 @@ class MarkRecurringDialog extends ConsumerStatefulWidget {
 
 class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
   bool _isSaving = false;
-  String? _errorText;
+  String? _saveError;
 
   /// Whether the series picker replaces the preview. Purely which pane the
   /// dialog shows: the picker's own state lives in its controller.
@@ -105,20 +116,21 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
 
   void _setPicking(bool picking) => setState(() {
     _picking = picking;
-    _errorText = null;
+    _saveError = null;
   });
 
   /// Adds the transaction to [series], which learns its label, and closes.
   /// Either way a toast says how it went; on a failure the dialog stays open
   /// so the user can pick another series or cancel.
   Future<void> _confirm(RecurringSeries series) async {
+    if (_isSaving) return;
     final l10n = AppLocalizations.of(context)!;
     // Looked up now: the toast outlives the dialog, whose context is gone by
     // the time a success is due.
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
     setState(() {
       _isSaving = true;
-      _errorText = null;
+      _saveError = null;
     });
     try {
       final saved = await ref
@@ -144,9 +156,11 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
   }
 
   Future<void> _save() async {
+    if (_isSaving) return;
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isSaving = true;
-      _errorText = null;
+      _saveError = null;
     });
     try {
       final saved = await ref
@@ -156,12 +170,10 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
       Navigator.of(context).pop(SeriesSaved(saved));
     } catch (error) {
       if (!mounted) return;
+      // The ticks stay as they were; the frame shows the banner.
       setState(() {
         _isSaving = false;
-        _errorText = localizeRecurringError(
-          AppLocalizations.of(context)!,
-          error,
-        );
+        _saveError = localizeRecurringError(l10n, error);
       });
     }
   }
@@ -179,65 +191,37 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
         Navigator.of(context).pop(OpenExistingSeries(series));
       }
     });
+
+    if (_picking) return _pickerModal(l10n);
+
     final state = ref.watch(provider);
-    final existing = switch (state.value?.outcome) {
+    final loaded = state.isLoading ? null : state.value;
+    final failed = !state.isLoading && state.hasError;
+    final existing = switch (loaded?.outcome) {
       AlreadyInSeries(:final series) => series,
       _ => null,
     };
-    final canSave =
-        !_isSaving &&
-        !state.isLoading &&
-        (state.value?.selected.isNotEmpty ?? false);
-
-    if (_picking) {
-      final selected = ref
-          .watch(seriesPickerControllerProvider)
-          .value
-          ?.selected;
-      return AppModal(
-        title: l10n.markRecurringTitle,
-        width: 520,
-        actions: [
-          OutlinedButton(
-            key: const Key('seriesPickerBack'),
-            onPressed: _isSaving ? null : () => _setPicking(false),
-            child: Text(l10n.seriesPickerBack),
-          ),
-          OutlinedButton(
-            key: const Key('markRecurringCancel'),
-            onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-            child: Text(l10n.markRecurringCancel),
-          ),
-          PrimaryButton(
-            key: const Key('seriesPickerConfirm'),
-            label: l10n.seriesPickerConfirm,
-            isLoading: _isSaving,
-            onPressed: selected != null && !_isSaving
-                ? () => _confirm(selected)
-                : null,
-          ),
-        ],
-        child: SeriesPickerBody(enabled: !_isSaving),
-      );
-    }
+    final canSave = !_isSaving && (loaded?.selected.isNotEmpty ?? false);
 
     return AppModal(
+      key: const Key('markRecurringModal'),
       title: l10n.markRecurringTitle,
-      width: 520,
-      actions: [
-        OutlinedButton(
-          key: const Key('markRecurringCancel'),
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.markRecurringCancel),
+      // The lead describes the body, so the loading silhouette and the load
+      // error go without one (`proposal_v6` `m-frame`, États).
+      subtitle: switch (loaded?.outcome) {
+        Proposal() => Text(l10n.markRecurringIntro),
+        AlreadyInSeries(:final series) => Text(
+          l10n.markRecurringExistingIntro(series.label),
         ),
-        if (existing != null)
-          OutlinedButton(
-            key: const Key('markRecurringViewSeries'),
-            onPressed: _isSaving
-                ? null
-                : () => Navigator.of(context).pop(OpenExistingSeries(existing)),
-            child: Text(l10n.markRecurringViewSeries),
-          ),
+        null => null,
+      },
+      width: AppModalSizes.w520,
+      // Unticking a proposed charge is the user's input.
+      dirty: loaded != null && loaded.ticked.length != loaded.candidates.length,
+      busy: _isSaving,
+      saveError: _saveError,
+      actions: [
+        const AppModalCancel(key: Key('markRecurringCancel')),
         PrimaryButton(
           key: const Key('markRecurringSave'),
           label: existing != null
@@ -247,191 +231,161 @@ class _MarkRecurringDialogState extends ConsumerState<MarkRecurringDialog> {
           onPressed: canSave ? _save : null,
         ),
       ],
-      child: switch (state) {
-        AsyncValue(hasError: true) when !state.isLoading => ErrorStateView(
+      child: switch (loaded) {
+        _ when failed => ModalLoadError(
           message: l10n.markRecurringLoadError,
-          retryLabel: l10n.markRecurringRetry,
-          retryKey: const Key('markRecurringRetry'),
           onRetry: () => ref.invalidate(provider),
         ),
-        AsyncValue(
-          value: MarkRecurringState(outcome: Proposal(:final preview)),
-        )
-            when !state.isLoading =>
-          _ProposalBody(
-            transactionId: widget.transactionId,
-            preview: preview,
-            state: state.requireValue,
-            errorText: _errorText,
-            enabled: !_isSaving,
-            onPickSeries: () => _setPicking(true),
-          ),
-        AsyncValue(
-          value: MarkRecurringState(
-            outcome: AlreadyInSeries(:final series, addable: [_, ...]),
-          ),
-        )
-            when !state.isLoading =>
+        MarkRecurringState(outcome: Proposal(:final preview)) => _ProposalBody(
+          transactionId: widget.transactionId,
+          preview: preview,
+          state: loaded,
+          onPickSeries: () => _setPicking(true),
+        ),
+        MarkRecurringState(outcome: AlreadyInSeries(:final series)) =>
           _ExistingSeriesBody(
             transactionId: widget.transactionId,
             series: series,
-            state: state.requireValue,
-            errorText: _errorText,
-            enabled: !_isSaving,
+            state: loaded,
           ),
-        _ => const _LoadingBody(),
+        null => const ModalLoadingBody(key: Key('markRecurringLoading')),
       },
     );
   }
-}
 
-class _LoadingBody extends StatelessWidget {
-  const _LoadingBody();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      key: Key('markRecurringLoading'),
-      height: 160,
-      child: Center(
-        child: SizedBox(
-          width: 22,
-          height: 22,
-          child: CircularProgressIndicator(
-            strokeWidth: 2.5,
-            color: context.colors.accent,
-          ),
-        ),
+  /// « Choisir une série »: « Retour à l’aperçu » as the left ghost action,
+  /// then « Annuler » and « Confirmer ».
+  Widget _pickerModal(AppLocalizations l10n) {
+    final selected = ref.watch(seriesPickerControllerProvider).value?.selected;
+    return AppModal(
+      key: const Key('markRecurringPickerModal'),
+      title: l10n.markRecurringTitle,
+      subtitle: Text(l10n.seriesPickerIntro),
+      width: AppModalSizes.w520,
+      busy: _isSaving,
+      leadingAction: AppButton(
+        key: const Key('seriesPickerBack'),
+        label: l10n.seriesPickerBack,
+        icon: LucideIcons300.arrowLeft,
+        variant: AppButtonVariant.ghost,
+        onPressed: () => _setPicking(false),
       ),
+      actions: [
+        const AppModalCancel(key: Key('markRecurringCancel')),
+        PrimaryButton(
+          key: const Key('seriesPickerConfirm'),
+          label: l10n.seriesPickerConfirm,
+          isLoading: _isSaving,
+          onPressed: selected != null && !_isSaving
+              ? () => _confirm(selected)
+              : null,
+        ),
+      ],
+      child: const SeriesPickerBody(),
     );
   }
 }
 
-class _ProposalBody extends ConsumerWidget {
+/// The preview: what Bastide would group, and why.
+class _ProposalBody extends StatelessWidget {
   const _ProposalBody({
     required this.transactionId,
     required this.preview,
     required this.state,
-    required this.errorText,
-    required this.enabled,
     required this.onPickSeries,
   });
 
   final String transactionId;
   final SeriesPreview preview;
   final MarkRecurringState state;
-  final String? errorText;
-  final bool enabled;
 
   /// Opens the series picker, for a charge whose label has nothing in common
   /// with the series it belongs to.
   final VoidCallback onPickSeries;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     final textTheme = Theme.of(context).textTheme;
+    final locale = Localizations.localeOf(context).toString();
+    final secondary = textTheme.bodySmall?.copyWith(
+      color: colors.textSecondary,
+    );
+    const gap = SizedBox(height: AppSpacing.fieldGap);
+    const lineGap = SizedBox(height: AppSpacing.xs);
+
+    Widget figure(String label, String value) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: secondary),
+        lineGap,
+        Text(value, style: textTheme.bodyMedium),
+      ],
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          l10n.markRecurringIntro,
-          style: textTheme.bodySmall?.copyWith(
-            color: context.colors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        if (errorText != null) ...[
-          InlineBanner(
-            key: const Key('markRecurringError'),
-            message: errorText!,
-          ),
-          const SizedBox(height: AppSpacing.md),
-        ],
         Row(
           children: [
-            _ConfidenceChip(confidence: preview.confidence),
-            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 preview.label,
-                style: textTheme.titleSmall,
+                key: const Key('markRecurringLabel'),
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                style: textTheme.titleSmall,
               ),
             ),
+            const SizedBox(width: AppSpacing.sm),
+            _Confidence(confidence: preview.confidence),
           ],
         ),
-        const SizedBox(height: AppSpacing.sm),
-        Wrap(
-          key: const Key('markRecurringReasons'),
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.xs,
-          children: [
+        lineGap,
+        // Said once, on one line: no banner repeats the reasons.
+        Text(
+          [
             for (final reason in preview.reasons)
-              Text(
-                _reasonLabel(l10n, reason, preview.transactions.length),
-                style: textTheme.bodySmall?.copyWith(
-                  color: context.colors.textSecondary,
-                ),
-              ),
-          ],
+              _reasonLabel(l10n, reason, preview.transactions.length),
+          ].join(' · '),
+          key: const Key('markRecurringReasons'),
+          style: secondary,
         ),
-        if (preview.confidence == PreviewConfidence.low) ...[
-          const SizedBox(height: AppSpacing.md),
-          InlineBanner(
-            key: const Key('markRecurringLowWarning'),
-            tone: BannerTone.warning,
-            message: l10n.markRecurringLowWarning,
-          ),
-        ],
-        const SizedBox(height: AppSpacing.md),
+        gap,
         Row(
           children: [
             Expanded(
-              child: _SummaryFigure(
-                label: l10n.markRecurringCadenceLabel,
-                child: Text(
-                  cadenceLabel(l10n, preview.cadence),
-                  style: textTheme.bodyMedium,
-                ),
+              child: figure(
+                l10n.markRecurringCadenceLabel,
+                cadenceLabel(l10n, preview.cadence),
               ),
             ),
+            const SizedBox(width: AppModalSizes.columnGutter),
             Expanded(
-              child: _SummaryFigure(
-                label: l10n.markRecurringAmountLabel,
-                child: AmountText(
-                  amountMinor: preview.expectedAmountMinor,
+              // What the subscription costs, unsigned, as the panel prints it.
+              child: figure(
+                l10n.markRecurringAmountLabel,
+                formatAmount(
+                  amountMinor: preview.expectedAmountMinor.abs(),
                   currency: preview.currency,
-                  style: textTheme.bodyMedium!,
+                  locale: locale,
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.md),
-        _Checklist(
-          transactionId: transactionId,
-          state: state,
-          enabled: enabled,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
+        gap,
+        _Checklist(transactionId: transactionId, state: state),
+        lineGap,
+        _TickedSummary(state: state),
+        gap,
+        RecurringModalLinkLine(
+          link: RecurringModalLink(
             key: const Key('markRecurringPickSeries'),
-            onPressed: enabled ? onPickSeries : null,
-            icon: Icon(
-              Icons.playlist_add_rounded,
-              size: 16,
-              color: context.colors.accent,
-            ),
-            label: Text(
-              l10n.markRecurringPickSeries,
-              style: textTheme.labelMedium?.copyWith(
-                color: context.colors.accent,
-              ),
-            ),
+            label: l10n.markRecurringPickSeries,
+            icon: LucideIcons300.listPlus,
+            onTap: onPickSeries,
           ),
         ),
       ],
@@ -439,111 +393,18 @@ class _ProposalBody extends ConsumerWidget {
   }
 }
 
-/// The checklist of candidate transactions and the summary of the ticked ones,
-/// shared by the proposal and the add-to-series bodies.
-class _Checklist extends ConsumerWidget {
-  const _Checklist({
-    required this.transactionId,
-    required this.state,
-    required this.enabled,
-  });
-
-  final String transactionId;
-  final MarkRecurringState state;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
-    final locale = Localizations.localeOf(context).toString();
-    final dates = seriesDateFormat(locale);
-    final selected = state.selected;
-    final controller = ref.read(
-      markRecurringControllerProvider(transactionId).notifier,
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 260),
-          child: Container(
-            decoration: BoxDecoration(
-              color: context.colors.field,
-              borderRadius: BorderRadius.circular(AppRadii.md),
-              border: Border.all(color: context.colors.line),
-            ),
-            child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-              children: [
-                for (final transaction in state.candidates)
-                  TransactionCheckRow(
-                    tickKey: Key('markRecurringTick-${transaction.id}'),
-                    transaction: transaction,
-                    date: dates.format(transaction.bookedDate),
-                    ticked: state.ticked.contains(transaction.id),
-                    onChanged: enabled
-                        ? () => controller.toggle(transaction.id)
-                        : null,
-                  ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-        Wrap(
-          key: const Key('markRecurringSummary'),
-          spacing: AppSpacing.sm,
-          children: [
-            if (selected.isEmpty)
-              Text(
-                l10n.markRecurringNoneTicked,
-                style: textTheme.bodySmall?.copyWith(
-                  color: context.colors.warning,
-                ),
-              )
-            else ...[
-              Text(
-                l10n.markRecurringTickedCount(selected.length),
-                style: textTheme.bodySmall?.copyWith(
-                  color: context.colors.textSecondary,
-                ),
-              ),
-              if (selected.length > 1)
-                Text(
-                  l10n.markRecurringTickedRange(
-                    dates.format(selected.first.bookedDate),
-                    dates.format(selected.last.bookedDate),
-                  ),
-                  style: textTheme.bodySmall?.copyWith(
-                    color: context.colors.textSecondary,
-                  ),
-                ),
-            ],
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-/// A series already tracks this merchant: offer to add the charges it lacks.
+/// A series already tracks this merchant: the charges it lacks, and a link
+/// to the series. The lead names it.
 class _ExistingSeriesBody extends StatelessWidget {
   const _ExistingSeriesBody({
     required this.transactionId,
     required this.series,
     required this.state,
-    required this.errorText,
-    required this.enabled,
   });
 
   final String transactionId;
   final RecurringSeries series;
   final MarkRecurringState state;
-  final String? errorText;
-  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -552,24 +413,82 @@ class _ExistingSeriesBody extends StatelessWidget {
       key: const Key('markRecurringExisting'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        InlineBanner(
-          tone: BannerTone.info,
-          message: l10n.markRecurringExistingIntro(series.label),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        if (errorText != null) ...[
-          InlineBanner(
-            key: const Key('markRecurringError'),
-            message: errorText!,
+        _Checklist(transactionId: transactionId, state: state),
+        const SizedBox(height: AppSpacing.fieldGap),
+        RecurringModalLinkLine(
+          link: RecurringModalLink(
+            key: const Key('markRecurringViewSeries'),
+            label: l10n.markRecurringViewSeries(series.label),
+            icon: LucideIcons300.arrowUpRight,
+            onTap: () => Navigator.of(context).pop(OpenExistingSeries(series)),
           ),
-          const SizedBox(height: AppSpacing.md),
-        ],
-        _Checklist(
-          transactionId: transactionId,
-          state: state,
-          enabled: enabled,
         ),
       ],
+    );
+  }
+}
+
+/// The candidate charges as checkable rows, the most recent first.
+class _Checklist extends ConsumerWidget {
+  const _Checklist({required this.transactionId, required this.state});
+
+  final String transactionId;
+  final MarkRecurringState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dates = DayMonthFormat.yMMMd(
+      Localizations.localeOf(context).toString(),
+    );
+    final controller = ref.read(
+      markRecurringControllerProvider(transactionId).notifier,
+    );
+    return ModalList(
+      children: [
+        for (final transaction in state.candidates.reversed)
+          ChargeRow(
+            key: Key('markRecurringTick-${transaction.id}'),
+            transaction: transaction,
+            date: dates.format(transaction.bookedDate),
+            ticked: state.ticked.contains(transaction.id),
+            onChanged: () => controller.toggle(transaction.id),
+          ),
+      ],
+    );
+  }
+}
+
+/// « 3 opérations cochées · du 12 mars 2026 au 12 mai 2026 », 11
+/// `textTertiary`; in `warning` when nothing is ticked, since saving then
+/// waits on the user.
+class _TickedSummary extends StatelessWidget {
+  const _TickedSummary({required this.state});
+
+  final MarkRecurringState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final styles = context.textStyles;
+    final selected = state.selected;
+    final dates = DayMonthFormat.yMMMd(
+      Localizations.localeOf(context).toString(),
+    );
+    final text = switch (selected) {
+      [] => l10n.markRecurringNoneTicked,
+      [_] => l10n.markRecurringTickedCount(1),
+      [final first, ..., final last] => l10n.markRecurringTickedRange(
+        selected.length,
+        dates.format(first.bookedDate),
+        dates.format(last.bookedDate),
+      ),
+    };
+    return Text(
+      text,
+      key: const Key('markRecurringSummary'),
+      style: selected.isEmpty
+          ? styles.helper.copyWith(color: context.colors.warning)
+          : styles.helper,
     );
   }
 }
@@ -594,59 +513,34 @@ String _reasonLabel(
   PreviewReason.noRhythm => l10n.markRecurringReasonNoRhythm,
 };
 
-/// Confidence as a tinted chip whose glyph repeats the hue's meaning, so the
-/// level never rests on color alone. Low is amber, not red: the user may still
-/// save, the dialog only says the app could not find a rhythm.
-class _ConfidenceChip extends StatelessWidget {
-  const _ConfidenceChip({required this.confidence});
+/// Confidence as status text, no pill (`proposal_v6` `m-subscriptions`):
+/// high in `textSecondary` with `check`, low in `warning` with
+/// `triangle-alert`. Low is amber, not red: the user may still save. Medium,
+/// which the mockup does not draw, is plain `textSecondary`.
+class _Confidence extends StatelessWidget {
+  const _Confidence({required this.confidence});
 
   final PreviewConfidence confidence;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final (label, tone) = switch (confidence) {
-      PreviewConfidence.high => (
-        l10n.markRecurringConfidenceHigh,
-        StatusTone.positive,
+    const key = Key('markRecurringConfidence');
+    return switch (confidence) {
+      PreviewConfidence.high => StatusText(
+        key: key,
+        label: l10n.markRecurringConfidenceHigh,
+        icon: LucideIcons300.check,
       ),
-      PreviewConfidence.medium => (
-        l10n.markRecurringConfidenceMedium,
-        StatusTone.neutral,
+      PreviewConfidence.medium => StatusText(
+        key: key,
+        label: l10n.markRecurringConfidenceMedium,
       ),
-      PreviewConfidence.low => (
-        l10n.markRecurringConfidenceLow,
-        StatusTone.warning,
+      PreviewConfidence.low => StatusText(
+        key: key,
+        label: l10n.markRecurringConfidenceLow,
+        tone: StatusTone.warning,
       ),
     };
-    return StatusText(
-      key: const Key('markRecurringConfidence'),
-      label: label,
-      tone: tone,
-    );
-  }
-}
-
-class _SummaryFigure extends StatelessWidget {
-  const _SummaryFigure({required this.label, required this.child});
-
-  final String label;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.labelSmall?.copyWith(color: context.colors.textSecondary),
-        ),
-        const SizedBox(height: 2),
-        child,
-      ],
-    );
   }
 }

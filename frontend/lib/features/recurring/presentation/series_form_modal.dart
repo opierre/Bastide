@@ -6,8 +6,8 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/category_label.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -30,8 +30,9 @@ Future<RecurringSeries?> showSeriesForm(
 }
 
 /// The 480 px « Modifier le paiement récurrent » modal (`docs/design/10`
-/// § Edit modal): Nom · Compte (read-only) · Montant · Cadence · Catégorie,
-/// then « Annuler » · « Enregistrer ».
+/// § Edit modal, `proposal_v6` `m-subscriptions`): Nom · Compte (read-only)
+/// · Montant and Cadence side by side · Catégorie, then « Annuler » ·
+/// « Enregistrer ».
 ///
 /// Edit only. A series is never created from scratch: it starts from its
 /// charges, in « Marquer comme récurrent », so detection can keep it up to
@@ -41,9 +42,6 @@ class SeriesFormModal extends ConsumerStatefulWidget {
   const SeriesFormModal({super.key, required this.initial});
 
   final RecurringSeries initial;
-
-  /// The modal's width (`10` § Edit modal).
-  static const width = 480.0;
 
   @override
   ConsumerState<SeriesFormModal> createState() => _SeriesFormModalState();
@@ -64,7 +62,11 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
   late String? _categoryId = widget.initial.categoryId;
 
   bool _isSubmitting = false;
-  String? _errorText;
+
+  /// The user has changed a field: Escape and « Annuler » then ask before
+  /// dropping the input, and the scrim no longer closes the modal.
+  bool _dirty = false;
+  String? _saveError;
 
   @override
   void didChangeDependencies() {
@@ -87,6 +89,10 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
     super.dispose();
   }
 
+  void _touch() {
+    if (!_dirty) setState(() => _dirty = true);
+  }
+
   /// The typed amount in minor units, or `null` unless it is above zero.
   int? _magnitude(String text) {
     final locale = Localizations.localeOf(context).toString();
@@ -95,13 +101,15 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final magnitude = _magnitude(_amountController.text);
     if (magnitude == null) return;
+    final l10n = AppLocalizations.of(context)!;
 
     setState(() {
       _isSubmitting = true;
-      _errorText = null;
+      _saveError = null;
     });
 
     final controller = ref.read(subscriptionsControllerProvider.notifier);
@@ -119,12 +127,10 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
       Navigator.of(context).pop(saved);
     } catch (error) {
       if (!mounted) return;
+      // The input stays as it was; the frame shows the banner.
       setState(() {
         _isSubmitting = false;
-        _errorText = localizeRecurringError(
-          AppLocalizations.of(context)!,
-          error,
-        );
+        _saveError = localizeRecurringError(l10n, error);
       });
     }
   }
@@ -139,21 +145,23 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
         .where((account) => account.id == widget.initial.accountId)
         .firstOrNull
         ?.displayName;
+    const gap = SizedBox(height: AppSpacing.fieldGap);
 
     return AppModal(
+      key: const Key('seriesFormModal'),
       title: l10n.subscriptionFormEditTitle,
-      width: SeriesFormModal.width,
+      width: AppModalSizes.w480,
+      dirty: _dirty,
+      busy: _isSubmitting,
+      saveError: _saveError,
+      onSubmit: _submit,
       actions: [
-        AppButton(
-          key: const Key('seriesFormCancel'),
-          label: l10n.subscriptionFormCancel,
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(key: Key('seriesFormCancel')),
         PrimaryButton(
           key: const Key('seriesFormSubmit'),
           label: l10n.subscriptionFormSave,
           isLoading: _isSubmitting,
-          onPressed: _submit,
+          onPressed: _isSubmitting ? null : _submit,
         ),
       ],
       child: Form(
@@ -161,25 +169,19 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_errorText != null) ...[
-              InlineBanner(
-                key: const Key('seriesFormError'),
-                message: _errorText!,
-              ),
-              const SizedBox(height: AppSpacing.fieldGap),
-            ],
             LabeledField(
               label: l10n.subscriptionFormNameLabel,
               child: TextFormField(
                 key: const Key('seriesFormName'),
                 controller: _labelController,
                 autofocus: true,
+                onChanged: (_) => _touch(),
                 validator: (value) => (value == null || value.trim().isEmpty)
                     ? l10n.subscriptionFormNameRequired
                     : null,
               ),
             ),
-            const SizedBox(height: AppSpacing.fieldGap),
+            gap,
             LabeledField(
               label: l10n.subscriptionFormAccountLabel,
               // The account is fixed once the series exists: the API has no
@@ -187,41 +189,49 @@ class _SeriesFormModalState extends ConsumerState<SeriesFormModal> {
               // worse than none.
               child: ReadOnlyField(value: accountName ?? ''),
             ),
-            const SizedBox(height: AppSpacing.fieldGap),
-            LabeledField(
-              label: l10n.subscriptionFormAmountLabel,
-              child: MoneyField(
-                key: const Key('seriesFormAmount'),
-                controller: _amountController,
-                currency: widget.initial.currency,
-                validator: (value) => _magnitude(value ?? '') == null
-                    ? l10n.subscriptionFormAmountInvalid
-                    : null,
+            gap,
+            ModalFieldRow(
+              start: ModalFieldCell(
+                label: l10n.subscriptionFormAmountLabel,
+                input: MoneyField(
+                  key: const Key('seriesFormAmount'),
+                  controller: _amountController,
+                  currency: widget.initial.currency,
+                  onChanged: (_) => _touch(),
+                  validator: (value) => _magnitude(value ?? '') == null
+                      ? l10n.subscriptionFormAmountInvalid
+                      : null,
+                ),
+              ),
+              end: ModalFieldCell(
+                label: l10n.subscriptionFormCadenceLabel,
+                input: AppSelect<Cadence>(
+                  key: const Key('seriesFormCadence'),
+                  value: _cadence,
+                  onChanged: (value) => setState(() {
+                    _cadence = value;
+                    _dirty = true;
+                  }),
+                  items: [
+                    for (final cadence in Cadence.values)
+                      AppSelectItem(
+                        value: cadence,
+                        label: cadenceLabel(l10n, cadence),
+                      ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: AppSpacing.fieldGap),
-            LabeledField(
-              label: l10n.subscriptionFormCadenceLabel,
-              child: AppSelect<Cadence>(
-                key: const Key('seriesFormCadence'),
-                value: _cadence,
-                onChanged: (value) => setState(() => _cadence = value),
-                items: [
-                  for (final cadence in Cadence.values)
-                    AppSelectItem(
-                      value: cadence,
-                      label: cadenceLabel(l10n, cadence),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.fieldGap),
+            gap,
             LabeledField(
               label: l10n.subscriptionFormCategoryLabel,
               child: AppSelect<String?>(
                 key: const Key('seriesFormCategory'),
                 value: _categoryId,
-                onChanged: (value) => setState(() => _categoryId = value),
+                onChanged: (value) => setState(() {
+                  _categoryId = value;
+                  _dirty = true;
+                }),
                 items: [
                   AppSelectItem(
                     value: null,

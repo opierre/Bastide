@@ -4020,10 +4020,6 @@
   "@subscriptionFormCategoryNone": {
     "description": "The no-category option in the recurring payment form's category select."
   },
-  "subscriptionFormCancel": "Annuler",
-  "@subscriptionFormCancel": {
-    "description": "Cancel action in the recurring payment modal footer."
-  },
   "subscriptionFormSave": "Enregistrer",
   "@subscriptionFormSave": {
     "description": "Confirm action when editing a recurring payment."
@@ -6871,10 +6867,6 @@
   "@markRecurringReasonNoRhythm": {
     "description": "Reason: no cadence could be recognised."
   },
-  "markRecurringLowWarning": "Aucun rythme régulier n’a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.",
-  "@markRecurringLowWarning": {
-    "description": "Warning banner shown when the preview's confidence is low."
-  },
   "markRecurringCadenceLabel": "Rythme proposé",
   "@markRecurringCadenceLabel": {
     "description": "Label of the proposed cadence in the dialog summary."
@@ -6892,10 +6884,13 @@
       }
     }
   },
-  "markRecurringTickedRange": "du {from} au {to}",
+  "markRecurringTickedRange": "{count, plural, =1{1 opération cochée} other{{count} opérations cochées}} · du {from} au {to}",
   "@markRecurringTickedRange": {
-    "description": "Summary line: the dates of the oldest and newest ticked transactions.",
+    "description": "Summary line under the charges: how many are ticked, and the dates of the oldest and newest of them.",
     "placeholders": {
+      "count": {
+        "type": "int"
+      },
       "from": {
         "type": "String"
       },
@@ -6912,17 +6907,9 @@
   "@markRecurringSave": {
     "description": "Primary button creating the series from the ticked transactions."
   },
-  "markRecurringCancel": "Annuler",
-  "@markRecurringCancel": {
-    "description": "Closes the dialog without saving."
-  },
-  "markRecurringLoadError": "Impossible de préparer l’aperçu.",
+  "markRecurringLoadError": "Impossible de préparer l’aperçu. Rien n’a été modifié.",
   "@markRecurringLoadError": {
     "description": "Shown when the preview request failed."
-  },
-  "markRecurringRetry": "Réessayer",
-  "@markRecurringRetry": {
-    "description": "Retries the preview request."
   },
   "subscriptionErrorPreviewInflow": "Seule une dépense peut être marquée comme récurrente.",
   "@subscriptionErrorPreviewInflow": {
@@ -6945,9 +6932,14 @@
       }
     }
   },
-  "markRecurringViewSeries": "Voir la série",
+  "markRecurringViewSeries": "Voir la série « {label} »",
   "@markRecurringViewSeries": {
-    "description": "Closes the dialog and opens the existing series in Abonnements."
+    "description": "Link in the dialog body: closes it and opens the existing series in Abonnements.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
   },
   "markRecurringAddToSeries": "Ajouter à cette série",
   "@markRecurringAddToSeries": {
