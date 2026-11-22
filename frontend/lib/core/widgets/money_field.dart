@@ -81,6 +81,11 @@ class MoneyField extends StatelessWidget {
         suffixStyle: fieldSuffixStyle(context),
       ),
       validator: validator,
+      // The decorator would set the message with the field's [textAlign] and
+      // cut it to one line: a right-aligned amount pushed it off the field's
+      // start, truncated. Only the figure is right-aligned (`00` §6); the
+      // helper beneath starts at the field's edge and wraps, as FieldHelper.
+      errorBuilder: (context, errorText) => Text(errorText),
       onFieldSubmitted: onFieldSubmitted,
       onChanged: onChanged,
     );
