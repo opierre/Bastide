@@ -766,6 +766,37 @@ abstract final class AppSubscriptions {
   static const chargeDateColumn = 96.0;
 }
 
+/// The Simulateur panel of `docs/design/14-simulateur.md` (`00` §16).
+abstract final class AppSimulator {
+  /// The inputs pane, right hairline, padding 24 (§Layout).
+  static const inputsWidth = 380.0;
+
+  /// Between the inputs pane's blocks, and on either side of its hairline.
+  static const inputsGap = AppSpacing.fieldGap;
+
+  /// Between the reading pane's blocks, the hairline in the middle of each
+  /// gap (11, 1, 11).
+  static const readingGap = 22.0;
+
+  /// The comparison table's row-label column (§Comparison).
+  static const compareLabelColumn = 190.0;
+
+  /// Below this pane height the reading pane scrolls and the projection
+  /// chart keeps [fixedChartHeight].
+  static const flexibleMinHeight = 640.0;
+  static const fixedChartHeight = 220.0;
+
+  /// The widest a yearly projection bar gets.
+  static const projectionBarMaxWidth = 44.0;
+
+  /// The ratio repère's fixed scale, in basis points: 0–70 %, wider than
+  /// Crédits' 0–60 %, so a reading in the sixties stays inside it (`00` §8).
+  static const ratioScaleBps = 7000;
+
+  /// The duration repère's scale: 0–30 years (`00` §8).
+  static const termScaleMonths = 360;
+}
+
 /// The one chart frame (`00` §9). Colours come from the theme: gridlines in
 /// `line`, the zero line in `lineStrong`, the series in `accent`.
 abstract final class AppChart {

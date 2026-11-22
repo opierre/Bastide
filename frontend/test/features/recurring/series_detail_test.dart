@@ -2,6 +2,7 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/inline_banner.dart';
+import 'package:bastide/core/widgets/summary_line.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
 import 'package:bastide/features/recurring/domain/recurring_series.dart';
 import 'package:bastide/features/recurring/presentation/price_history_chart.dart';
@@ -505,6 +506,38 @@ void main() {
         'confirmer un changement.',
       ),
       findsOneWidget,
+    );
+  });
+
+  testWidgets('hairlines separate the blocks and the summary items', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(SeriesDetail(series: testSeries(), occurrences: const [])),
+    );
+    await tester.pumpAndSettle();
+
+    // `00` §7: a vertical hairline between every item of the summary line.
+    final summary = find.byKey(const Key('seriesDetailSummaryLine'));
+    expect(
+      find.descendant(of: summary, matching: find.byType(SummaryHairline)),
+      findsNWidgets(2),
+    );
+
+    // `00` §1.2: 24 px, a hairline, 24 px between the summary line and the
+    // history block.
+    final divider = find.descendant(
+      of: find.byKey(const Key('seriesDetailContent')),
+      matching: find.byType(Divider),
+    );
+    expect(divider, findsOneWidget);
+    final hairline = tester.getRect(divider);
+    expect(hairline.top - tester.getRect(summary).bottom, AppSpacing.section);
+    expect(
+      tester.getTopLeft(find.text('Historique des prélèvements')).dy -
+          hairline.bottom,
+      greaterThanOrEqualTo(AppSpacing.section),
     );
   });
 

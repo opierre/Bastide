@@ -11,7 +11,8 @@ Crumb « Comptes / » (link back to the list), title = account name. Right: seco
 `ellipsis` whose menu holds « Archiver ». No delete.
 
 ## Layout
-Standard padding. Three blocks, 24 px apart:
+Standard padding. Blocks separated by 24 px, a hairline, 24 px (`00` §1.2); the summary
+line is the first of them:
 
 1. **Summary line.**
 2. **Balance chart** block.

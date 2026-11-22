@@ -51,9 +51,13 @@ Montant and Prochain are sortable. A row opens the series detail.
 Title bar: crumb « Abonnements / », title = series name, right: secondary « Modifier »,
 `ellipsis` menu.
 
+Blocks separated by 24 px, a hairline, 24 px (`00` §1.2): the summary line, then the history
+block. The banner of item 2 sits 24 px above the history block, with no hairline of its own;
+the note of item 4 closes the history block.
+
 1. Summary line: lead « Montant attendu » 40 px · « Cadence » 20 px · « Prochain
-   prélèvement » 20 px · right-aligned 12 `textSecondary`: category label, then « {account} ·
-   détecté depuis {mois} ».
+   prélèvement » 20 px, a vertical hairline between each item (`00` §7) · right-aligned 12
+   `textSecondary`: category label, then « {account} · détecté depuis {mois} ».
 2. When the price changed: a Banner with a `warning` `trending-up` icon: « Hausse : 13,49 € →
    15,49 € le 15 avr. 2026, soit +24,00 € par an. »
 3. Block « Historique des prélèvements »: the step-line chart (`00` §9), 184 px tall. Value

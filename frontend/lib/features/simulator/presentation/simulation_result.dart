@@ -14,13 +14,6 @@ import '../application/simulator_controller.dart';
 import '../domain/simulation.dart';
 import 'simulator_labels.dart';
 
-/// The ratio repère's fixed scale on this panel, in bps: 0–70 %, wider than
-/// Crédits' 0–60 %, so a reading in the sixties stays inside it (`00` §8).
-const simulatorRatioScaleBps = 7000;
-
-/// The term repère's scale: 0–30 years (`00` §8).
-const simulatorTermScaleMonths = 360;
-
 /// The summary line (`14-simulateur.md` §Reading pane, 1): « Échéance
 /// mensuelle » leads at 40 px, then « Coût total » and « TAEG indicatif » at
 /// 20 px, bottom-aligned and split by vertical hairlines.
@@ -281,8 +274,8 @@ class _RatioColumn extends StatelessWidget {
       // made here. Above 70 % the fill clamps; the number stays exact.
       meter: RepereMeter(
         key: const Key('hcsfRatioGauge'),
-        fraction: ratio / simulatorRatioScaleBps,
-        markFraction: result.hcsf.limitBps / simulatorRatioScaleBps,
+        fraction: ratio / AppSimulator.ratioScaleBps,
+        markFraction: result.hcsf.limitBps / AppSimulator.ratioScaleBps,
         markLabel: l10n.simulatorReference(limit),
         tone: result.hcsf.withinRatio == false
             ? RepereTone.over
@@ -328,8 +321,8 @@ class _TermColumn extends StatelessWidget {
           ? null
           : RepereMeter(
               key: const Key('hcsfTermGauge'),
-              fraction: term / simulatorTermScaleMonths,
-              markFraction: hcsf.maxTermMonths / simulatorTermScaleMonths,
+              fraction: term / AppSimulator.termScaleMonths,
+              markFraction: hcsf.maxTermMonths / AppSimulator.termScaleMonths,
               markLabel: l10n.simulatorReference(
                 termLabel(l10n, hcsf.maxTermMonths),
               ),

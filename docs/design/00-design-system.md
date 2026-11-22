@@ -21,6 +21,13 @@ exist: add it here first, then to `frontend/lib/core/theme/tokens.dart`.
 2. **Sections, not cards.** Parts of one page are separated by 24 px of space and a hairline.
    A bordered box is used only for an object the user can open or move (an account tile is not
    one in v2; see each panel), and for things that float: popover, modal, toast, banner.
+
+   **Hairlines between blocks.** Two blocks of a page (the summary line counts as one) are
+   always separated by space, a 1 px `line` hairline, then the same space again: 24, 1, 24 in
+   the content region. Space alone never separates two blocks, even where the mockup draws
+   nothing (§15). A panel spec may set another gap (the inspector's 16, §7; the Simulateur
+   reading pane's 22, that is 11, 1, 11), never drop the hairline. A Banner or a Note belongs
+   to the block it concerns and sits 24 px from it, with no hairline of its own.
 3. **One accent, flat.** Ink for the primary action, blue for selection, links, focus and
    progress. No gradient, no glow, no coloured shadow anywhere.
 4. **Colour carries meaning or nothing.** Green and red are the sign of money. Amber is
@@ -143,10 +150,16 @@ formatter replaces it.
   toggles. Monogram: 5 (22 px) and 7 (32 px).
 - **Spacing ramp:** 2, 4, 6, 8, 12, 16, 24, 32, 40. Inside a group 8; between a label and its
   value 4–6; between sections 24; page margin 32 horizontal, 24 vertical; two-column gutter 40.
+  Off the ramp, by name: fields 14 apart (`AppSpacing.fieldGap`), in a modal (§7) and down
+  the auth column; the drop target's padding 18 / 20 (`dropTargetY`, `dropTargetX`, §7).
+  Panel-local values are listed in §16.
 - **Heights:** title bar 48; nav item 30; button 28 (large 36); toolbar select 28; form field
   and form select 32; table row 36 (48 when the first cell has two lines); group row 30; tab
   40; popover item 28.
-- **Elevation:** only `shadow`, only on popover, modal, toast.
+- **Widths:** sidebar 224 (collapsed 56); inspector 440; search field 240; the auth screens'
+  single form column 320 (`AppSizes.authColumn`, `02-login.md`); modal widths in §7.
+- **Elevation:** only `shadow`, only on popover, modal, toast. A Material menu, which takes an
+  elevation rather than a shadow, uses 12 (`AppShadows.popoverElevation`).
 
 ## 5. Shell (identical on every panel)
 
@@ -243,8 +256,8 @@ Disabled is 45 % opacity and not focusable.
 | **Popover / menu** | `surface`, 1 px `lineStrong`, radius 8, `shadow`, padding 4; items 28 px, radius 4, hover `hover`; a `check` 14 px on the selected item. |
 | **Modal** | `surface`, radius 12, `shadow`, on `scrim`; padding 24; title 16/600, optional lead 13 `textSecondary`; fields 14 px apart; footer right-aligned, secondary then primary, 8 px apart. Widths are given per panel. Only for a task that needs protected focus (a form, a confirmation). Full recipe under « Modal » below. |
 | **Toast** | Bottom-right, 24 px from the edges; `surface`, 1 px `lineStrong`, radius 8, `shadow`, padding 10 14; status icon + 13 px text, optional second line 12 `textSecondary`; leaves after 4 s. |
-| **Inspector pane** | Right pane, 440 px, `rail`, left hairline, padding 24, blocks 16 apart separated by hairlines. Shows the row selected in the list on its left. Used by Transactions, Objectifs, Placements. |
-| **Drop target** | 1 px dashed `lineStrong`, radius 8, padding 18 20; icon, one line of text, one line of help, a secondary button. Drag-over: `accent` dashed border and `accentSoft` ground. |
+| **Inspector pane** | Right pane, 440 px (`AppSizes.inspector`), `rail`, left hairline, padding 24; blocks separated by a hairline with 16 px on each side (16, 1, 16; `InspectorPane.blockGap`). Shows the row selected in the list on its left. Used by Transactions, Objectifs, Placements. |
+| **Drop target** | 1 px dashed `lineStrong`, radius 8, padding 18 vertical, 20 horizontal (`AppSpacing.dropTargetY`, `dropTargetX`); icon, one line of text, one line of help, a secondary button. Drag-over: `accent` dashed border and `accentSoft` ground. |
 
 ### Modal
 
@@ -320,7 +333,8 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
 ### States of a panel
 
 - **Empty:** centred in the content region, on tomettes faded toward the edges: title 16/600,
-  one sentence 13 `textSecondary` (≤ 44 ch), one button. No icon plate.
+  one sentence 13 `textSecondary` (≤ 44 ch: at most 300 px wide,
+  `CenteredStatePane.maxSentenceWidth`), one button. No icon plate.
 - **Loading:** the layout's own silhouette in `hover` blocks (radius 4), opacity pulsing 1 → .5
   over 1.6 s. No spinner for a whole panel.
 - **Error:** as empty, with a `warning` `triangle-alert` 16 px before the title and a secondary
@@ -373,8 +387,14 @@ line 1 px `lineStrong` when a series crosses it; category axis in a 22 px band b
 
 - **Hatching** marks what is not yet a fact: the month in progress, a projected value, a value
   held flat between two declarations. 45° lines, 1.5 px on a 5 px pitch, in the mark's own
-  colour, with a 1 px outline in that colour. It replaces dashed outlines. Dashed strokes (5 on,
-  4 off) remain for annotation lines only: "today", an end date, a declared-history segment.
+  colour, with a 1 px outline in that colour. It replaces dashed outlines. On bars, the bar is
+  hatched.
+- **Line and area charts** show a stretch that is not yet a fact in two ways at once: its
+  **area is hatched** (in the line's colour, with no outline of its own: the line is its upper
+  edge), and its **line is dashed** (5 on, 4 off, same width and colour). Dots and the hover
+  card keep their rules.
+- Dashed strokes (5 on, 4 off) are otherwise for annotation lines only: "today", an end date,
+  a declared-history segment.
 - **Legend:** required for two or more series, as category labels (dot + name) on the heading
   line. One series needs none.
 - **Hover:** a popover-style card (`surface`, 1 px `lineStrong`, radius 8, `shadow`), shown at
@@ -518,3 +538,111 @@ The written values win.
   controls.
 - The mockup's « Logos » and « Textures » pages keep the eight-mark and three-texture
   comparison code; only Plan and tomettes are retained.
+- The mockup separates some blocks with space only (the account detail, the subscription
+  detail); the hairline of §1.2 is drawn there too.
+
+## 16. Panel values
+
+Layout values that belong to one panel. Each comes from that panel's spec (or its mockup
+frame where the spec is silent) and lives in `tokens.dart` under the class named in the
+heading. A new panel value is added here and to its spec, then to `tokens.dart`; a value two
+panels share moves to §4.
+
+### Objectifs: `AppGoalBanner` (`11-goals.md` §Inspector pane)
+
+| Value | Token | Use |
+|---|---|---|
+| 190 px | `height` | Banner with a picture, edge to edge at the top of the inspector |
+| 120 px | `heightEmpty` | Banner without a picture: tomettes on `rail` |
+| 100 px | `fadeHeight` | Bottom fade under the title, over the picture |
+| `rgba(12,14,24,.82)` | `fade` | The fade's bottom colour, transparent at its top |
+| `#FFFFFF` | `title` | The name and the percent over the fade |
+| `#D9DCE6` | `caption` | The deadline line over the fade |
+| 18 px | `contentTop` | Top padding of the inspector content under the banner (18 24 24) |
+| 36 × 24 px | `thumbWidth`, `thumbHeight` | The table's thumbnail of the picture, radius 4 |
+| 44:19 | `aspectRatio` | The picture's proportions, also the crop's |
+
+The fade and the two text colours sit on the picture, not on the theme, so they are the same
+in both themes (like the crop circle, §7).
+
+### Simulateur: `AppSimulator` (`14-simulateur.md`)
+
+| Value | Token | Use |
+|---|---|---|
+| 380 px | `inputsWidth` | The inputs pane, right hairline, padding 24 |
+| 14 px | `inputsGap` (= `fieldGap`) | Between the inputs pane's blocks, and around its hairline |
+| 22 px | `readingGap` | Between the reading pane's blocks, the hairline in the middle (11, 1, 11) |
+| 190 px | `compareLabelColumn` | The comparison table's row-label column |
+| 640 px | `flexibleMinHeight` | Below this pane height the reading pane scrolls … |
+| 220 px | `fixedChartHeight` | … and the projection chart keeps this height |
+| 44 px | `projectionBarMaxWidth` | The widest a yearly projection bar gets |
+| 0–70 % | `ratioScaleBps` | The debt-ratio repère's scale (§8) |
+| 0–30 years | `termScaleMonths` | The duration repère's scale (§8) |
+
+### Comptes: `AppAccountSection` (`05-accounts.md` §Section)
+
+| Value | Token | Use |
+|---|---|---|
+| 10 / 12 px | `headerPaddingY`, `headerPaddingX` | The account-type header bar's padding |
+| 10 px | `tableGap` | Between the header bar and its table |
+| 120 px | `subtotalWidth` | The right-aligned subtotal slot |
+
+### Crédits: `AppLoans` (`12-credits.md`)
+
+| Value | Token | Use |
+|---|---|---|
+| 360 px | `ratioWidth` | The debt-ratio item of the summary line |
+| 0–60 % | `ratioScaleBps` | The debt-ratio repère's scale (§8) |
+| 28 px | `scheduleRow` | The amortisation table's dense rows |
+| 96 px | `yearSelectWidth` | The schedule's year select |
+| 22 % | `repaidFlex` | The « Remboursé » column's share of the loans table |
+| 4 / 10 px | `instalmentLineTop`, `instalmentLabelGap` | The loan form's « Mensualité calculée » line: 4 px more than the field gap above it, 10 px between label and figures |
+
+### Synthèse: `AppNetworth` (`15-synthese.md` §Layout)
+
+| Value | Token | Use |
+|---|---|---|
+| 28 px | `equationGap` | Between the equation line's items and operators |
+| 440 / 48 px | `compositionWidth`, `compositionGutter` | « Composition de l’actif », then the gutter before « Patrimoine net » |
+| 230 px | `chartHeight` | The series chart, axis included |
+| 72 / 140 px | `shareColumn`, `amountColumn` | Composition table columns |
+| 96 / 140 px | `propertyShareColumn`, `propertyValueColumn` | Properties table columns |
+| 40 px | `menuColumn` | The row-menu column (a 28 px button and 12 px) |
+| 130 / 100 / 72 px | `declaredMonthField`, `declaredMonthColumn`, `declaredActionsColumn` | « Historique déclaré »: the entry row's month field, the list's month and action columns |
+
+### Placements: `AppPlacements` (`17-placements.md`)
+
+| Value | Token | Use |
+|---|---|---|
+| 20 px | `listGap` | Between the list pane's blocks |
+| 170 px | `chartHeight` | The inspector chart, axis included |
+| 112 / 112 / 160 / 108 px | `netPaymentsColumn`, `valueColumn`, `gainColumn`, `valuedOnColumn` | Investments table columns; « Placement » takes the rest |
+| 96 / 116 px | `historyDateColumn`, `historyAmountColumn` | Movements table columns; the label takes the rest |
+
+### Catégories et règles: `AppCategoriesPanel` (`08-categories-rules.md`)
+
+| Value | Token | Use |
+|---|---|---|
+| 340 px | `treeWidth` | The category tree, right hairline |
+| 52 px | `subcategoryIndent` | A subcategory's indent, past its parent's chevron, dot and icon |
+| 60 / 120 / 56 px | `orderColumn`, `matchesColumn`, `activeColumn` | Rules table columns |
+| 520 / 480 / 560 px | `ruleEditorWidth`, `categoryFormWidth`, `packModalWidth` | Modal widths |
+| 32 / 20 / 12 px | `iconCell`, `colorSquare`, `colorCheck` | The category form's icon cell, colour square and its `check` |
+
+### Transactions: `AppTransactions` (`07-transactions.md`)
+
+| Value | Token | Use |
+|---|---|---|
+| 12 px | `filterRowY` | The filter row's vertical padding (12 32), controls 8 apart |
+| 10 px | `pagerY` | The pager's vertical padding (10 32) |
+| 220 px | `filterMaxWidth` | The widest a filter-row select grows |
+| 240 / 128 px | `categoryColumn`, `amountColumn` | Table columns |
+| 230 / 280 px | `pickerWidth`, `pickerListHeight` | The category picker popover and its list |
+| 260 / 420 px | `progressWidth`, `noteMaxWidth` | The review tab's progress block and the Note beside it |
+| 88 / 380 px | `reviewDateColumn`, `reviewActionsColumn` | Review table columns |
+
+### Abonnements: `AppSubscriptions` (`10-subscriptions.md`)
+
+| Value | Token | Use |
+|---|---|---|
+| 96 px | `chargeDateColumn` | A charge list's date column in the modals, its 12 px gap included |
