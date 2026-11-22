@@ -5,7 +5,10 @@ import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/runs/run_progress_client.dart';
 import 'package:bastide/core/runs/run_progress_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/app_modal.dart';
+import 'package:bastide/core/widgets/inline_banner.dart';
 import 'package:bastide/features/categories/application/categories_controller.dart';
+import 'package:bastide/features/categories/domain/category.dart';
 import 'package:bastide/features/categories/presentation/categories_screen.dart';
 import 'package:bastide/features/rules/application/rule_packs_controller.dart';
 import 'package:bastide/features/rules/application/rules_controller.dart';
@@ -118,6 +121,7 @@ Widget _wrap(
   required FakeRulePackFiles files,
   FakeRulesController? rules,
   RunProgressClient? progress,
+  List<AppCategory> categories = const [],
 }) {
   return ProviderScope(
     overrides: [
@@ -130,7 +134,7 @@ Widget _wrap(
         () => rules ?? FakeRulesController(),
       ),
       categoriesControllerProvider.overrideWith(
-        () => FakeCategoriesController(),
+        () => FakeCategoriesController(initialCategories: categories),
       ),
     ],
     child: MaterialApp(
@@ -225,7 +229,19 @@ void main() {
 
       final files = FakeRulePackFiles(pickedSource: _packSource());
       await tester.pumpWidget(
-        _wrap(apiClient, files: files, progress: progress),
+        _wrap(
+          apiClient,
+          files: files,
+          progress: progress,
+          categories: [
+            testCategory(id: 'food', name: 'category.food'),
+            testCategory(
+              id: 'groceries',
+              parentId: 'food',
+              name: 'category.food.groceries',
+            ),
+          ],
+        ),
       );
       await tester.pumpAndSettle();
       await _openRules(tester);
@@ -248,6 +264,17 @@ void main() {
       );
       expect(find.text('10'), findsOneWidget);
       expect(find.text('2'), findsOneWidget);
+      // Each rule on the table: its pattern, then the category its key names.
+      final row = find.byKey(const Key('rulePackRule-0'));
+      await tester.ensureVisible(row);
+      expect(
+        find.descendant(of: row, matching: find.text('CARREFOUR')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: row, matching: find.textContaining('Alimentation')),
+        findsOneWidget,
+      );
 
       await tester.tap(find.byKey(const Key('rulePackImportConfirm')));
       await tester.pumpAndSettle();
@@ -273,11 +300,22 @@ void main() {
     await tester.tap(find.byKey(const Key('rulePackImportButton')));
     await tester.pumpAndSettle();
 
+    // An acknowledgement: the reason in a banner, one « Fermer ».
+    final modal = tester.widget<AppModal>(
+      find.byKey(const Key('rulePackRefusedModal')),
+    );
+    expect(modal.kind, AppModalKind.acknowledgement);
+    expect(modal.actions, hasLength(1));
+    expect(find.text('Ce fichier n’a pas été accepté'), findsOneWidget);
     expect(find.byKey(const Key('rulePackRefusal')), findsOneWidget);
-    expect(find.textContaining('regex'), findsWidgets);
+    expect(find.textContaining('Rien n’a été importé.'), findsOneWidget);
     verifyNever(
       () => apiClient.post('/rules/packs/preview', body: any(named: 'body')),
     );
+
+    await tester.tap(find.byKey(const Key('rulePackRefusedClose')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('rulePackRefusedModal')), findsNothing);
   });
 
   testWidgets('an unsupported version explains the version this build reads', (
@@ -328,7 +366,13 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.byKey(const Key('rulePackPrivacyNotice')), findsOneWidget);
+      // The privacy warning is a banner to read, with nothing to click away.
+      final notice = tester.widget<InlineBanner>(
+        find.byKey(const Key('rulePackPrivacyNotice')),
+      );
+      expect(notice.tone, BannerTone.warning);
+      expect(notice.onDismiss, isNull);
+      expect(notice.actions, isEmpty);
       expect(find.byKey(const Key('rulePackOmitted-r9')), findsOneWidget);
       expect(files.saved, isEmpty);
 

@@ -3739,18 +3739,6 @@ abstract class AppLocalizations {
   /// **'Exporter mes règles'**
   String get rulePackExportAction;
 
-  /// Cancel button on the pack import and export sheets.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get rulePackCancel;
-
-  /// Button closing the refused-pack explanation.
-  ///
-  /// In fr, this message translates to:
-  /// **'Fermer'**
-  String get rulePackClose;
-
   /// Title of the dialog explaining why a pack was refused.
   ///
   /// In fr, this message translates to:
@@ -3772,7 +3760,7 @@ abstract class AppLocalizations {
   /// Refusal reason: the pack contains a regex rule. Names the risk, and the three types that are accepted.
   ///
   /// In fr, this message translates to:
-  /// **'Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d’un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».'**
+  /// **'Rien n’a été importé. Ce pack contient une règle « regex », que Bastide n’accepte pas d’un fichier partagé : écrite par quelqu’un d’autre, elle pourrait ralentir fortement l’application. Les conditions « contient », « égal à » et « plage » sont acceptées.'**
   String get rulePackRefusedRegex;
 
   /// Headline of the import confirmation. The figure the backend reports covers the user's currently-uncategorized transactions.
@@ -3856,7 +3844,7 @@ abstract class AppLocalizations {
   /// Warning at the top of the export sheet. Names a concrete example, because the abstract warning is the one nobody reads.
   ///
   /// In fr, this message translates to:
-  /// **'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».'**
+  /// **'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR LOYER DUPONT ».'**
   String get rulePackExportPrivacyNotice;
 
   /// Section label above the verbatim pack contents in the export sheet.

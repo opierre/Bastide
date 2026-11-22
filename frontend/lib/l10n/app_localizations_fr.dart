@@ -2266,12 +2266,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rulePackExportAction => 'Exporter mes règles';
 
   @override
-  String get rulePackCancel => 'Annuler';
-
-  @override
-  String get rulePackClose => 'Fermer';
-
-  @override
   String get rulePackRefusedTitle => 'Ce fichier n’a pas été accepté';
 
   @override
@@ -2285,7 +2279,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rulePackRefusedRegex =>
-      'Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d’un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».';
+      'Rien n’a été importé. Ce pack contient une règle « regex », que Bastide n’accepte pas d’un fichier partagé : écrite par quelqu’un d’autre, elle pourrait ralentir fortement l’application. Les conditions « contient », « égal à » et « plage » sont acceptées.';
 
   @override
   String rulePackWouldMatch(int count) {
@@ -2361,7 +2355,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rulePackExportPrivacyNotice =>
-      'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».';
+      'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR LOYER DUPONT ».';
 
   @override
   String rulePackExportContents(int count) {

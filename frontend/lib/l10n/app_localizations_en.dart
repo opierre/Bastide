@@ -2255,12 +2255,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rulePackExportAction => 'Export my rules';
 
   @override
-  String get rulePackCancel => 'Cancel';
-
-  @override
-  String get rulePackClose => 'Close';
-
-  @override
   String get rulePackRefusedTitle => 'This file wasn’t accepted';
 
   @override
@@ -2274,7 +2268,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rulePackRefusedRegex =>
-      'This pack contains a “regex” rule. Regular expressions aren’t accepted in a shared pack: an expression from someone else’s file can lock up your machine. Use “contains”, “equals” or “range”.';
+      'Nothing was imported. This pack contains a “regex” rule, which Bastide doesn’t accept from a shared file: written by someone else, it could slow the app down badly. The “contains”, “equals” and “range” conditions are accepted.';
 
   @override
   String rulePackWouldMatch(int count) {
@@ -2350,7 +2344,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rulePackExportPrivacyNotice =>
-      'Read it before saving. A pattern can hold personal details, such as your landlord’s name: “VIR SALAIRE DUPONT”.';
+      'Read it before saving. A pattern can hold personal details, such as your landlord’s name: “VIR LOYER DUPONT”.';
 
   @override
   String rulePackExportContents(int count) {

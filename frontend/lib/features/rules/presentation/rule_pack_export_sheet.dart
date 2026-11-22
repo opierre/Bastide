@@ -42,9 +42,9 @@ Future<void> startRulePackExport(BuildContext context, WidgetRef ref) async {
   }
 }
 
-/// The review modal, 560 px (`docs/design/08` §Rule packs): the pack's
-/// contents verbatim, what it could not carry, and a plain note that patterns
-/// can hold personal detail.
+/// « Exporter mes règles », 560 px (`docs/design/08` §Rule packs, proposal v6
+/// `m-rules`): the privacy warning, the pack's contents verbatim in a `field`
+/// well, and what it could not carry.
 class RulePackExportSheet extends ConsumerStatefulWidget {
   const RulePackExportSheet({super.key, required this.export});
 
@@ -122,18 +122,23 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     final pack = _export.pack;
     final omitted = _export.omitted;
     final isBusy = _isSaving || _isRefreshing;
+    final labelStyle = Theme.of(
+      context,
+    ).textTheme.bodySmall?.copyWith(color: colors.textSecondary);
+    const gap = SizedBox(height: AppSpacing.fieldGap);
 
     return AppModal(
+      key: const Key('rulePackExportModal'),
       title: l10n.rulePackExportTitle,
       width: AppCategoriesPanel.packModalWidth,
+      busy: _isSaving,
+      saveError: _errorText,
       actions: [
-        AppButton(
-          label: l10n.rulePackCancel,
-          onPressed: isBusy ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(key: Key('rulePackExportCancel')),
         PrimaryButton(
           key: const Key('rulePackExportSave'),
           label: l10n.rulePackExportSave,
@@ -144,38 +149,21 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (_errorText != null) ...[
-            InlineBanner(
-              key: const Key('rulePackExportError'),
-              message: _errorText!,
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
-          NoteLine(
+          // Something to act on before saving, so a banner and not a note;
+          // nothing to dismiss, since the pack it warns about stays on screen
+          // (`08` §Rule packs).
+          InlineBanner(
             key: const Key('rulePackPrivacyNotice'),
-            icon: LucideIcons300.triangleAlert,
-            text: l10n.rulePackExportPrivacyNotice,
+            tone: BannerTone.warning,
+            message: l10n.rulePackExportPrivacyNotice,
           ),
-          const SizedBox(height: AppSpacing.fieldGap),
-          Row(
-            children: [
-              AppCheckbox(
-                key: const Key('rulePackExportIncludeLogos'),
-                value: _includeLogos,
-                semanticLabel: l10n.rulePackExportIncludeLogos,
-                onChanged: isBusy ? null : _setIncludeLogos,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  l10n.rulePackExportIncludeLogos,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-            ],
+          gap,
+          _IncludeLogosCheckbox(
+            value: _includeLogos,
+            onChanged: isBusy ? null : _setIncludeLogos,
           ),
           if (_includeLogos && !_isRefreshing) ...[
-            const SizedBox(height: AppSpacing.sm),
+            gap,
             if (_export.logosTooLarge)
               InlineBanner(
                 key: const Key('rulePackExportLogosTooLarge'),
@@ -185,25 +173,26 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
             else
               NoteLine(
                 key: const Key('rulePackExportLogoCount'),
+                icon: LucideIcons300.image,
                 text: l10n.rulePackExportLogoCount(_export.logoCount),
               ),
           ],
-          const SizedBox(height: AppSpacing.fieldGap),
+          gap,
           Text(
             l10n.rulePackExportContents(pack.rules.length),
-            style: context.textStyles.sectionLabel,
+            style: labelStyle,
           ),
-          const SizedBox(height: AppSpacing.xsPlus),
+          gap,
           // The file itself, not a summary of it: the point of the step is that
           // the user reads what leaves their machine.
           Container(
             key: const Key('rulePackExportPreview'),
-            constraints: const BoxConstraints(maxHeight: 220),
-            padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
+            height: AppCategoriesPanel.packPreviewHeight,
+            padding: const EdgeInsets.all(AppSpacing.smPlus),
             decoration: BoxDecoration(
-              color: context.colors.field,
+              color: colors.field,
               borderRadius: BorderRadius.circular(AppRadii.container),
-              border: Border.all(color: context.colors.lineStrong),
+              border: Border.all(color: colors.lineStrong),
             ),
             child: SingleChildScrollView(
               child: SelectableText(
@@ -220,28 +209,63 @@ class _RulePackExportSheetState extends ConsumerState<RulePackExportSheet> {
             ),
           ),
           if (omitted.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.fieldGap),
-            Text(
-              l10n.rulePackOmittedLabel(omitted.length),
-              style: context.textStyles.sectionLabel,
-            ),
-            for (final rule in omitted)
-              Padding(
+            gap,
+            Text(l10n.rulePackOmittedLabel(omitted.length), style: labelStyle),
+            gap,
+            for (final (i, rule) in omitted.indexed) ...[
+              if (i > 0) const SizedBox(height: AppSpacing.xsPlus),
+              NoteLine(
                 key: Key('rulePackOmitted-${rule.ruleId}'),
-                padding: const EdgeInsets.only(top: AppSpacing.xsPlus),
-                child: NoteLine(
-                  text: switch (rule.reason) {
-                    RuleOmissionReason.regex => l10n.rulePackOmittedRegex(
-                      rule.pattern,
-                    ),
-                    RuleOmissionReason.userCategory =>
-                      l10n.rulePackOmittedUserCategory(rule.pattern),
-                  },
-                ),
+                icon: LucideIcons300.circleMinus,
+                text: switch (rule.reason) {
+                  RuleOmissionReason.regex => l10n.rulePackOmittedRegex(
+                    rule.pattern,
+                  ),
+                  RuleOmissionReason.userCategory =>
+                    l10n.rulePackOmittedUserCategory(rule.pattern),
+                },
               ),
+            ],
           ],
-          const SizedBox(height: AppSpacing.sm),
         ],
+      ),
+    );
+  }
+}
+
+/// « Inclure les logos »: the design system's checkbox (`00` §6) with its
+/// label, both of which toggle it.
+class _IncludeLogosCheckbox extends StatelessWidget {
+  const _IncludeLogosCheckbox({required this.value, required this.onChanged});
+
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = AppLocalizations.of(context)!.rulePackExportIncludeLogos;
+    final onChanged = this.onChanged;
+    return MouseRegion(
+      cursor: onChanged == null
+          ? SystemMouseCursors.basic
+          : SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onChanged == null ? null : () => onChanged(!value),
+        behavior: HitTestBehavior.opaque,
+        child: Row(
+          children: [
+            AppCheckbox(
+              key: const Key('rulePackExportIncludeLogos'),
+              value: value,
+              semanticLabel: label,
+              onChanged: onChanged,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(
+              child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+            ),
+          ],
+        ),
       ),
     );
   }
