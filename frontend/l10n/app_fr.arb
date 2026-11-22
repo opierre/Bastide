@@ -5618,7 +5618,7 @@
   "@propertyFormLabelRequired": {
     "description": "Validation message when the property name is empty."
   },
-  "propertyFormAddress": "Adresse",
+  "propertyFormAddress": "Adresse (facultative)",
   "@propertyFormAddress": {
     "description": "Property form field: the property's optional postal address, free text."
   },
@@ -5674,10 +5674,6 @@
   "propertyFormCalendar": "Choisir une date",
   "@propertyFormCalendar": {
     "description": "Tooltip of the calendar button beside a date field."
-  },
-  "propertyFormCancel": "Annuler",
-  "@propertyFormCancel": {
-    "description": "Cancel action on the property modals."
   },
   "propertyFormSave": "Enregistrer",
   "@propertyFormSave": {
@@ -6011,10 +6007,6 @@
   "@networthDeclaredSave": {
     "description": "Saves the month's total (adds or replaces)."
   },
-  "networthDeclaredClose": "Fermer",
-  "@networthDeclaredClose": {
-    "description": "Closes the declared-history modal."
-  },
   "networthDeclaredEmpty": "Aucun montant déclaré.",
   "@networthDeclaredEmpty": {
     "description": "Shown in the modal when nothing is declared."
@@ -6034,10 +6026,6 @@
   "networthDeclaredLoadFailed": "Impossible de charger l’historique déclaré.",
   "@networthDeclaredLoadFailed": {
     "description": "Error state of the declared-history list."
-  },
-  "networthDeclaredRetry": "Réessayer",
-  "@networthDeclaredRetry": {
-    "description": "Retry action on the declared-history list."
   },
   "networthDeclaredErrorNotFound": "Ce montant n’existe plus.",
   "@networthDeclaredErrorNotFound": {

@@ -9,12 +9,11 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_modal.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
-import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/networth_controller.dart';
 import '../domain/networth_summary.dart';
@@ -68,11 +67,13 @@ String localizeDeclaredError(AppLocalizations l10n, Object? error) {
   return l10n.networthDeclaredErrorGeneric;
 }
 
-/// The 560 px modal: a month + total form that adds or replaces, over the list
-/// of what is declared, newest first.
+/// The 560 px list editor (`00` §7, `15-synthese.md` §Modals): an entry row
+/// (Mois · Total des comptes · primary « Enregistrer ») that adds or
+/// replaces, over the list of what is declared, newest first. The footer has
+/// a single « Fermer ».
 ///
-/// A month the imports cover stays listed with a chip, so the user sees why it
-/// is not on the chart rather than wondering where it went.
+/// A month the imports cover stays listed, dimmed, so the user sees why it is
+/// not on the chart rather than wondering where it went.
 class DeclaredBalancesModal extends ConsumerStatefulWidget {
   const DeclaredBalancesModal({super.key, required this.currency});
 
@@ -103,6 +104,7 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final l10n = AppLocalizations.of(context)!;
     final month = parseMonthInput(_monthController.text)!;
@@ -122,8 +124,12 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
       if (!mounted) return;
       _monthController.clear();
       _amountController.clear();
-      _monthFocus.requestFocus();
       setState(() => _isSubmitting = false);
+      // The fields were out of the focus order while the save ran: back to
+      // the entry row's first field once they return, for the next month.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _monthFocus.requestFocus();
+      });
     } catch (error) {
       if (!mounted) return;
       _fail(l10n, error);
@@ -167,164 +173,109 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
     return AppModal(
       title: l10n.networthDeclaredTitle,
       subtitle: Text(l10n.networthDeclaredSubtitle),
-      width: 560,
-      actions: [
-        AppButton(
-          key: const Key('declaredClose'),
-          label: l10n.networthDeclaredClose,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ],
+      width: AppModalSizes.w560,
+      kind: AppModalKind.listEditor,
+      busy: _isSubmitting,
+      saveError: _bannerError,
+      onSubmit: _submit,
+      actions: const [AppModalClose(primary: false)],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (_bannerError != null) ...[
-            InlineBanner(
-              key: const Key('declaredError'),
-              message: _bannerError!,
-            ),
-            const SizedBox(height: AppSpacing.fieldGap),
-          ],
           Form(
             key: _formKey,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 130,
-                  child: LabeledField(
-                    label: l10n.networthDeclaredMonth,
-                    errorText: _monthError,
-                    child: TextFormField(
-                      key: const Key('declaredMonth'),
-                      controller: _monthController,
-                      focusNode: _monthFocus,
-                      autofocus: true,
-                      keyboardType: TextInputType.datetime,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9/]')),
-                      ],
-                      style: tabularNumberStyle(
-                        Theme.of(context).textTheme.bodyLarge!,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: l10n.networthDeclaredMonthHint,
-                      ),
-                      validator: (value) {
-                        final month = parseMonthInput(value ?? '');
-                        if (month == null) {
-                          return l10n.networthDeclaredMonthInvalid;
-                        }
-                        return isClosedMonth(month, DateTime.now())
-                            ? null
-                            : l10n.networthDeclaredMonthNotClosed;
-                      },
-                    ),
-                  ),
+            child: _EntryRow(
+              monthLabel: l10n.networthDeclaredMonth,
+              monthError: _monthError,
+              month: TextFormField(
+                key: const Key('declaredMonth'),
+                controller: _monthController,
+                focusNode: _monthFocus,
+                keyboardType: TextInputType.datetime,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9/]')),
+                ],
+                style: tabularNumberStyle(
+                  Theme.of(context).textTheme.bodyLarge!,
                 ),
-                const SizedBox(width: AppSpacing.fieldGap),
-                Expanded(
-                  child: LabeledField(
-                    label: l10n.networthDeclaredAmount,
-                    child: MoneyField(
-                      key: const Key('declaredAmount'),
-                      controller: _amountController,
-                      currency: widget.currency,
-                      // An overdrawn total is a total too.
-                      allowNegative: true,
-                      validator: (value) =>
-                          parseMoneyMinor(
-                                value ?? '',
-                                locale,
-                                allowNegative: true,
-                              ) ==
-                              null
-                          ? l10n.networthDeclaredAmountInvalid
-                          : null,
-                    ),
-                  ),
+                decoration: InputDecoration(
+                  hintText: l10n.networthDeclaredMonthHint,
                 ),
-                const SizedBox(width: AppSpacing.fieldGap),
-                Padding(
-                  // Level with the fields, under their labels.
-                  padding: const EdgeInsets.only(top: 22),
-                  child: PrimaryButton(
-                    key: const Key('declaredSave'),
-                    label: l10n.networthDeclaredSave,
-                    isLoading: _isSubmitting,
-                    onPressed: _isSubmitting ? null : _submit,
-                  ),
-                ),
-              ],
+                validator: (value) {
+                  final month = parseMonthInput(value ?? '');
+                  if (month == null) {
+                    return l10n.networthDeclaredMonthInvalid;
+                  }
+                  return isClosedMonth(month, DateTime.now())
+                      ? null
+                      : l10n.networthDeclaredMonthNotClosed;
+                },
+              ),
+              amountLabel: l10n.networthDeclaredAmount,
+              amount: MoneyField(
+                key: const Key('declaredAmount'),
+                controller: _amountController,
+                currency: widget.currency,
+                // An overdrawn total is a total too.
+                allowNegative: true,
+                validator: (value) =>
+                    parseMoneyMinor(value ?? '', locale, allowNegative: true) ==
+                        null
+                    ? l10n.networthDeclaredAmountInvalid
+                    : null,
+              ),
+              save: PrimaryButton(
+                key: const Key('declaredSave'),
+                label: l10n.networthDeclaredSave,
+                isLoading: _isSubmitting,
+                onPressed: _isSubmitting ? null : _submit,
+              ),
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          Divider(height: 1, color: context.colors.line),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 320),
-            // The list stays on screen while a write re-reads it.
-            child: entries.when(
-              skipLoadingOnReload: true,
-              data: (value) => value.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.lg,
+          const SizedBox(height: AppSpacing.fieldGap),
+          // The list stays on screen while a write re-reads it.
+          entries.when(
+            skipLoadingOnReload: true,
+            data: (value) => value.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                    ),
+                    child: Text(
+                      l10n.networthDeclaredEmpty,
+                      key: const Key('declaredEmpty'),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: context.colors.textSecondary,
                       ),
-                      child: Text(
-                        l10n.networthDeclaredEmpty,
-                        key: const Key('declaredEmpty'),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: context.colors.textSecondary,
-                        ),
-                      ),
-                    )
-                  : ListView(
-                      key: const Key('declaredList'),
-                      shrinkWrap: true,
-                      children: [
-                        for (final entry in value.reversed)
-                          _DeclaredRow(
-                            entry: entry,
-                            locale: locale,
-                            onEdit: () => _edit(entry),
-                            onDelete: () => _remove(entry.month),
-                          ),
-                      ],
                     ),
-              error: (_, _) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                child: Column(
-                  children: [
-                    Text(
-                      l10n.networthDeclaredLoadFailed,
-                      key: const Key('declaredLoadFailed'),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    AppButton(
-                      key: const Key('declaredRetry'),
-                      label: l10n.networthDeclaredRetry,
-                      onPressed: () =>
-                          ref.invalidate(declaredBalancesControllerProvider),
-                    ),
-                  ],
-                ),
-              ),
-              // The rows' own silhouette (`00` §7), not a spinner.
-              loading: () => const Padding(
-                key: Key('declaredLoading'),
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                child: SkeletonPulse(
-                  child: Column(
+                  )
+                : Column(
+                    key: const Key('declaredList'),
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      SkeletonBlock(height: AppSizes.tableRow),
-                      SizedBox(height: AppSpacing.smPlus),
-                      SkeletonBlock(height: AppSizes.tableRow),
+                      for (final (i, entry) in value.reversed.indexed)
+                        _DeclaredRow(
+                          entry: entry,
+                          locale: locale,
+                          first: i == 0,
+                          onEdit: () => _edit(entry),
+                          onDelete: () => _remove(entry.month),
+                        ),
                     ],
                   ),
-                ),
-              ),
+            error: (_, _) => ModalLoadError(
+              message: l10n.networthDeclaredLoadFailed,
+              onRetry: () => ref.invalidate(declaredBalancesControllerProvider),
+            ),
+            // The rows' own silhouette (`00` §7), not a spinner.
+            loading: () => const ModalLoadingBody(
+              key: Key('declaredLoading'),
+              children: [
+                SkeletonBlock(height: AppSizes.tableRow),
+                SkeletonBlock(height: AppSizes.tableRow),
+                SkeletonBlock(height: AppSizes.tableRow),
+              ],
             ),
           ),
         ],
@@ -333,75 +284,186 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
   }
 }
 
-/// One declared month: « mars 2025 », the chip when imports cover it, the
-/// neutral total, then edit and delete.
+/// The entry row: the 130 px month, the total taking the rest, then the
+/// primary « Enregistrer », 16 px apart, bottom-aligned with the inputs.
+///
+/// A [Table], as [ModalFieldRow]: labels, inputs and the server's month error
+/// each share a row, so the button stays level with the inputs whatever the
+/// labels do, and an error under one field never moves it.
+class _EntryRow extends StatelessWidget {
+  const _EntryRow({
+    required this.monthLabel,
+    required this.month,
+    required this.amountLabel,
+    required this.amount,
+    required this.save,
+    this.monthError,
+  });
+
+  final String monthLabel;
+  final Widget month;
+  final String amountLabel;
+  final Widget amount;
+  final Widget save;
+  final String? monthError;
+
+  static const _labelGap = 5.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelStyle = Theme.of(
+      context,
+    ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary);
+    Widget label(String text) => TableCell(
+      verticalAlignment: TableCellVerticalAlignment.bottom,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: _labelGap),
+        child: Text(text, style: labelStyle),
+      ),
+    );
+    const gutter = SizedBox(width: AppModalSizes.columnGutter);
+    const none = SizedBox.shrink();
+    final error = monthError;
+
+    return Table(
+      columnWidths: const {
+        0: FixedColumnWidth(AppNetworth.declaredMonthField),
+        1: FixedColumnWidth(AppModalSizes.columnGutter),
+        2: FlexColumnWidth(),
+        3: FixedColumnWidth(AppModalSizes.columnGutter),
+        4: IntrinsicColumnWidth(),
+      },
+      children: [
+        TableRow(
+          children: [
+            label(monthLabel),
+            gutter,
+            label(amountLabel),
+            gutter,
+            none,
+          ],
+        ),
+        TableRow(
+          children: [
+            month,
+            gutter,
+            amount,
+            gutter,
+            // The 28 px button ends level with the 32 px inputs.
+            Padding(
+              padding: const EdgeInsets.only(
+                top: AppSizes.formField - AppSizes.button,
+              ),
+              child: save,
+            ),
+          ],
+        ),
+        TableRow(
+          children: [
+            error == null ? none : FieldHelper(text: error, isError: true),
+            gutter,
+            none,
+            gutter,
+            none,
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// One declared month (36 px, hairline between rows): « déc. 2024 »,
+/// « Couvert par vos imports » when the ledger has it, the neutral total, then
+/// the ghost edit and delete. A covered month is dimmed and keeps only
+/// delete: its declared figure is no longer used.
 class _DeclaredRow extends StatelessWidget {
   const _DeclaredRow({
     required this.entry,
     required this.locale,
+    required this.first,
     required this.onEdit,
     required this.onDelete,
   });
 
   final DeclaredBalance entry;
   final String locale;
+  final bool first;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+    final textTheme = Theme.of(context).textTheme;
     final key = formatMonthInput(entry.month);
+    final covered = entry.superseded;
+    final ink = covered ? colors.textTertiary : colors.text;
+    const cellGap = SizedBox(width: AppSpacing.smPlus);
 
     return Container(
       key: Key('declaredRow-$key'),
-      height: AppSizes.tableRowTwoLines,
+      height: AppSizes.tableRow,
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: context.colors.line)),
+        border: first ? null : Border(top: BorderSide(color: colors.line)),
       ),
       child: Row(
         children: [
-          Expanded(
-            child: Row(
-              children: [
-                Text(
-                  DateFormat.yMMMM(locale).format(entry.month),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                if (entry.superseded) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  Flexible(
-                    child: StatusText(
-                      key: Key('declaredSuperseded-$key'),
-                      label: l10n.networthDeclaredSuperseded,
-                    ),
-                  ),
-                ],
-              ],
+          SizedBox(
+            width: AppNetworth.declaredMonthColumn - AppSpacing.smPlus,
+            child: Text(
+              DateFormat.yMMM(locale).format(entry.month),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.bodyMedium?.copyWith(color: ink),
             ),
           ),
+          cellGap,
+          Expanded(
+            child: covered
+                ? Text(
+                    l10n.networthDeclaredSuperseded,
+                    key: Key('declaredSuperseded-$key'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodySmall?.copyWith(color: ink),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          cellGap,
           AmountText(
             amountMinor: entry.amountMinor,
             currency: entry.currency,
             colorize: false,
+            style: textTheme.bodyMedium?.copyWith(color: ink),
           ),
-          const SizedBox(width: AppSpacing.smPlus),
-          AppButton(
-            key: Key('declaredEdit-$key'),
-            label: l10n.networthDeclaredEdit,
-            icon: LucideIcons300.pencil,
-            iconOnly: true,
-            variant: AppButtonVariant.ghost,
-            onPressed: onEdit,
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          AppButton(
-            key: Key('declaredDelete-$key'),
-            label: l10n.networthDeclaredDelete,
-            icon: LucideIcons300.trash2,
-            iconOnly: true,
-            variant: AppButtonVariant.ghost,
-            onPressed: onDelete,
+          cellGap,
+          SizedBox(
+            width: AppNetworth.declaredActionsColumn,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (!covered) ...[
+                  AppButton(
+                    key: Key('declaredEdit-$key'),
+                    label: l10n.networthDeclaredEdit,
+                    icon: LucideIcons300.pencil,
+                    iconOnly: true,
+                    variant: AppButtonVariant.ghost,
+                    onPressed: onEdit,
+                  ),
+                  const SizedBox(width: AppSpacing.xxs),
+                ],
+                AppButton(
+                  key: Key('declaredDelete-$key'),
+                  label: l10n.networthDeclaredDelete,
+                  icon: LucideIcons300.trash2,
+                  iconOnly: true,
+                  variant: AppButtonVariant.ghost,
+                  onPressed: onDelete,
+                ),
+              ],
+            ),
           ),
         ],
       ),

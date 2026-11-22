@@ -10,8 +10,8 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/date_field.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -142,12 +142,34 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
 
   String get _locale => Localizations.localeOf(context).toString();
 
+  /// Every text input, for the listeners and for [_dirty].
+  List<TextEditingController> get _inputs => [
+    _labelController,
+    _addressController,
+    _valueController,
+    _valuedOnController,
+    _ownershipController,
+    _priceController,
+    _acquiredOnController,
+  ];
+
+  /// What the form held once filled: input differing from it is unsaved.
+  List<String> _pristine = const [];
+
+  bool get _dirty =>
+      _kind != (widget.initial?.kind ?? PropertyKind.primaryResidence) ||
+      [
+        for (final c in _inputs) c.text,
+      ].indexed.any((entry) => entry.$2 != _pristine[entry.$1]);
+
   @override
   void initState() {
     super.initState();
-    // The live « part : … » label follows both inputs it is read from.
-    _valueController.addListener(_onShareInputChanged);
-    _ownershipController.addListener(_onShareInputChanged);
+    // The live « part : … » label and the unsaved-input state follow every
+    // input.
+    for (final controller in _inputs) {
+      controller.addListener(_onInputChanged);
+    }
   }
 
   @override
@@ -155,6 +177,11 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
     super.didChangeDependencies();
     if (_filled) return;
     _filled = true;
+    _fill();
+    _pristine = [for (final c in _inputs) c.text];
+  }
+
+  void _fill() {
     final initial = widget.initial;
     final locale = _locale;
     if (initial == null) {
@@ -180,21 +207,13 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
 
   @override
   void dispose() {
-    for (final controller in [
-      _labelController,
-      _addressController,
-      _valueController,
-      _valuedOnController,
-      _ownershipController,
-      _priceController,
-      _acquiredOnController,
-    ]) {
+    for (final controller in _inputs) {
       controller.dispose();
     }
     super.dispose();
   }
 
-  void _onShareInputChanged() {
+  void _onInputChanged() {
     if (mounted) setState(() {});
   }
 
@@ -255,15 +274,6 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
     }
   }
 
-  Widget _pair(Widget first, Widget second) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Expanded(child: first),
-      const SizedBox(width: AppSpacing.fieldGap),
-      Expanded(child: second),
-    ],
-  );
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -271,17 +281,25 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
     final liveShare = _liveShareMinor;
     const rowGap = SizedBox(height: AppSpacing.fieldGap);
 
+    String? optionalDate(String? value) {
+      final text = value?.trim() ?? '';
+      if (text.isEmpty) return null;
+      return parseDateInput(text, locale) == null
+          ? l10n.propertyFormDateInvalid
+          : null;
+    }
+
     return AppModal(
       title: _isEditing
           ? l10n.propertyFormEditTitle
           : l10n.propertyFormCreateTitle,
-      width: 620,
+      width: AppModalSizes.w620,
+      dirty: _dirty,
+      busy: _isSubmitting,
+      saveError: _bannerError,
+      onSubmit: _submit,
       actions: [
-        AppButton(
-          key: const Key('propertyFormCancel'),
-          label: l10n.propertyFormCancel,
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(),
         PrimaryButton(
           key: const Key('propertyFormSubmit'),
           label: l10n.propertyFormSave,
@@ -289,49 +307,26 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
           onPressed: _isSubmitting ? null : _submit,
         ),
       ],
+      // Libellé and Adresse full width, then three pairs, so the grid leaves
+      // no empty cell (mockup `#panel=m-networth`).
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_bannerError != null) ...[
-              InlineBanner(
-                key: const Key('propertyFormError'),
-                message: _bannerError!,
-              ),
-              const SizedBox(height: AppSpacing.fieldGap),
-            ],
-            _pair(
-              LabeledField(
-                label: l10n.propertyFormLabel,
-                child: TextFormField(
-                  key: const Key('propertyFormLabel'),
-                  controller: _labelController,
-                  autofocus: true,
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? l10n.propertyFormLabelRequired
-                      : null,
-                ),
-              ),
-              LabeledField(
-                label: l10n.propertyFormKind,
-                child: AppSelect<PropertyKind>(
-                  key: const Key('propertyFormKind'),
-                  value: _kind,
-                  onChanged: (value) => setState(() => _kind = value),
-                  items: [
-                    for (final kind in PropertyKind.values)
-                      AppSelectItem(
-                        value: kind,
-                        label: propertyKindLabel(l10n, kind),
-                      ),
-                  ],
-                ),
+            LabeledField(
+              label: l10n.propertyFormLabel,
+              child: TextFormField(
+                key: const Key('propertyFormLabel'),
+                controller: _labelController,
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? l10n.propertyFormLabelRequired
+                    : null,
               ),
             ),
             rowGap,
-            // Optional, full width: an address runs longer than any other
-            // field, and it is what tells two similar biens apart.
+            // An address runs longer than any other field, and it is what
+            // tells two similar biens apart.
             LabeledField(
               label: l10n.propertyFormAddress,
               child: TextFormField(
@@ -346,44 +341,26 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
               ),
             ),
             rowGap,
-            _pair(
-              LabeledField(
-                label: l10n.propertyFormValue,
-                child: MoneyField(
-                  key: const Key('propertyFormValue'),
-                  controller: _valueController,
-                  currency: widget.currency,
-                  validator: (value) {
-                    final amount = parseMoneyMinor(value ?? '', locale);
-                    return amount == null || amount <= 0
-                        ? l10n.propertyFormAmountInvalid
-                        : null;
-                  },
+            ModalFieldRow(
+              start: ModalFieldCell(
+                label: l10n.propertyFormKind,
+                input: AppSelect<PropertyKind>(
+                  key: const Key('propertyFormKind'),
+                  value: _kind,
+                  onChanged: (value) => setState(() => _kind = value),
+                  items: [
+                    for (final kind in PropertyKind.values)
+                      AppSelectItem(
+                        value: kind,
+                        label: propertyKindLabel(l10n, kind),
+                      ),
+                  ],
                 ),
               ),
-              LabeledField(
-                label: l10n.propertyFormValuedOn,
-                errorText: _valuedOnError,
-                child: DateField(
-                  key: const Key('propertyFormValuedOn'),
-                  controller: _valuedOnController,
-                  firstDate: DateTime(1900),
-                  // A valuation is a fact already given, never a forecast.
-                  lastDate: DateTime.now(),
-                  calendarTooltip: l10n.propertyFormCalendar,
-                  validator: (value) =>
-                      parseDateInput(value ?? '', locale) == null
-                      ? l10n.propertyFormDateInvalid
-                      : null,
-                ),
-              ),
-            ),
-            rowGap,
-            _pair(
-              LabeledField(
+              end: ModalFieldCell(
                 label: l10n.propertyFormOwnership,
-                // The label carries the held share live, so the user sees what
-                // enters the synthèse before saving (`15` §Modals). A
+                // The label carries the held share live, so the user sees
+                // what enters the synthèse before saving (`15` §Modals). A
                 // reading, not an action: `textTertiary`, never the accent.
                 trailing: liveShare == null
                     ? null
@@ -400,7 +377,7 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
                           Theme.of(context).textTheme.bodySmall!,
                         ).copyWith(color: context.colors.textTertiary),
                       ),
-                child: TextFormField(
+                input: TextFormField(
                   key: const Key('propertyFormOwnership'),
                   controller: _ownershipController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -422,13 +399,45 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
                       : null,
                 ),
               ),
-              const SizedBox.shrink(),
             ),
             rowGap,
-            _pair(
-              LabeledField(
+            ModalFieldRow(
+              start: ModalFieldCell(
+                label: l10n.propertyFormValue,
+                input: MoneyField(
+                  key: const Key('propertyFormValue'),
+                  controller: _valueController,
+                  currency: widget.currency,
+                  validator: (value) {
+                    final amount = parseMoneyMinor(value ?? '', locale);
+                    return amount == null || amount <= 0
+                        ? l10n.propertyFormAmountInvalid
+                        : null;
+                  },
+                ),
+              ),
+              end: ModalFieldCell(
+                label: l10n.propertyFormValuedOn,
+                errorText: _valuedOnError,
+                input: DateField(
+                  key: const Key('propertyFormValuedOn'),
+                  controller: _valuedOnController,
+                  firstDate: DateTime(1900),
+                  // A valuation is a fact already given, never a forecast.
+                  lastDate: DateTime.now(),
+                  calendarTooltip: l10n.propertyFormCalendar,
+                  validator: (value) =>
+                      parseDateInput(value ?? '', locale) == null
+                      ? l10n.propertyFormDateInvalid
+                      : null,
+                ),
+              ),
+            ),
+            rowGap,
+            ModalFieldRow(
+              start: ModalFieldCell(
                 label: l10n.propertyFormAcquisitionPrice,
-                child: MoneyField(
+                input: MoneyField(
                   key: const Key('propertyFormAcquisitionPrice'),
                   controller: _priceController,
                   currency: widget.currency,
@@ -441,21 +450,15 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
                   },
                 ),
               ),
-              LabeledField(
+              end: ModalFieldCell(
                 label: l10n.propertyFormAcquiredOn,
-                child: DateField(
+                input: DateField(
                   key: const Key('propertyFormAcquiredOn'),
                   controller: _acquiredOnController,
                   firstDate: DateTime(1900),
                   lastDate: DateTime.now(),
                   calendarTooltip: l10n.propertyFormCalendar,
-                  validator: (value) {
-                    final text = value?.trim() ?? '';
-                    if (text.isEmpty) return null;
-                    return parseDateInput(text, locale) == null
-                        ? l10n.propertyFormDateInvalid
-                        : null;
-                  },
+                  validator: optionalDate,
                 ),
               ),
             ),
@@ -466,7 +469,7 @@ class _PropertyFormModalState extends ConsumerState<PropertyFormModal> {
   }
 }
 
-/// « Nouvelle estimation »: a new declared value with the date it was given.
+// « Nouvelle estimation »: a new declared value with the date it was given.
 ///
 /// The API keeps one declared value per property, so this replaces the
 /// previous one. The 420 px modal of `15-synthese.md` §Modals.
@@ -489,6 +492,21 @@ class _PropertyRevalueModalState extends ConsumerState<PropertyRevalueModal> {
   String? _bannerError;
 
   String get _locale => Localizations.localeOf(context).toString();
+
+  /// Both inputs open empty: anything typed is unsaved.
+  bool get _dirty =>
+      _valueController.text.isNotEmpty || _valuedOnController.text.isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    _valueController.addListener(_onInputChanged);
+    _valuedOnController.addListener(_onInputChanged);
+  }
+
+  void _onInputChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   void dispose() {
@@ -537,6 +555,8 @@ class _PropertyRevalueModalState extends ConsumerState<PropertyRevalueModal> {
 
     return AppModal(
       title: l10n.propertyRevalueTitle,
+      // « Studio : 145 000,00 € estimés le 15 mars 2026. » The date is
+      // written out, as in running text (mockup `#panel=m-networth`).
       subtitle: Text(
         l10n.propertyRevalueSubtitle(
           property.label,
@@ -545,17 +565,17 @@ class _PropertyRevalueModalState extends ConsumerState<PropertyRevalueModal> {
             currency: property.currency,
             locale: locale,
           ),
-          appDateFormat(locale).format(property.valuedOn),
+          DateFormat.yMMMMd(locale).format(property.valuedOn),
         ),
         key: const Key('propertyRevalueSubtitle'),
       ),
-      width: 420,
+      width: AppModalSizes.w420,
+      dirty: _dirty,
+      busy: _isSubmitting,
+      saveError: _bannerError,
+      onSubmit: _submit,
       actions: [
-        AppButton(
-          key: const Key('propertyRevalueCancel'),
-          label: l10n.propertyFormCancel,
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(),
         PrimaryButton(
           key: const Key('propertyRevalueSubmit'),
           label: l10n.propertyFormSave,
@@ -565,57 +585,35 @@ class _PropertyRevalueModalState extends ConsumerState<PropertyRevalueModal> {
       ],
       child: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_bannerError != null) ...[
-              InlineBanner(
-                key: const Key('propertyRevalueError'),
-                message: _bannerError!,
-              ),
-              const SizedBox(height: AppSpacing.fieldGap),
-            ],
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: LabeledField(
-                    label: l10n.propertyFormValue,
-                    child: MoneyField(
-                      key: const Key('propertyRevalueValue'),
-                      controller: _valueController,
-                      currency: property.currency,
-                      autofocus: true,
-                      validator: (value) {
-                        final amount = parseMoneyMinor(value ?? '', locale);
-                        return amount == null || amount <= 0
-                            ? l10n.propertyFormAmountInvalid
-                            : null;
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.fieldGap),
-                Expanded(
-                  child: LabeledField(
-                    label: l10n.propertyFormValuedOn,
-                    errorText: _valuedOnError,
-                    child: DateField(
-                      key: const Key('propertyRevalueValuedOn'),
-                      controller: _valuedOnController,
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                      calendarTooltip: l10n.propertyFormCalendar,
-                      validator: (value) =>
-                          parseDateInput(value ?? '', locale) == null
-                          ? l10n.propertyFormDateInvalid
-                          : null,
-                    ),
-                  ),
-                ),
-              ],
+        child: ModalFieldRow(
+          start: ModalFieldCell(
+            label: l10n.propertyFormValue,
+            input: MoneyField(
+              key: const Key('propertyRevalueValue'),
+              controller: _valueController,
+              currency: property.currency,
+              validator: (value) {
+                final amount = parseMoneyMinor(value ?? '', locale);
+                return amount == null || amount <= 0
+                    ? l10n.propertyFormAmountInvalid
+                    : null;
+              },
             ),
-          ],
+          ),
+          end: ModalFieldCell(
+            label: l10n.propertyFormValuedOn,
+            errorText: _valuedOnError,
+            input: DateField(
+              key: const Key('propertyRevalueValuedOn'),
+              controller: _valuedOnController,
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+              calendarTooltip: l10n.propertyFormCalendar,
+              validator: (value) => parseDateInput(value ?? '', locale) == null
+                  ? l10n.propertyFormDateInvalid
+                  : null,
+            ),
+          ),
         ),
       ),
     );
