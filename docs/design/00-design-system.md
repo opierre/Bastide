@@ -134,6 +134,16 @@ patterns, file names, file paths, URLs and codes to copy (a recovery code). Spac
 Line height 1.45 for text, 1.1 for figures. No uppercase labels, no letter-spaced labels.
 All numerals tabular.
 
+**Text size.** The sizes above are the reference, « Normal ». Paramètres → Préférences offers
+two larger steps, stored per user (`AppTextScale`): « Grand » × 1.08 (body 13 reads about 14)
+and « Très grand » × 1.15 (about 15). One factor multiplies every size of the table, so the
+scale keeps its proportions; it composes with the system's own text scale. There is no smaller
+step: 11 stays the floor. Heights, widths, radii, spacing and icon sizes do not scale: the
+title bar stays 48, the sidebar 224, rows 36, nav items 30, buttons 28, and × 1.15 is the
+largest factor that chrome holds. Text drawn by a chart painter takes the same factor
+(`ChartPaints.painted`). The startup screen, shown before anyone signs in, stays at the
+reference.
+
 **No-break spaces.** A line never breaks inside a figure, between a figure and its unit, or
 between a day and its month. In French, `intl` groups thousands with U+202F (narrow no-break
 space) and puts U+00A0 (no-break space) before « € » and « % » (« 1 234,56 € », « 35 % »):

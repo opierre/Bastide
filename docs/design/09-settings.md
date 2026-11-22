@@ -63,6 +63,7 @@ session stays open and every other session of the user is signed out.
 | Group | Row | Right side |
 |---|---|---|
 | Affichage | Thème · « Sombre, clair, ou celui de votre système. » | Segmented « Système · Sombre · Clair ». Default « Sombre ». Applies at once. |
+| | Taille du texte · « Agrandit tout le texte de l’application. » | Segmented « Normal · Grand · Très grand ». Default « Normal ». Applies at once to every text of the app (`00` §3 « Text size »). |
 | | Langue · « S’applique immédiatement à toute l’interface. » | Segmented « Français · English ». |
 | | Formats · « Dates et montants suivent la langue choisie. » | Key/value list: Date « 14 mai 2026 · 14/05/2026 »; Montant « −1 234,56 € ». |
 | | Barre latérale · « Réduite, elle ne garde que les icônes. » | Segmented « Étendue · Réduite ». |
@@ -70,10 +71,12 @@ session stays open and every other session of the user is signed out.
 | | Objectif de taux d’épargne · « Le repère affiché sur le tableau de bord. » | Slider 1–50 %, step 1, value printed (« 20 % »). |
 | | Revenu déclaré · « Sert au taux d’endettement des panneaux Crédits et Simulateur. Sans lui, Bastide prend le revenu médian constaté. » | Amount field 140 px + « par mois »; empty means "not declared". |
 
-Two rows change what exists today and need more than a restyle:
+Three rows change what exists today and need more than a restyle:
 - « Objectif de taux d’épargne » is a stored per-user value (`savings_rate_goal_percent`,
   1–50 %, default 20). The Dashboard summary carries it, so the repère's mark and the goal status
   follow it.
+- « Taille du texte » is a stored per-user value (`text_size`: `normal`, `large`, `xlarge`;
+  default `normal`), like the theme; the app applies it before the save answers.
 - « Revenu déclaré » is edited only here. Every « Déclarer un revenu » action in Crédits and
   Simulateur opens Préférences (`/settings?focus=income`), scrolls this row into view and focuses
   its field; both panels re-read the value once it is saved.
@@ -145,7 +148,9 @@ done (« Sauvegarde enregistrée »).
 ## Copy
 Delete `navSettingsSubtitle`. `settingsAiSubtitle`, `settingsAiModelUnavailable`,
 `settingsBackupPrivacy`, `settingsBackupNone` per `00` §14. Remove « IRRÉVERSIBLE » and « Zone
-de danger ». New: theme, sidebar, session, licence and data-location strings above.
+de danger ». New: theme, text size, sidebar, session, licence and data-location strings above.
+A refused text-size save toasts « La taille du texte n’a pas pu être enregistrée. Rien n’a été
+modifié. Réessayez. » and puts the previous size back, as the theme does.
 
 ## Removed from v1
 Grouped cards per setting, tinted privacy callouts, inset export plate with a tinted tile, the
