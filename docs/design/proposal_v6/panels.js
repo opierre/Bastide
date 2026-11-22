@@ -582,10 +582,16 @@ MD.avatarCrop = () => modal(420, 'Recadrer la photo', 'Faites glisser l’image 
 /* ── settings data ── */
 const COUNTS = [['Comptes', '4'], ['Transactions', '1 284'], ['Catégories', '31'], ['Règles', '22'], ['Abonnements', '8'], ['Objectifs', '6'], ['Crédits', '2'], ['Biens', '2'], ['Simulations', '4']];
 const kvList = rows => `<dl class="kv" style="gap:6px 24px">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
-MD.restore = () => modal(500, 'Restaurer cette sauvegarde ?', '', `
-  <span class="mono">bastide-2026-05-11.bastide</span>
-  ${kvList([['Exporté le', '11 mai 2026 à 14:32'], ['Version de l’application', '0.2.0'], ...COUNTS])}
-  ${bnr('triangle-alert', 'warn', 'Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.')}`, `<span class="lead-act">${B('Exporter d’abord', 'ghost', 'download')}</span>` + CANCEL + B('Remplacer mes données', 'dsolid'));
+/* restore: the backup beside what it replaces; one value column per source (00 §7 « Key/value list ») */
+const kvCompare = (heads, rows) => `<div role="table" aria-label="${heads.join(', ')}" style="display:grid;grid-template-columns:1fr minmax(88px,auto) minmax(88px,auto);gap:8px 24px;align-items:baseline">
+  <div role="row" style="display:contents"><span role="columnheader"></span>${heads.map(h => `<span role="columnheader" class="sm t3" style="text-align:right">${h}</span>`).join('')}</div>
+  ${rows.map(([k, ...v]) => `<div role="row" style="display:contents"><span role="rowheader" class="t2">${k}</span>${v.map(x => `<span role="cell" style="text-align:right">${x}</span>`).join('')}</div>`).join('')}</div>`;
+const NOW = ['4', '1 342', '32', '23', '8', '6', '2', '2', '5'];
+MD.restore = ({ older = true, saved = false } = {}) => modal(500, 'Restaurer cette sauvegarde ?', `Les données exportées le ${older ? '11' : '20'} mai 2026 remplacent toutes vos données actuelles.`, `
+  <span class="mono">bastide-2026-05-${older ? '11' : '20'}.bastide</span>
+  ${kvCompare(['Sauvegarde', 'Actuel'], [['Version de l’application', '0.2.0', '0.2.0'], ['Dernier import', older ? '4 mai 2026' : '18 mai 2026', '18 mai 2026'], ...COUNTS.map(([k, v], i) => [k, v, older ? NOW[i] : v])])}
+  ${older ? `<span class="st warn" role="status">${I('triangle-alert')}Cette sauvegarde est antérieure à votre dernier import du 18 mai 2026.</span>` : ''}`,
+  `<span class="lead-act">${saved ? `<span class="st pos" role="status">${I('check')}Sauvegarde enregistrée</span>` : B('Exporter d’abord', 'ghost', 'download')}</span>` + B('Annuler', saved ? 'focus' : '') + B('Remplacer mes données', 'dsolid'));
 MD.reset = (typed = 'suppr') => modal(500, 'Réinitialiser la base de données ?', 'Tout le contenu du profil Camille Dubois sera supprimé définitivement :', `
   ${kvList([COUNTS[0], COUNTS[1], ['Catégories personnalisées', '3'], ...COUNTS.slice(3)])}
   ${note('info', 'Les catégories fournies, vos préférences et le réglage IA sont conservés.')}
@@ -807,7 +813,9 @@ P['m-profile'] = galleryM('Profil', 'Ticket #268 · spécification 09-settings.m
   itemM('Recadrer la photo', `420 · ${SRC}auth/presentation/avatar_crop_modal.dart`, MD.avatarCrop(), 'Recadrage carré. Le cercle montre ce que l’avatar rond gardera ; le reste prend le voile scrim. Le cercle est dessiné sur la photo, pas sur le thème : filet blanc à 80 % doublé d’un filet noir à 30 %, lisible sur une photo claire comme sombre.'),
 ]);
 P['m-data'] = galleryM('Paramètres, données', 'Ticket #269 · spécification 09-settings.md, Données.', () => [
-  itemM('Restaurer cette sauvegarde ?', `500 · ${SRC}settings/presentation/restore_confirm_modal.dart`, MD.restore(), '« Exporter d’abord », fantôme à gauche, enregistre une sauvegarde des données actuelles sans fermer la modale. Même action dans la réinitialisation.'),
+  itemM('Restaurer cette sauvegarde ?', `500 · ${SRC}settings/presentation/restore_confirm_modal.dart`, MD.restore(), 'La sauvegarde à côté des données qu’elle remplace. Le texte d’état warning apparaît quand la sauvegarde est antérieure au dernier import. « Exporter d’abord », fantôme à gauche, enregistre une sauvegarde des données actuelles sans fermer la modale. Même action dans la réinitialisation.'),
+  itemM('Restaurer cette sauvegarde ?, sauvegarde récente', '500', MD.restore({ older: false }), 'Rien ne s’affiche quand la sauvegarde est aussi récente que le dernier import.'),
+  itemM('Restaurer cette sauvegarde ?, sauvegarde enregistrée', '500', MD.restore({ saved: true }), 'Après « Exporter d’abord », le texte d’état positive remplace le bouton jusqu’à la fermeture et tient lieu de toast. Le focus passe sur « Annuler ».'),
   itemM('Réinitialiser la base de données ?', `500 · ${SRC}settings/presentation/reset_confirm_modal.dart`, MD.reset(), '« Tout supprimer » reste désactivé tant que le champ ne contient pas « supprimer », en majuscules ou en minuscules.'),
   itemM('Réinitialiser la base de données ?, mot saisi', '500', MD.reset('supprimer')),
 ]);
