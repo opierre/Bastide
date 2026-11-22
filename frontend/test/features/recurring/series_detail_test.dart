@@ -509,6 +509,23 @@ void main() {
     );
   });
 
+  testWidgets('the category and its sub-line end on the account’s right edge', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(SeriesDetail(series: testSeries(), occurrences: const [])),
+    );
+    await tester.pumpAndSettle();
+
+    final edge = tester.getTopRight(find.text('BNP — Compte courant')).dx;
+    expect(tester.getTopRight(find.text('Non catégorisé')).dx, edge);
+    expect(
+      tester.getTopRight(find.byKey(const Key('seriesDetailSubline'))).dx,
+      edge,
+    );
+  });
+
   testWidgets('hairlines separate the blocks and the summary items', (
     tester,
   ) async {
