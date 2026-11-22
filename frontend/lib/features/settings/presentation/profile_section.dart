@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import '../../../core/session/current_user_provider.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_modal.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/presentation/avatar_picker.dart';
@@ -57,7 +58,7 @@ class ProfileSection extends ConsumerWidget {
                 AppButton(
                   key: const Key('settingsDisplayNameButton'),
                   label: l10n.settingsProfileNameButton,
-                  onPressed: () => showDialog<void>(
+                  onPressed: () => showAppModal<void>(
                     context: context,
                     builder: (_) => DisplayNameModal(initialName: name),
                   ),
@@ -89,7 +90,7 @@ class ProfileSection extends ConsumerWidget {
             AppButton(
               key: const Key('settingsPasswordButton'),
               label: l10n.settingsPasswordButton,
-              onPressed: () => showDialog<void>(
+              onPressed: () => showAppModal<void>(
                 context: context,
                 builder: (_) => const PasswordChangeModal(),
               ),
@@ -104,11 +105,10 @@ class ProfileSection extends ConsumerWidget {
             AppButton(
               key: const Key('settingsRecoveryButton'),
               label: l10n.settingsRecoveryButton,
-              onPressed: () => showDialog<void>(
+              onPressed: () => showAppModal<void>(
                 context: context,
                 // The code is shown once; a stray click outside must not
                 // close the modal before it has been noted.
-                barrierDismissible: false,
                 builder: (_) => const RegenerateRecoveryCodeModal(),
               ),
             ),

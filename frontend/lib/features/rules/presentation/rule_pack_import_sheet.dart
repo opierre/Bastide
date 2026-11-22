@@ -54,7 +54,7 @@ Future<void> startRulePackImport(
   }
 
   if (pending == null || !context.mounted) return;
-  await showDialog<void>(
+  await showAppModal<void>(
     context: context,
     builder: (_) => RulePackImportSheet(pending: pending!),
   );
@@ -74,7 +74,7 @@ Future<void> _showRefusal(BuildContext context, RulePackRefusal reason) {
     RulePackRefusal.regexNotAllowed => l10n.rulePackRefusedRegex,
   };
 
-  return showDialog<void>(
+  return showAppModal<void>(
     context: context,
     builder: (dialogContext) => AppModal(
       title: l10n.rulePackRefusedTitle,
@@ -149,7 +149,7 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
     // embedded picture that isn't one) are listed so the user knows which
     // rules still show a monogram, and why.
     if (result.logoFailures.isNotEmpty) {
-      showDialog<void>(
+      showAppModal<void>(
         context: navigator.context,
         builder: (_) =>
             RulePackLogoFailuresDialog(failures: result.logoFailures),

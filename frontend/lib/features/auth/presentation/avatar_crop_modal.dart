@@ -29,6 +29,7 @@ class AvatarCropModal extends ConsumerWidget {
         final failure? => avatarUploadFailureText(l10n, failure),
         null => null,
       },
+      round: true,
       onSave: ref.read(profilePictureControllerProvider.notifier).upload,
     );
   }

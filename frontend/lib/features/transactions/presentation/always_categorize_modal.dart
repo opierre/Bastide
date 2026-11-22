@@ -29,7 +29,7 @@ Future<RuleFromTransactionResult?> showAlwaysCategorizeModal(
   BuildContext context, {
   required Transaction transaction,
 }) {
-  return showDialog<RuleFromTransactionResult>(
+  return showAppModal<RuleFromTransactionResult>(
     context: context,
     builder: (_) => AlwaysCategorizeModal(transaction: transaction),
   );

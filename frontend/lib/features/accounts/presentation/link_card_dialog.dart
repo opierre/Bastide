@@ -22,7 +22,7 @@ Future<bool> showLinkCardDialog(BuildContext context, Account account) async {
   // while the overview reloads.
   final overlay = Overlay.maybeOf(context, rootOverlay: true);
   final l10n = AppLocalizations.of(context)!;
-  final card = await showDialog<Account>(
+  final card = await showAppModal<Account>(
     context: context,
     builder: (_) => LinkCardDialog(account: account),
   );

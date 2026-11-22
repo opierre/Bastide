@@ -17,7 +17,7 @@ import 'placement_labels.dart';
 
 /// Opens the « Nouveau placement » modal, or « Modifier » with [initial].
 Future<void> showPlacementForm(BuildContext context, {Investment? initial}) {
-  return showDialog<void>(
+  return showAppModal<void>(
     context: context,
     builder: (_) => PlacementFormModal(initial: initial),
   );

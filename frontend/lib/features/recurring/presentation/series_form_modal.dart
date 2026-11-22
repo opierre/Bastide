@@ -23,7 +23,7 @@ Future<RecurringSeries?> showSeriesForm(
   BuildContext context, {
   required RecurringSeries series,
 }) {
-  return showDialog<RecurringSeries>(
+  return showAppModal<RecurringSeries>(
     context: context,
     builder: (_) => SeriesFormModal(initial: series),
   );

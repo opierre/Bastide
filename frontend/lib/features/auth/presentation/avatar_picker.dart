@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import '../../../core/session/current_user_provider.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/focus_ring.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/user_avatar.dart';
@@ -47,9 +48,8 @@ class AvatarPicker extends ConsumerWidget {
           .read(profilePictureControllerProvider.notifier)
           .pick();
       if (image == null || !context.mounted) return;
-      await showDialog<void>(
+      await showAppModal<void>(
         context: context,
-        barrierDismissible: false,
         builder: (_) => AvatarCropModal(image: image),
       );
     }

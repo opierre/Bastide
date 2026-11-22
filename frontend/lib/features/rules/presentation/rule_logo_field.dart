@@ -56,9 +56,8 @@ class RuleLogoField extends ConsumerWidget {
     final state = ref.watch(ruleLogoControllerProvider);
     final controller = ref.read(ruleLogoControllerProvider.notifier);
 
-    Future<void> crop(ui.Image image) => showDialog<void>(
+    Future<void> crop(ui.Image image) => showAppModal<void>(
       context: context,
-      barrierDismissible: false,
       builder: (_) => _RuleLogoCropModal(ruleId: ruleId!, image: image),
     );
 
@@ -69,9 +68,8 @@ class RuleLogoField extends ConsumerWidget {
     }
 
     Future<void> fromUrl() async {
-      final image = await showDialog<ui.Image>(
+      final image = await showAppModal<ui.Image>(
         context: context,
-        barrierDismissible: false,
         builder: (_) => const _RuleLogoUrlModal(),
       );
       if (image == null || !context.mounted) return;

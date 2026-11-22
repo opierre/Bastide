@@ -540,6 +540,56 @@ abstract final class AppFonts {
   static const mono = 'Geist Mono';
 }
 
+/// The modal frame of `00` §7 « Modal ».
+abstract final class AppModalSizes {
+  /// The widths a modal may take; each panel spec names its own.
+  static const w420 = 420.0;
+  static const w440 = 440.0;
+  static const w480 = 480.0;
+  static const w500 = 500.0;
+  static const w520 = 520.0;
+  static const w560 = 560.0;
+  static const w600 = 600.0;
+  static const w620 = 620.0;
+  static const widths = [w420, w440, w480, w500, w520, w560, w600, w620];
+
+  /// Between the frame and the window edge, above, below and on the sides.
+  static const windowInset = AppSpacing.lg;
+
+  /// The frame's padding: header 24 24 14, body 0 24, footer 24.
+  static const padding = AppSpacing.lg;
+  static const headerBottom = AppSpacing.fieldGap;
+
+  /// Between the title and the lead.
+  static const leadGap = AppSpacing.xs;
+
+  /// Between a scrolling body's content and the hairline above or below it.
+  static const scrollEdge = AppSpacing.fieldGap;
+
+  /// The gutter of a two-column row of fields.
+  static const columnGutter = AppSpacing.md;
+
+  /// The crop variant: a square window, the zoom range of its slider.
+  static const cropSquare = 320.0;
+  static const cropMinZoom = 1.0;
+  static const cropMaxZoom = 5.0;
+
+  /// The zoom variant: the picture alone.
+  static const zoomPicture = 240.0;
+}
+
+/// The avatar crop's circle (`00` §7 « Modal », Crop). It sits on the
+/// photo, not on the theme, so it keeps these colours in both themes.
+abstract final class AppCropGuide {
+  /// 1 px white at 80 %.
+  static const ring = Color(0xCCFFFFFF);
+
+  /// 1 px black at 30 %, outside the white ring.
+  static const ringShadow = Color(0x4D000000);
+
+  static const width = 1.0;
+}
+
 /// The goal banner of `docs/design/11-goals.md` §Inspector pane: the
 /// picture (or tomettes) edge to edge at the top of the inspector, and the
 /// thumbnail the table shows of it.

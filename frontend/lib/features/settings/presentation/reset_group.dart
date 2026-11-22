@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/reset_controller.dart';
@@ -38,7 +39,7 @@ class ResetGroup extends ConsumerWidget {
               label: l10n.settingsResetButton,
               icon: LucideIcons300.trash2,
               variant: AppButtonVariant.danger,
-              onPressed: () => showDialog<void>(
+              onPressed: () => showAppModal<void>(
                 context: context,
                 builder: (_) => const ResetConfirmModal(),
               ),

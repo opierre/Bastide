@@ -338,7 +338,7 @@ class _ScenarioRowState extends ConsumerState<_ScenarioRow> {
 const _nameModalWidth = 420.0;
 
 Future<void> showSaveScenarioModal(BuildContext context) {
-  return showDialog<void>(
+  return showAppModal<void>(
     context: context,
     builder: (_) => const SaveScenarioModal(),
   );
@@ -348,7 +348,7 @@ Future<void> showRenameScenarioModal(
   BuildContext context,
   SavedSimulation scenario,
 ) {
-  return showDialog<void>(
+  return showAppModal<void>(
     context: context,
     builder: (_) => SaveScenarioModal(renaming: scenario),
   );

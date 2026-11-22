@@ -18,7 +18,7 @@ Future<void> showDeleteAllocationModal(
   required Goal goal,
   required GoalAllocation allocation,
 }) {
-  return showDialog<void>(
+  return showAppModal<void>(
     context: context,
     builder: (_) => DeleteAllocationModal(goal: goal, allocation: allocation),
   );

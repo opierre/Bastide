@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -58,7 +59,7 @@ class BackupGroup extends ConsumerWidget {
         .read(backupControllerProvider.notifier)
         .pickForRestore();
     if (pending == null || !context.mounted) return;
-    await showDialog<void>(
+    await showAppModal<void>(
       context: context,
       builder: (_) => RestoreConfirmModal(pending: pending),
     );

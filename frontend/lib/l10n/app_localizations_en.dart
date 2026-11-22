@@ -2070,6 +2070,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ruleFormLogoSaveFirst => 'Save the rule to add a logo to it.';
 
   @override
+  String get modalCancel => 'Cancel';
+
+  @override
+  String get modalClose => 'Close';
+
+  @override
+  String get modalRetry => 'Retry';
+
+  @override
+  String get modalDiscardTitle => 'Discard your changes?';
+
+  @override
+  String modalDiscardLead(String form) {
+    return 'What you entered in “$form” will be lost.';
+  }
+
+  @override
+  String get modalDiscardContinue => 'Keep editing';
+
+  @override
+  String get modalDiscardConfirm => 'Discard';
+
+  @override
+  String get modalCropWindow => 'Framing';
+
+  @override
+  String get modalCropZoom => 'Zoom';
+
+  @override
+  String modalCropZoomValue(String value) {
+    return '$value ×';
+  }
+
+  @override
   String get logoZoomOpen => 'Show the logo larger';
 
   @override
@@ -2085,7 +2119,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ruleLogoCropTitle => 'Crop the logo';
 
   @override
-  String get ruleLogoCropLead => 'Drag and zoom to frame the logo.';
+  String get ruleLogoCropLead => 'Drag the image to frame the logo.';
 
   @override
   String get ruleLogoCropCancel => 'Cancel';
@@ -3284,7 +3318,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalImageCropTitle => 'Crop the image';
 
   @override
-  String get goalImageCropLead => 'Drag and zoom to frame the banner.';
+  String get goalImageCropLead => 'Drag the image to frame the banner.';
 
   @override
   String get goalImageCropSave => 'Use this image';
@@ -4801,7 +4835,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAvatarCropTitle => 'Crop the picture';
 
   @override
-  String get settingsAvatarCropLead => 'Drag and zoom to frame your avatar.';
+  String get settingsAvatarCropLead => 'Drag the image to frame your avatar.';
 
   @override
   String get settingsAvatarCropCancel => 'Cancel';

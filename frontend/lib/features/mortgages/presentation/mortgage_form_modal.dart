@@ -26,7 +26,7 @@ Future<MortgageDetail?> showMortgageForm(
   BuildContext context, {
   Mortgage? initial,
 }) {
-  return showDialog<MortgageDetail>(
+  return showAppModal<MortgageDetail>(
     context: context,
     builder: (_) => MortgageFormModal(initial: initial),
   );
@@ -248,7 +248,7 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
 
   Future<void> _delete() async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppModal<bool>(
       context: context,
       builder: (dialogContext) => AppModal(
         title: l10n.mortgageDeleteTitle,

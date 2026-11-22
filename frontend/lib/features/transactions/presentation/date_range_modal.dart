@@ -17,7 +17,7 @@ Future<(DateTime?, DateTime?)?> showTransactionDateRange(
   DateTime? from,
   DateTime? to,
 }) {
-  return showDialog<(DateTime?, DateTime?)>(
+  return showAppModal<(DateTime?, DateTime?)>(
     context: context,
     builder: (_) => DateRangeModal(from: from, to: to),
   );

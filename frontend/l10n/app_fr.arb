@@ -2593,6 +2593,58 @@
   "@ruleFormLogoSaveFirst": {
     "description": "Shown instead of the logo buttons while creating a rule: a logo is attached to a saved rule."
   },
+  "modalCancel": "Annuler",
+  "@modalCancel": {
+    "description": "The secondary action of a modal: leaves it without saving."
+  },
+  "modalClose": "Fermer",
+  "@modalClose": {
+    "description": "The single action of an acknowledgement modal, and the footer action of a list editor."
+  },
+  "modalRetry": "Réessayer",
+  "@modalRetry": {
+    "description": "The secondary action of the banner shown when a modal’s body cannot load."
+  },
+  "modalDiscardTitle": "Abandonner les modifications ?",
+  "@modalDiscardTitle": {
+    "description": "Title of the confirmation asked when leaving a form that holds unsaved input."
+  },
+  "modalDiscardLead": "Ce que vous avez saisi dans « {form} » sera perdu.",
+  "@modalDiscardLead": {
+    "description": "Lead of the discard confirmation, naming the form being left.",
+    "placeholders": {
+      "form": {
+        "type": "String",
+        "example": "Modifier le crédit"
+      }
+    }
+  },
+  "modalDiscardContinue": "Continuer la saisie",
+  "@modalDiscardContinue": {
+    "description": "Secondary action of the discard confirmation: back to the form."
+  },
+  "modalDiscardConfirm": "Abandonner",
+  "@modalDiscardConfirm": {
+    "description": "Primary action of the discard confirmation: closes the form and loses the input."
+  },
+  "modalCropWindow": "Cadrage",
+  "@modalCropWindow": {
+    "description": "Screen-reader label of the crop window. With it focused, arrow keys move the picture and + / − zoom."
+  },
+  "modalCropZoom": "Zoom",
+  "@modalCropZoom": {
+    "description": "Screen-reader label of the crop step’s zoom slider."
+  },
+  "modalCropZoomValue": "{value} ×",
+  "@modalCropZoomValue": {
+    "description": "The crop zoom factor printed beside its slider, formatted with one decimal (« 2,2 × »).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "2,2"
+      }
+    }
+  },
   "logoZoomOpen": "Afficher le logo en grand",
   "@logoZoomOpen": {
     "description": "Screen-reader label of a small logo picture that opens it enlarged when clicked."
@@ -2613,7 +2665,7 @@
   "@ruleLogoCropTitle": {
     "description": "Title of the modal where the user crops the picked logo to a square."
   },
-  "ruleLogoCropLead": "Faites glisser et zoomez pour cadrer le logo.",
+  "ruleLogoCropLead": "Faites glisser l’image pour cadrer le logo.",
   "@ruleLogoCropLead": {
     "description": "Lead text of the logo crop modal."
   },
@@ -4111,7 +4163,7 @@
   "@goalImageCropTitle": {
     "description": "Title of the banner crop modal."
   },
-  "goalImageCropLead": "Faites glisser et zoomez pour cadrer la bannière.",
+  "goalImageCropLead": "Faites glisser l’image pour cadrer la bannière.",
   "@goalImageCropLead": {
     "description": "Lead of the banner crop modal."
   },
@@ -6194,7 +6246,7 @@
   "@settingsAvatarCropTitle": {
     "description": "Title of the modal where the user crops the picked picture to a square."
   },
-  "settingsAvatarCropLead": "Faites glisser et zoomez pour cadrer votre avatar.",
+  "settingsAvatarCropLead": "Faites glisser l’image pour cadrer votre avatar.",
   "@settingsAvatarCropLead": {
     "description": "Lead text of the crop modal."
   },

@@ -2081,6 +2081,40 @@ class AppLocalizationsFr extends AppLocalizations {
       'Enregistrez la règle pour lui ajouter un logo.';
 
   @override
+  String get modalCancel => 'Annuler';
+
+  @override
+  String get modalClose => 'Fermer';
+
+  @override
+  String get modalRetry => 'Réessayer';
+
+  @override
+  String get modalDiscardTitle => 'Abandonner les modifications ?';
+
+  @override
+  String modalDiscardLead(String form) {
+    return 'Ce que vous avez saisi dans « $form » sera perdu.';
+  }
+
+  @override
+  String get modalDiscardContinue => 'Continuer la saisie';
+
+  @override
+  String get modalDiscardConfirm => 'Abandonner';
+
+  @override
+  String get modalCropWindow => 'Cadrage';
+
+  @override
+  String get modalCropZoom => 'Zoom';
+
+  @override
+  String modalCropZoomValue(String value) {
+    return '$value ×';
+  }
+
+  @override
   String get logoZoomOpen => 'Afficher le logo en grand';
 
   @override
@@ -2097,8 +2131,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ruleLogoCropTitle => 'Recadrer le logo';
 
   @override
-  String get ruleLogoCropLead =>
-      'Faites glisser et zoomez pour cadrer le logo.';
+  String get ruleLogoCropLead => 'Faites glisser l’image pour cadrer le logo.';
 
   @override
   String get ruleLogoCropCancel => 'Annuler';
@@ -3300,7 +3333,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get goalImageCropLead =>
-      'Faites glisser et zoomez pour cadrer la bannière.';
+      'Faites glisser l’image pour cadrer la bannière.';
 
   @override
   String get goalImageCropSave => 'Utiliser cette image';
@@ -4829,7 +4862,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAvatarCropLead =>
-      'Faites glisser et zoomez pour cadrer votre avatar.';
+      'Faites glisser l’image pour cadrer votre avatar.';
 
   @override
   String get settingsAvatarCropCancel => 'Annuler';

@@ -3469,6 +3469,66 @@ abstract class AppLocalizations {
   /// **'Enregistrez la règle pour lui ajouter un logo.'**
   String get ruleFormLogoSaveFirst;
 
+  /// The secondary action of a modal: leaves it without saving.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get modalCancel;
+
+  /// The single action of an acknowledgement modal, and the footer action of a list editor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get modalClose;
+
+  /// The secondary action of the banner shown when a modal’s body cannot load.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get modalRetry;
+
+  /// Title of the confirmation asked when leaving a form that holds unsaved input.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abandonner les modifications ?'**
+  String get modalDiscardTitle;
+
+  /// Lead of the discard confirmation, naming the form being left.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que vous avez saisi dans « {form} » sera perdu.'**
+  String modalDiscardLead(String form);
+
+  /// Secondary action of the discard confirmation: back to the form.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer la saisie'**
+  String get modalDiscardContinue;
+
+  /// Primary action of the discard confirmation: closes the form and loses the input.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abandonner'**
+  String get modalDiscardConfirm;
+
+  /// Screen-reader label of the crop window. With it focused, arrow keys move the picture and + / − zoom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadrage'**
+  String get modalCropWindow;
+
+  /// Screen-reader label of the crop step’s zoom slider.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zoom'**
+  String get modalCropZoom;
+
+  /// The crop zoom factor printed beside its slider, formatted with one decimal (« 2,2 × »).
+  ///
+  /// In fr, this message translates to:
+  /// **'{value} ×'**
+  String modalCropZoomValue(String value);
+
   /// Screen-reader label of a small logo picture that opens it enlarged when clicked.
   ///
   /// In fr, this message translates to:
@@ -3502,7 +3562,7 @@ abstract class AppLocalizations {
   /// Lead text of the logo crop modal.
   ///
   /// In fr, this message translates to:
-  /// **'Faites glisser et zoomez pour cadrer le logo.'**
+  /// **'Faites glisser l’image pour cadrer le logo.'**
   String get ruleLogoCropLead;
 
   /// Cancel button of the logo crop modal.
@@ -5168,7 +5228,7 @@ abstract class AppLocalizations {
   /// Lead of the banner crop modal.
   ///
   /// In fr, this message translates to:
-  /// **'Faites glisser et zoomez pour cadrer la bannière.'**
+  /// **'Faites glisser l’image pour cadrer la bannière.'**
   String get goalImageCropLead;
 
   /// Confirm action of the crop modal.
@@ -7631,7 +7691,7 @@ abstract class AppLocalizations {
   /// Lead text of the crop modal.
   ///
   /// In fr, this message translates to:
-  /// **'Faites glisser et zoomez pour cadrer votre avatar.'**
+  /// **'Faites glisser l’image pour cadrer votre avatar.'**
   String get settingsAvatarCropLead;
 
   /// Cancel button of the crop modal.

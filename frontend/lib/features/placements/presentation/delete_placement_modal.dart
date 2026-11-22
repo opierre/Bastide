@@ -12,7 +12,7 @@ Future<void> showDeletePlacementModal(
   BuildContext context, {
   required Investment investment,
 }) {
-  return showDialog<void>(
+  return showAppModal<void>(
     context: context,
     builder: (_) => DeletePlacementModal(investment: investment),
   );
