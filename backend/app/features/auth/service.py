@@ -23,6 +23,7 @@ from app.features.auth.schemas import (
     ProfileUpdate,
     UserLogin,
     UserRegister,
+    collapse_display_name,
 )
 
 
@@ -317,7 +318,7 @@ class AuthService:
         """Look a user up by email if the identifier has an "@", by display name otherwise."""
         if "@" in identifier:
             return self._repository.get_user_by_email(identifier)
-        return self._repository.get_user_by_display_name(identifier.strip().lower())
+        return self._repository.get_user_by_display_name(collapse_display_name(identifier))
 
     def _issue_token(self, user: User) -> str:
         token = generate_token()

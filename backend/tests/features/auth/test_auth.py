@@ -1,12 +1,16 @@
 """Tests for register, login, logout, me, and password recovery."""
 
 import re
+import shutil
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import select
+from sqlalchemy import create_engine, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.core.security import (
@@ -67,13 +71,33 @@ def test_register_duplicate_email_returns_409(client: TestClient) -> None:
     assert response.json()["error"]["code"] == "EMAIL_TAKEN"
 
 
-def test_register_stores_display_name_lowercased(client: TestClient) -> None:
+def test_register_keeps_the_display_name_case(client: TestClient) -> None:
     body = _register(client)
 
-    assert body["user"]["display_name"] == "amelie"
+    assert body["user"]["display_name"] == "Amelie"
 
 
-@pytest.mark.parametrize("name", ["ab", "a" * 33, "amélie", "ame lie", "amelie@home", "  "])
+def test_register_accepts_a_display_name_with_a_space(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/auth/register", json={**REGISTER_PAYLOAD, "display_name": "Camille Dubois"}
+    )
+
+    assert response.status_code == 201
+    assert response.json()["user"]["display_name"] == "Camille Dubois"
+
+
+def test_register_collapses_inner_spaces(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/auth/register", json={**REGISTER_PAYLOAD, "display_name": "  Camille   Dubois "}
+    )
+
+    assert response.status_code == 201
+    assert response.json()["user"]["display_name"] == "Camille Dubois"
+
+
+@pytest.mark.parametrize(
+    "name", ["ab", "a" * 33, "amélie", "amelie@home", "  ", "ab  ", "ame\tlie"]
+)
 def test_register_malformed_display_name_returns_422(client: TestClient, name: str) -> None:
     response = client.post("/api/v1/auth/register", json={**REGISTER_PAYLOAD, "display_name": name})
 
@@ -96,6 +120,57 @@ def test_register_duplicate_display_name_any_case_returns_409(client: TestClient
 
     assert response.status_code == 409
     assert response.json()["error"]["code"] == "DISPLAY_NAME_TAKEN"
+
+
+@pytest.mark.parametrize("taken", ["camille dubois", "CAMILLE  DUBOIS", " Camille Dubois "])
+def test_register_name_differing_by_case_or_spaces_returns_409(
+    client: TestClient, taken: str
+) -> None:
+    client.post(
+        "/api/v1/auth/register", json={**REGISTER_PAYLOAD, "display_name": "Camille Dubois"}
+    )
+
+    response = client.post(
+        "/api/v1/auth/register",
+        json={**REGISTER_PAYLOAD, "email": "other@example.com", "display_name": taken},
+    )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "DISPLAY_NAME_TAKEN"
+
+
+@pytest.mark.parametrize("schema", ["schema_template", "migrated_template"])
+def test_display_name_is_unique_ignoring_case_in_the_database(
+    request: pytest.FixtureRequest, tmp_path: Path, schema: str
+) -> None:
+    db_path = tmp_path / "users.db"
+    shutil.copyfile(request.getfixturevalue(schema), db_path)
+    engine = create_engine(f"sqlite:///{db_path}")
+    user = {"password_hash": "x", "locale": "fr", "currency": "EUR"}
+    try:
+        with Session(engine) as db:
+            db.add(User(email="a@example.com", display_name="Camille Dubois", **user))
+            db.commit()
+            db.add(User(email="b@example.com", display_name="camille dubois", **user))
+            with pytest.raises(IntegrityError):
+                db.commit()
+    finally:
+        engine.dispose()
+
+
+@pytest.mark.parametrize("identifier", ["Camille Dubois", "camille dubois", " CAMILLE   DUBOIS "])
+def test_login_with_a_spaced_display_name_any_case(client: TestClient, identifier: str) -> None:
+    client.post(
+        "/api/v1/auth/register", json={**REGISTER_PAYLOAD, "display_name": "Camille Dubois"}
+    )
+
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"identifier": identifier, "password": REGISTER_PAYLOAD["password"]},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["user"]["display_name"] == "Camille Dubois"
 
 
 @pytest.mark.parametrize("identifier", ["amelie", "Amelie", " AMELIE "])
@@ -381,7 +456,7 @@ def test_update_profile_changes_the_login_name(client: TestClient) -> None:
     response = client.patch("/api/v1/auth/me", json={"display_name": "Amelie.R"}, headers=headers)
 
     assert response.status_code == 200
-    assert response.json()["user"]["display_name"] == "amelie.r"
+    assert response.json()["user"]["display_name"] == "Amelie.R"
     password = REGISTER_PAYLOAD["password"]
     new_login = client.post(
         "/api/v1/auth/login", json={"identifier": "amelie.r", "password": password}
@@ -400,6 +475,24 @@ def test_update_profile_keeping_own_name_succeeds(client: TestClient) -> None:
     response = client.patch("/api/v1/auth/me", json={"display_name": "AMELIE"}, headers=headers)
 
     assert response.status_code == 200
+    assert response.json()["user"]["display_name"] == "AMELIE"
+
+
+def test_update_profile_to_a_name_with_spaces(client: TestClient) -> None:
+    body = _register(client)
+    headers = {"Authorization": f"Bearer {body['token']}"}
+
+    response = client.patch(
+        "/api/v1/auth/me", json={"display_name": "Camille  Dubois"}, headers=headers
+    )
+
+    assert response.status_code == 200
+    assert response.json()["user"]["display_name"] == "Camille Dubois"
+    login = client.post(
+        "/api/v1/auth/login",
+        json={"identifier": "camille dubois", "password": REGISTER_PAYLOAD["password"]},
+    )
+    assert login.status_code == 200
 
 
 def test_update_profile_taken_name_returns_409(client: TestClient) -> None:
@@ -420,7 +513,9 @@ def test_update_profile_malformed_name_returns_422(client: TestClient) -> None:
     body = _register(client)
     headers = {"Authorization": f"Bearer {body['token']}"}
 
-    response = client.patch("/api/v1/auth/me", json={"display_name": "a b"}, headers=headers)
+    response = client.patch(
+        "/api/v1/auth/me", json={"display_name": "Camille Dubois!"}, headers=headers
+    )
 
     assert response.status_code == 422
 
