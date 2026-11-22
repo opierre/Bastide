@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
+import 'app_modal.dart';
 
 /// Makes a small logo picture open larger when clicked.
 ///
@@ -40,49 +41,68 @@ class LogoZoomTarget extends StatelessWidget {
   }
 }
 
-/// Shows [bytes] enlarged in a dialog; a click outside or Escape closes it.
+/// Shows [bytes] enlarged; any click or Escape closes it (`00` §7
+/// « Modal », Zoom).
 Future<void> showLogoZoom(BuildContext context, Uint8List bytes) =>
-    showDialog<void>(
+    showAppModal<void>(
       context: context,
       builder: (_) => LogoZoomDialog(bytes: bytes),
     );
 
-/// The enlarged logo: the picture alone, cover-cropped to the modal's
-/// rounded square like the chip it came from, with no plate behind it.
+/// The enlarged logo: the picture alone, 240 × 240, radius 12, `shadow`, on
+/// the `scrim`, cover-cropped like the chip it came from, with no plate
+/// behind it. Any click, on the picture or beside it, closes it, as does
+/// Escape.
 class LogoZoomDialog extends StatelessWidget {
   const LogoZoomDialog({super.key, required this.bytes});
 
-  /// Large enough to read a wordmark, small enough to sit over the rule
-  /// editor without hiding all of it.
-  static const size = 240.0;
+  static const size = AppModalSizes.zoomPicture;
 
   final Uint8List bytes;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Not a [Dialog]: its 280 px minimum width would put a transparent strip
-    // beside the picture that swallows the click meant to close it.
-    return Center(
-      key: const Key('logoZoomDialog'),
-      child: Semantics(
-        scopesRoute: true,
-        namesRoute: true,
-        explicitChildNodes: true,
-        label: l10n.logoZoomLabel,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadii.modal),
-            boxShadow: context.colors.shadow,
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadii.modal),
-            child: Image.memory(
-              bytes,
-              width: size,
-              height: size,
-              fit: BoxFit.cover,
-              excludeFromSemantics: true,
+    void close() => Navigator.of(context).pop();
+    return Actions(
+      actions: {
+        DismissIntent: CallbackAction<DismissIntent>(
+          onInvoke: (_) {
+            close();
+            return null;
+          },
+        ),
+      },
+      child: Focus(
+        autofocus: true,
+        child: GestureDetector(
+          key: const Key('logoZoomScrim'),
+          behavior: HitTestBehavior.opaque,
+          excludeFromSemantics: true,
+          onTap: close,
+          child: Center(
+            key: const Key('logoZoomDialog'),
+            child: Semantics(
+              scopesRoute: true,
+              namesRoute: true,
+              explicitChildNodes: true,
+              label: l10n.logoZoomLabel,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppRadii.modal),
+                  boxShadow: context.colors.shadow,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadii.modal),
+                  child: Image.memory(
+                    bytes,
+                    width: size,
+                    height: size,
+                    fit: BoxFit.cover,
+                    excludeFromSemantics: true,
+                  ),
+                ),
+              ),
             ),
           ),
         ),

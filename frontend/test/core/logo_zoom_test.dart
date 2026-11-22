@@ -85,6 +85,49 @@ void main() {
       expect(find.byKey(_dialog), findsNothing);
     });
 
+    testWidgets('a click on the enlarged logo itself closes it', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        InstitutionAvatar(name: 'Streamflix', logo: _logo, zoomable: true),
+      );
+      await tester.tap(find.byKey(_target));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(Image).last);
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(_dialog), findsNothing);
+    });
+
+    testWidgets('the enlarged logo is 240 × 240, radius 12, with the shadow', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        InstitutionAvatar(name: 'Streamflix', logo: _logo, zoomable: true),
+      );
+      await tester.tap(find.byKey(_target));
+      await tester.pumpAndSettle();
+
+      final image = tester.widget<Image>(
+        find.descendant(of: find.byKey(_dialog), matching: find.byType(Image)),
+      );
+      expect((image.width, image.height), (240.0, 240.0));
+      final box = tester.widget<DecoratedBox>(
+        find
+            .descendant(
+              of: find.byKey(_dialog),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      final deco = box.decoration as BoxDecoration;
+      expect(deco.borderRadius, BorderRadius.circular(12));
+      expect(deco.boxShadow, isNotEmpty);
+    });
+
     testWidgets('a click outside the enlarged logo closes it', (tester) async {
       await pump(
         tester,
