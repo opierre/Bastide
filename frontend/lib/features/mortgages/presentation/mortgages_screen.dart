@@ -8,6 +8,7 @@ import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/summary_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
 import '../domain/mortgage.dart';
@@ -275,7 +276,7 @@ class LoansSummaryLine extends StatelessWidget {
               captionKey: const Key('mortgagesChargeCaption'),
             ),
           ),
-          const LoanSummaryHairline(),
+          const SummaryHairline(),
           Flexible(
             child: LoanSummaryItem(
               label: l10n.mortgagesOutstandingLabel,
@@ -288,7 +289,7 @@ class LoansSummaryLine extends StatelessWidget {
               captionKey: const Key('mortgagesOutstandingCaption'),
             ),
           ),
-          const LoanSummaryHairline(),
+          const SummaryHairline(),
           DebtRatioItem(summary: summary),
         ],
       ),

@@ -22,6 +22,7 @@ import '../../../core/widgets/note_line.dart';
 import '../../../core/widgets/section_heading.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../core/widgets/status_text.dart';
+import '../../../core/widgets/summary_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../imports/presentation/imports_screen.dart';
 import '../../transactions/application/transactions_controller.dart';
@@ -132,26 +133,6 @@ class _SectionBreak extends StatelessWidget {
 
 // ── 1. Summary line ─────────────────────────────────────────────────────────
 
-/// One item of the summary line (`00` §7): a 12 `textSecondary` label over
-/// its figure.
-class _SummaryItem extends StatelessWidget {
-  const _SummaryItem({super.key, required this.label, required this.figure});
-
-  final String label;
-  final Widget figure;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    mainAxisAlignment: MainAxisAlignment.end,
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: context.textStyles.statLabel),
-      const SizedBox(height: AppSpacing.xs),
-      figure,
-    ],
-  );
-}
-
 class _SummaryLine extends StatelessWidget {
   const _SummaryLine({required this.overview});
 
@@ -180,7 +161,8 @@ class _SummaryLine extends StatelessWidget {
 
     // The headline is the one place a positive balance takes `positive`
     // (`00` §2.3); a card's open cycle is spending, so it reads `negative`.
-    final lead = _SummaryItem(
+    final lead = SummaryItem(
+      labelGap: AppSpacing.xs,
       key: const Key('accountDetailHeadline'),
       label: settlement == null
           ? l10n.accountDetailBalanceOn(
@@ -202,17 +184,20 @@ class _SummaryLine extends StatelessWidget {
     if (settlement == null) {
       final month = DateFormat.MMMM(locale).format(overview.month.since);
       items = [
-        _SummaryItem(
+        SummaryItem(
+          labelGap: AppSpacing.xs,
           key: const Key('accountDetailMonthInflow'),
           label: l10n.accountDetailMonthInflow(month),
           figure: amount(overview.month.inflowMinor),
         ),
-        _SummaryItem(
+        SummaryItem(
+          labelGap: AppSpacing.xs,
           key: const Key('accountDetailMonthOutflow'),
           label: l10n.accountDetailMonthOutflow(month),
           figure: amount(overview.month.outflowMinor),
         ),
-        _SummaryItem(
+        SummaryItem(
+          labelGap: AppSpacing.xs,
           key: const Key('accountDetailMonthNet'),
           label: l10n.accountDetailNet,
           figure: amount(overview.month.netMinor),
@@ -221,17 +206,20 @@ class _SummaryLine extends StatelessWidget {
     } else {
       final debit = settlement.nextDebitDate;
       items = [
-        _SummaryItem(
+        SummaryItem(
+          labelGap: AppSpacing.xs,
           key: const Key('accountDetailPreviousCycle'),
           label: l10n.accountDetailPreviousCycle,
           figure: amount(settlement.lastClosed?.amountMinor),
         ),
-        _SummaryItem(
+        SummaryItem(
+          labelGap: AppSpacing.xs,
           key: const Key('accountDetailCycleAverage'),
           label: l10n.accountDetailCycleAverage(averagedCycles),
           figure: amount(settlement.averageClosedMinor),
         ),
-        _SummaryItem(
+        SummaryItem(
+          labelGap: AppSpacing.xs,
           key: const Key('accountDetailDebitDate'),
           label: l10n.accountDetailDebitDateLabel,
           figure: Text(
@@ -251,12 +239,7 @@ class _SummaryLine extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           lead,
-          for (final item in items) ...[
-            const SizedBox(width: AppSpacing.xxl / 2),
-            VerticalDivider(width: 1, thickness: 1, color: context.colors.line),
-            const SizedBox(width: AppSpacing.xxl / 2),
-            item,
-          ],
+          for (final item in items) ...[const SummaryHairline(), item],
         ],
       ),
     );

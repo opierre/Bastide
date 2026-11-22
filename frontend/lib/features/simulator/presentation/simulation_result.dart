@@ -7,6 +7,7 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/status_text.dart';
+import '../../../core/widgets/summary_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../application/simulator_controller.dart';
@@ -67,7 +68,7 @@ class SimulationSummaryLine extends StatelessWidget {
                     ),
             ),
           ),
-          const _VerticalHairline(),
+          const SummaryHairline(),
           Flexible(
             flex: 4,
             child: _SummaryItem(
@@ -84,7 +85,7 @@ class SimulationSummaryLine extends StatelessWidget {
                     ),
             ),
           ),
-          const _VerticalHairline(),
+          const SummaryHairline(),
           Flexible(
             flex: 3,
             child: _SummaryItem(
@@ -102,19 +103,8 @@ class SimulationSummaryLine extends StatelessWidget {
   }
 }
 
-/// A vertical `line` hairline with the summary line's 40 px either side.
-class _VerticalHairline extends StatelessWidget {
-  const _VerticalHairline();
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-    child: SizedBox(width: 1, child: ColoredBox(color: context.colors.line)),
-  );
-}
-
-/// One item of the summary line: label 12 `textSecondary`, the figure, then
-/// an optional caption 12 `textTertiary`.
+/// A [SummaryItem] whose figure is the API's string, or the dash before
+/// anything computes.
 class _SummaryItem extends StatelessWidget {
   const _SummaryItem({
     required this.id,
@@ -138,48 +128,28 @@ class _SummaryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
     final colors = context.colors;
-    final caption = this.caption;
 
-    return Column(
+    return SummaryItem(
       key: Key('result${id}Item'),
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          key: Key('result${id}Label'),
+      label: label,
+      labelKey: Key('result${id}Label'),
+      labelGap: labelGap,
+      caption: caption,
+      captionKey: Key('result${id}Caption'),
+      captionMaxLines: 2,
+      figure: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerStart,
+        child: Text(
+          value ?? l10n.simulatorNoValue,
+          key: Key('result$id'),
           maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textStyles.statLabel,
+          style: tabularNumberStyle(
+            valueStyle,
+          ).copyWith(color: value == null ? colors.textTertiary : colors.text),
         ),
-        SizedBox(height: labelGap),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: AlignmentDirectional.centerStart,
-          child: Text(
-            value ?? l10n.simulatorNoValue,
-            key: Key('result$id'),
-            maxLines: 1,
-            style: tabularNumberStyle(valueStyle).copyWith(
-              color: value == null ? colors.textTertiary : colors.text,
-            ),
-          ),
-        ),
-        if (caption != null) ...[
-          SizedBox(height: labelGap),
-          Text(
-            caption,
-            key: Key('result${id}Caption'),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: tabularNumberStyle(
-              textTheme.bodySmall!,
-            ).copyWith(color: colors.textTertiary),
-          ),
-        ],
-      ],
+      ),
     );
   }
 }

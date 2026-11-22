@@ -1,35 +1,54 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
-import '../../../core/theme/tokens.dart';
+import '../theme/app_theme.dart';
+import '../theme/tokens.dart';
 
 /// One item of a summary line (`docs/design/00-design-system.md` §7): label
 /// 12 `textSecondary`, the figure, then an optional caption 12
-/// `textTertiary`, bottom-aligned with its neighbours. Shared by the list's
-/// and the series detail's summary lines.
+/// `textTertiary` or a trend line, bottom-aligned with its neighbours.
+///
+/// A panel lays its items out in an `IntrinsicHeight` row stretched to one
+/// height, so a [SummaryHairline] between two of them runs the line's full
+/// height.
 class SummaryItem extends StatelessWidget {
   const SummaryItem({
     super.key,
     required this.label,
     required this.figure,
+    this.labelKey,
     this.caption,
+    this.captionKey,
+    this.captionMaxLines = 1,
+    this.below,
     this.labelGap = AppSpacing.xsPlus,
-  });
+  }) : assert(
+         caption == null || below == null,
+         'An item carries a caption or a trend line, not both.',
+       );
 
   final String label;
-  final Widget figure;
-  final String? caption;
+  final Key? labelKey;
 
-  /// The gap between the label, the figure and the caption: 4 under a lead
+  /// The figure, styled by the caller: 40 px for the lead, 28 or 20 px for
+  /// the others, signed and coloured per `00` §2.3.
+  final Widget figure;
+
+  /// 12 `textTertiary` under the figure; an empty caption is not drawn.
+  final String? caption;
+  final Key? captionKey;
+  final int captionMaxLines;
+
+  /// A trend line or a status in place of the caption.
+  final Widget? below;
+
+  /// The gap between the label, the figure and what follows: 4 under a lead
   /// figure, 6 under the others.
   final double labelGap;
 
   @override
   Widget build(BuildContext context) {
-    final captionStyle = Theme.of(
-      context,
-    ).textTheme.bodySmall!.copyWith(color: context.colors.textTertiary);
     final caption = this.caption;
+    final below = this.below;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -37,6 +56,7 @@ class SummaryItem extends StatelessWidget {
       children: [
         Text(
           label,
+          key: labelKey,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.textStyles.statLabel,
@@ -47,18 +67,24 @@ class SummaryItem extends StatelessWidget {
           SizedBox(height: labelGap),
           Text(
             caption,
-            maxLines: 1,
+            key: captionKey,
+            maxLines: captionMaxLines,
             overflow: TextOverflow.ellipsis,
-            style: tabularNumberStyle(captionStyle),
+            style: tabularNumberStyle(
+              Theme.of(context).textTheme.bodySmall!,
+            ).copyWith(color: context.colors.textTertiary),
           ),
+        ] else if (below != null) ...[
+          SizedBox(height: labelGap),
+          below,
         ],
       ],
     );
   }
 }
 
-/// The vertical `line` hairline after a summary line's lead, with the
-/// line's 40 px either side.
+/// The vertical `line` hairline between two items of a summary line, with
+/// the line's 40 px either side (`00` §7).
 class SummaryHairline extends StatelessWidget {
   const SummaryHairline({super.key});
 

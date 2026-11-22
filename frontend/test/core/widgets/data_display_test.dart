@@ -2,6 +2,7 @@ import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/app_table.dart';
 import 'package:bastide/core/widgets/key_value_list.dart';
 import 'package:bastide/core/widgets/section_heading.dart';
+import 'package:bastide/core/widgets/summary_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -201,6 +202,64 @@ void main() {
     expect(
       tester.getCenter(find.text('Voir tout')).dy,
       tester.getCenter(find.text('Dépenses')).dy,
+    );
+  });
+
+  group('SummaryItem', () {
+    testWidgets('label in 12 textSecondary, the figure, then a caption in '
+        'textTertiary', (tester) async {
+      await pumpHost(
+        tester,
+        const SummaryItem(
+          label: 'Revenus',
+          figure: Text('3 200,00 €'),
+          caption: 'sur 2 comptes',
+        ),
+      );
+      final label = tester.widget<Text>(find.text('Revenus'));
+      expect(label.style?.color, dark.textSecondary);
+      expect(label.style?.fontSize, 12);
+      final caption = tester.widget<Text>(find.text('sur 2 comptes'));
+      expect(caption.style?.color, dark.textTertiary);
+      expect(
+        tester.getTopLeft(find.text('3 200,00 €')).dy -
+            tester.getBottomLeft(find.text('Revenus')).dy,
+        AppSpacing.xsPlus,
+      );
+    });
+
+    testWidgets('an empty caption is not drawn; a trend line takes its place', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        const SummaryItem(label: 'Net', figure: Text('+120,00 €'), caption: ''),
+      );
+      expect(find.byType(Text), findsNWidgets(2));
+
+      await pumpHost(
+        tester,
+        const SummaryItem(
+          label: 'Net',
+          figure: Text('+120,00 €'),
+          below: Text('2,1 % vs avril'),
+        ),
+      );
+      expect(find.text('2,1 % vs avril'), findsOneWidget);
+    });
+  });
+
+  testWidgets('a summary hairline is 1 px of line with 40 px either side', (
+    tester,
+  ) async {
+    await pumpHost(
+      tester,
+      const SizedBox(height: 40, child: SummaryHairline()),
+    );
+    expect(tester.getSize(find.byType(SummaryHairline)).width, 81);
+    expect(
+      tester.widget<ColoredBox>(find.byType(ColoredBox).last).color,
+      dark.line,
     );
   });
 }
