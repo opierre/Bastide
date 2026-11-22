@@ -5726,18 +5726,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get placementFormOpenedOn => 'Date d’ouverture';
 
   @override
-  String get placementFormCurrentValue => 'Valeur actuelle';
+  String get placementFormCurrentValue => 'Valeur actuelle (facultative)';
 
   @override
-  String get placementFormCurrentValueHelp =>
-      'Facultatif. Saisie à la date du jour.';
-
-  @override
-  String get placementFormInitialPayments => 'Versements déjà effectués';
+  String get placementFormInitialPayments =>
+      'Versements déjà effectués (facultatif)';
 
   @override
   String get placementFormInitialPaymentsHelp =>
-      'Facultatif. Un versement à la date d’ouverture.';
+      'Comptés comme un versement à l’ouverture.';
 
   @override
   String get placementFormDateInvalid =>
@@ -5748,9 +5745,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get placementFormDatePick => 'Choisir une date';
-
-  @override
-  String get placementFormCancel => 'Annuler';
 
   @override
   String get placementFormSave => 'Enregistrer';
@@ -5775,7 +5769,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get placementFieldDate => 'Date';
 
   @override
-  String get placementFieldNote => 'Note';
+  String get placementFieldNote => 'Note (facultative)';
+
+  @override
+  String get placementValuationNoteHint => 'Ex. Relevé trimestriel';
+
+  @override
+  String get placementMovementNoteHint => 'Ex. Versement mensuel';
 
   @override
   String get placementMovementEditTitle => 'Modifier le mouvement';
@@ -5792,23 +5792,26 @@ class AppLocalizationsFr extends AppLocalizations {
       'Saisissez un montant différent de zéro.';
 
   @override
-  String get placementMovementLink => 'Transaction liée';
+  String get placementMovementLink => 'Transaction liée (facultative)';
+
+  @override
+  String get placementMovementLinkHelp =>
+      'Les virements récents du même montant.';
 
   @override
   String get placementMovementLinkNone => 'Aucune';
 
   @override
-  String placementMovementLinkItem(String date, String description) {
-    return '$date · $description';
+  String placementMovementLinkDetail(String date, String amount) {
+    return '$date · $amount';
   }
 
   @override
-  String get placementCloseTitle => 'Clôturer le placement';
+  String get placementCloseTitle => 'Clôturer ce placement ?';
 
   @override
-  String placementCloseLead(String name) {
-    return '$name quitte la synthèse à cette date et reste listé.';
-  }
+  String get placementCloseLead =>
+      'Il quitte la synthèse à la date de clôture et reste dans la liste, grisé. Son historique est conservé.';
 
   @override
   String get placementCloseDate => 'Date de clôture';
@@ -5824,12 +5827,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get placementCloseSubmit => 'Clôturer';
 
   @override
-  String get placementDeleteTitle => 'Supprimer le placement';
+  String placementDeleteTitle(String name) {
+    return 'Supprimer le placement « $name » ?';
+  }
 
   @override
-  String placementDeleteLead(String name) {
-    return '$name et tout son historique seront supprimés. Pour le garder, clôturez-le.';
-  }
+  String get placementDeleteLead =>
+      'Ses valeurs saisies et ses versements seront supprimés. Vos comptes ne sont pas modifiés.';
 
   @override
   String get placementDeleteSubmit => 'Supprimer';

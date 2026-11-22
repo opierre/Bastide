@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/session/current_user_provider.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/date_field.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/money_field.dart';
+import '../../../core/widgets/monogram_avatar.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/placements_controller.dart';
 import '../domain/investment.dart';
+import 'delete_placement_modal.dart';
 import 'placement_labels.dart';
 
 /// Opens the « Nouveau placement » modal, or « Modifier » with [initial].
@@ -32,9 +35,11 @@ DateTime? parsePastDate(String text, String locale) {
   return date.isAfter(DateTime(now.year, now.month, now.day)) ? null : date;
 }
 
-/// The 440 px placement modal (`17-placements.md` §Modals): Nom ·
-/// Enveloppe · Établissement · Date d’ouverture, and on creation the
-/// optional Valeur actuelle and Versements déjà effectués.
+/// The 440 px placement modal (`17-placements.md` §Modals, proposal v6
+/// `m-investments`): Nom · Enveloppe, then Établissement and Date
+/// d’ouverture side by side, and on creation the optional Valeur actuelle
+/// and Versements déjà effectués side by side. Editing puts a ghost
+/// « Supprimer » on the footer's left.
 class PlacementFormModal extends ConsumerStatefulWidget {
   const PlacementFormModal({super.key, this.initial});
 
@@ -55,6 +60,7 @@ class _PlacementFormModalState extends ConsumerState<PlacementFormModal> {
   final _payments = TextEditingController();
   late Envelope _envelope = widget.initial?.envelope ?? Envelope.pea;
   bool _filled = false;
+  bool _dirty = false;
   bool _isSubmitting = false;
   String? _errorText;
 
@@ -89,7 +95,18 @@ class _PlacementFormModalState extends ConsumerState<PlacementFormModal> {
     return minor;
   }
 
+  /// The destructive confirmation, over the form; the form closes once the
+  /// placement is gone.
+  Future<void> _delete() async {
+    final deleted = await showDeletePlacementModal(
+      context,
+      investment: widget.initial!,
+    );
+    if (deleted == true && mounted) Navigator.of(context).pop();
+  }
+
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final locale = Localizations.localeOf(context).toString();
     final openedOn = parsePastDate(_openedOn.text, locale);
@@ -150,6 +167,11 @@ class _PlacementFormModalState extends ConsumerState<PlacementFormModal> {
         _optionalAmount(value ?? '', locale, allowZero: allowZero) == -1
         ? l10n.placementFormAmountInvalid
         : null;
+    // The placeholder of an optional amount: « 0,00 ».
+    final zero = NumberFormat.decimalPatternDigits(
+      locale: locale,
+      decimalDigits: 2,
+    ).format(0);
     const gap = SizedBox(height: AppSpacing.fieldGap);
 
     return AppModal(
@@ -158,12 +180,20 @@ class _PlacementFormModalState extends ConsumerState<PlacementFormModal> {
           ? l10n.placementFormEditTitle
           : l10n.placementFormCreateTitle,
       width: AppSizes.inspector,
+      dirty: _dirty,
+      busy: _isSubmitting,
+      saveError: _errorText,
+      onSubmit: _submit,
+      leadingAction: _isEditing
+          ? AppButton(
+              key: const Key('placementFormDelete'),
+              label: l10n.placementFormDelete,
+              variant: AppButtonVariant.ghost,
+              onPressed: _isSubmitting ? null : _delete,
+            )
+          : null,
       actions: [
-        OutlinedButton(
-          key: const Key('placementFormCancel'),
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.placementFormCancel),
-        ),
+        const AppModalCancel(key: Key('placementFormCancel')),
         PrimaryButton(
           key: const Key('placementFormSubmit'),
           label: l10n.placementFormSave,
@@ -173,16 +203,13 @@ class _PlacementFormModalState extends ConsumerState<PlacementFormModal> {
       ],
       child: Form(
         key: _formKey,
+        // Typed input makes the form dirty: the scrim no longer closes it.
+        onChanged: () {
+          if (!_dirty) setState(() => _dirty = true);
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_errorText != null) ...[
-              InlineBanner(
-                key: const Key('placementFormError'),
-                message: _errorText!,
-              ),
-              gap,
-            ],
             LabeledField(
               label: l10n.placementFormName,
               child: TextFormField(
@@ -208,56 +235,82 @@ class _PlacementFormModalState extends ConsumerState<PlacementFormModal> {
                 ],
                 onChanged: _isSubmitting
                     ? null
-                    : (envelope) => setState(() => _envelope = envelope),
+                    : (envelope) => setState(() {
+                        _envelope = envelope;
+                        _dirty = true;
+                      }),
               ),
             ),
             gap,
-            LabeledField(
-              label: l10n.placementFormInstitution,
-              child: TextFormField(
-                key: const Key('placementFormInstitution'),
-                controller: _institution,
-                validator: (value) =>
-                    required(value, l10n.placementFormInstitutionRequired),
+            ModalFieldRow(
+              start: ModalFieldCell(
+                label: l10n.placementFormInstitution,
+                input: TextFormField(
+                  key: const Key('placementFormInstitution'),
+                  controller: _institution,
+                  // The monogram the placement will carry, live as it is
+                  // typed, inside the field as in the accounts form.
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    prefixIcon: Padding(
+                      padding: const EdgeInsetsDirectional.only(
+                        start: AppSpacing.xsPlus,
+                        end: AppSpacing.sm,
+                      ),
+                      child: MonogramAvatar(
+                        key: const Key('placementFormMonogram'),
+                        name: _institution.text,
+                      ),
+                    ),
+                    prefixIconConstraints: const BoxConstraints(),
+                  ),
+                  validator: (value) =>
+                      required(value, l10n.placementFormInstitutionRequired),
+                ),
               ),
-            ),
-            gap,
-            LabeledField(
-              label: l10n.placementFormOpenedOn,
-              child: DateField(
-                key: const Key('placementFormOpenedOn'),
-                controller: _openedOn,
-                firstDate: DateTime(1950),
-                lastDate: DateTime.now(),
-                calendarTooltip: l10n.placementFormDatePick,
-                validator: (value) => parsePastDate(value ?? '', locale) == null
-                    ? l10n.placementFormDateInvalid
-                    : null,
+              end: ModalFieldCell(
+                label: l10n.placementFormOpenedOn,
+                input: DateField(
+                  key: const Key('placementFormOpenedOn'),
+                  controller: _openedOn,
+                  firstDate: DateTime(1950),
+                  lastDate: DateTime.now(),
+                  calendarTooltip: l10n.placementFormDatePick,
+                  validator: (value) =>
+                      parsePastDate(value ?? '', locale) == null
+                      ? l10n.placementFormDateInvalid
+                      : null,
+                ),
               ),
             ),
             if (!_isEditing) ...[
               gap,
-              LabeledField(
-                label: l10n.placementFormCurrentValue,
-                helper: l10n.placementFormCurrentValueHelp,
-                child: MoneyField(
-                  key: const Key('placementFormValue'),
-                  controller: _value,
-                  currency: currency,
-                  textAlign: TextAlign.end,
-                  validator: amount,
+              // « Versements déjà effectués (facultatif) » wraps onto two
+              // lines in French: both inputs move down together (`00` §7).
+              ModalFieldRow(
+                key: const Key('placementFormOptionalRow'),
+                start: ModalFieldCell(
+                  label: l10n.placementFormCurrentValue,
+                  input: MoneyField(
+                    key: const Key('placementFormValue'),
+                    controller: _value,
+                    currency: currency,
+                    hintText: zero,
+                    textAlign: TextAlign.end,
+                    validator: amount,
+                  ),
                 ),
-              ),
-              gap,
-              LabeledField(
-                label: l10n.placementFormInitialPayments,
-                helper: l10n.placementFormInitialPaymentsHelp,
-                child: MoneyField(
-                  key: const Key('placementFormPayments'),
-                  controller: _payments,
-                  currency: currency,
-                  textAlign: TextAlign.end,
-                  validator: (value) => amount(value, allowZero: false),
+                end: ModalFieldCell(
+                  label: l10n.placementFormInitialPayments,
+                  helper: l10n.placementFormInitialPaymentsHelp,
+                  input: MoneyField(
+                    key: const Key('placementFormPayments'),
+                    controller: _payments,
+                    currency: currency,
+                    hintText: zero,
+                    textAlign: TextAlign.end,
+                    validator: (value) => amount(value, allowZero: false),
+                  ),
                 ),
               ),
             ],

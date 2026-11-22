@@ -5697,17 +5697,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get placementFormOpenedOn => 'Opening date';
 
   @override
-  String get placementFormCurrentValue => 'Current value';
+  String get placementFormCurrentValue => 'Current value (optional)';
 
   @override
-  String get placementFormCurrentValueHelp => 'Optional. Entered as of today.';
-
-  @override
-  String get placementFormInitialPayments => 'Payments already made';
+  String get placementFormInitialPayments => 'Payments already made (optional)';
 
   @override
   String get placementFormInitialPaymentsHelp =>
-      'Optional. One payment at the opening date.';
+      'Counted as one payment at opening.';
 
   @override
   String get placementFormDateInvalid =>
@@ -5718,9 +5715,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get placementFormDatePick => 'Pick a date';
-
-  @override
-  String get placementFormCancel => 'Cancel';
 
   @override
   String get placementFormSave => 'Save';
@@ -5745,7 +5739,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get placementFieldDate => 'Date';
 
   @override
-  String get placementFieldNote => 'Note';
+  String get placementFieldNote => 'Note (optional)';
+
+  @override
+  String get placementValuationNoteHint => 'e.g. Quarterly statement';
+
+  @override
+  String get placementMovementNoteHint => 'e.g. Monthly payment';
 
   @override
   String get placementMovementEditTitle => 'Edit the movement';
@@ -5762,23 +5762,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter an amount other than zero.';
 
   @override
-  String get placementMovementLink => 'Linked transaction';
+  String get placementMovementLink => 'Linked transaction (optional)';
+
+  @override
+  String get placementMovementLinkHelp =>
+      'Recent transfers of the same amount.';
 
   @override
   String get placementMovementLinkNone => 'None';
 
   @override
-  String placementMovementLinkItem(String date, String description) {
-    return '$date · $description';
+  String placementMovementLinkDetail(String date, String amount) {
+    return '$date · $amount';
   }
 
   @override
-  String get placementCloseTitle => 'Close the investment';
+  String get placementCloseTitle => 'Close this investment?';
 
   @override
-  String placementCloseLead(String name) {
-    return '$name leaves your net worth from that date and stays listed.';
-  }
+  String get placementCloseLead =>
+      'It leaves your net worth from the closing date and stays in the list, dimmed. Its history is kept.';
 
   @override
   String get placementCloseDate => 'Closing date';
@@ -5794,12 +5797,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get placementCloseSubmit => 'Close';
 
   @override
-  String get placementDeleteTitle => 'Delete the investment';
+  String placementDeleteTitle(String name) {
+    return 'Delete the investment “$name”?';
+  }
 
   @override
-  String placementDeleteLead(String name) {
-    return '$name and its whole history will be deleted. To keep it, close it instead.';
-  }
+  String get placementDeleteLead =>
+      'Its entered values and payments will be deleted. Your accounts are not changed.';
 
   @override
   String get placementDeleteSubmit => 'Delete';
