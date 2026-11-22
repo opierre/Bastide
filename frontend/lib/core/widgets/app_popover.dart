@@ -66,6 +66,8 @@ class AppMenuItem extends StatelessWidget {
     this.selected = false,
     this.leading,
     this.subtitle,
+    this.detail,
+    this.mono = false,
     this.width,
     this.destructive = false,
   });
@@ -83,6 +85,12 @@ class AppMenuItem extends StatelessWidget {
 
   /// A second line, for a choice that needs one (a property's address).
   final String? subtitle;
+
+  /// Text after the label in `textTertiary` (a transaction's date and amount).
+  final String? detail;
+
+  /// Sets the label in Geist Mono: a raw bank label.
+  final bool mono;
 
   /// The row's width; a [MenuAnchor] panel sizes itself to its widest row, so
   /// giving every row the anchor's width lines the menu up with its field.
@@ -146,11 +154,11 @@ class AppMenuItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodyMedium?.copyWith(color: foreground),
+                    AppSelectLabel(
+                      label: label,
+                      detail: detail,
+                      mono: mono,
+                      color: foreground,
                     ),
                     if (subtitle case final subtitle?)
                       Text(
@@ -177,6 +185,52 @@ class AppMenuItem extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A choice's label on one line, ellipsized: in Geist Mono when [mono] (a
+/// raw bank label), then [detail] 6 px after it in `textTertiary`. Shared by
+/// the closed [AppMenuItem] row and the closed select.
+class AppSelectLabel extends StatelessWidget {
+  const AppSelectLabel({
+    super.key,
+    required this.label,
+    this.detail,
+    this.mono = false,
+    this.color,
+  });
+
+  final String label;
+  final String? detail;
+  final bool mono;
+
+  /// The label's colour; `text` by default.
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final body = Theme.of(context).textTheme.bodyMedium;
+    final labelStyle = (mono ? context.textStyles.mono : body)?.copyWith(
+      color: color ?? colors.text,
+    );
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: label, style: labelStyle),
+          if (detail case final detail?) ...[
+            const WidgetSpan(child: SizedBox(width: AppSpacing.xsPlus)),
+            TextSpan(
+              text: detail,
+              style: body?.copyWith(color: colors.textTertiary),
+            ),
+          ],
+        ],
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: body,
     );
   }
 }

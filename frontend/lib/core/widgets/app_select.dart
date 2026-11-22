@@ -13,10 +13,19 @@ class AppSelectItem<T> {
     required this.label,
     this.leading,
     this.subtitle,
+    this.detail,
+    this.mono = false,
   });
 
   final T value;
   final String label;
+
+  /// Optional text after the label, in `textTertiary`, both in the closed
+  /// field and in the menu (a transaction's date and amount, say).
+  final String? detail;
+
+  /// Sets the label in Geist Mono: a raw bank label (`00` §3).
+  final bool mono;
 
   /// Optional secondary line under the label in the open menu only (a
   /// property's address, say); the closed field states the label alone.
@@ -111,6 +120,8 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
           AppMenuItem(
             label: item.label,
             subtitle: item.subtitle,
+            detail: item.detail,
+            mono: item.mono,
             leading: item.leading,
             width: rowWidth,
             selected: item.value == widget.value,
@@ -120,6 +131,8 @@ class _AppSelectState<T> extends State<AppSelect<T>> {
       builder: (context, controller, _) => _Anchor(
         key: _anchorKey,
         label: selected?.label ?? '',
+        detail: selected?.detail,
+        mono: selected?.mono ?? false,
         leading: selected?.leading,
         height: widget.height,
         isOpen: _isOpen,
@@ -134,6 +147,8 @@ class _Anchor extends StatefulWidget {
   const _Anchor({
     super.key,
     required this.label,
+    required this.detail,
+    required this.mono,
     required this.leading,
     required this.height,
     required this.isOpen,
@@ -141,6 +156,8 @@ class _Anchor extends StatefulWidget {
   });
 
   final String label;
+  final String? detail;
+  final bool mono;
   final Widget? leading;
   final double height;
   final bool isOpen;
@@ -179,11 +196,10 @@ class _AnchorState extends State<_Anchor> {
             const SizedBox(width: AppSpacing.sm),
           ],
           Expanded(
-            child: Text(
-              widget.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium,
+            child: AppSelectLabel(
+              label: widget.label,
+              detail: widget.detail,
+              mono: widget.mono,
             ),
           ),
           const SizedBox(width: AppSpacing.xsPlus),
