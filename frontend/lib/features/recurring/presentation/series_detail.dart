@@ -186,9 +186,11 @@ class _DetailBody extends ConsumerWidget {
       key: const Key('seriesDetailContent'),
       children: [
         _DetailSummaryLine(series: series, accountName: accountName),
+        const _SectionBreak(),
+        // The banner belongs to the history block below it: space, no
+        // hairline of its own (`00` §1.2).
         if (series.priceChangedAt case final changedAt?
             when annual != null) ...[
-          const SizedBox(height: AppSpacing.section),
           InlineBanner(
             key: const Key('seriesIncreaseBanner'),
             tone: BannerTone.warning,
@@ -208,8 +210,8 @@ class _DetailBody extends ConsumerWidget {
               ),
             ),
           ),
+          const SizedBox(height: AppSpacing.section),
         ],
-        const SizedBox(height: AppSpacing.section),
         SectionHeading(
           title: l10n.subscriptionDetailHistoryTitle,
           trailing: Text(
@@ -297,7 +299,7 @@ class _DetailSummaryLine extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(width: AppSpacing.xxl),
+          const SummaryHairline(),
           Flexible(
             child: SummaryItem(
               label: l10n.subscriptionDetailNextCharge,
@@ -360,6 +362,17 @@ class _DetailSummaryLine extends ConsumerWidget {
   }
 }
 
+/// 24 px, a hairline, 24 px: the gap between two blocks (`00` §1.2).
+class _SectionBreak extends StatelessWidget {
+  const _SectionBreak();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: AppSpacing.section),
+    child: Divider(height: 1, thickness: 1, color: context.colors.line),
+  );
+}
+
 /// The summary line's silhouette: label, 40 px figure.
 const _summarySilhouette = 66.0;
 
@@ -377,7 +390,7 @@ class _DetailSkeleton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SkeletonBlock(height: _summarySilhouette),
-          SizedBox(height: AppSpacing.section),
+          SizedBox(height: AppSpacing.section * 2 + 1),
           SkeletonBlock(height: _headingSilhouette + PriceHistoryChart.height),
         ],
       ),
