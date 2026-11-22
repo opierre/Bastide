@@ -77,4 +77,30 @@ void main() {
     expect(statementsSharingDestination(matches, fixed, accounts), isEmpty);
     expect(importTargetFor(first, matches, fixed, accounts), isNotNull);
   });
+
+  test('ready targets keep file order and skip unsettled statements', () {
+    final first = OfxAccountMatched(_info('111'), a1);
+    final waiting = OfxAccountAmbiguous(_info('222'), accounts);
+    final unknown = OfxAccountUnmatched(_info('333'));
+    final last = OfxAccountMatched(_info('444'), a2);
+    final matches = [first, waiting, unknown, last];
+
+    expect(
+      readyImportTargets(
+        matches,
+        const {},
+        accounts,
+      ).map((t) => (t.statement, t.account.id)),
+      [('111', 'a1'), ('444', 'a2')],
+    );
+  });
+
+  test('ready targets leave out statements sharing a destination', () {
+    final first = OfxAccountMatched(_info('111'), a1);
+    final second = OfxAccountAmbiguous(_info('222'), accounts);
+    expect(
+      readyImportTargets([first, second], const {'222': 'a1'}, accounts),
+      isEmpty,
+    );
+  });
 }

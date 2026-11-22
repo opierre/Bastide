@@ -1113,6 +1113,10 @@
   "@importSubmitting": {
     "description": "Label replacing the import button text while the upload is in flight."
   },
+  "importAll": "Importer tout",
+  "@importAll": {
+    "description": "Primary action, shown when the selected file holds several statements, that imports every statement whose destination is settled."
+  },
   "importDetectedAccountAmbiguous": "Ce relevé vient de {account}, mais plusieurs comptes y correspondent. Choisissez la destination.",
   "@importDetectedAccountAmbiguous": {
     "description": "Banner shown when the statement's bank matches several accounts and nothing in the file separates them; the user picks the destination.",

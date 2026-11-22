@@ -920,6 +920,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importSubmitting => 'Importing…';
 
   @override
+  String get importAll => 'Import all';
+
+  @override
   String importDetectedAccountAmbiguous(String account) {
     return 'This statement is from $account, but several accounts match it. Choose the destination.';
   }

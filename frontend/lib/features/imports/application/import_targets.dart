@@ -66,3 +66,16 @@ ImportTarget? importTargetFor(
   }
   return (statement: statement, account: account);
 }
+
+/// Every statement of the file that can import right now, in file order:
+/// what « Importer tout » sends. Statements still waiting on an answer (an
+/// open choice, an account to create, a shared destination) are left out and
+/// keep their line, so one unsettled statement never holds back the rest.
+List<ImportTarget> readyImportTargets(
+  List<OfxAccountMatch> matches,
+  Map<String?, String> chosen,
+  List<Account> accounts,
+) => [
+  for (final match in matches)
+    ?importTargetFor(match, matches, chosen, accounts),
+];

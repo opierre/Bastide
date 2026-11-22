@@ -256,6 +256,7 @@
   "importRemoveFile": "Remove",
   "importSubmit": "Import",
   "importSubmitting": "Importing…",
+  "importAll": "Import all",
   "importDetectedAccountAmbiguous": "This statement is from {account}, but several accounts match it. Choose the destination.",
   "importDetectedAccountUnknown": "Unknown account: {account}",
   "importCreateDetectedAccount": "Create this account",

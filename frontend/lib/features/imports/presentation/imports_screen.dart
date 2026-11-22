@@ -49,6 +49,9 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
   /// The statements being imported right now, by `ACCTID` (`null` for a file
   /// that names no account). Their lines show the spinner and can't be removed.
   final Set<String?> _importing = {};
+
+  /// Whether the run in flight is « Importer tout », whose button then spins.
+  bool _importingAll = false;
   String? _errorText;
 
   Future<void> _pickFile() async {
@@ -145,7 +148,6 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
   /// retrying is safe, since a statement already imported into its account
   /// comes back as its original batch.
   Future<void> _import(OfxAccountMatch match) async {
-    final l10n = AppLocalizations.of(context)!;
     final file = ref.read(selectedImportFileProvider);
     final matches = ref.read(ofxAccountDetectionProvider) ?? const [];
     final target = importTargetFor(
@@ -155,39 +157,82 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
       ref.read(accountsControllerProvider).value ?? const <Account>[],
     );
     if (target == null || file == null) return;
-    final overlay = Overlay.maybeOf(context);
+    await _importTargets(file, [target]);
+  }
 
-    setState(() {
-      _importing.add(target.statement);
-      _errorText = null;
-    });
+  /// « Importer tout »: every statement that can import right now, one after
+  /// the other. Statements still waiting on an answer keep their line.
+  Future<void> _importAll() async {
+    final file = ref.read(selectedImportFileProvider);
+    final targets = readyImportTargets(
+      ref.read(ofxAccountDetectionProvider) ?? const [],
+      ref.read(chosenImportAccountsProvider),
+      ref.read(accountsControllerProvider).value ?? const <Account>[],
+    );
+    if (targets.isEmpty || file == null) return;
+    setState(() => _importingAll = true);
     try {
-      final batch = await ref
-          .read(importsControllerProvider.notifier)
-          .importFile(
-            accountId: target.account.id,
-            file: file,
-            statement: target.statement,
-          );
-      if (!mounted) return;
-      ref.read(lastImportResultProvider.notifier).add(batch);
-      ref.read(recentImportHighlightsProvider.notifier).mark(batch.id);
-      if (ref.read(selectedImportFileProvider) == file) {
-        _removeStatement(target.statement);
-      }
-      if (overlay != null) _confirm(overlay, l10n, batch);
-    } catch (error) {
-      if (!mounted) return;
-      setState(() => _errorText = localizeImportError(l10n, error));
+      await _importTargets(file, targets);
     } finally {
-      if (mounted) setState(() => _importing.remove(target.statement));
+      if (mounted) setState(() => _importingAll = false);
     }
   }
 
-  /// The toast that confirms what the import did: its counts, or that a file
-  /// the backend rejected changed nothing.
-  void _confirm(OverlayState overlay, AppLocalizations l10n, ImportBatch b) {
-    if (b.status == ImportStatus.failed) {
+  /// Uploads [targets] in turn and confirms them with a single toast.
+  ///
+  /// Sequential rather than parallel: each import moves balances and history
+  /// the next one reads, and the sidecar takes one write at a time anyway.
+  /// Every line shows its spinner from the start, so none can be removed or
+  /// re-pointed mid-run. A statement that throws keeps its line and the run
+  /// moves on: the others don't depend on it, and retrying is safe.
+  Future<void> _importTargets(
+    PickedImportFile file,
+    List<ImportTarget> targets,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final overlay = Overlay.maybeOf(context);
+    setState(() {
+      _importing.addAll(targets.map((t) => t.statement));
+      _errorText = null;
+    });
+    final batches = <ImportBatch>[];
+    for (final target in targets) {
+      try {
+        final batch = await ref
+            .read(importsControllerProvider.notifier)
+            .importFile(
+              accountId: target.account.id,
+              file: file,
+              statement: target.statement,
+            );
+        if (!mounted) return;
+        batches.add(batch);
+        ref.read(lastImportResultProvider.notifier).add(batch);
+        ref.read(recentImportHighlightsProvider.notifier).mark(batch.id);
+        if (ref.read(selectedImportFileProvider) == file) {
+          _removeStatement(target.statement);
+        }
+      } catch (error) {
+        if (!mounted) return;
+        setState(() => _errorText = localizeImportError(l10n, error));
+      } finally {
+        if (mounted) setState(() => _importing.remove(target.statement));
+      }
+    }
+    if (overlay != null && batches.isNotEmpty) {
+      _confirm(overlay, l10n, batches);
+    }
+  }
+
+  /// The toast that confirms what the imports did: their summed counts, or
+  /// that the files the backend rejected changed nothing.
+  void _confirm(
+    OverlayState overlay,
+    AppLocalizations l10n,
+    List<ImportBatch> batches,
+  ) {
+    final written = batches.where((b) => b.status != ImportStatus.failed);
+    if (written.isEmpty) {
       showAppToastOn(
         overlay,
         title: l10n.importFailedNote,
@@ -197,7 +242,10 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
     }
     showAppToastOn(
       overlay,
-      title: l10n.importToastSummary(b.newCount, b.duplicateCount),
+      title: l10n.importToastSummary(
+        written.fold(0, (sum, b) => sum + b.newCount),
+        written.fold(0, (sum, b) => sum + b.duplicateCount),
+      ),
     );
   }
 
@@ -228,8 +276,10 @@ class _ImportsScreenState extends ConsumerState<ImportsScreen> {
           ],
           _StatementLines(
             importing: _importing,
+            importingAll: _importingAll,
             onRemove: _removeStatement,
             onImport: _import,
+            onImportAll: _importAll,
             onCreateAccount: _createDetectedAccount,
           ),
           if (_errorText case final error?) ...[
@@ -400,18 +450,23 @@ class _DropTargetState extends State<_DropTarget> {
 class _StatementLines extends ConsumerWidget {
   const _StatementLines({
     required this.importing,
+    required this.importingAll,
     required this.onRemove,
     required this.onImport,
+    required this.onImportAll,
     required this.onCreateAccount,
   });
 
   final Set<String?> importing;
+  final bool importingAll;
   final ValueChanged<String?> onRemove;
   final ValueChanged<OfxAccountMatch> onImport;
+  final VoidCallback onImportAll;
   final ValueChanged<OfxAccountInfo> onCreateAccount;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final file = ref.watch(selectedImportFileProvider);
     final matches = ref.watch(ofxAccountDetectionProvider);
     if (file == null || matches == null) return const SizedBox.shrink();
@@ -419,6 +474,14 @@ class _StatementLines extends ConsumerWidget {
     final accounts =
         ref.watch(accountsControllerProvider).value ?? const <Account>[];
     final shared = statementsSharingDestination(matches, chosen, accounts);
+    // « Importer tout » only means something when the file holds several
+    // statements. It then takes the view's one primary, and each line's own
+    // « Importer » steps down to secondary (`00` §6: one primary per view).
+    final multiple = matches.length > 1;
+    final ready = readyImportTargets(matches, chosen, accounts);
+    // Disabled while any statement is in flight, so a line being imported
+    // on its own is never sent a second time.
+    final importingAny = importing.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -436,9 +499,26 @@ class _StatementLines extends ConsumerWidget {
               canImport:
                   importTargetFor(match, matches, chosen, accounts) != null,
               isImporting: importing.contains(statementKey(match)),
+              isPrimary: !multiple,
               onRemove: () => onRemove(statementKey(match)),
               onImport: () => onImport(match),
               onCreateAccount: onCreateAccount,
+            ),
+          ),
+        if (multiple)
+          Padding(
+            padding: const EdgeInsets.only(top: _lineGap),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: PrimaryButton(
+                key: const Key('importAllButton'),
+                label: l10n.importAll,
+                loadingLabel: l10n.importSubmitting,
+                isLoading: importingAll,
+                // Live while at least one statement can go. Lines still
+                // waiting on an answer say so themselves and stay behind.
+                onPressed: ready.isEmpty || importingAny ? null : onImportAll,
+              ),
             ),
           ),
       ],
@@ -457,6 +537,7 @@ class _StatementLine extends StatelessWidget {
     required this.sharesDestination,
     required this.canImport,
     required this.isImporting,
+    required this.isPrimary,
     required this.onRemove,
     required this.onImport,
     required this.onCreateAccount,
@@ -468,6 +549,10 @@ class _StatementLine extends StatelessWidget {
   final bool sharesDestination;
   final bool canImport;
   final bool isImporting;
+
+  /// Whether the line's « Importer » is the view's primary: only when the
+  /// file holds a single statement, since « Importer tout » takes it otherwise.
+  final bool isPrimary;
   final VoidCallback onRemove;
   final VoidCallback onImport;
   final ValueChanged<OfxAccountInfo> onCreateAccount;
@@ -525,10 +610,13 @@ class _StatementLine extends StatelessWidget {
         ),
         // An unreadable file has nothing to import: only « Retirer ».
         if (!unreadable)
-          PrimaryButton(
+          AppButton(
             key: _lineKey('importSubmitButton', statement),
             label: l10n.importSubmit,
             loadingLabel: l10n.importSubmitting,
+            variant: isPrimary
+                ? AppButtonVariant.primary
+                : AppButtonVariant.secondary,
             isLoading: isImporting,
             // Disabled until the statement has its own destination. The
             // detection result always says what is missing, so this never
