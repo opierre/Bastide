@@ -8,10 +8,14 @@ import '../domain/auth_user.dart';
 final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
 
 /// Session state: `null` = signed out, otherwise the current user.
-/// `build()` restores a session from a stored token on app launch; `login`,
-/// `register`, `startSession` (after a password reset), and `logout` drive the
-/// rest of the lifecycle. The router
-/// watches this to gate navigation (see `core/router/app_router.dart`).
+/// `build()` restores a session from a stored token on app launch;
+/// `startSession` (after a login, a registration or a password reset) and
+/// `logout` drive the rest of the lifecycle. The router watches this to gate
+/// navigation (see `core/router/app_router.dart`).
+///
+/// It never holds a form's failure: a rejected login or registration leaves
+/// the user signed out, and the error belongs to that form's own controller
+/// (`auth_form_controllers.dart`), so it cannot leak onto another screen.
 class AuthController extends AsyncNotifier<AuthUser?> {
   @override
   Future<AuthUser?> build() async {
@@ -30,46 +34,8 @@ class AuthController extends AsyncNotifier<AuthUser?> {
     }
   }
 
-  /// Signs in with [identifier]: the email or the display name.
-  Future<void> login({
-    required String identifier,
-    required String password,
-  }) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final session = await ref
-          .read(authRepositoryProvider)
-          .login(identifier: identifier, password: password);
-      await _persistSession(session);
-      return session.user;
-    });
-  }
-
-  Future<void> register({
-    required String email,
-    required String password,
-    required String displayName,
-    required String locale,
-    required String currency,
-  }) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final session = await ref
-          .read(authRepositoryProvider)
-          .register(
-            email: email,
-            password: password,
-            displayName: displayName,
-            locale: locale,
-            currency: currency,
-          );
-      await _persistSession(session);
-      return session.user;
-    });
-  }
-
-  /// Adopts a session obtained outside [login]/[register] — a password reset —
-  /// so the router treats the user as signed in from here on.
+  /// Adopts a session a form obtained — login, registration or password
+  /// reset — so the router treats the user as signed in from here on.
   Future<void> startSession(AuthSession session) async {
     await _persistSession(session);
     state = AsyncValue.data(session.user);

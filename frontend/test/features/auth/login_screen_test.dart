@@ -4,22 +4,22 @@ import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
-import 'package:bastide/features/auth/application/auth_controller.dart';
+import 'package:bastide/features/auth/application/auth_form_controllers.dart';
 import 'package:bastide/features/auth/presentation/login_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../support/fake_auth_controller.dart';
+import '../../support/fake_auth_forms.dart';
 
 Widget _wrap({
-  required FakeAuthController controller,
+  required FakeLoginController controller,
   Locale locale = const Locale('fr'),
   ThemeData? theme,
 }) {
   return ProviderScope(
-    overrides: [authControllerProvider.overrideWith(() => controller)],
+    overrides: [loginControllerProvider.overrideWith(() => controller)],
     child: MaterialApp(
       locale: locale,
       theme: theme ?? AppTheme.dark,
@@ -62,7 +62,7 @@ void main() {
     tester,
   ) async {
     _useReferenceFrame(tester);
-    await tester.pumpWidget(_wrap(controller: FakeAuthController()));
+    await tester.pumpWidget(_wrap(controller: FakeLoginController()));
     await tester.pumpAndSettle();
 
     expect(
@@ -95,7 +95,7 @@ void main() {
   });
 
   testWidgets('the password reveal toggles obscuring', (tester) async {
-    await tester.pumpWidget(_wrap(controller: FakeAuthController()));
+    await tester.pumpWidget(_wrap(controller: FakeLoginController()));
     await tester.pumpAndSettle();
 
     expect(_field(tester, 'loginPasswordField').obscureText, isTrue);
@@ -107,7 +107,7 @@ void main() {
   });
 
   testWidgets('submitting empty fields shows the field errors', (tester) async {
-    final controller = FakeAuthController();
+    final controller = FakeLoginController();
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
@@ -131,14 +131,14 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Le mot de passe est requis.'), findsOneWidget);
-    expect(controller.loginCalls, isEmpty);
+    expect(controller.calls, isEmpty);
   });
 
   testWidgets(
     'a rejected pair reddens both fields and says so once, under the password',
     (tester) async {
-      final controller = FakeAuthController(
-        loginError: const ApiFailure(
+      final controller = FakeLoginController(
+        error: const ApiFailure(
           code: 'INVALID_CREDENTIALS',
           message: 'invalid credentials',
         ),
@@ -170,8 +170,8 @@ void main() {
   );
 
   testWidgets('a rejected pair is reported in English too', (tester) async {
-    final controller = FakeAuthController(
-      loginError: const ApiFailure(
+    final controller = FakeLoginController(
+      error: const ApiFailure(
         code: 'INVALID_CREDENTIALS',
         message: 'invalid credentials',
       ),
@@ -192,7 +192,7 @@ void main() {
     tester,
   ) async {
     final hold = Completer<void>();
-    await tester.pumpWidget(_wrap(controller: FakeAuthController(hold: hold)));
+    await tester.pumpWidget(_wrap(controller: FakeLoginController(hold: hold)));
     await tester.pumpAndSettle();
     final width = tester
         .getSize(find.byKey(const Key('loginSubmitButton')))
@@ -217,7 +217,7 @@ void main() {
   testWidgets('submitting calls the controller with the typed credentials', (
     tester,
   ) async {
-    final controller = FakeAuthController();
+    final controller = FakeLoginController();
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
@@ -225,13 +225,13 @@ void main() {
     await tester.tap(find.byKey(const Key('loginSubmitButton')));
     await tester.pumpAndSettle();
 
-    expect(controller.loginCalls, hasLength(1));
-    expect(controller.loginCalls.single.identifier, 'ada@example.com');
-    expect(controller.loginCalls.single.password, 'secret123');
+    expect(controller.calls, hasLength(1));
+    expect(controller.calls.single.identifier, 'ada@example.com');
+    expect(controller.calls.single.password, 'secret123');
   });
 
   testWidgets('Enter in the e-mail field submits too', (tester) async {
-    final controller = FakeAuthController();
+    final controller = FakeLoginController();
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
@@ -240,13 +240,13 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
 
-    expect(controller.loginCalls, hasLength(1));
+    expect(controller.calls, hasLength(1));
   });
 
   testWidgets('a username is submitted as the identifier, like an email', (
     tester,
   ) async {
-    final controller = FakeAuthController();
+    final controller = FakeLoginController();
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
@@ -254,7 +254,7 @@ void main() {
     await tester.tap(find.byKey(const Key('loginSubmitButton')));
     await tester.pumpAndSettle();
 
-    expect(controller.loginCalls.single.identifier, 'ada.lovelace');
+    expect(controller.calls.single.identifier, 'ada.lovelace');
   });
 
   for (final (name, theme) in [
@@ -266,7 +266,7 @@ void main() {
     ) async {
       _useReferenceFrame(tester);
       await tester.pumpWidget(
-        _wrap(controller: FakeAuthController(), theme: theme),
+        _wrap(controller: FakeLoginController(), theme: theme),
       );
       await tester.pumpAndSettle();
 
@@ -282,7 +282,7 @@ void main() {
   testWidgets('renders under en with the same geometry', (tester) async {
     _useReferenceFrame(tester);
     await tester.pumpWidget(
-      _wrap(controller: FakeAuthController(), locale: const Locale('en')),
+      _wrap(controller: FakeLoginController(), locale: const Locale('en')),
     );
     await tester.pumpAndSettle();
 

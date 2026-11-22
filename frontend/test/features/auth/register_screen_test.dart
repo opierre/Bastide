@@ -1,29 +1,35 @@
 import 'dart:async';
 
 import 'package:bastide/core/api/api_client.dart';
+import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/l10n/locale_provider.dart';
+import 'package:bastide/core/storage/token_store.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
+import 'package:bastide/features/auth/application/auth_form_controllers.dart';
+import 'package:bastide/features/auth/presentation/login_screen.dart';
 import 'package:bastide/features/auth/presentation/register_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mocktail/mocktail.dart';
 
-import '../../support/fake_auth_controller.dart';
+import '../../support/fake_auth_forms.dart';
 
 /// The app's own wiring: the locale comes from [localeProvider], so the
 /// language segment switches the screen like it does in the app.
 Widget _wrap({
-  required FakeAuthController controller,
+  required FakeRegisterController controller,
   Locale locale = const Locale('fr'),
   ThemeData? theme,
 }) {
   return ProviderScope(
     overrides: [
-      authControllerProvider.overrideWith(() => controller),
+      registerControllerProvider.overrideWith(() => controller),
       localeProvider.overrideWith(() => _FixedLocale(locale)),
     ],
     child: Consumer(
@@ -37,6 +43,10 @@ Widget _wrap({
     ),
   );
 }
+
+class _MockApiClient extends Mock implements ApiClient {}
+
+class _MockTokenStore extends Mock implements TokenStore {}
 
 class _FixedLocale extends LocaleController {
   _FixedLocale(this.initial);
@@ -90,7 +100,7 @@ void main() {
     tester,
   ) async {
     _useReferenceFrame(tester);
-    await tester.pumpWidget(_wrap(controller: FakeAuthController()));
+    await tester.pumpWidget(_wrap(controller: FakeRegisterController()));
     await tester.pumpAndSettle();
 
     expect(find.text("Nom d’utilisateur"), findsOneWidget);
@@ -124,7 +134,7 @@ void main() {
   });
 
   testWidgets('the currency reads « EUR, euro »', (tester) async {
-    await tester.pumpWidget(_wrap(controller: FakeAuthController()));
+    await tester.pumpWidget(_wrap(controller: FakeRegisterController()));
     await tester.pumpAndSettle();
 
     expect(find.text('EUR, euro'), findsOneWidget);
@@ -133,7 +143,7 @@ void main() {
   testWidgets('empty: submit disabled, the password minimum as guidance', (
     tester,
   ) async {
-    await tester.pumpWidget(_wrap(controller: FakeAuthController()));
+    await tester.pumpWidget(_wrap(controller: FakeRegisterController()));
     await tester.pumpAndSettle();
 
     expect(_submitEnabled(tester), isFalse);
@@ -143,7 +153,7 @@ void main() {
   testWidgets('valid: the check form of the helper and submit enabled', (
     tester,
   ) async {
-    await tester.pumpWidget(_wrap(controller: FakeAuthController()));
+    await tester.pumpWidget(_wrap(controller: FakeRegisterController()));
     await tester.pumpAndSettle();
 
     await _fillValidForm(tester);
@@ -156,7 +166,7 @@ void main() {
   testWidgets('a short password left behind turns into « Encore n »', (
     tester,
   ) async {
-    await tester.pumpWidget(_wrap(controller: FakeAuthController()));
+    await tester.pumpWidget(_wrap(controller: FakeRegisterController()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('registerPasswordField')));
@@ -187,8 +197,8 @@ void main() {
   testWidgets('a taken email is reported on the field, not as a banner', (
     tester,
   ) async {
-    final controller = FakeAuthController(
-      registerError: const ApiFailure(code: 'EMAIL_TAKEN', message: 'taken'),
+    final controller = FakeRegisterController(
+      error: const ApiFailure(code: 'EMAIL_TAKEN', message: 'taken'),
     );
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
@@ -206,7 +216,7 @@ void main() {
   testWidgets('a malformed name is flagged and keeps submit disabled', (
     tester,
   ) async {
-    await tester.pumpWidget(_wrap(controller: FakeAuthController()));
+    await tester.pumpWidget(_wrap(controller: FakeRegisterController()));
     await tester.pumpAndSettle();
 
     await _fillValidForm(tester);
@@ -231,7 +241,7 @@ void main() {
   testWidgets('a name with a space is accepted and sent as typed', (
     tester,
   ) async {
-    final controller = FakeAuthController();
+    final controller = FakeRegisterController();
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
 
@@ -245,15 +255,12 @@ void main() {
     expect(find.textContaining('lettres sans accent'), findsNothing);
     expect(_submitEnabled(tester), isTrue);
     await _tapSubmit(tester);
-    expect(controller.registerCalls.single.displayName, 'Camille Dubois');
+    expect(controller.calls.single.displayName, 'Camille Dubois');
   });
 
   testWidgets('a taken name is reported on its field', (tester) async {
-    final controller = FakeAuthController(
-      registerError: const ApiFailure(
-        code: 'DISPLAY_NAME_TAKEN',
-        message: 'taken',
-      ),
+    final controller = FakeRegisterController(
+      error: const ApiFailure(code: 'DISPLAY_NAME_TAKEN', message: 'taken'),
     );
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
@@ -266,7 +273,9 @@ void main() {
 
   testWidgets('loading: « Création… » and the fields disabled', (tester) async {
     final hold = Completer<void>();
-    await tester.pumpWidget(_wrap(controller: FakeAuthController(hold: hold)));
+    await tester.pumpWidget(
+      _wrap(controller: FakeRegisterController(hold: hold)),
+    );
     await tester.pumpAndSettle();
 
     await _fillValidForm(tester);
@@ -288,7 +297,7 @@ void main() {
   });
 
   testWidgets('choosing English switches the screen at once', (tester) async {
-    await tester.pumpWidget(_wrap(controller: FakeAuthController()));
+    await tester.pumpWidget(_wrap(controller: FakeRegisterController()));
     await tester.pumpAndSettle();
 
     await tester.ensureVisible(
@@ -306,7 +315,7 @@ void main() {
   testWidgets(
     'submitting calls the controller with the chosen locale and currency',
     (tester) async {
-      final controller = FakeAuthController();
+      final controller = FakeRegisterController();
       await tester.pumpWidget(_wrap(controller: controller));
       await tester.pumpAndSettle();
 
@@ -335,8 +344,8 @@ void main() {
 
       await _tapSubmit(tester);
 
-      expect(controller.registerCalls, hasLength(1));
-      final call = controller.registerCalls.single;
+      expect(controller.calls, hasLength(1));
+      final call = controller.calls.single;
       expect(call.email, 'ada@example.com');
       expect(call.password, _validPassword);
       expect(call.displayName, 'ada.lovelace');
@@ -354,7 +363,7 @@ void main() {
     ) async {
       _useReferenceFrame(tester);
       await tester.pumpWidget(
-        _wrap(controller: FakeAuthController(), theme: theme),
+        _wrap(controller: FakeRegisterController(), theme: theme),
       );
       await tester.pumpAndSettle();
 
@@ -372,7 +381,7 @@ void main() {
   ) async {
     _useReferenceFrame(tester);
     await tester.pumpWidget(
-      _wrap(controller: FakeAuthController(), locale: const Locale('en')),
+      _wrap(controller: FakeRegisterController(), locale: const Locale('en')),
     );
     await tester.pumpAndSettle();
 
@@ -385,5 +394,157 @@ void main() {
       AppSizes.authColumn,
     );
     expect(tester.takeException(), isNull);
+  });
+
+  group('#319: only registration errors, cleared on edit', () {
+    const loginError = 'Identifiant ou mot de passe incorrect.';
+
+    testWidgets('a failed login does not follow the user to « Inscription »', (
+      tester,
+    ) async {
+      _useReferenceFrame(tester);
+      final apiClient = _MockApiClient();
+      final tokenStore = _MockTokenStore();
+      when(() => tokenStore.read()).thenAnswer((_) async => null);
+      when(() => tokenStore.write(any())).thenAnswer((_) async {});
+      when(
+        () => apiClient.post('/auth/login', body: any(named: 'body')),
+      ).thenThrow(
+        const ApiFailure(code: 'INVALID_CREDENTIALS', message: 'invalid'),
+      );
+      when(
+        () => apiClient.post('/auth/register', body: any(named: 'body')),
+      ).thenAnswer(
+        (_) async => {
+          'token': 'tok-1',
+          'user': {
+            'id': 'u1',
+            'email': 'ada@example.com',
+            'display_name': 'ada.lovelace',
+            'locale': 'fr',
+            'currency': 'EUR',
+          },
+          'recovery_code': 'ABCD-EFGH-IJKL-MNOP',
+        },
+      );
+      final router = GoRouter(
+        initialLocation: LoginScreen.path,
+        routes: [
+          GoRoute(
+            path: LoginScreen.path,
+            builder: (_, _) => const LoginScreen(),
+          ),
+          GoRoute(
+            path: RegisterScreen.path,
+            builder: (_, _) => const RegisterScreen(),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      final container = ProviderContainer(
+        overrides: [
+          apiClientProvider.overrideWithValue(apiClient),
+          tokenStoreProvider.overrideWithValue(tokenStore),
+          localeProvider.overrideWith(() => _FixedLocale(const Locale('fr'))),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            locale: const Locale('fr'),
+            theme: AppTheme.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('loginIdentifierField')),
+        'ada@example.com',
+      );
+      await tester.enterText(
+        find.byKey(const Key('loginPasswordField')),
+        'wrong-password',
+      );
+      await tester.tap(find.byKey(const Key('loginSubmitButton')));
+      await tester.pumpAndSettle();
+      expect(find.text(loginError), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('goToRegisterButton')));
+      await tester.pumpAndSettle();
+      expect(find.byType(RegisterScreen), findsOneWidget);
+      expect(find.text(loginError), findsNothing);
+
+      await _fillValidForm(tester);
+      await _tapSubmit(tester);
+
+      expect(find.text(loginError), findsNothing);
+      expect(find.byKey(const Key('registerErrorText')), findsNothing);
+      expect(container.read(authControllerProvider).value, isNotNull);
+    });
+
+    testWidgets('an error under the button goes once a field is edited', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeRegisterController(
+            error: const ApiFailure(code: 'UNKNOWN_ERROR', message: 'boom'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await _fillValidForm(tester);
+      await _tapSubmit(tester);
+      expect(find.byKey(const Key('registerErrorText')), findsOneWidget);
+
+      await tester.enterText(
+        find.byKey(const Key('registerPasswordField')),
+        '${_validPassword}x',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('registerErrorText')), findsNothing);
+    });
+
+    testWidgets('a taken e-mail goes once the e-mail is edited', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeRegisterController(
+            error: const ApiFailure(code: 'EMAIL_TAKEN', message: 'taken'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      const taken = 'Cet e-mail a déjà un compte. Connectez-vous.';
+
+      await _fillValidForm(tester);
+      await _tapSubmit(tester);
+      expect(find.text(taken), findsOneWidget);
+
+      // Another field's edit doesn't answer it.
+      await tester.enterText(
+        find.byKey(const Key('registerDisplayNameField')),
+        'ada.byron',
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(taken), findsOneWidget);
+
+      await tester.enterText(
+        find.byKey(const Key('registerEmailField')),
+        'ada.byron@example.com',
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(taken), findsNothing);
+    });
   });
 }

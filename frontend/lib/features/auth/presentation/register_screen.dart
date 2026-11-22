@@ -11,7 +11,7 @@ import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
-import '../application/auth_controller.dart';
+import '../application/auth_form_controllers.dart';
 import '../domain/display_name.dart';
 import '../domain/password_rule.dart';
 import '../domain/supported_currencies.dart';
@@ -76,10 +76,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       isLongEnoughPassword(_passwordController.text);
 
   Future<void> _submit(String locale) async {
-    if (!_isValid || ref.read(authControllerProvider).isLoading) return;
+    if (!_isValid || ref.read(registerControllerProvider).isLoading) return;
     await ref
-        .read(authControllerProvider.notifier)
-        .register(
+        .read(registerControllerProvider.notifier)
+        .submit(
           email: _emailController.text.trim(),
           password: _passwordController.text,
           displayName: _displayNameController.text.trim(),
@@ -115,9 +115,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final authState = ref.watch(authControllerProvider);
-    final isSubmitting = authState.isLoading;
-    final error = authState.hasError ? authState.error : null;
+    final submission = ref.watch(registerControllerProvider);
+    final isSubmitting = submission.isLoading;
+    final error = submission.hasError ? submission.error : null;
     final displayNameError = _displayNameError(l10n, error);
     final emailError = _emailError(l10n, error);
     final password = _passwordController.text;
@@ -135,7 +135,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ? localizeAuthError(l10n, error)
         : null;
 
-    void refresh(String _) => setState(() {});
+    // Editing a field clears the error it answers, then re-validates.
+    ValueChanged<String> edited(RegisterField field) => (_) {
+      ref.read(registerControllerProvider.notifier).fieldEdited(field);
+      setState(() {});
+    };
 
     return AuthScaffold(
       children: [
@@ -149,7 +153,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             autocorrect: false,
             enabled: !isSubmitting,
             hasError: displayNameError != null,
-            onChanged: refresh,
+            onChanged: edited(RegisterField.displayName),
           ),
         ),
         LabeledField(
@@ -163,7 +167,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             autocorrect: false,
             enabled: !isSubmitting,
             hasError: emailError != null,
-            onChanged: refresh,
+            onChanged: edited(RegisterField.email),
           ),
         ),
         LabeledField(
@@ -178,7 +182,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 autofillHint: AutofillHints.newPassword,
                 enabled: !isSubmitting,
                 hasError: passwordShort,
-                onChanged: refresh,
+                onChanged: edited(RegisterField.password),
                 onSubmitted: (_) => _submit(locale),
               ),
               NewPasswordHelper(password: password, flagShort: _passwordLeft),
