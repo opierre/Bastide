@@ -99,14 +99,15 @@ Widget _wrap({
       theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      // The title-bar controls ride along, as the shell would place them.
+      // The title-bar controls ride along in a 48 px row, as the shell
+      // places them.
       home: const Scaffold(
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: AccountsTopBarActions(),
+            SizedBox(
+              height: AppSizes.titleBar,
+              child: Row(children: [Spacer(), AccountsTopBarActions()]),
             ),
             Expanded(child: AccountsScreen()),
           ],
@@ -480,6 +481,24 @@ void main() {
       ];
       expect(tops, orderedEquals([...tops]..sort()));
       expect(find.text('Sans établissement'), findsOneWidget);
+    });
+
+    testWidgets('the switch is as tall as the other title-bar controls', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        _wrap(controller: FakeAccountsController(initialAccounts: _mixed())),
+      );
+
+      final switchSize = tester.getSize(
+        find.byKey(const Key('accountsGroupingSwitch')),
+      );
+      expect(switchSize.height, AppSizes.button);
+      expect(
+        tester.getSize(find.byKey(const Key('addAccountButton'))).height,
+        switchSize.height,
+      );
     });
 
     testWidgets('a remembered grouping is restored', (tester) async {

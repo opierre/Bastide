@@ -212,6 +212,34 @@ void main() {
       expect(well.borderRadius, BorderRadius.circular(AppRadii.control));
     });
 
+    testWidgets('a height pins the control, even in a taller slot', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        SizedBox(
+          height: AppSizes.titleBar,
+          child: Row(
+            children: [
+              AppSegmented<String>(
+                segments: const [
+                  AppSegment(value: 'system', label: 'Système'),
+                  AppSegment(value: 'dark', label: 'Sombre'),
+                ],
+                value: 'dark',
+                onChanged: (_) {},
+                height: AppSizes.button,
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(
+        tester.getSize(find.byType(AppSegmented<String>)).height,
+        AppSizes.button,
+      );
+    });
+
     testWidgets('a tap selects; disabled is 45 % and inert', (tester) async {
       String? picked;
       await pumpHost(tester, segmented('dark', (v) => picked = v));

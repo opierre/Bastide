@@ -25,6 +25,7 @@ class AppSegmented<T> extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.expand = false,
+    this.height,
   });
 
   final List<AppSegment<T>> segments;
@@ -37,6 +38,12 @@ class AppSegmented<T> extends StatelessWidget {
   /// each to its label.
   final bool expand;
 
+  /// Pins the whole control to this height, the label centred in each
+  /// segment. The title bar passes [AppSizes.button] so the control matches
+  /// its other 28 px contextual controls (`00` §5): its 48 px height would
+  /// otherwise stretch the segments. `null` sizes the control to its labels.
+  final double? height;
+
   @override
   Widget build(BuildContext context) {
     final onChanged = this.onChanged;
@@ -48,6 +55,7 @@ class AppSegmented<T> extends StatelessWidget {
             key: segments[i].key,
             label: segments[i].label,
             selected: segments[i].value == value,
+            compact: height != null,
             onTap: onChanged == null
                 ? null
                 : () => onChanged(segments[i].value),
@@ -59,6 +67,7 @@ class AppSegmented<T> extends StatelessWidget {
     return Opacity(
       opacity: onChanged == null ? 0.45 : 1,
       child: Container(
+        height: height,
         padding: const EdgeInsets.all(AppSpacing.xxs),
         decoration: BoxDecoration(
           color: context.colors.field,
@@ -85,11 +94,16 @@ class _Segment extends StatefulWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    required this.compact,
   });
 
   final String label;
   final bool selected;
   final VoidCallback? onTap;
+
+  /// The control's height is fixed: the segment fills it and drops its
+  /// vertical padding, so the label stays centred without overflowing.
+  final bool compact;
 
   @override
   State<_Segment> createState() => _SegmentState();
@@ -128,9 +142,9 @@ class _SegmentState extends State<_Segment> {
             focused: _focused,
             radius: AppRadii.item,
             child: Container(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 horizontal: AppSpacing.sm + AppSpacing.xxs,
-                vertical: AppSpacing.xxs,
+                vertical: widget.compact ? 0 : AppSpacing.xxs,
               ),
               alignment: Alignment.center,
               decoration: BoxDecoration(

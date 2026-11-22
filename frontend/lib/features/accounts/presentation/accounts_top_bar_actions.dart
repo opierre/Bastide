@@ -32,6 +32,7 @@ class AccountsTopBarActions extends ConsumerWidget {
         AppSegmented<AccountsGrouping>(
           key: const Key('accountsGroupingSwitch'),
           value: grouping,
+          height: AppSizes.button,
           segments: [
             AppSegment(
               key: const Key('accountsGroupingByType'),
