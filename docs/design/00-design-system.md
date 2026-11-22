@@ -127,6 +127,14 @@ patterns, file names, file paths, URLs and codes to copy (a recovery code). Spac
 Line height 1.45 for text, 1.1 for figures. No uppercase labels, no letter-spaced labels.
 All numerals tabular.
 
+**No-break spaces.** A line never breaks inside a figure, between a figure and its unit, or
+between a day and its month. In French, `intl` groups thousands with U+202F (narrow no-break
+space) and puts U+00A0 (no-break space) before « € » and « % » (« 1 234,56 € », « 35 % »):
+keep what it emits, never an ordinary space. Any other unit after a figure (« 320 k€ »,
+« 2,2 × ») takes U+00A0. A date in words takes U+00A0 between the day and the month
+(« 12 mai 2026 », « May 12, 2026 »); `DateFormat` writes an ordinary space there, so the
+formatter replaces it.
+
 ## 4. Shape, spacing, density
 
 - **Radius:** 6 on controls (buttons, fields, nav items, segmented, tabs' focus), 4 on items

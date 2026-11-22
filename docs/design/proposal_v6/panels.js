@@ -925,13 +925,20 @@ S.accent = 'encre';
 const DOCS = ['system', 'logos', 'textures', 'splash', 'window', 'm-frame', 'm-accounts', 'm-profile', 'm-data', 'm-categories', 'm-rules', 'm-transactions', 'm-subscriptions', 'm-goals', 'm-loans', 'm-investments', 'm-networth', 'm-simulator'];
 S.logo = 'plan'; S.tex = 'tomettes';
 const $ = s => document.querySelector(s);
+/* 00 §3 « No-break spaces »: thousands take U+202F, a unit U+00A0, a day and its month U+00A0, as the app's formatters write them */
+const MONTHS = String.raw`janv\.|févr\.|mars|avr\.|mai|juin|juil\.|août|sept\.|oct\.|nov\.|déc\.|janvier|février|avril|juillet|septembre|octobre|novembre|décembre`;
+const NOBREAK = [[/(\d) (?=\d{3}(?!\d))/g, '$1\u202f'], [/(\d) (?=(?:k?€|%|×)(?!\p{L}))/gu, '$1\u00a0'], [new RegExp(String.raw`(?<![\d,])(\d{1,2}|1er) (?=(?:${MONTHS})(?!\p{L}))`, 'gu'), '$1\u00a0']];
+function noBreak(root) {
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let n; (n = w.nextNode());) { const t = NOBREAK.reduce((v, [re, to]) => v.replace(re, to), n.nodeValue); if (t !== n.nodeValue) n.nodeValue = t; }
+}
 function render() {
   MARK = markSvg(S.logo); TEX = S.tex !== 'off' || S.panel === 'textures';
   const p = P[S.panel], fit = $('#fit'), multi = typeof p === 'object';
   if (multi && !p[S.variant]) S.variant = 'A';
   let html = DOCS.includes(S.panel) ? p(S.theme, S.accent) : multi ? p[S.variant][1]() : p();
   if (!DOCS.includes(S.panel)) html = html.startsWith('<div class="app') ? html.replace('<div class="app', `<div data-theme="${S.theme}" data-accent="${S.accent}" data-tex="${S.tex}" class="app`) : `<div class="app" data-theme="${S.theme}" data-accent="${S.accent}" data-tex="${S.tex}">${html}</div>`;
-  fit.innerHTML = html; fit.classList.toggle('doc', DOCS.includes(S.panel));
+  fit.innerHTML = html; fit.classList.toggle('doc', DOCS.includes(S.panel)); noBreak(fit);
   $('#g-var').style.display = multi ? '' : 'none';
   $('#s-var').innerHTML = multi ? Object.entries(p).map(([k, v]) => `<button data-v="${k}">${v[0]}</button>`).join('') : '';
   for (const [id, key] of [['#s-var', 'variant'], ['#s-theme', 'theme']]) document.querySelectorAll(id + ' button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.v === S[key]); b.onclick = () => { S[key] = b.dataset.v; render(); }; });
