@@ -3486,13 +3486,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get allocationDateInvalid => 'Date invalide.';
 
   @override
-  String get allocationNoteLabel => 'Note (optionnelle)';
+  String get allocationNoteLabel => 'Note (facultative)';
 
   @override
   String get allocationNoteHint => 'Ex. Virement mensuel';
-
-  @override
-  String get allocationCancel => 'Annuler';
 
   @override
   String get allocationSubmit => 'Ajouter';

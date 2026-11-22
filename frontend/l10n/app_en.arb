@@ -929,7 +929,6 @@
   "allocationDateInvalid": "Invalid date.",
   "allocationNoteLabel": "Note (optional)",
   "allocationNoteHint": "e.g. Monthly transfer",
-  "allocationCancel": "Cancel",
   "allocationSubmit": "Add",
   "goalErrorNotFound": "This goal no longer exists.",
   "goalErrorAllocationNotFound": "This allocation no longer exists.",

@@ -3475,9 +3475,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allocationNoteHint => 'e.g. Monthly transfer';
 
   @override
-  String get allocationCancel => 'Cancel';
-
-  @override
   String get allocationSubmit => 'Add';
 
   @override

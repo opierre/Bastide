@@ -5480,7 +5480,7 @@ abstract class AppLocalizations {
   /// Label of the optional allocation note field.
   ///
   /// In fr, this message translates to:
-  /// **'Note (optionnelle)'**
+  /// **'Note (facultative)'**
   String get allocationNoteLabel;
 
   /// Placeholder example in the allocation note field.
@@ -5488,12 +5488,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ex. Virement mensuel'**
   String get allocationNoteHint;
-
-  /// Cancel action in the allocation modal footer.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get allocationCancel;
 
   /// Confirm action appending the allocation.
   ///

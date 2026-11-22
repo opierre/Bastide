@@ -4362,17 +4362,13 @@
   "@allocationDateInvalid": {
     "description": "Validation message when the allocation date cannot be read in the current locale."
   },
-  "allocationNoteLabel": "Note (optionnelle)",
+  "allocationNoteLabel": "Note (facultative)",
   "@allocationNoteLabel": {
     "description": "Label of the optional allocation note field."
   },
   "allocationNoteHint": "Ex. Virement mensuel",
   "@allocationNoteHint": {
     "description": "Placeholder example in the allocation note field."
-  },
-  "allocationCancel": "Annuler",
-  "@allocationCancel": {
-    "description": "Cancel action in the allocation modal footer."
   },
   "allocationSubmit": "Ajouter",
   "@allocationSubmit": {
