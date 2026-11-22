@@ -13,11 +13,11 @@ import '../application/goals_controller.dart';
 import '../domain/goal.dart';
 import 'goal_labels.dart';
 
-/// The crop window: the modal's content width (440 − 2 × 24) at 44:19.
-const _viewport = Size(
-  AppSizes.inspector - 2 * AppSpacing.lg,
-  (AppSizes.inspector - 2 * AppSpacing.lg) / AppGoalBanner.aspectRatio,
-);
+/// The crop window: the full body width of the 440 px modal (440 − 2 × 24 =
+/// 392) at 44:19, so 392 × 169 (proposal v6 `m-frame`, « Recadrage
+/// bannière »).
+const _bodyWidth = AppModalSizes.w440 - 2 * AppModalSizes.padding;
+const _viewport = Size(_bodyWidth, _bodyWidth / AppGoalBanner.aspectRatio);
 
 /// Opens the picker, then the 44:19 crop step, then uploads the result as
 /// [goal]'s banner. The avatar's picker and crop, framed for a banner.
@@ -100,7 +100,7 @@ class GoalImageCropModal extends ConsumerWidget {
       saveLabel: l10n.goalImageCropSave,
       busy: state.busy,
       viewport: _viewport,
-      width: AppSizes.inspector,
+      width: AppModalSizes.w440,
       failureMessage: switch (state.failure) {
         final failure? => goalImageFailureText(l10n, failure),
         null => null,
