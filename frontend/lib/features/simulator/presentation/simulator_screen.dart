@@ -27,9 +27,6 @@ class SimulatorScreen extends ConsumerWidget {
 
   static const path = '/simulations';
 
-  /// The inputs pane's width (`14` §Layout).
-  static const inputsWidth = 380.0;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
@@ -88,7 +85,7 @@ class _SimulatorPanel extends StatelessWidget {
       children: [
         Container(
           key: const Key('simulatorInputsPane'),
-          width: SimulatorScreen.inputsWidth,
+          width: AppSimulator.inputsWidth,
           decoration: BoxDecoration(
             border: Border(right: BorderSide(color: context.colors.line)),
           ),
@@ -98,9 +95,9 @@ class _SimulatorPanel extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SimulatorForm(state: state),
-                const SizedBox(height: AppSpacing.fieldGap),
+                const SizedBox(height: AppSimulator.inputsGap),
                 Divider(height: 1, thickness: 1, color: context.colors.line),
-                const SizedBox(height: AppSpacing.fieldGap),
+                const SizedBox(height: AppSimulator.inputsGap),
                 ScenarioList(state: state),
               ],
             ),
@@ -123,13 +120,8 @@ class _ReadingPane extends StatelessWidget {
 
   final SimulatorState state;
 
-  /// The blocks' spacing (`14` §Reading pane): 22 px, a hairline in the
-  /// middle of each gap.
-  static const _halfGap = 11.0;
-
-  /// Below this height the pane scrolls and the chart keeps a fixed height.
-  static const _minFlexibleHeight = 640.0;
-  static const _fixedChartHeight = 220.0;
+  /// Half the blocks' gap: the hairline sits in the middle of each.
+  static const _halfGap = AppSimulator.readingGap / 2;
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +144,7 @@ class _ReadingPane extends StatelessWidget {
           key: const Key('simulatorComputeError'),
           message: l10n.simulatorComputeFailed,
         ),
-        const SizedBox(height: _halfGap * 2),
+        const SizedBox(height: AppSimulator.readingGap),
       ],
       SimulationSummaryLine(state: state),
       hairline(),
@@ -168,7 +160,7 @@ class _ReadingPane extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxHeight >= _minFlexibleHeight) {
+        if (constraints.maxHeight >= AppSimulator.flexibleMinHeight) {
           return Padding(
             padding: padding,
             child: Column(
@@ -185,7 +177,7 @@ class _ReadingPane extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: blocks(
               SizedBox(
-                height: _fixedChartHeight,
+                height: AppSimulator.fixedChartHeight,
                 child: YearlyProjection(result: state.result),
               ),
             ),
@@ -209,7 +201,7 @@ class _LoadingView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            width: SimulatorScreen.inputsWidth,
+            width: AppSimulator.inputsWidth,
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
               border: Border(right: BorderSide(color: context.colors.line)),
@@ -218,9 +210,9 @@ class _LoadingView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SkeletonBlock(height: AppSizes.formField * 3 + 56),
-                SizedBox(height: AppSpacing.fieldGap),
+                SizedBox(height: AppSimulator.inputsGap),
                 SkeletonBlock(height: AppSizes.formField),
-                SizedBox(height: AppSpacing.fieldGap),
+                SizedBox(height: AppSimulator.inputsGap),
                 SkeletonBlock(height: AppSizes.tableRowTwoLines * 3),
               ],
             ),

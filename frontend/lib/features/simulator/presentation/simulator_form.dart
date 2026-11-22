@@ -133,7 +133,7 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
     final errorField = simulatorErrorField(state.computeError);
     final errorMessage = localizeSimulatorError(l10n, state.computeError);
     const rowGap = SizedBox(height: AppSpacing.smPlus);
-    const blockGap = SizedBox(height: AppSpacing.fieldGap);
+    const blockGap = SizedBox(height: AppSimulator.inputsGap);
 
     return KeyedSubtree(
       key: const Key('simulatorForm'),

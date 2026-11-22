@@ -303,12 +303,12 @@ class _StackedBarsPainter extends CustomPainter {
   final TextStyle labelStyle;
   final TextDirection textDirection;
 
-  static const _topPad = 8.0;
+  static const _topPad = AppSpacing.sm;
   static const _stackGap = AppChart.stackGap;
-  static const _maxBarWidth = 44.0;
+  static const _maxBarWidth = AppSimulator.projectionBarMaxWidth;
 
   /// Gap between the plot's floor and a year label.
-  static const _axisLabelGap = 6.0;
+  static const _axisLabelGap = AppSpacing.xsPlus;
 
   TextPainter _text(String text) => TextPainter(
     text: TextSpan(text: text, style: labelStyle),

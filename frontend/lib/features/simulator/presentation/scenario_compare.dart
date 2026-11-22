@@ -106,8 +106,7 @@ class _CompareTable extends StatelessWidget {
   final SimulatorState state;
   final List<ComparisonColumn> columns;
 
-  /// The row-label column (`14` §Comparison).
-  static const _labelWidth = 190.0;
+  static const _labelWidth = AppSimulator.compareLabelColumn;
 
   @override
   Widget build(BuildContext context) {

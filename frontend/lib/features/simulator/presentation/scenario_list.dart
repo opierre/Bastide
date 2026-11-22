@@ -86,7 +86,7 @@ class ScenarioList extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           heading,
-          const SizedBox(height: AppSpacing.fieldGap),
+          const SizedBox(height: AppSimulator.inputsGap),
           NoteLine(
             key: const Key('scenariosEmpty'),
             text: l10n.simulatorScenariosEmpty,

@@ -1,5 +1,6 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/features/settings/presentation/settings_screen.dart';
@@ -484,7 +485,7 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(
           tester.getSize(find.byKey(const Key('simulatorInputsPane'))).width,
-          SimulatorScreen.inputsWidth,
+          AppSimulator.inputsWidth,
         );
         expect(find.byKey(const Key('hcsfOverStatus')), findsOneWidget);
         expect(find.byKey(const Key('projectionPlot')), findsOneWidget);
