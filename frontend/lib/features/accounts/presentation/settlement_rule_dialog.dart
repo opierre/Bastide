@@ -5,9 +5,10 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/date_field.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../rules/application/rule_preview_controller.dart';
 import '../../rules/domain/rule.dart';
@@ -17,17 +18,22 @@ import '../domain/account.dart';
 
 /// Opens the settlement-rule dialog for [card] and, once a rule is saved, says
 /// how many imported debits it filed. Resolves to whether one was saved.
+///
+/// [proposed] says Bastide raised the task itself (a card just created, a
+/// « Règle de règlement à configurer » warning): the secondary then reads
+/// « Plus tard » rather than « Annuler » (`00` §7 « Modal », Footer).
 Future<bool> showSettlementRuleDialog(
   BuildContext context,
-  Account card,
-) async {
+  Account card, {
+  bool proposed = false,
+}) async {
   // Looked up before the await: the menu or form that opened the dialog may
   // be rebuilt away by the time the rule is saved.
   final overlay = Overlay.maybeOf(context, rootOverlay: true);
   final l10n = AppLocalizations.of(context)!;
   final moved = await showAppModal<int>(
     context: context,
-    builder: (_) => SettlementRuleDialog(card: card),
+    builder: (_) => SettlementRuleDialog(card: card, proposed: proposed),
   );
   if (moved == null) return false;
   if (overlay != null && overlay.mounted) {
@@ -37,16 +43,23 @@ Future<bool> showSettlementRuleDialog(
 }
 
 /// Proposes — or edits — the one rule that files [card]'s monthly debit as a
-/// transfer.
+/// transfer (`05-accounts.md`, proposal v6 `m-accounts`).
 ///
 /// The pattern comes pre-filled with what the card's paying account shows month
 /// after month (`DEPENSES CARTE X4821`), and the live preview counts what it
 /// catches, so the user confirms a rule they can see working rather than
 /// writing one from scratch.
 class SettlementRuleDialog extends ConsumerStatefulWidget {
-  const SettlementRuleDialog({super.key, required this.card});
+  const SettlementRuleDialog({
+    super.key,
+    required this.card,
+    this.proposed = false,
+  });
 
   final Account card;
+
+  /// Bastide proposed the task: the secondary reads « Plus tard ».
+  final bool proposed;
 
   @override
   ConsumerState<SettlementRuleDialog> createState() =>
@@ -60,6 +73,7 @@ class _SettlementRuleDialogState extends ConsumerState<SettlementRuleDialog> {
   /// Guards the one-time fill of the field from the loaded state.
   bool _filled = false;
   bool _isSaving = false;
+  bool _dirty = false;
   String? _patternError;
   String? _fromError;
   String? _errorText;
@@ -98,7 +112,13 @@ class _SettlementRuleDialogState extends ConsumerState<SettlementRuleDialog> {
         );
   }
 
+  void _edited() {
+    if (!_dirty) setState(() => _dirty = true);
+    _preview();
+  }
+
   Future<void> _save() async {
+    if (_isSaving) return;
     final l10n = AppLocalizations.of(context)!;
     final pattern = _patternController.text.trim();
     final appliesFrom = _appliesFrom();
@@ -146,76 +166,85 @@ class _SettlementRuleDialogState extends ConsumerState<SettlementRuleDialog> {
       Future.microtask(_preview);
     }
 
+    final Widget body;
+    if (state.hasError) {
+      body = ModalLoadError(
+        message: l10n.settlementRuleLoadFailed,
+        onRetry: () => ref.invalidate(settlementRuleProvider(widget.card.id)),
+      );
+    } else if (loaded == null) {
+      // The proposal is the body's content: while it loads the body is its
+      // silhouette (`00` §7 « Modal », States).
+      body = const ModalLoadingBody(
+        children: [
+          SkeletonBlock(height: AppSizes.formField),
+          SkeletonBlock(height: AppSizes.formField),
+        ],
+      );
+    } else {
+      body = Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          LabeledField(
+            label: l10n.settlementRulePatternLabel,
+            helper: l10n.settlementRulePatternHelper,
+            errorText: _patternError,
+            child: TextField(
+              key: const Key('settlementRulePatternField'),
+              controller: _patternController,
+              autofocus: true,
+              // A bank label, in Geist Mono (`05-accounts.md`).
+              style: context.textStyles.mono.copyWith(
+                color: context.colors.text,
+              ),
+              onChanged: (_) => _edited(),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.fieldGap),
+          LabeledField(
+            label: l10n.settlementRuleFromLabel,
+            helper: l10n.settlementRuleFromHelper,
+            errorText: _fromError,
+            child: DateField(
+              key: const Key('settlementRuleFromField'),
+              controller: _fromController,
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+              onChanged: (_) => _edited(),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          RuleMatchPreviewBanner(
+            state: ref.watch(rulePreviewControllerProvider),
+          ),
+        ],
+      );
+    }
+
     return AppModal(
-      width: 480,
+      key: const Key('settlementRuleModal'),
+      width: AppModalSizes.w480,
       title: l10n.settlementRuleTitle,
+      subtitle: Text(l10n.settlementRuleBody(widget.card.name)),
+      dirty: _dirty,
+      busy: _isSaving,
+      saveError: _errorText,
+      onSubmit: loaded == null ? null : _save,
       actions: [
-        TextButton(
-          key: const Key('settlementRuleLaterButton'),
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.settlementRuleLater),
+        // « Annuler » by default.
+        AppModalCancel(
+          key: const Key('settlementRuleSecondaryButton'),
+          label: widget.proposed ? l10n.settlementRuleLater : null,
         ),
         PrimaryButton(
           key: const Key('settlementRuleSaveButton'),
           label: l10n.settlementRuleSave,
           isLoading: _isSaving,
-          onPressed: loaded == null ? null : _save,
+          onPressed: loaded == null || _isSaving ? null : _save,
         ),
       ],
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            l10n.settlementRuleBody(widget.card.name),
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          if (state.hasError)
-            InlineBanner(
-              key: const Key('settlementRuleLoadError'),
-              message: l10n.settlementRuleLoadFailed,
-            )
-          else if (loaded == null)
-            const Center(child: CircularProgressIndicator())
-          else ...[
-            LabeledField(
-              label: l10n.settlementRulePatternLabel,
-              helper: l10n.settlementRulePatternHelper,
-              errorText: _patternError,
-              child: TextField(
-                key: const Key('settlementRulePatternField'),
-                controller: _patternController,
-                onChanged: (_) => _preview(),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            LabeledField(
-              label: l10n.settlementRuleFromLabel,
-              helper: l10n.settlementRuleFromHelper,
-              errorText: _fromError,
-              child: DateField(
-                key: const Key('settlementRuleFromField'),
-                controller: _fromController,
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-                onChanged: (_) => _preview(),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            RuleMatchPreviewBanner(
-              state: ref.watch(rulePreviewControllerProvider),
-            ),
-          ],
-          if (_errorText != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            InlineBanner(
-              key: const Key('settlementRuleErrorText'),
-              message: _errorText!,
-            ),
-          ],
-        ],
-      ),
+      child: body,
     );
   }
 }

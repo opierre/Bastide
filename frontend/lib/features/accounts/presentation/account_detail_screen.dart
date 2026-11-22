@@ -781,7 +781,13 @@ class _LinkedCardRow extends ConsumerWidget {
     WidgetRef ref,
     Account cardAccount,
   ) async {
-    final saved = await showSettlementRuleDialog(context, cardAccount);
+    // Opened from the « Règle de règlement à configurer » warning: Bastide
+    // proposed the task.
+    final saved = await showSettlementRuleDialog(
+      context,
+      cardAccount,
+      proposed: true,
+    );
     if (saved) ref.invalidate(accountOverviewProvider(accountId));
   }
 }

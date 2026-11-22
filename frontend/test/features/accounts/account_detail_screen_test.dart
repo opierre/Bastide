@@ -272,6 +272,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SettlementRuleDialog), findsOneWidget);
+    // Bastide raised the warning, so it proposed the task: « Plus tard ».
+    expect(
+      tester
+          .widget<SettlementRuleDialog>(find.byType(SettlementRuleDialog))
+          .proposed,
+      isTrue,
+    );
   });
 
   testWidgets('no card to link, no link action', (tester) async {
@@ -465,6 +472,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SettlementRuleDialog), findsOneWidget);
+    // The user asked for it: « Annuler ».
+    expect(
+      tester
+          .widget<SettlementRuleDialog>(find.byType(SettlementRuleDialog))
+          .proposed,
+      isFalse,
+    );
   });
 
   testWidgets('a current account without cards draws no card block', (

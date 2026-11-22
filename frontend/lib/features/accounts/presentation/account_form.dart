@@ -45,7 +45,7 @@ Future<Account?> showAccountForm(
       created != null &&
       created.type == AccountType.deferredCard &&
       context.mounted) {
-    await showSettlementRuleDialog(context, created);
+    await showSettlementRuleDialog(context, created, proposed: true);
   }
   return created;
 }
