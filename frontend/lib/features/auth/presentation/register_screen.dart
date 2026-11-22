@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/l10n/locale_provider.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/labeled_field.dart';
@@ -15,7 +16,6 @@ import '../domain/display_name.dart';
 import '../domain/password_rule.dart';
 import '../domain/supported_currencies.dart';
 import 'auth_error_localizer.dart';
-import 'auth_link.dart';
 import 'auth_scaffold.dart';
 import 'login_screen.dart';
 import 'new_password_helper.dart';
@@ -228,10 +228,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 color: context.colors.textSecondary,
               ),
             ),
-            AuthLink(
+            AppLink(
               key: const Key('goToLoginButton'),
               label: l10n.authGoToLoginLink,
-              onPressed: () => context.go(LoginScreen.path),
+              onTap: () => context.go(LoginScreen.path),
             ),
           ],
         ),

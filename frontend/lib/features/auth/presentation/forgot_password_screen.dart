@@ -4,13 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/recovery_controllers.dart';
 import '../domain/password_rule.dart';
 import 'auth_error_localizer.dart';
-import 'auth_link.dart';
 import 'auth_scaffold.dart';
 import 'login_screen.dart';
 import 'new_password_helper.dart';
@@ -179,10 +179,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         ),
         Align(
           alignment: AlignmentDirectional.centerStart,
-          child: AuthLink(
+          child: AppLink(
             key: const Key('resetBackToLoginButton'),
             label: l10n.authBackToLogin,
-            onPressed: () => context.go(LoginScreen.path),
+            onTap: () => context.go(LoginScreen.path),
           ),
         ),
       ],

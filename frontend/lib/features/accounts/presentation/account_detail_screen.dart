@@ -11,6 +11,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/app_table.dart';
 import '../../../core/widgets/bar_charts.dart';
@@ -311,14 +312,13 @@ class _AccountFacts extends StatelessWidget {
             ),
             if (first != null && imported != null) ...[
               Text(l10n.accountDetailMetaSeparator, style: style),
-              _Link(
+              AppLink(
                 key: const Key('accountDetailLastImport'),
                 label: l10n.accountDetailLastImport(
                   DayMonthFormat.MMMd(
                     _locale(context),
                   ).format(imported.toLocal()),
                 ),
-                small: true,
                 onTap: () => context.go(ImportsScreen.path),
               ),
             ],
@@ -630,9 +630,10 @@ class _LinkedCardsBlock extends ConsumerWidget {
         SectionHeading(
           title: l10n.accountDetailLinkedTitle,
           trailing: canLink
-              ? _Link(
+              ? AppLink(
                   key: const Key('accountDetailLinkCard'),
                   label: l10n.accountDetailLinkCard,
+                  small: false,
                   onTap: () => showLinkCardDialog(context, overview.account),
                 )
               : null,
@@ -918,10 +919,9 @@ class _OperationsBlock extends ConsumerWidget {
       children: [
         SectionHeading(
           title: l10n.accountDetailRecentTitle,
-          trailing: _Link(
+          trailing: AppLink(
             key: const Key('accountDetailSeeAll'),
             label: l10n.accountDetailSeeAll,
-            small: true,
             onTap: () {
               ref.read(transactionFiltersProvider.notifier)
                 ..setAccount(accountId)
@@ -1065,55 +1065,6 @@ class _OperationRow extends StatelessWidget {
 }
 
 // ── Shared bits ─────────────────────────────────────────────────────────────
-
-/// A link (`00` §6): `accent`, 13 or 12 px, underlined on hover.
-class _Link extends StatefulWidget {
-  const _Link({
-    super.key,
-    required this.label,
-    required this.onTap,
-    this.small = false,
-  });
-
-  final String label;
-  final VoidCallback onTap;
-  final bool small;
-
-  @override
-  State<_Link> createState() => _LinkState();
-}
-
-class _LinkState extends State<_Link> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final base = widget.small ? textTheme.bodySmall! : textTheme.bodyMedium!;
-    final color = context.colors.accent;
-
-    return Semantics(
-      link: true,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: widget.onTap,
-          child: Text(
-            widget.label,
-            style: tabularNumberStyle(base).copyWith(
-              color: color,
-              decoration: _hovered ? TextDecoration.underline : null,
-              decorationColor: color,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// The populated panel's silhouette in `hover` blocks, pulsing as one, so
 /// nothing moves when the data lands (`00` §7).

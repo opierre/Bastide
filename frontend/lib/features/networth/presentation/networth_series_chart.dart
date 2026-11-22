@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/chart_scale.dart';
 import '../../../core/widgets/chart_style.dart';
@@ -16,7 +17,6 @@ import '../../../l10n/app_localizations.dart';
 import '../application/networth_controller.dart';
 import '../domain/networth_summary.dart';
 import 'declared_balances_modal.dart';
-import 'networth_link.dart';
 
 /// « Patrimoine net » (`15-synthese.md` §3b): the closed-month series as a
 /// line / area over the range picked on its heading line.
@@ -135,7 +135,7 @@ class NetworthSeriesSection extends ConsumerWidget {
               ),
             ],
             const Spacer(),
-            NetworthLink(
+            AppLink(
               key: const Key('networthDeclaredOpen'),
               label: l10n.networthDeclaredOpen,
               onTap: () =>
