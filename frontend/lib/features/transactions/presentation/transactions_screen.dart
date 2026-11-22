@@ -24,8 +24,8 @@ import 'transactions_list_pane.dart';
 /// is the review queue.
 ///
 /// [operationId] opens the panel on that operation (`?operation=<id>`): the
-/// list narrowed to its account and day, the operation in the inspector. An
-/// unknown id is ignored.
+/// list narrowed to that operation alone, in the inspector. An unknown id is
+/// ignored.
 class TransactionsScreen extends ConsumerStatefulWidget {
   const TransactionsScreen({super.key, this.operationId});
 

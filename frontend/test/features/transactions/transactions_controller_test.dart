@@ -324,6 +324,58 @@ void main() {
     expect(filters.categoryId, 'c1');
   });
 
+  test('an operation filter reads that operation alone', () async {
+    when(
+      () => apiClient.get('/transactions', query: any(named: 'query')),
+    ).thenAnswer((_) async => _pageJson([_transactionJson()]));
+    when(
+      () => apiClient.get('/transactions/t9'),
+    ).thenAnswer((_) async => _transactionJson(id: 't9', amountMinor: -4210));
+
+    await container.read(transactionsControllerProvider.future);
+    container.read(transactionFiltersProvider.notifier)
+      ..setCategory('c1')
+      ..setQuery('loyer')
+      ..showOperation('t9');
+    final page = await container.read(transactionsControllerProvider.future);
+
+    expect(page.items.map((t) => t.id), ['t9']);
+    expect(page.total, 1);
+    expect(page.netMinor, -4210);
+    // Nothing else narrows it, so nothing hides it.
+    expect(
+      container.read(transactionFiltersProvider),
+      const TransactionFilters(operationId: 't9'),
+    );
+  });
+
+  test('any other filter lifts the operation filter', () {
+    final notifier = container.read(transactionFiltersProvider.notifier);
+    final lifts = <void Function()>[
+      () => notifier.setAccount('a1'),
+      () => notifier.setDateRange(DateTime(2026, 5), DateTime(2026, 5, 31)),
+      () => notifier.setCategory('c1'),
+      () => notifier.setQuery('cafe'),
+      notifier.clearOperation,
+      notifier.clearFilters,
+    ];
+    for (final lift in lifts) {
+      notifier.showOperation('t9');
+      lift();
+      expect(container.read(transactionFiltersProvider).operationId, isNull);
+    }
+  });
+
+  test('the operation filter survives a trip to « À vérifier »', () {
+    container.read(transactionFiltersProvider.notifier)
+      ..showOperation('t9')
+      ..setNeedsReview(true)
+      ..setNeedsReview(null);
+
+    expect(container.read(transactionFiltersProvider).operationId, 't9');
+    expect(container.read(transactionFiltersProvider).hasListFilter, isTrue);
+  });
+
   test('clearFilters lifts every filter and stays on the tab', () {
     final notifier = container.read(transactionFiltersProvider.notifier)
       ..setAccount('a1')

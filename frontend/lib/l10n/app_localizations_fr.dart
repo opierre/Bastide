@@ -1131,6 +1131,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transactionsFilterImportRemove => 'Retirer le filtre d’import';
 
   @override
+  String transactionsFilterOperation(String name) {
+    return 'Opération : $name';
+  }
+
+  @override
+  String get transactionsFilterOperationRemove =>
+      'Retirer le filtre d’opération';
+
+  @override
   String get transactionsDateRangeTitle => 'Période';
 
   @override

@@ -313,6 +313,8 @@
   "transactionsFilterAllDates": "All dates",
   "transactionsFilterImport": "Import: {fileName}",
   "transactionsFilterImportRemove": "Remove the import filter",
+  "transactionsFilterOperation": "Operation: {name}",
+  "transactionsFilterOperationRemove": "Remove the operation filter",
   "transactionsDateRangeTitle": "Date range",
   "transactionsDateRangeFromLabel": "From",
   "transactionsDateRangeToLabel": "To",

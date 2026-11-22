@@ -76,6 +76,7 @@ class TransactionFilters {
     this.categoryId,
     this.needsReview,
     this.importBatch,
+    this.operationId,
     this.q = '',
     this.page = 1,
   });
@@ -90,6 +91,11 @@ class TransactionFilters {
 
   /// Set from an import history row; shown as a removable chip.
   final ImportBatchFilter? importBatch;
+
+  /// Set from a deep link (a dashboard « Activité récente » row, an account's
+  /// « Opérations » row): the list holds that one operation and nothing else.
+  /// Shown as a removable chip; any other filter lifts it.
+  final String? operationId;
   final String q;
   final int page;
 
@@ -109,6 +115,7 @@ class TransactionFilters {
       dateTo != null ||
       categoryId != null ||
       importBatch != null ||
+      operationId != null ||
       q.trim().isNotEmpty;
 
   TransactionFilters copyWith({
@@ -123,6 +130,7 @@ class TransactionFilters {
     bool clearNeedsReview = false,
     ImportBatchFilter? importBatch,
     bool clearImportBatch = false,
+    bool clearOperation = false,
     String? q,
     int? page,
   }) {
@@ -133,6 +141,7 @@ class TransactionFilters {
       categoryId: clearCategoryId ? null : (categoryId ?? this.categoryId),
       needsReview: clearNeedsReview ? null : (needsReview ?? this.needsReview),
       importBatch: clearImportBatch ? null : (importBatch ?? this.importBatch),
+      operationId: clearOperation ? null : operationId,
       q: q ?? this.q,
       page: page ?? this.page,
     );
@@ -148,6 +157,7 @@ class TransactionFilters {
           other.categoryId == categoryId &&
           other.needsReview == needsReview &&
           other.importBatch == importBatch &&
+          other.operationId == operationId &&
           other.q == q &&
           other.page == page);
 
@@ -159,6 +169,7 @@ class TransactionFilters {
     categoryId,
     needsReview,
     importBatch,
+    operationId,
     q,
     page,
   );
@@ -174,6 +185,7 @@ class TransactionFiltersNotifier extends Notifier<TransactionFilters> {
     accountId: accountId,
     clearAccountId: accountId == null,
     clearImportBatch: accountId != state.accountId,
+    clearOperation: true,
     page: 1,
   );
 
@@ -181,12 +193,14 @@ class TransactionFiltersNotifier extends Notifier<TransactionFilters> {
     dateFrom: from,
     dateTo: to,
     clearDateRange: from == null && to == null,
+    clearOperation: true,
     page: 1,
   );
 
   void setCategory(String? categoryId) => state = state.copyWith(
     categoryId: categoryId,
     clearCategoryId: categoryId == null,
+    clearOperation: true,
     page: 1,
   );
 
@@ -209,11 +223,15 @@ class TransactionFiltersNotifier extends Notifier<TransactionFilters> {
   void clearFilters() =>
       state = TransactionFilters(needsReview: state.needsReview);
 
-  /// Sets every filter at once: a deep link narrowing the list to its
-  /// operation's account and day.
-  void replace(TransactionFilters filters) => state = filters;
+  /// Narrows the list to operation [id] alone, from a deep link. Every other
+  /// filter is dropped, so nothing hides it and nothing shows beside it.
+  void showOperation(String id) => state = TransactionFilters(operationId: id);
 
-  void setQuery(String q) => state = state.copyWith(q: q, page: 1);
+  void clearOperation() =>
+      state = state.copyWith(clearOperation: true, page: 1);
+
+  void setQuery(String q) =>
+      state = state.copyWith(q: q, clearOperation: true, page: 1);
 
   void setPage(int page) => state = state.copyWith(page: page);
 }
@@ -241,6 +259,19 @@ class TransactionsController extends AsyncNotifier<TransactionsPage> {
         q: filters.q,
         page: filters.page,
       );
+    }
+    if (filters.operationId case final id?) {
+      return repository
+          .get(id)
+          .then(
+            (transaction) => TransactionsPage(
+              items: [transaction],
+              page: 1,
+              pageSize: 1,
+              total: 1,
+              netMinor: transaction.amountMinor,
+            ),
+          );
     }
     return ref
         .read(transactionsRepositoryProvider)
