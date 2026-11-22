@@ -39,12 +39,12 @@ class _DisplayNameModalState extends ConsumerState<DisplayNameModal> {
 
   bool get _canSave =>
       isValidDisplayName(_nameController.text) &&
-      _nameController.text.trim().toLowerCase() != widget.initialName;
+      normalizeDisplayName(_nameController.text) != widget.initialName;
 
   Future<void> _save() async {
     await ref
         .read(displayNameControllerProvider.notifier)
-        .save(displayName: _nameController.text.trim());
+        .save(displayName: normalizeDisplayName(_nameController.text));
     if (!mounted) return;
     if (!ref.read(displayNameControllerProvider).hasError) {
       Navigator.of(context).pop();

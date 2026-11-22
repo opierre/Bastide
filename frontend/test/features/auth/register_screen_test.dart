@@ -214,17 +214,38 @@ void main() {
 
     await tester.enterText(
       find.byKey(const Key('registerDisplayNameField')),
-      'Ada Lovelace',
+      'Ada@Lovelace',
     );
     await tester.pumpAndSettle();
 
     expect(
       find.text(
-        '3 à 32 caractères : lettres sans accent, chiffres, « . », « _ » ou « - ».',
+        '3 à 32 caractères : lettres sans accent, chiffres, espaces, '
+        '« . », « _ » ou « - ».',
       ),
       findsOneWidget,
     );
     expect(_submitEnabled(tester), isFalse);
+  });
+
+  testWidgets('a name with a space is accepted and sent as typed', (
+    tester,
+  ) async {
+    final controller = FakeAuthController();
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    await _fillValidForm(tester);
+    await tester.enterText(
+      find.byKey(const Key('registerDisplayNameField')),
+      'Camille Dubois',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('lettres sans accent'), findsNothing);
+    expect(_submitEnabled(tester), isTrue);
+    await _tapSubmit(tester);
+    expect(controller.registerCalls.single.displayName, 'Camille Dubois');
   });
 
   testWidgets('a taken name is reported on its field', (tester) async {
