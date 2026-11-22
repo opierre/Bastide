@@ -94,4 +94,94 @@ void main() {
       },
     );
   });
+
+  group('ChartScale.signedBars', () {
+    /// Whether the ticks are evenly spaced clean multiples of their step,
+    /// inside the scale, zero among them.
+    void expectTicksInside(ChartScale scale) {
+      expect(scale.ticks, contains(0));
+      expect(scale.ticks.first, greaterThanOrEqualTo(scale.min));
+      expect(scale.ticks.last, lessThanOrEqualTo(scale.max));
+      final step = scale.ticks[1] - scale.ticks[0];
+      for (var i = 1; i < scale.ticks.length; i++) {
+        expect(scale.ticks[i] - scale.ticks[i - 1], closeTo(step, 1e-9));
+      }
+    }
+
+    test('fits a window that crosses zero to its own min and max, plus a '
+        'margin on each side', () {
+      const values = [-5000, 120000, 80000, 95000];
+      final scale = ChartScale.signedBars(values, intervals: 4, minStep: 100);
+
+      // A tenth of the 125 000 spread below the deepest bar and above the
+      // tallest one.
+      expect(scale.min, -17500);
+      expect(scale.max, 132500);
+      expect(scale.min < 0 && scale.max > 0, isTrue, reason: 'zero line');
+      expectTicksInside(scale);
+      expect(scale.ticks, [0, 40000, 80000, 120000]);
+    });
+
+    test('is not widened to whole steps, so a small negative month does not '
+        'claim a large band', () {
+      const values = [-5000, 120000, 80000, 95000];
+      final fitted = ChartScale.signedBars(values, intervals: 4);
+      final padded = ChartScale.of([...values, 0], intervals: 4);
+
+      expect(fitted.max - fitted.min, lessThan(padded.max - padded.min));
+      // The negative band is the deepest bar plus its margin, nothing more.
+      expect(-fitted.min / (fitted.max - fitted.min), lessThan(0.15));
+    });
+
+    test('a window above zero stands on zero with headroom on top only', () {
+      const values = [90000, 150000, 120000];
+      final scale = ChartScale.signedBars(values, intervals: 4, minStep: 100);
+
+      expect(scale.min, 0);
+      expect(scale.max, 165000);
+      expectTicksInside(scale);
+    });
+
+    test('a window below zero hangs from zero with room underneath only', () {
+      const values = [-30000, -12000, -45000];
+      final scale = ChartScale.signedBars(values, intervals: 4, minStep: 100);
+
+      expect(scale.max, 0);
+      expect(scale.min, -49500);
+      expectTicksInside(scale);
+    });
+
+    test('the bars fill the plot whatever the window', () {
+      for (final values in const [
+        [1200, 1500, 1350],
+        [-80000, 2000, -1000],
+        [700000, -650000, 10000],
+      ]) {
+        final scale = ChartScale.signedBars(values, intervals: 4);
+        final low = math.min(values.reduce(math.min), 0);
+        final high = math.max(values.reduce(math.max), 0);
+        expect((high - low) / (scale.max - scale.min), greaterThan(0.8));
+        expectTicksInside(scale);
+      }
+    });
+
+    test('keeps ticks off cents and frames an all-zero window', () {
+      final small = ChartScale.signedBars(
+        const [30, -20],
+        intervals: 4,
+        minStep: 100,
+      );
+      expect(small.ticks, [0]);
+
+      final zero = ChartScale.signedBars(
+        const [0, 0],
+        intervals: 2,
+        minStep: 100,
+      );
+      expect(zero.ticks, [-100, 0, 100]);
+
+      final empty = ChartScale.signedBars(const [], intervals: 4, minStep: 100);
+      expect(empty.max, greaterThan(empty.min));
+    });
+  });
 }

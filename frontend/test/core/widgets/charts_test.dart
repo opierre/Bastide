@@ -55,9 +55,15 @@ void main() {
           ),
         ),
       );
+      // The axis fits the bars (−56 € to 136 €), so its gridlines are the
+      // four 50 € multiples inside it, zero among them.
       expect(
         plotOf(SignedBarChart),
-        gridlines()
+        paints
+          ..line(color: dark.line)
+          ..line(color: dark.line)
+          ..line(color: dark.line)
+          ..line(color: dark.line)
           ..line(color: dark.lineStrong, strokeWidth: 1)
           ..rrect(color: dark.positive)
           ..rrect(color: dark.negative)

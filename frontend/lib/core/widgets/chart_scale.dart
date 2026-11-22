@@ -65,13 +65,50 @@ class ChartScale {
     return ChartScale._(low, high, _ticks(low, (high - low) / n, n));
   }
 
+  /// The scale for bars by sign: [values] from their own min and max, so the bars fill the
+  /// plot whatever the window, rather than a range widened to whole steps.
+  ///
+  /// Zero stays in range, since every bar stands on it. The side that holds bars gets a
+  /// margin of a share of the spread, so the tallest bar and the deepest one stay clear of
+  /// the plot's edges; a side without bars gets none, so an all-positive window has no
+  /// negative band. The gridlines are the clean multiples of a step that fall inside the
+  /// range: zero is always one of them, and the zero line is drawn when the range crosses
+  /// it. About [intervals] gaps fit between them, never one smaller than [minStep].
+  factory ChartScale.signedBars(
+    List<num> values, {
+    required int intervals,
+    num minStep = 1,
+  }) {
+    final n = math.max(intervals, 1);
+    final floor = minStep > 0 ? minStep.toDouble() : 1.0;
+    final low = values.fold<num>(0, math.min).toDouble();
+    final high = values.fold<num>(0, math.max).toDouble();
+    final spread = high - low;
+    // Nothing but zeros: no spread to fit, so frame them like any flat series.
+    if (spread == 0) {
+      return ChartScale.of(values, intervals: n, minStep: minStep);
+    }
+
+    final margin = spread * _headroom;
+    final min = low < 0 ? low - margin : 0.0;
+    final max = high > 0 ? high + margin : 0.0;
+    final step = _niceAtLeast(math.max((max - min) / n, floor));
+    final first = (min / step - _epsilon).ceil();
+    final last = (max / step + _epsilon).floor();
+    final whole = step == step.roundToDouble();
+    return ChartScale._(min, max, [
+      for (var k = first; k <= last; k++) whole ? (k * step).round() : k * step,
+    ]);
+  }
+
   /// The value at the bottom of the plot.
   final double min;
 
   /// The value at the top of the plot.
   final double max;
 
-  /// The value of each gridline, bottom to top: [min] first, [max] last.
+  /// The value of each gridline, bottom to top: [min] first and [max] last, except on a
+  /// [ChartScale.signedBars] scale, whose gridlines fall inside its range.
   final List<num> ticks;
 
   /// Share of the series' spread added below its min and above its max.
