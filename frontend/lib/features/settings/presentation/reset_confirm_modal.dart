@@ -13,13 +13,11 @@ import '../../../core/widgets/note_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/reset_controller.dart';
 import '../domain/database_reset.dart';
-
-/// Width of both destructive confirmations (`09-settings.md` §Données).
-const _modalWidth = 500.0;
+import 'export_first_action.dart';
 
 /// « Réinitialiser la base de données ? »: what the reset would delete, and
 /// one of the two places the solid destructive red appears. Nothing is
-/// deleted until the confirmation word has been typed exactly: a click alone
+/// deleted until the confirmation word has been typed, in any case: a click alone
 /// cannot reach the delete.
 class ResetConfirmModal extends ConsumerStatefulWidget {
   const ResetConfirmModal({super.key});
@@ -66,11 +64,15 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
     final counts = ref.watch(databaseSummaryProvider);
     final isResetting = ref.watch(resetControllerProvider).isResetting;
     final word = l10n.settingsResetConfirmWord;
-    final confirmed = _typed.text == word;
+    // Any case matches (`09-settings.md` §Données): the guard is the act of
+    // typing the word, not its capitalisation.
+    final confirmed = _typed.text.trim().toLowerCase() == word.toLowerCase();
 
     return AppModal(
       title: l10n.settingsResetConfirmTitle,
-      width: _modalWidth,
+      width: AppModalSizes.w500,
+      kind: AppModalKind.destructive,
+      busy: isResetting,
       subtitle: Text.rich(
         TextSpan(
           children: _leadSpans(
@@ -81,17 +83,15 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
         ),
         key: const Key('resetConfirmLead'),
       ),
+      leadingAction: const ExportFirstAction(),
       actions: [
-        AppButton(
-          label: l10n.settingsBackupCancel,
-          onPressed: isResetting ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(),
         AppButton(
           key: const Key('resetConfirmSubmit'),
           label: l10n.settingsResetConfirmSubmit,
           variant: AppButtonVariant.destructive,
           isLoading: isResetting,
-          // Disabled until the word matches exactly.
+          // Disabled until the word matches.
           onPressed: confirmed ? _confirm : null,
         ),
       ],
@@ -104,6 +104,7 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
           const SizedBox(height: AppSpacing.fieldGap),
           LabeledField(
             label: l10n.settingsResetConfirmLabel(word),
+            helper: l10n.settingsResetConfirmHelper,
             child: FocusGlow(
               child: TextField(
                 key: const Key('resetConfirmInput'),
@@ -111,6 +112,7 @@ class _ResetConfirmModalState extends ConsumerState<ResetConfirmModal> {
                 enabled: !isResetting,
                 autofocus: true,
                 style: context.textStyles.mono.copyWith(
+                  fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
                   color: context.colors.text,
                 ),
               ),

@@ -175,5 +175,12 @@ class BackupController extends Notifier<BackupState> {
       : '$path.$backupExtension';
 }
 
+/// The data a restore would replace, read each time the confirmation opens:
+/// it is set beside the file's, and a count from when the panel loaded is
+/// not a claim worth making before a replace.
+final currentDataProvider = FutureProvider.autoDispose<CurrentData>((ref) {
+  return ref.watch(backupRepositoryProvider).current();
+});
+
 final backupControllerProvider =
     NotifierProvider<BackupController, BackupState>(BackupController.new);

@@ -2718,7 +2718,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsBackupConfirmTitle => 'Restore this backup?';
 
   @override
-  String get settingsBackupConfirmExportedAt => 'Exported on';
+  String settingsBackupConfirmLead(String date) {
+    return 'The data exported on $date replaces all your current data.';
+  }
+
+  @override
+  String get settingsBackupConfirmBackupColumn => 'Backup';
+
+  @override
+  String get settingsBackupConfirmCurrentColumn => 'Current';
+
+  @override
+  String get settingsBackupConfirmLastImport => 'Latest import';
+
+  @override
+  String settingsBackupConfirmOlder(String date) {
+    return 'This backup predates your latest import on $date.';
+  }
+
+  @override
+  String get settingsBackupConfirmCurrentError =>
+      'Your current data could not be read.';
+
+  @override
+  String get settingsBackupExportFirst => 'Export first';
+
+  @override
+  String get settingsBackupSaved => 'Backup saved';
 
   @override
   String get settingsBackupConfirmVersion => 'App version';
@@ -2749,13 +2775,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsBackupConfirmSimulations => 'Simulations';
-
-  @override
-  String get settingsBackupConfirmWarning =>
-      'All your current data will be replaced. Export it first if needed.';
-
-  @override
-  String get settingsBackupCancel => 'Cancel';
 
   @override
   String get settingsBackupReplace => 'Replace my data';
@@ -3504,12 +3523,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'The built-in categories, your preferences and the AI settings are kept.';
 
   @override
-  String get settingsResetConfirmWord => 'DELETE';
+  String get settingsResetConfirmWord => 'delete';
 
   @override
   String settingsResetConfirmLabel(String word) {
-    return 'Type $word to confirm';
+    return 'Type “$word” to confirm';
   }
+
+  @override
+  String get settingsResetConfirmHelper => 'Upper or lower case, either works.';
 
   @override
   String get settingsResetConfirmSubmit => 'Delete everything';

@@ -1,9 +1,13 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/session/current_user_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/app_button.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
+import 'package:bastide/features/settings/application/backup_controller.dart';
 import 'package:bastide/features/settings/application/reset_controller.dart';
 import 'package:bastide/features/settings/domain/database_reset.dart';
 import 'package:bastide/features/settings/presentation/reset_group.dart';
@@ -17,6 +21,46 @@ import 'package:mocktail/mocktail.dart';
 import '../../support/desktop_surface.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
+
+/// Stands in for the save dialog of « Exporter d’abord ».
+class FakeBackupFiles implements BackupFiles {
+  final written = <String, Uint8List>{};
+
+  @override
+  Future<String?> chooseSaveLocation(String suggestedName) async =>
+      'C:/sauvegardes/bastide';
+
+  @override
+  Future<void> write(String path, Uint8List bytes) async =>
+      written[path] = bytes;
+
+  @override
+  Future<({String name, Uint8List bytes})?> pick() async => null;
+}
+
+final _archive = Uint8List.fromList([80, 75, 3, 4]);
+
+final _backupSummaryJson = {
+  'format_version': 8,
+  'app_version': '0.1.0',
+  'exported_at': '2026-09-11T12:32:00Z',
+  'currency': 'EUR',
+  'last_import_at': null,
+  'counts': {
+    for (final key in [
+      'accounts',
+      'transactions',
+      'categories',
+      'rules',
+      'recurring',
+      'goals',
+      'mortgages',
+      'properties',
+      'simulations',
+    ])
+      key: 0,
+  },
+};
 
 Map<String, dynamic> _summaryJson({int transactions = 1284}) => {
   'counts': {
@@ -42,9 +86,21 @@ const _user = AuthUser(
 
 void main() {
   late MockApiClient apiClient;
+  late FakeBackupFiles files;
 
   setUp(() {
     apiClient = MockApiClient();
+    files = FakeBackupFiles();
+    when(() => apiClient.get('/settings')).thenAnswer(
+      (_) async => {
+        'ai_enabled': false,
+        'inference_base_url': 'http://127.0.0.1:11434/v1',
+        'model_tag': null,
+        'confidence_threshold': 0.8,
+        'savings_rate_goal_percent': 20,
+        'last_backup_at': null,
+      },
+    );
     when(
       () => apiClient.get('/database/summary'),
     ).thenAnswer((_) async => _summaryJson());
@@ -63,6 +119,7 @@ void main() {
     overrides: [
       apiClientProvider.overrideWithValue(apiClient),
       currentUserProvider.overrideWithValue(_user),
+      backupFilesProvider.overrideWithValue(files),
     ],
     child: MaterialApp(
       locale: locale,
@@ -164,7 +221,7 @@ void main() {
       expect(find.text('30'), findsOneWidget);
     });
 
-    testWidgets('the delete waits for the word, typed exactly', (tester) async {
+    testWidgets('the delete waits for the word, in any case', (tester) async {
       useDesktopSurface(tester);
       stubReset();
       await openModal(tester);
@@ -177,14 +234,55 @@ void main() {
         await tester.pumpAndSettle();
       }
 
+      expect(
+        find.text('Saisissez « supprimer » pour confirmer'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Majuscules ou minuscules, peu importe.'),
+        findsOneWidget,
+      );
       expect(tester.widget<AppButton>(_submit).onPressed, isNull);
 
-      await type('supprimer');
+      await type('suppr');
       expect(tester.widget<AppButton>(_submit).onPressed, isNull);
       verifyNever(() => apiClient.post('/database/reset'));
 
-      await type('SUPPRIMER');
-      expect(tester.widget<AppButton>(_submit).onPressed, isNotNull);
+      for (final word in ['supprimer', 'SUPPRIMER', 'Supprimer']) {
+        await type(word);
+        expect(tester.widget<AppButton>(_submit).onPressed, isNotNull);
+      }
+    });
+
+    testWidgets('lists the live counts 8 px apart', (tester) async {
+      useDesktopSurface(tester);
+      await openModal(tester);
+
+      final accounts = tester.getBottomLeft(find.text('Comptes')).dy;
+      final transactions = tester.getTopLeft(find.text('Transactions')).dy;
+      expect(transactions - accounts, moreOrLessEquals(8, epsilon: 1));
+      expect(find.text('Catégories personnalisées'), findsOneWidget);
+    });
+
+    testWidgets('« Exporter d’abord » saves without closing, then says so', (
+      tester,
+    ) async {
+      useDesktopSurface(tester);
+      when(() => apiClient.postForBytes('/backup/export')).thenAnswer(
+        (_) async => ApiBytesResponse(
+          bytes: _archive,
+          headers: {'x-backup-summary': jsonEncode(_backupSummaryJson)},
+        ),
+      );
+      await openModal(tester);
+
+      await tester.tap(find.byKey(const Key('exportFirstButton')));
+      await tester.pumpAndSettle();
+
+      expect(files.written, hasLength(1));
+      expect(find.text('Réinitialiser la base de données ?'), findsOneWidget);
+      expect(find.byKey(const Key('exportFirstButton')), findsNothing);
+      expect(find.text('Sauvegarde enregistrée'), findsOneWidget);
     });
 
     testWidgets('⑪ confirming deletes, closes and says the catalog is back', (
@@ -251,8 +349,17 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Reset the database?'), findsOneWidget);
-      expect(find.text('Type DELETE to confirm'), findsOneWidget);
+      expect(find.text('Type “delete” to confirm'), findsOneWidget);
+      expect(find.text('Upper or lower case, either works.'), findsOneWidget);
+      expect(find.text('Export first'), findsOneWidget);
       expect(find.text('Delete everything'), findsOneWidget);
+
+      await tester.enterText(
+        find.byKey(const Key('resetConfirmInput')),
+        'DELETE',
+      );
+      await tester.pumpAndSettle();
+      expect(tester.widget<AppButton>(_submit).onPressed, isNotNull);
     });
   });
 }

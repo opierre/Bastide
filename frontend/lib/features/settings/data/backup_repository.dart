@@ -27,6 +27,12 @@ class BackupRepository {
     );
   }
 
+  /// The data as it stands, counted as an archive of it would be.
+  Future<CurrentData> current() async {
+    final json = await _apiClient.get('/backup/current');
+    return CurrentData.fromJson(json as Map<String, dynamic>);
+  }
+
   /// What an archive holds. Refuses one this build cannot restore without
   /// touching any data.
   Future<BackupSummary> inspect(String fileName, List<int> bytes) =>
