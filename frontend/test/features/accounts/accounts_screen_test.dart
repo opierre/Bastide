@@ -300,7 +300,7 @@ void main() {
               find.byKey(const Key('accountSectionShare-type:checking')),
             )
             .data,
-        '39,8 % du total',
+        '39,8\u00A0% du total',
       );
       // A negative group reads its share in absolute value.
       expect(
@@ -309,7 +309,7 @@ void main() {
               find.byKey(const Key('accountSectionShare-type:deferredCard')),
             )
             .data,
-        '2,0 % du total',
+        '2,0\u00A0% du total',
       );
     });
 

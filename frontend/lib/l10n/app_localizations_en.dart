@@ -567,8 +567,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       minutes,
       locale: localeName,
-      other: '$minutes min ago',
-      one: '1 min ago',
+      other: '$minutes min ago',
+      one: '1 min ago',
       zero: 'just now',
     );
     return '$_temp0';
@@ -579,8 +579,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       hours,
       locale: localeName,
-      other: '$hours h ago',
-      one: '1 h ago',
+      other: '$hours h ago',
+      one: '1 h ago',
     );
     return '$_temp0';
   }
@@ -898,7 +898,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String importFileSize(String size) {
-    return '$size kB';
+    return '$size kB';
   }
 
   @override
@@ -1580,7 +1580,7 @@ class AppLocalizationsEn extends AppLocalizations {
     final intl.DateFormat monthDateFormat = intl.DateFormat.MMMM(localeName);
     final String monthString = monthDateFormat.format(month);
 
-    return '$delta pt since $monthString';
+    return '$delta pt since $monthString';
   }
 
   @override
@@ -2095,7 +2095,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ruleLogoTooLarge(int megabytes) {
-    return 'This picture is too large: choose a file under $megabytes MB.';
+    return 'This picture is too large: choose a file under $megabytes MB.';
   }
 
   @override
@@ -2130,7 +2130,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ruleLogoUrlTooLarge(int megabytes) {
-    return 'This picture is over $megabytes MB.';
+    return 'This picture is over $megabytes MB.';
   }
 
   @override
@@ -2424,7 +2424,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rulePackExportLogoElided(int kilobytes) {
-    return '‹ $kilobytes KB picture ›';
+    return '‹ $kilobytes KB picture ›';
   }
 
   @override
@@ -3291,7 +3291,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String goalImageTooLarge(int megabytes) {
-    return 'This picture is too large: choose a file under $megabytes MB.';
+    return 'This picture is too large: choose a file under $megabytes MB.';
   }
 
   @override
@@ -4786,7 +4786,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String settingsAvatarPictureTooLarge(int megabytes) {
-    return 'This picture is too large: choose a file under $megabytes MB.';
+    return 'This picture is too large: choose a file under $megabytes MB.';
   }
 
   @override

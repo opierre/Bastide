@@ -93,8 +93,8 @@ Future<void> _tapRow(
 
 final _threeScenarios = [
   testScenario(),
-  testScenario(id: 's2', label: 'Lyon 7e, 350 k€'),
-  testScenario(id: 's3', label: 'Lyon 8e, 290 k€'),
+  testScenario(id: 's2', label: 'Lyon 7e, 350\u00A0k€'),
+  testScenario(id: 's3', label: 'Lyon 8e, 290\u00A0k€'),
 ];
 
 void main() {
@@ -168,19 +168,21 @@ void main() {
         matching: find.byType(EditableText),
       ),
     );
-    expect(nameField.controller.text, ', 320 k€');
+    expect(nameField.controller.text, ', 320\u00A0k€');
     expect(nameField.controller.selection.baseOffset, 0);
 
     await tester.enterText(
       find.byKey(const Key('saveScenarioName')),
-      'Lyon 3e, 320 k€',
+      'Lyon 3e, 320\u00A0k€',
     );
     await tester.tap(find.byKey(const Key('saveScenarioSubmit')));
     await _settle(tester);
 
-    verify(() => repository.create('Lyon 3e, 320 k€', testTerms)).called(1);
+    verify(
+      () => repository.create('Lyon 3e, 320\u00A0k€', testTerms),
+    ).called(1);
     expect(find.byKey(const Key('saveScenarioName')), findsNothing);
-    expect(_text(tester, 'scenarioName-s9'), 'Lyon 3e, 320 k€');
+    expect(_text(tester, 'scenarioName-s9'), 'Lyon 3e, 320\u00A0k€');
   });
 
   testWidgets('the live row comes first, its sub-line led by « en cours »', (
@@ -194,7 +196,7 @@ void main() {
     final live = tester.getTopLeft(find.byKey(const Key('scenarioRow-live')));
     final saved = tester.getTopLeft(find.byKey(const Key('scenarioRow-s1')));
     expect(live.dy, lessThan(saved.dy));
-    expect(_text(tester, 'scenarioName-live'), '320 k€');
+    expect(_text(tester, 'scenarioName-live'), '320\u00A0k€');
     expect(
       _text(tester, 'scenarioSub-live'),
       'en cours · ${formatRate(325, 'fr')} · 25 ans',
@@ -235,13 +237,15 @@ void main() {
 
     await tester.enterText(
       find.byKey(const Key('saveScenarioName')),
-      'Villeurbanne, 270 k€',
+      'Villeurbanne, 270\u00A0k€',
     );
     await tester.tap(find.byKey(const Key('saveScenarioSubmit')));
     await _settle(tester);
 
-    verify(() => repository.rename('s1', 'Villeurbanne, 270 k€')).called(1);
-    expect(_text(tester, 'scenarioName-s1'), 'Villeurbanne, 270 k€');
+    verify(
+      () => repository.rename('s1', 'Villeurbanne, 270\u00A0k€'),
+    ).called(1);
+    expect(_text(tester, 'scenarioName-s1'), 'Villeurbanne, 270\u00A0k€');
   });
 
   testWidgets('delete removes a saved row at once, with no confirmation', (
@@ -294,7 +298,7 @@ void main() {
     );
     expect(
       tester.widget<NoteLine>(find.byKey(const Key('scenarioNote'))).text,
-      'Trois scénarios au plus. Décochez-en un pour ajouter Lyon 8e, 290 k€.',
+      'Trois scénarios au plus. Décochez-en un pour ajouter Lyon 8e, 290\u00A0k€.',
     );
 
     // A fourth check is ignored rather than swapped in.

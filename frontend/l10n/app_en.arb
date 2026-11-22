@@ -166,8 +166,8 @@
   "accountsGroupShare": "{share}% of total",
   "accountsCount": "{count, plural, =1{1 account} other{{count} accounts}}",
   "accountsSummaryCaption": "{accounts} · balances recalculated {ago}",
-  "accountsAgoMinutes": "{minutes, plural, =0{just now} =1{1 min ago} other{{minutes} min ago}}",
-  "accountsAgoHours": "{hours, plural, =1{1 h ago} other{{hours} h ago}}",
+  "accountsAgoMinutes": "{minutes, plural, =0{just now} =1{1\u00A0min ago} other{{minutes}\u00A0min ago}}",
+  "accountsAgoHours": "{hours, plural, =1{1\u00A0h ago} other{{hours}\u00A0h ago}}",
   "accountsColumnAccount": "Account",
   "accountsColumnInstitution": "Institution",
   "accountsColumnLastImport": "Last import",
@@ -249,7 +249,7 @@
   "@importDropZoneHint": {
     "description": "Sub-line inside the imports drop zone, stating that the file itself names the destination account."
   },
-  "importFileSize": "{size} kB",
+  "importFileSize": "{size}\u00A0kB",
   "importRemoveFile": "Remove",
   "importSubmit": "Import",
   "importSubmitting": "Importing…",
@@ -444,7 +444,7 @@
   "dashboardStatVsPreviousMonth": "vs {month}",
   "dashboardSavingsGoalReached": "Goal reached",
   "dashboardSavingsGoalPending": "Goal {goal} in progress",
-  "dashboardSavingsDeltaSince": "{delta} pt since {month}",
+  "dashboardSavingsDeltaSince": "{delta}\u00A0pt since {month}",
   "dashboardSavingsGoalMark": "goal {goal}",
   "dashboardNoValue": "—",
   "dashboardCategoryBreakdownTitle": "Spending by category",
@@ -596,7 +596,7 @@
   "ruleFormLogoSaveFirst": "Save the rule to add a logo to it.",
   "logoZoomOpen": "Show the logo larger",
   "logoZoomLabel": "Enlarged logo",
-  "ruleLogoTooLarge": "This picture is too large: choose a file under {megabytes} MB.",
+  "ruleLogoTooLarge": "This picture is too large: choose a file under {megabytes}\u00A0MB.",
   "ruleLogoInvalid": "This file isn’t a PNG, JPEG or WebP picture.",
   "ruleLogoError": "The logo couldn’t be saved. Try again.",
   "ruleLogoCropTitle": "Crop the logo",
@@ -612,7 +612,7 @@
   "ruleLogoUrlFetch": "Download",
   "ruleLogoUrlInvalidAddress": "Enter an address starting with http:// or https://.",
   "ruleLogoUrlUnreachable": "The picture couldn’t be downloaded. Check the address and your connection.",
-  "ruleLogoUrlTooLarge": "This picture is over {megabytes} MB.",
+  "ruleLogoUrlTooLarge": "This picture is over {megabytes}\u00A0MB.",
   "ruleLogoUrlNotAPicture": "This address doesn’t lead to a picture.",
   "ruleFormCancel": "Cancel",
   "ruleFormSave": "Save",
@@ -671,7 +671,7 @@
   "rulePackExportIncludeLogos": "Include the logos",
   "rulePackExportLogoCount": "{count, plural, =0{No rule has a logo to include.} one{{count} logo included.} other{{count} logos included.}}",
   "rulePackExportLogosTooLarge": "The logos were left out: the pack would be too large to import. All the rules are exported, without their logos.",
-  "rulePackExportLogoElided": "‹ {kilobytes} KB picture ›",
+  "rulePackExportLogoElided": "‹ {kilobytes}\u00A0KB picture ›",
   "reviewAiInvitation": "Turn on local AI to file the operations your rules did not recognise.",
   "reviewAiInvitationLink": "Settings",
   "reviewConfidence": "confidence {confidence}",
@@ -877,7 +877,7 @@
   "goalImageCropTitle": "Crop the image",
   "goalImageCropLead": "Drag and zoom to frame the banner.",
   "goalImageCropSave": "Use this image",
-  "goalImageTooLarge": "This picture is too large: choose a file under {megabytes} MB.",
+  "goalImageTooLarge": "This picture is too large: choose a file under {megabytes}\u00A0MB.",
   "goalImageInvalid": "This file isn’t a PNG, JPEG or WebP picture.",
   "goalImageError": "The image couldn’t be saved. Try again.",
   "goalImageAlt": "Image of the goal {name}",
@@ -1305,7 +1305,7 @@
   "@settingsAvatarRemovePicture": {
     "description": "Button of the avatar card dropping the uploaded picture and going back to the previous default avatar."
   },
-  "settingsAvatarPictureTooLarge": "This picture is too large: choose a file under {megabytes} MB.",
+  "settingsAvatarPictureTooLarge": "This picture is too large: choose a file under {megabytes}\u00A0MB.",
   "@settingsAvatarPictureTooLarge": {
     "description": "Error when the picked picture is over the size limit; {megabytes} is that limit.",
     "placeholders": {

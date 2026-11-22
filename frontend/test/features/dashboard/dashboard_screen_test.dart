@@ -166,7 +166,7 @@ void main() {
       expect(status.tone, StatusTone.positive);
       expect(
         tester.widget<Text>(_byKey('dashboardSavingsDelta')).data,
-        ' · +1,9 pt depuis avril',
+        ' · +1,9\u00A0pt depuis avril',
       );
     });
 
@@ -182,7 +182,7 @@ void main() {
       expect(
         tester.widget<Text>(_byKey('dashboardSavingsDelta')).data,
         'Objectif ${formatRatioPct(0.2, 'fr', decimalDigits: 0)} en cours'
-        ' · −0,8 pt depuis avril',
+        ' · −0,8\u00A0pt depuis avril',
       );
       expect(
         tester.widget<RepereMeter>(_byKey('dashboardSavingsGoalBar')).tone,
@@ -211,7 +211,7 @@ void main() {
       expect(
         tester.widget<Text>(_byKey('dashboardSavingsDelta')).data,
         'Objectif ${formatRatioPct(0.3, 'fr', decimalDigits: 0)} en cours'
-        ' · +1,9 pt depuis avril',
+        ' · +1,9\u00A0pt depuis avril',
       );
     });
 

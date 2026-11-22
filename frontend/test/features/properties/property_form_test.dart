@@ -165,7 +165,7 @@ void main() {
     expect(find.text('Saisissez un montant supérieur à zéro.'), findsOneWidget);
     expect(find.text('Date invalide (JJ/MM/AAAA).'), findsOneWidget);
     expect(
-      find.text('Indiquez une quote-part entre 0,01 et 100 %.'),
+      find.text('Indiquez une quote-part entre 0,01 et 100\u00A0%.'),
       findsOneWidget,
     );
     expect(controller.createCalls, isEmpty);

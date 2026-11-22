@@ -544,7 +544,7 @@ class AppLocalizationsFr extends AppLocalizations {
         );
     final String shareString = shareNumberFormat.format(share);
 
-    return '$shareString % du total';
+    return '$shareString % du total';
   }
 
   @override
@@ -568,8 +568,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       minutes,
       locale: localeName,
-      other: 'il y a $minutes min',
-      one: 'il y a 1 min',
+      other: 'il y a $minutes min',
+      one: 'il y a 1 min',
       zero: 'à l’instant',
     );
     return '$_temp0';
@@ -580,8 +580,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       hours,
       locale: localeName,
-      other: 'il y a $hours h',
-      one: 'il y a 1 h',
+      other: 'il y a $hours h',
+      one: 'il y a 1 h',
     );
     return '$_temp0';
   }
@@ -903,7 +903,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String importFileSize(String size) {
-    return '$size Ko';
+    return '$size Ko';
   }
 
   @override
@@ -1588,7 +1588,7 @@ class AppLocalizationsFr extends AppLocalizations {
     final intl.DateFormat monthDateFormat = intl.DateFormat.MMMM(localeName);
     final String monthString = monthDateFormat.format(month);
 
-    return '$delta pt depuis $monthString';
+    return '$delta pt depuis $monthString';
   }
 
   @override
@@ -2108,7 +2108,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String ruleLogoTooLarge(int megabytes) {
-    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
+    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
   }
 
   @override
@@ -2143,7 +2143,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String ruleLogoUrlTooLarge(int megabytes) {
-    return 'Cette image dépasse $megabytes Mo.';
+    return 'Cette image dépasse $megabytes Mo.';
   }
 
   @override
@@ -2436,7 +2436,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String rulePackExportLogoElided(int kilobytes) {
-    return '‹ image de $kilobytes Ko ›';
+    return '‹ image de $kilobytes Ko ›';
   }
 
   @override
@@ -3307,7 +3307,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String goalImageTooLarge(int megabytes) {
-    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
+    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
   }
 
   @override
@@ -4194,7 +4194,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String simulatorPriceThousands(String amount) {
-    return '$amount k€';
+    return '$amount k€';
   }
 
   @override
@@ -4349,7 +4349,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get propertyFormOwnershipInvalid =>
-      'Indiquez une quote-part entre 0,01 et 100 %.';
+      'Indiquez une quote-part entre 0,01 et 100 %.';
 
   @override
   String get propertyFormAcquisitionPrice => 'Prix d’acquisition';
@@ -4813,7 +4813,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String settingsAvatarPictureTooLarge(int megabytes) {
-    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
+    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
   }
 
   @override

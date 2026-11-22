@@ -351,7 +351,7 @@ void main() {
       expect(find.byKey(const Key('pictureCropViewport')), findsNothing);
       expect(
         find.text(
-          'Cette image est trop lourde : choisissez un fichier de moins de 10 Mo.',
+          'Cette image est trop lourde : choisissez un fichier de moins de 10\u00A0Mo.',
         ),
         findsOneWidget,
       );
@@ -411,7 +411,7 @@ void main() {
       );
       expect(
         find.text(
-          'Cette image est trop lourde : choisissez un fichier de moins de 10 Mo.',
+          'Cette image est trop lourde : choisissez un fichier de moins de 10\u00A0Mo.',
         ),
         findsWidgets,
       );
