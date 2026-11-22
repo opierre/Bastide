@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/settings/application/update_check_controller.dart';
 import 'package:bastide/features/settings/presentation/update_check_row.dart';
 import 'package:bastide/l10n/app_localizations.dart';
@@ -213,6 +214,22 @@ void main() {
 
       expect(find.text('You are on the latest version.'), findsOneWidget);
       expect(find.byKey(const Key('settingsUpdateDownload')), findsNothing);
+    });
+
+    testWidgets('up to date reads like the local model « Connecté »', (
+      tester,
+    ) async {
+      useDesktopSurface(tester);
+      stubStatus(_status(latest: '0.1.0'));
+
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      final status = tester.widget<StatusText>(
+        find.byKey(const Key('settingsUpdateStatus')),
+      );
+      expect(status.tone, StatusTone.positive);
+      expect(status.icon, isNull);
     });
 
     testWidgets('offline says GitHub could not be reached', (tester) async {
