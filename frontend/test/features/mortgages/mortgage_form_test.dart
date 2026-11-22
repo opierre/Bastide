@@ -89,6 +89,20 @@ Future<void> _fillWorksLoan(WidgetTester tester, {String rate = '4,90'}) async {
   );
 }
 
+String _eur(int minor) =>
+    formatAmount(amountMinor: minor, currency: 'EUR', locale: 'fr');
+
+String _plateDetail(WidgetTester tester) =>
+    tester.widget<Text>(find.byKey(const Key('mortgageFormPlateDetail'))).data!;
+
+/// Picks « In fine » in the Remboursement select.
+Future<void> _pickInterestOnly(WidgetTester tester) async {
+  await tester.tap(find.byKey(const Key('mortgageFormRepayment')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('In fine').last);
+  await tester.pumpAndSettle();
+}
+
 /// Lets the plate's debounce elapse and its request resolve.
 Future<void> _settlePreview(WidgetTester tester) async {
   await tester.pump(
@@ -162,14 +176,7 @@ void main() {
       await _fillWorksLoan(tester);
       await _settlePreview(tester);
 
-      expect(
-        tester
-            .widget<AmountText>(
-              find.byKey(const Key('mortgageFormPlateAmount')),
-            )
-            .amountMinor,
-        28238,
-      );
+      expect(_plateDetail(tester), contains(_eur(28238)));
       verify(
         () => repository.compute(
           principalMinor: 1500000,
@@ -184,14 +191,7 @@ void main() {
       await tester.enterText(find.byKey(const Key('mortgageFormRate')), '5');
       await _settlePreview(tester);
 
-      expect(
-        tester
-            .widget<AmountText>(
-              find.byKey(const Key('mortgageFormPlateAmount')),
-            )
-            .amountMinor,
-        28307,
-      );
+      expect(_plateDetail(tester), contains(_eur(28307)));
     },
   );
 
@@ -249,10 +249,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.byKey(const Key('mortgageFormRepayment-interest_only')),
-    );
-    await tester.pumpAndSettle();
+    await _pickInterestOnly(tester);
     await _fillWorksLoan(tester);
     await _settlePreview(tester);
 
@@ -260,7 +257,7 @@ void main() {
       find.byKey(const Key('mortgageFormPlateInterestOnly')),
       findsOneWidget,
     );
-    expect(find.byKey(const Key('mortgageFormPlateAmount')), findsNothing);
+    expect(find.byKey(const Key('mortgageFormPlateDetail')), findsNothing);
     verifyNever(
       () => repository.compute(
         principalMinor: any(named: 'principalMinor'),
@@ -304,7 +301,7 @@ void main() {
   );
 
   testWidgets(
-    'editing prefills the form, and deleting names both consequences',
+    'editing prefills the form, and deleting asks a destructive confirmation',
     (tester) async {
       _useDesktopSurface(tester);
       final controller = FakeMortgagesController(
@@ -350,11 +347,32 @@ void main() {
 
       await tester.tap(find.byKey(const Key('mortgageFormDelete')));
       await tester.pumpAndSettle();
-      final body = tester
+      // The title names the loan; the lead says what goes and what stays.
+      expect(
+        find.text('Supprimer le crédit « Appartement Lyon 3e » ?'),
+        findsOneWidget,
+      );
+      final lead = tester
           .widget<Text>(find.byKey(const Key('mortgageDeleteBody')))
           .data!;
-      expect(body, contains('Synthèse'));
-      expect(body, contains('IFI'));
+      expect(lead, contains('Synthèse'));
+      expect(lead, contains('Vos comptes ne sont pas modifiés.'));
+      // A solid destructive button, with focus on « Annuler » so Enter
+      // deletes nothing by mistake.
+      expect(
+        tester
+            .widget<AppButton>(find.byKey(const Key('mortgageDeleteConfirm')))
+            .variant,
+        AppButtonVariant.destructive,
+      );
+      final focused = FocusManager.instance.primaryFocus!.context!;
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('appModalCancel')).last,
+          matching: find.byWidget(focused.widget),
+        ),
+        findsOneWidget,
+      );
 
       await tester.tap(find.byKey(const Key('mortgageDeleteConfirm')));
       await tester.pumpAndSettle();
@@ -362,4 +380,64 @@ void main() {
       expect(controller.archiveCalls, ['m1']);
     },
   );
+
+  testWidgets('lays the fields out on the two-column grid of proposal v6', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeMortgagesController(),
+        repository: repository,
+        properties: const [LoanProperty(id: 'p1', label: 'Studio')],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    double top(String key) => tester.getTopLeft(find.byKey(Key(key))).dy;
+    double left(String key) => tester.getTopLeft(find.byKey(Key(key))).dx;
+
+    // Libellé spans both columns; then pairs, left then right.
+    for (final (first, second) in [
+      ('mortgageFormLender', 'mortgageFormKind'),
+      ('mortgageFormRepayment', 'mortgageFormPrincipal'),
+      ('mortgageFormRate', 'mortgageFormTerm'),
+      ('mortgageFormFirstPayment', 'mortgageFormInsurance'),
+      ('mortgageFormFees', 'mortgageFormProperty'),
+    ]) {
+      expect(top(first), top(second), reason: '$first beside $second');
+      expect(left(first), lessThan(left(second)));
+    }
+    expect(top('mortgageFormLabel'), lessThan(top('mortgageFormLender')));
+    expect(
+      tester.getSize(find.byKey(const Key('mortgageFormLabel'))).width,
+      greaterThan(
+        tester.getSize(find.byKey(const Key('mortgageFormLender'))).width * 2,
+      ),
+    );
+    expect(find.text('Bien financé (facultatif)'), findsOneWidget);
+    // The new form has no « Supprimer ».
+    expect(find.byKey(const Key('mortgageFormDelete')), findsNothing);
+    expect(find.text('Nouveau crédit'), findsOneWidget);
+  });
+
+  testWidgets('a changed form asks before its input is dropped', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(controller: FakeMortgagesController(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('mortgageFormLabel')),
+      'Travaux cuisine',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('mortgageFormCancel')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Abandonner les modifications ?'), findsOneWidget);
+  });
 }

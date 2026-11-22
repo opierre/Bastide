@@ -668,6 +668,12 @@ abstract final class AppLoans {
   /// The « Remboursé » column takes 22 % of the loans table's width: its
   /// flex against the other columns' 78 shares.
   static const repaidFlex = 22;
+
+  /// The loan form's « Mensualité calculée » line (`proposal_v6` m-loans):
+  /// 4 px more than the field gap above it, 10 px between its label and
+  /// the figures, on one baseline.
+  static const instalmentLineTop = AppSpacing.xs;
+  static const instalmentLabelGap = 10.0;
 }
 
 /// The Synthèse panel of `docs/design/15-synthese.md` §Layout.

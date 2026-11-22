@@ -7,13 +7,11 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_modal.dart';
-import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/date_field.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/money_field.dart';
-import '../../../core/widgets/monogram_avatar.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
@@ -50,8 +48,9 @@ String formatRateInput(int bps, String locale) {
   return '${bps ~/ 100}$separator${(bps % 100).toString().padLeft(2, '0')}';
 }
 
-/// The 600 px « Nouveau crédit » modal (`12-credits.md` frame ③), reused
-/// prefilled for « Modifier », where deletion also lives.
+/// The 600 px « Nouveau crédit » modal (`12-credits.md` « Loan form »,
+/// `proposal_v6` m-loans), reused prefilled for « Modifier le crédit », where
+/// the ghost « Supprimer » opens its destructive confirmation.
 class MortgageFormModal extends ConsumerStatefulWidget {
   const MortgageFormModal({super.key, this.initial});
 
@@ -92,7 +91,19 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
   String? _propertyError;
   String? _bannerError;
 
+  /// The field values once the prefill has run, so the form reads as
+  /// changed only while something differs from what it opened with.
+  List<String>? _pristineTexts;
+  bool _dirty = false;
+
   bool get _isEditing => widget.initial != null;
+
+  List<TextEditingController> get _textInputs => [
+    _labelController,
+    _lenderController,
+    _dateController,
+    ..._computeInputs,
+  ];
 
   List<TextEditingController> get _computeInputs => [
     _principalController,
@@ -111,6 +122,10 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
       if (!mounted) return;
       for (final controller in _computeInputs) {
         controller.addListener(_requestPreview);
+      }
+      _pristineTexts = [for (final c in _textInputs) c.text];
+      for (final controller in _textInputs) {
+        controller.addListener(_updateDirty);
       }
       _requestPreview();
     });
@@ -145,15 +160,30 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
 
   @override
   void dispose() {
-    for (final controller in [
-      _labelController,
-      _lenderController,
-      _dateController,
-      ..._computeInputs,
-    ]) {
+    for (final controller in _textInputs) {
       controller.dispose();
     }
     super.dispose();
+  }
+
+  /// Whether the form holds unsaved input: the frame then asks before
+  /// closing it (`00` §7 « Modal », Closing).
+  void _updateDirty() {
+    if (!mounted) return;
+    final pristine = _pristineTexts;
+    final initial = widget.initial;
+    final textsChanged =
+        pristine != null &&
+        [
+          for (final (i, c) in _textInputs.indexed) c.text != pristine[i],
+        ].any((changed) => changed);
+    final dirty =
+        textsChanged ||
+        _kind != (initial?.kind ?? MortgageKind.mortgage) ||
+        _repayment !=
+            (initial?.repaymentType ?? RepaymentType.constantPayment) ||
+        _propertyId != initial?.propertyId;
+    if (dirty != _dirty) setState(() => _dirty = dirty);
   }
 
   String get _locale => Localizations.localeOf(context).toString();
@@ -196,6 +226,7 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final l10n = AppLocalizations.of(context)!;
     final firstPayment = parseDateInput(_dateController.text, _locale);
@@ -251,13 +282,17 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
     final confirmed = await showAppModal<bool>(
       context: context,
       builder: (dialogContext) => AppModal(
-        title: l10n.mortgageDeleteTitle,
-        width: 440,
+        title: l10n.mortgageDeleteTitle(widget.initial!.label),
+        width: AppModalSizes.w440,
+        kind: AppModalKind.destructive,
+        // What leaves (the Synthèse deduction, the schedule) and what stays
+        // (the accounts), as the lead; a confirmation has no body.
+        subtitle: Text(
+          l10n.mortgageDeleteBody,
+          key: const Key('mortgageDeleteBody'),
+        ),
         actions: [
-          AppButton(
-            label: l10n.mortgageFormCancel,
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-          ),
+          const AppModalCancel(),
           AppButton(
             key: const Key('mortgageDeleteConfirm'),
             label: l10n.mortgageDeleteConfirm,
@@ -265,15 +300,6 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
             onPressed: () => Navigator.of(dialogContext).pop(true),
           ),
         ],
-        // Both consequences, named: the loan leaves Synthèse's passif, and the
-        // IFI base when it was linked to a property.
-        child: Text(
-          l10n.mortgageDeleteBody,
-          key: const Key('mortgageDeleteBody'),
-          style: Theme.of(
-            dialogContext,
-          ).textTheme.bodyMedium?.copyWith(color: context.colors.textSecondary),
-        ),
       ),
     );
     if (confirmed != true || !mounted) return;
@@ -298,15 +324,6 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
     }
   }
 
-  Widget _pair(Widget first, Widget second) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Expanded(child: first),
-      const SizedBox(width: AppSpacing.fieldGap),
-      Expanded(child: second),
-    ],
-  );
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -322,30 +339,75 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
     final preview = ref.watch(loanInstalmentPreviewProvider);
     const rowGap = SizedBox(height: AppSpacing.fieldGap);
 
+    final feesCell = ModalFieldCell(
+      label: l10n.mortgageFormFees,
+      errorText: _feesError,
+      input: MoneyField(
+        key: const Key('mortgageFormFees'),
+        controller: _feesController,
+        currency: currency,
+        validator: (value) => _optionalMoney(value ?? '') == null
+            ? l10n.mortgageFormAmountOptionalInvalid
+            : null,
+      ),
+    );
+    // Without a property to link, Frais de dossier stays alone on the last
+    // row: the one row allowed an empty cell.
+    final propertyCell = (properties.isNotEmpty || _propertyId != null)
+        ? ModalFieldCell(
+            label: l10n.mortgageFormProperty,
+            errorText: _propertyError,
+            input: AppSelect<String?>(
+              key: const Key('mortgageFormProperty'),
+              value: _propertyId,
+              onChanged: (value) {
+                setState(() => _propertyId = value);
+                _updateDirty();
+              },
+              items: [
+                // An existing link cannot be cleared through the API (null
+                // means "absent" on a patch), so « Aucun » is only offered
+                // while nothing is linked.
+                if (widget.initial?.propertyId == null)
+                  AppSelectItem<String?>(
+                    value: null,
+                    label: l10n.mortgageFormPropertyNone,
+                  ),
+                for (final property in properties)
+                  AppSelectItem<String?>(
+                    value: property.id,
+                    label: property.label,
+                    subtitle: property.address,
+                  ),
+              ],
+            ),
+          )
+        : null;
+
     return AppModal(
       title: _isEditing
           ? l10n.mortgageFormEditTitle
           : l10n.mortgageFormCreateTitle,
-      width: 600,
+      width: AppModalSizes.w600,
+      dirty: _dirty,
+      busy: _isSubmitting,
+      saveError: _bannerError,
+      onSubmit: _submit,
       leadingAction: _isEditing
           ? AppButton(
               key: const Key('mortgageFormDelete'),
               label: l10n.mortgageFormDelete,
               variant: AppButtonVariant.ghost,
-              onPressed: _isSubmitting ? null : _delete,
+              onPressed: _delete,
             )
           : null,
       actions: [
-        AppButton(
-          key: const Key('mortgageFormCancel'),
-          label: l10n.mortgageFormCancel,
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(key: Key('mortgageFormCancel')),
         PrimaryButton(
           key: const Key('mortgageFormSubmit'),
           label: l10n.mortgageFormSave,
           isLoading: _isSubmitting,
-          onPressed: _isSubmitting ? null : _submit,
+          onPressed: _submit,
         ),
       ],
       child: Form(
@@ -353,55 +415,38 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_bannerError != null) ...[
-              InlineBanner(
-                key: const Key('mortgageFormError'),
-                message: _bannerError!,
-              ),
-              const SizedBox(height: AppSpacing.fieldGap),
-            ],
             LabeledField(
               label: l10n.mortgageFormLabel,
               child: TextFormField(
                 key: const Key('mortgageFormLabel'),
                 controller: _labelController,
-                autofocus: true,
                 validator: (value) => (value == null || value.trim().isEmpty)
                     ? l10n.mortgageFormLabelRequired
                     : null,
               ),
             ),
             rowGap,
-            _pair(
-              LabeledField(
+            ModalFieldRow(
+              start: ModalFieldCell(
                 label: l10n.mortgageFormLender,
-                child: TextFormField(
+                input: TextFormField(
                   key: const Key('mortgageFormLender'),
                   controller: _lenderController,
-                  // Rebuilds the monogram as the name is typed.
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    prefixIcon: Padding(
-                      padding: const EdgeInsetsDirectional.only(
-                        start: AppSpacing.xsPlus,
-                        end: AppSpacing.sm,
-                      ),
-                      child: MonogramAvatar(name: _lenderController.text),
-                    ),
-                    prefixIconConstraints: const BoxConstraints(),
-                  ),
                   validator: (value) => (value == null || value.trim().isEmpty)
                       ? l10n.mortgageFormLenderRequired
                       : null,
                 ),
               ),
-              LabeledField(
+              end: ModalFieldCell(
                 label: l10n.mortgageFormKind,
-                child: AppSelect<MortgageKind>(
+                input: AppSelect<MortgageKind>(
                   key: const Key('mortgageFormKind'),
                   value: _kind,
                   // The product label only — it never touches the repayment type.
-                  onChanged: (value) => setState(() => _kind = value),
+                  onChanged: (value) {
+                    setState(() => _kind = value);
+                    _updateDirty();
+                  },
                   items: [
                     for (final kind in MortgageKind.values)
                       AppSelectItem(
@@ -413,29 +458,29 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
               ),
             ),
             rowGap,
-            LabeledField(
-              label: l10n.mortgageFormRepayment,
-              child: AppSegmented<RepaymentType>(
-                value: _repayment,
-                onChanged: (value) {
-                  setState(() => _repayment = value);
-                  _requestPreview();
-                },
-                segments: [
-                  for (final type in RepaymentType.values)
-                    AppSegment(
-                      key: Key('mortgageFormRepayment-${type.wireValue}'),
-                      value: type,
-                      label: repaymentTypeLabel(l10n, type),
-                    ),
-                ],
+            ModalFieldRow(
+              start: ModalFieldCell(
+                label: l10n.mortgageFormRepayment,
+                input: AppSelect<RepaymentType>(
+                  key: const Key('mortgageFormRepayment'),
+                  value: _repayment,
+                  onChanged: (value) {
+                    setState(() => _repayment = value);
+                    _updateDirty();
+                    _requestPreview();
+                  },
+                  items: [
+                    for (final type in RepaymentType.values)
+                      AppSelectItem(
+                        value: type,
+                        label: repaymentTypeLabel(l10n, type),
+                      ),
+                  ],
+                ),
               ),
-            ),
-            rowGap,
-            _pair(
-              LabeledField(
+              end: ModalFieldCell(
                 label: l10n.mortgageFormPrincipal,
-                child: MoneyField(
+                input: MoneyField(
                   key: const Key('mortgageFormPrincipal'),
                   controller: _principalController,
                   currency: currency,
@@ -447,10 +492,13 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
                   },
                 ),
               ),
-              LabeledField(
+            ),
+            rowGap,
+            ModalFieldRow(
+              start: ModalFieldCell(
                 label: l10n.mortgageFormRate,
                 errorText: _rateError,
-                child: TextFormField(
+                input: TextFormField(
                   key: const Key('mortgageFormRate'),
                   controller: _rateController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -470,12 +518,9 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
                       : null,
                 ),
               ),
-            ),
-            rowGap,
-            _pair(
-              LabeledField(
+              end: ModalFieldCell(
                 label: l10n.mortgageFormTerm,
-                child: TextFormField(
+                input: TextFormField(
                   key: const Key('mortgageFormTerm'),
                   controller: _termController,
                   keyboardType: TextInputType.number,
@@ -494,9 +539,12 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
                   },
                 ),
               ),
-              LabeledField(
+            ),
+            rowGap,
+            ModalFieldRow(
+              start: ModalFieldCell(
                 label: l10n.mortgageFormFirstPayment,
-                child: DateField(
+                input: DateField(
                   key: const Key('mortgageFormFirstPayment'),
                   controller: _dateController,
                   firstDate: DateTime(1970),
@@ -508,12 +556,9 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
                       : null,
                 ),
               ),
-            ),
-            rowGap,
-            _pair(
-              LabeledField(
+              end: ModalFieldCell(
                 label: l10n.mortgageFormInsurance,
-                child: MoneyField(
+                input: MoneyField(
                   key: const Key('mortgageFormInsurance'),
                   controller: _insuranceController,
                   currency: currency,
@@ -522,48 +567,28 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
                       : null,
                 ),
               ),
-              LabeledField(
-                label: l10n.mortgageFormFees,
-                errorText: _feesError,
-                child: MoneyField(
-                  key: const Key('mortgageFormFees'),
-                  controller: _feesController,
-                  currency: currency,
-                  validator: (value) => _optionalMoney(value ?? '') == null
-                      ? l10n.mortgageFormAmountOptionalInvalid
-                      : null,
-                ),
-              ),
             ),
-            if (properties.isNotEmpty || _propertyId != null) ...[
-              rowGap,
-              LabeledField(
-                label: l10n.mortgageFormProperty,
-                errorText: _propertyError,
-                child: AppSelect<String?>(
-                  key: const Key('mortgageFormProperty'),
-                  value: _propertyId,
-                  onChanged: (value) => setState(() => _propertyId = value),
-                  items: [
-                    // An existing link cannot be cleared through the API (null
-                    // means "absent" on a patch), so « Aucun » is only offered
-                    // while nothing is linked.
-                    if (widget.initial?.propertyId == null)
-                      AppSelectItem<String?>(
-                        value: null,
-                        label: l10n.mortgageFormPropertyNone,
-                      ),
-                    for (final property in properties)
-                      AppSelectItem<String?>(
-                        value: property.id,
-                        label: property.label,
-                        subtitle: property.address,
-                      ),
-                  ],
-                ),
+            rowGap,
+            if (propertyCell != null)
+              ModalFieldRow(start: feesCell, end: propertyCell)
+            else
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: LabeledField(
+                      label: feesCell.label,
+                      errorText: feesCell.errorText,
+                      child: feesCell.input,
+                    ),
+                  ),
+                  const SizedBox(width: AppModalSizes.columnGutter),
+                  const Spacer(),
+                ],
               ),
-            ],
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(
+              height: AppSpacing.fieldGap + AppLoans.instalmentLineTop,
+            ),
             _InstalmentLine(
               interestOnly: _repayment == RepaymentType.interestOnly,
               preview: preview,
@@ -576,8 +601,10 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
 }
 
 /// The read-only « Mensualité calculée » line under the grid, following the
-/// fields live: the label and the instalment at 13/600, then « échéance
-/// totale {x} · intérêts totaux {y} » in `textSecondary`. No box, no plate.
+/// fields live: the label at 13/600, then on its baseline « échéance totale
+/// {x} · intérêts totaux {y} » in `textSecondary` (`proposal_v6` m-loans).
+/// Until the simulator can run, the same place says what it is waiting for.
+/// No box, no plate.
 class _InstalmentLine extends StatelessWidget {
   const _InstalmentLine({required this.interestOnly, required this.preview});
 
@@ -600,36 +627,22 @@ class _InstalmentLine extends StatelessWidget {
     String money(int minor, String currency) =>
         formatAmount(amountMinor: minor, currency: currency, locale: locale);
 
-    final Widget content;
+    final Widget detail;
     if (interestOnly) {
-      content = Text(
+      detail = Text(
         l10n.mortgageFormPlateInterestOnly,
         key: const Key('mortgageFormPlateInterestOnly'),
         style: secondary,
       );
     } else {
-      content = switch (preview) {
-        AsyncData(:final value) => Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: AppSpacing.sm,
-          children: [
-            Text(l10n.mortgageFormPlateLabel, style: strong),
-            AmountText(
-              key: const Key('mortgageFormPlateAmount'),
-              amountMinor: value.monthlyPaymentMinor,
-              currency: value.currency,
-              colorize: false,
-              style: strong,
-            ),
-            Text(
-              l10n.mortgageFormPlateDetail(
-                money(value.totalInstalmentMinor, value.currency),
-                money(value.totalInterestMinor, value.currency),
-              ),
-              key: const Key('mortgageFormPlateDetail'),
-              style: secondary,
-            ),
-          ],
+      detail = switch (preview) {
+        AsyncData(:final value) => Text(
+          l10n.mortgageFormPlateDetail(
+            money(value.totalInstalmentMinor, value.currency),
+            money(value.totalInterestMinor, value.currency),
+          ),
+          key: const Key('mortgageFormPlateDetail'),
+          style: secondary,
         ),
         AsyncError(:final error) => Text(
           localizeMortgageError(l10n, error),
@@ -643,6 +656,16 @@ class _InstalmentLine extends StatelessWidget {
         ),
       };
     }
+
+    final content = Row(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        Text(l10n.mortgageFormPlateLabel, style: strong),
+        const SizedBox(width: AppLoans.instalmentLabelGap),
+        Expanded(child: detail),
+      ],
+    );
 
     return KeyedSubtree(key: const Key('mortgageFormPlate'), child: content);
   }
