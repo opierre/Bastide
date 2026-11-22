@@ -74,7 +74,7 @@ void main() {
     expect(_text(tester, 'placementsSummaryValue'), _money(5423500));
     expect(
       _text(tester, 'placementsSummaryCaption'),
-      '3 placements · dernière valeur saisie le 30 avr. 2026',
+      '3 placements · dernière valeur saisie le 30\u00A0avr. 2026',
     );
     expect(_text(tester, 'placementsSummaryNetPayments'), _money(4670000));
     expect(
@@ -109,10 +109,10 @@ void main() {
     expect(first.twoLines, isTrue);
     expect(_inInspector(find.text('PEA')), findsOneWidget);
     expect(
-      _inInspector(find.text('Courtier Nord · ouvert le 14 mars 2023')),
+      _inInspector(find.text('Courtier Nord · ouvert le 14\u00A0mars 2023')),
       findsOneWidget,
     );
-    expect(_inInspector(find.text('au 30 avr. 2026')), findsOneWidget);
+    expect(_inInspector(find.text('au 30\u00A0avr. 2026')), findsOneWidget);
     expect(find.text('Saisir la valeur'), findsOneWidget);
     expect(find.text('Versement ou retrait'), findsOneWidget);
 
@@ -121,15 +121,15 @@ void main() {
       _text(tester, 'placementCeilingValue-i1'),
       '${_money(2700000)} sur ${_money(15000000)}',
     );
-    expect(_text(tester, 'placementAgeValue-i1'), '3 ans 2 mois');
+    expect(_text(tester, 'placementAgeValue-i1'), '3\u00A0ans 2\u00A0mois');
     final age = tester.widget<RepereMeter>(
       find.byKey(const Key('placementAgeMeter-i1')),
     );
-    expect(age.markLabel, 'repère 5 ans · mars 2028');
+    expect(age.markLabel, 'repère 5\u00A0ans · mars 2028');
     expect(age.tone, RepereTone.normal);
     expect(
       find.text(
-        'Avant 5 ans, un retrait clôt en principe le plan. Lecture '
+        'Avant 5\u00A0ans, un retrait clôt en principe le plan. Lecture '
         'indicative, qui ne vaut pas conseil fiscal.',
       ),
       findsOneWidget,
@@ -220,7 +220,7 @@ void main() {
     );
     expect(
       find.text(
-        'Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, '
+        'Après 8\u00A0ans, la fiscalité des retraits s’allège. Lecture indicative, '
         'qui ne vaut pas conseil fiscal.',
       ),
       findsOneWidget,

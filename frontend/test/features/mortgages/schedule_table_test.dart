@@ -88,7 +88,7 @@ void main() {
     expect(_text(tester, 'scheduleFootTotal'), _money(1468644));
     expect(
       _text(tester, 'scheduleFootOutstanding'),
-      'au 31 déc. 2026 : ${_money(21862220)}',
+      'au 31\u00A0déc. 2026 : ${_money(21862220)}',
     );
     expect(find.text('Total 2026'), findsOneWidget);
     expect(

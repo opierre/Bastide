@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/l10n/date_display.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/investment.dart';
@@ -64,12 +65,12 @@ String gainPercentLabel(int bps, String locale) {
       : bps < 0
       ? '−'
       : '';
-  return '$sign$formatted %';
+  return withUnit('$sign$formatted', '%');
 }
 
 /// « 30 avr. 2026 »: a date as the panel prints it.
 String placementDateLabel(String locale, DateTime date) =>
-    DateFormat.yMMMd(locale).format(date);
+    DayMonthFormat.yMMMd(locale).format(date);
 
 /// « mars 2023 »: the month of a date, in the locale's own case.
 String placementMonthLabel(String locale, DateTime date) =>

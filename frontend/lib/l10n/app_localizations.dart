@@ -965,7 +965,7 @@ abstract class AppLocalizations {
   /// Section header: the group's share of the total, one decimal.
   ///
   /// In fr, this message translates to:
-  /// **'{share} % du total'**
+  /// **'{share} % du total'**
   String accountsGroupShare(double share);
 
   /// Number of accounts on the total line.
@@ -983,13 +983,13 @@ abstract class AppLocalizations {
   /// How long ago the balances were recalculated, under an hour.
   ///
   /// In fr, this message translates to:
-  /// **'{minutes, plural, =0{à l’instant} =1{il y a 1 min} other{il y a {minutes} min}}'**
+  /// **'{minutes, plural, =0{à l’instant} =1{il y a 1 min} other{il y a {minutes} min}}'**
   String accountsAgoMinutes(int minutes);
 
   /// How long ago the balances were recalculated, an hour or more.
   ///
   /// In fr, this message translates to:
-  /// **'{hours, plural, =1{il y a 1 h} other{il y a {hours} h}}'**
+  /// **'{hours, plural, =1{il y a 1 h} other{il y a {hours} h}}'**
   String accountsAgoHours(int hours);
 
   /// Accounts table column header.
@@ -1468,7 +1468,7 @@ abstract class AppLocalizations {
   /// Size of the staged file, shown under its name. The number is already formatted for the locale.
   ///
   /// In fr, this message translates to:
-  /// **'{size} Ko'**
+  /// **'{size} Ko'**
   String importFileSize(String size);
 
   /// Ghost button removing one statement line of the selected file.
@@ -2602,7 +2602,7 @@ abstract class AppLocalizations {
   /// The savings rate's change in percentage points since the previous month, after the goal status (« +1,9 pt depuis avril »).
   ///
   /// In fr, this message translates to:
-  /// **'{delta} pt depuis {month}'**
+  /// **'{delta} pt depuis {month}'**
   String dashboardSavingsDeltaSince(String delta, DateTime month);
 
   /// Label of the goal mark on the savings rate repère (« objectif 20 % »). Lowercase: it sits on the meter.
@@ -2644,7 +2644,7 @@ abstract class AppLocalizations {
   /// Follows the signed 12-month average on the right of the « Épargne mensuelle » heading.
   ///
   /// In fr, this message translates to:
-  /// **'en moyenne sur 12 mois'**
+  /// **'en moyenne sur 12 mois'**
   String get dashboardSavingsTrendAverage;
 
   /// Title of the recent-transactions card.
@@ -3610,7 +3610,7 @@ abstract class AppLocalizations {
   /// Error when the picked logo is over the size limit; {megabytes} is that limit.
   ///
   /// In fr, this message translates to:
-  /// **'Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.'**
+  /// **'Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.'**
   String ruleLogoTooLarge(int megabytes);
 
   /// Button of the rule editor opening the dialog that downloads a logo from a web address.
@@ -3670,7 +3670,7 @@ abstract class AppLocalizations {
   /// Error when the downloaded logo is over the upload size limit; {megabytes} is that limit.
   ///
   /// In fr, this message translates to:
-  /// **'Cette image dépasse {megabytes} Mo.'**
+  /// **'Cette image dépasse {megabytes} Mo.'**
   String ruleLogoUrlTooLarge(int megabytes);
 
   /// Error when the downloaded file is not a picture.
@@ -4024,7 +4024,7 @@ abstract class AppLocalizations {
   /// Stand-in shown in the export preview instead of an embedded logo's base64; the saved file keeps the picture.
   ///
   /// In fr, this message translates to:
-  /// **'‹ image de {kilobytes} Ko ›'**
+  /// **'‹ image de {kilobytes} Ko ›'**
   String rulePackExportLogoElided(int kilobytes);
 
   /// Calm invitation at the foot of the review queue's header card when AI is off or the runtime is unreachable. The only place in the app that mentions it.
@@ -4575,7 +4575,7 @@ abstract class AppLocalizations {
   /// Relative phrasing for a charge further ahead.
   ///
   /// In fr, this message translates to:
-  /// **'{days, plural, =1{dans 1 jour} other{dans {days} jours}}'**
+  /// **'{days, plural, =1{dans 1 jour} other{dans {days} jours}}'**
   String subscriptionsNextInDays(int days);
 
   /// Label of the summary-line figure counting the series that carry a price rise or a missed charge. Hidden at 0.
@@ -4707,7 +4707,7 @@ abstract class AppLocalizations {
   /// Amber status pill on a row whose charge has not landed past its tolerance.
   ///
   /// In fr, this message translates to:
-  /// **'{days, plural, =1{Prélèvement manquant depuis 1 jour} other{Prélèvement manquant depuis {days} jours}}'**
+  /// **'{days, plural, =1{Prélèvement manquant depuis 1 jour} other{Prélèvement manquant depuis {days} jours}}'**
   String subscriptionSignalMissed(int days);
 
   /// Gray status pill on a recurring payment the user ended. It stays listed, dimmed.
@@ -5270,7 +5270,7 @@ abstract class AppLocalizations {
   /// Refused banner image: over the size limit. Same wording as the avatar.
   ///
   /// In fr, this message translates to:
-  /// **'Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.'**
+  /// **'Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.'**
   String goalImageTooLarge(int megabytes);
 
   /// Refused banner image: wrong type. Same wording as the avatar.
@@ -5726,7 +5726,7 @@ abstract class AppLocalizations {
   /// Ratio caption when the income is the median of the ledger's last 12 complete months. Says median, never average.
   ///
   /// In fr, this message translates to:
-  /// **'{charge} sur un revenu médian constaté de {income} (12 mois). Un revenu déclaré remplace cette lecture.'**
+  /// **'{charge} sur un revenu médian constaté de {income} (12 mois). Un revenu déclaré remplace cette lecture.'**
   String mortgagesRatioCaptionLedger(String charge, String income);
 
   /// Ratio caption when no income is known: no ratio is drawn.
@@ -6260,7 +6260,7 @@ abstract class AppLocalizations {
   /// Loans table cell: the lender and the term in months.
   ///
   /// In fr, this message translates to:
-  /// **'{lender} · {months} mois'**
+  /// **'{lender} · {months} mois'**
   String mortgagesTableLenderTerm(String lender, int months);
 
   /// Loans table cell under the repère: the share repaid and the instalments left.
@@ -6272,7 +6272,7 @@ abstract class AppLocalizations {
   /// First right-aligned line of the loan detail summary.
   ///
   /// In fr, this message translates to:
-  /// **'{kind} · {lender} · {principal} sur {months} mois'**
+  /// **'{kind} · {lender} · {principal} sur {months} mois'**
   String mortgageDetailFacts(
     String kind,
     String lender,
@@ -6379,19 +6379,19 @@ abstract class AppLocalizations {
   /// Term slider value in both units.
   ///
   /// In fr, this message translates to:
-  /// **'{years, plural, =1{1 an} other{{years} ans}} · {months} mois'**
+  /// **'{years, plural, =1{1 an} other{{years} ans}} · {months} mois'**
   String simulatorTermValue(int months, num years);
 
   /// A duration in whole years.
   ///
   /// In fr, this message translates to:
-  /// **'{years, plural, =1{1 an} other{{years} ans}}'**
+  /// **'{years, plural, =1{1 an} other{{years} ans}}'**
   String simulatorYears(num years);
 
   /// A duration in months.
   ///
   /// In fr, this message translates to:
-  /// **'{months} mois'**
+  /// **'{months} mois'**
   String simulatorMonths(int months);
 
   /// Switch adding the user's active loans to the HCSF reading.
@@ -6671,7 +6671,7 @@ abstract class AppLocalizations {
   /// A property price in thousands of euros, as scenario names read it.
   ///
   /// In fr, this message translates to:
-  /// **'{amount} k€'**
+  /// **'{amount} k€'**
   String simulatorPriceThousands(String amount);
 
   /// Save refused because the per-user scenario cap is reached.
@@ -6917,7 +6917,7 @@ abstract class AppLocalizations {
   /// Validation message when the ownership share is not between 0.01 and 100 percent.
   ///
   /// In fr, this message translates to:
-  /// **'Indiquez une quote-part entre 0,01 et 100 %.'**
+  /// **'Indiquez une quote-part entre 0,01 et 100 %.'**
   String get propertyFormOwnershipInvalid;
 
   /// Property form field: the optional purchase price.
@@ -7271,13 +7271,13 @@ abstract class AppLocalizations {
   /// Series range segment: the last 12 months.
   ///
   /// In fr, this message translates to:
-  /// **'12 mois'**
+  /// **'12 mois'**
   String get networthRangeYear;
 
   /// Series range segment: the last 3 years.
   ///
   /// In fr, this message translates to:
-  /// **'3 ans'**
+  /// **'3 ans'**
   String get networthRangeThreeYears;
 
   /// Series range segment: the whole history.
@@ -7697,7 +7697,7 @@ abstract class AppLocalizations {
   /// Error when the picked picture is over the size limit; {megabytes} is that limit.
   ///
   /// In fr, this message translates to:
-  /// **'Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.'**
+  /// **'Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.'**
   String settingsAvatarPictureTooLarge(int megabytes);
 
   /// Error when the picked file is not a supported picture.
@@ -7979,13 +7979,13 @@ abstract class AppLocalizations {
   /// Balance chart range segment.
   ///
   /// In fr, this message translates to:
-  /// **'6 mois'**
+  /// **'6 mois'**
   String get accountDetailRangeSixMonths;
 
   /// Balance chart range segment.
   ///
   /// In fr, this message translates to:
-  /// **'12 mois'**
+  /// **'12 mois'**
   String get accountDetailRangeTwelveMonths;
 
   /// Balance chart range segment: the whole history.
@@ -8033,7 +8033,7 @@ abstract class AppLocalizations {
   /// Sentence under the balance chart, shown only when the balance rose at least two month-ends running.
   ///
   /// In fr, this message translates to:
-  /// **'Votre solde progresse depuis {count} mois.'**
+  /// **'Votre solde progresse depuis {count} mois.'**
   String accountDetailRisingStreak(int count);
 
   /// Summary line label of a deferred card: the mean of its last settled cycles.
@@ -8847,13 +8847,13 @@ abstract class AppLocalizations {
   /// Age of an investment, whole years.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 an} other{{count} ans}}'**
+  /// **'{count, plural, =1{1 an} other{{count} ans}}'**
   String placementAgeYears(int count);
 
   /// Age of an investment, months.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 mois} other{{count} mois}}'**
+  /// **'{count, plural, =1{1 mois} other{{count} mois}}'**
   String placementAgeMonths(int count);
 
   /// Age of an investment: years then months.
@@ -8865,19 +8865,19 @@ abstract class AppLocalizations {
   /// Label of the age repère's mark: the milestone and the month it falls in.
   ///
   /// In fr, this message translates to:
-  /// **'repère {years} ans · {month}'**
+  /// **'repère {years} ans · {month}'**
   String placementMilestoneMark(int years, String month);
 
   /// Caption under the age repère of a PEA.
   ///
   /// In fr, this message translates to:
-  /// **'Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.'**
+  /// **'Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.'**
   String get placementMilestonePea;
 
   /// Caption under the age repère of a life insurance policy.
   ///
   /// In fr, this message translates to:
-  /// **'Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.'**
+  /// **'Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.'**
   String get placementMilestoneLifeInsurance;
 
   /// Inspector section heading: payments, withdrawals and declared values.

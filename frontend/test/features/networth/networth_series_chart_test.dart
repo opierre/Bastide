@@ -329,8 +329,8 @@ void main() {
       await tester.tap(find.byKey(const Key('networthRangeAll')));
       await tester.pumpAndSettle();
 
-      expect(find.text('12 months'), findsOneWidget);
-      expect(find.text('3 years'), findsOneWidget);
+      expect(find.text('12\u00A0months'), findsOneWidget);
+      expect(find.text('3\u00A0years'), findsOneWidget);
       expect(find.text('Declared totals'), findsOneWidget);
       expect(find.text('Declared history'), findsOneWidget);
     });

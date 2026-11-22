@@ -170,7 +170,7 @@ void main() {
 
     // The summary line: the balance on the last history day, then the
     // month's figures, neutral and signed.
-    expect(find.text('Solde au 30 octobre 2026'), findsOneWidget);
+    expect(find.text('Solde au 30\u00A0octobre 2026'), findsOneWidget);
     expect(find.text(_eur(348612, plus: true)), findsOneWidget);
     expect(find.text('Entrées en octobre'), findsOneWidget);
     expect(find.text(_eur(327000, plus: true)), findsOneWidget);
@@ -179,17 +179,20 @@ void main() {
     expect(find.text('Net'), findsOneWidget);
     expect(find.text(_eur(61205, plus: true)), findsOneWidget);
     expect(find.text('BNP Paribas · Courant'), findsOneWidget);
-    expect(find.text('Historique depuis le 3 janv. 2025'), findsOneWidget);
-    expect(find.text('dernier import le 28 oct.'), findsOneWidget);
+    expect(find.text('Historique depuis le 3\u00A0janv. 2025'), findsOneWidget);
+    expect(find.text('dernier import le 28\u00A0oct.'), findsOneWidget);
     expect(find.text('Solde en fin de mois'), findsOneWidget);
     expect(find.byKey(const Key('accountDetailBalanceChart')), findsOneWidget);
     // Four month-ends rising in a row: said, because it is true.
-    expect(find.text('Votre solde progresse depuis 4 mois.'), findsOneWidget);
+    expect(
+      find.text('Votre solde progresse depuis 4\u00A0mois.'),
+      findsOneWidget,
+    );
     expect(find.text('Cartes rattachées'), findsOneWidget);
     expect(find.text('Visa Premier'), findsOneWidget);
     expect(find.text('•••• 4821'), findsOneWidget);
     expect(find.text('Débit différé'), findsNWidgets(2));
-    expect(find.text('Prélevé le 5 nov.'), findsOneWidget);
+    expect(find.text('Prélevé le 5\u00A0nov.'), findsOneWidget);
     expect(find.text('Opérations'), findsOneWidget);
     expect(find.text('Ouvrir dans Transactions'), findsOneWidget);
     // The second card has no rule: the chip offers the fix; the first does not.
@@ -402,7 +405,7 @@ void main() {
     expect(find.text('Moyenne sur 6 cycles'), findsOneWidget);
     expect(find.text(_eur(-87318)), findsOneWidget);
     expect(find.text('Prélevé le'), findsOneWidget);
-    expect(find.text('5 nov.'), findsOneWidget);
+    expect(find.text('5\u00A0nov.'), findsOneWidget);
     expect(find.text('Dépenses par cycle'), findsOneWidget);
     expect(find.byKey(const Key('accountDetailCycleChart')), findsOneWidget);
     expect(find.byKey(const Key('accountDetailBalanceChart')), findsNothing);
@@ -417,7 +420,9 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.text('Libellé : CARTE X4821 · appliquée depuis le 5 févr. 2025'),
+      find.text(
+        'Libellé : CARTE X4821 · appliquée depuis le 5\u00A0févr. 2025',
+      ),
       findsOneWidget,
     );
     expect(find.text('Modifier la règle'), findsOneWidget);
@@ -493,7 +498,7 @@ void main() {
     }
     expect(find.text('Box Internet'), findsNWidgets(2));
     expect(find.text('Non catégorisé'), findsNWidgets(2));
-    expect(find.text('29 oct.'), findsNWidgets(2));
+    expect(find.text('29\u00A0oct.'), findsNWidgets(2));
     expect(find.text(_eur(-2999)), findsOneWidget);
     expect(find.text(_eur(150000, plus: true)), findsOneWidget);
   });
@@ -585,7 +590,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Balance on October 30, 2026'), findsOneWidget);
+    expect(find.text('Balance on October\u00A030, 2026'), findsOneWidget);
     expect(find.text(_eur(348612, plus: true, locale: 'en')), findsOneWidget);
     expect(find.text('Money in, October'), findsOneWidget);
     expect(find.text('Month-end balance'), findsOneWidget);

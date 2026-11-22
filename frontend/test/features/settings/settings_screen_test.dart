@@ -145,14 +145,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Langue'), findsOneWidget);
-    expect(find.text('14 mai 2026 · 14/05/2026'), findsOneWidget);
+    expect(find.text('14\u00A0mai 2026 · 14/05/2026'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('settingsLocaleEnglishOption')));
     await tester.pumpAndSettle();
 
     // The promise under the control is "applies immediately": no save step.
     expect(find.text('Language'), findsOneWidget);
-    expect(find.text('May 14, 2026 · 5/14/2026'), findsOneWidget);
+    expect(find.text('May\u00A014, 2026 · 5/14/2026'), findsOneWidget);
     expect(find.text('Display'), findsOneWidget);
   });
 

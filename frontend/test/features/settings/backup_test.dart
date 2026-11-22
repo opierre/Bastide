@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
+import 'package:bastide/core/l10n/date_display.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/features/settings/application/backup_controller.dart';
 import 'package:bastide/features/settings/application/settings_controller.dart';
@@ -239,7 +240,7 @@ void main() {
 
       final local = _exportedAt.toLocal();
       final expected =
-          'Dernière sauvegarde le ${DateFormat.yMMMMd('fr').format(local)} '
+          'Dernière sauvegarde le ${DayMonthFormat.yMMMMd('fr').format(local)} '
           'à ${DateFormat.Hm('fr').format(local)}';
       expect(find.text(expected), findsOneWidget);
       // The month is spelled out, as in the mockup, not « 11/09/2026 ».

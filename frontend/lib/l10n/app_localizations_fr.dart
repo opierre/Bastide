@@ -559,7 +559,7 @@ class AppLocalizationsFr extends AppLocalizations {
         );
     final String shareString = shareNumberFormat.format(share);
 
-    return '$shareString % du total';
+    return '$shareString % du total';
   }
 
   @override
@@ -583,8 +583,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       minutes,
       locale: localeName,
-      other: 'il y a $minutes min',
-      one: 'il y a 1 min',
+      other: 'il y a $minutes min',
+      one: 'il y a 1 min',
       zero: 'à l’instant',
     );
     return '$_temp0';
@@ -595,8 +595,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       hours,
       locale: localeName,
-      other: 'il y a $hours h',
-      one: 'il y a 1 h',
+      other: 'il y a $hours h',
+      one: 'il y a 1 h',
     );
     return '$_temp0';
   }
@@ -918,7 +918,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String importFileSize(String size) {
-    return '$size Ko';
+    return '$size Ko';
   }
 
   @override
@@ -1603,7 +1603,7 @@ class AppLocalizationsFr extends AppLocalizations {
     final intl.DateFormat monthDateFormat = intl.DateFormat.MMMM(localeName);
     final String monthString = monthDateFormat.format(month);
 
-    return '$delta pt depuis $monthString';
+    return '$delta pt depuis $monthString';
   }
 
   @override
@@ -1627,7 +1627,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardSavingsTrendTitle => 'Épargne mensuelle';
 
   @override
-  String get dashboardSavingsTrendAverage => 'en moyenne sur 12 mois';
+  String get dashboardSavingsTrendAverage => 'en moyenne sur 12 mois';
 
   @override
   String get dashboardRecentActivityTitle => 'Activité récente';
@@ -2156,7 +2156,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String ruleLogoTooLarge(int megabytes) {
-    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
+    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
   }
 
   @override
@@ -2191,7 +2191,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String ruleLogoUrlTooLarge(int megabytes) {
-    return 'Cette image dépasse $megabytes Mo.';
+    return 'Cette image dépasse $megabytes Mo.';
   }
 
   @override
@@ -2484,7 +2484,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String rulePackExportLogoElided(int kilobytes) {
-    return '‹ image de $kilobytes Ko ›';
+    return '‹ image de $kilobytes Ko ›';
   }
 
   @override
@@ -2899,8 +2899,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: 'dans $days jours',
-      one: 'dans 1 jour',
+      other: 'dans $days jours',
+      one: 'dans 1 jour',
     );
     return '$_temp0';
   }
@@ -2993,8 +2993,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: 'Prélèvement manquant depuis $days jours',
-      one: 'Prélèvement manquant depuis 1 jour',
+      other: 'Prélèvement manquant depuis $days jours',
+      one: 'Prélèvement manquant depuis 1 jour',
     );
     return '$_temp0';
   }
@@ -3355,7 +3355,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String goalImageTooLarge(int megabytes) {
-    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
+    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
   }
 
   @override
@@ -3619,7 +3619,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String mortgagesRatioCaptionLedger(String charge, String income) {
-    return '$charge sur un revenu médian constaté de $income (12 mois). Un revenu déclaré remplace cette lecture.';
+    return '$charge sur un revenu médian constaté de $income (12 mois). Un revenu déclaré remplace cette lecture.';
   }
 
   @override
@@ -3933,7 +3933,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String mortgagesTableLenderTerm(String lender, int months) {
-    return '$lender · $months mois';
+    return '$lender · $months mois';
   }
 
   @override
@@ -3955,7 +3955,7 @@ class AppLocalizationsFr extends AppLocalizations {
     String principal,
     int months,
   ) {
-    return '$kind · $lender · $principal sur $months mois';
+    return '$kind · $lender · $principal sur $months mois';
   }
 
   @override
@@ -4021,10 +4021,10 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       years,
       locale: localeName,
-      other: '$yearsString ans',
-      one: '1 an',
+      other: '$yearsString ans',
+      one: '1 an',
     );
-    return '$_temp0 · $months mois';
+    return '$_temp0 · $months mois';
   }
 
   @override
@@ -4037,15 +4037,15 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       years,
       locale: localeName,
-      other: '$yearsString ans',
-      one: '1 an',
+      other: '$yearsString ans',
+      one: '1 an',
     );
     return '$_temp0';
   }
 
   @override
   String simulatorMonths(int months) {
-    return '$months mois';
+    return '$months mois';
   }
 
   @override
@@ -4242,7 +4242,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String simulatorPriceThousands(String amount) {
-    return '$amount k€';
+    return '$amount k€';
   }
 
   @override
@@ -4397,7 +4397,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get propertyFormOwnershipInvalid =>
-      'Indiquez une quote-part entre 0,01 et 100 %.';
+      'Indiquez une quote-part entre 0,01 et 100 %.';
 
   @override
   String get propertyFormAcquisitionPrice => 'Prix d’acquisition';
@@ -4617,10 +4617,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get networthRangeYear => '12 mois';
+  String get networthRangeYear => '12 mois';
 
   @override
-  String get networthRangeThreeYears => '3 ans';
+  String get networthRangeThreeYears => '3 ans';
 
   @override
   String get networthRangeAll => 'Tout';
@@ -4861,7 +4861,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String settingsAvatarPictureTooLarge(int megabytes) {
-    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
+    return 'Cette image est trop lourde : choisissez un fichier de moins de $megabytes Mo.';
   }
 
   @override
@@ -5042,10 +5042,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountDetailCyclesChartTitle => 'Dépenses par cycle';
 
   @override
-  String get accountDetailRangeSixMonths => '6 mois';
+  String get accountDetailRangeSixMonths => '6 mois';
 
   @override
-  String get accountDetailRangeTwelveMonths => '12 mois';
+  String get accountDetailRangeTwelveMonths => '12 mois';
 
   @override
   String get accountDetailRangeAll => 'Tout';
@@ -5075,7 +5075,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String accountDetailRisingStreak(int count) {
-    return 'Votre solde progresse depuis $count mois.';
+    return 'Votre solde progresse depuis $count mois.';
   }
 
   @override
@@ -5611,8 +5611,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count ans',
-      one: '1 an',
+      other: '$count ans',
+      one: '1 an',
     );
     return '$_temp0';
   }
@@ -5622,8 +5622,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count mois',
-      one: '1 mois',
+      other: '$count mois',
+      one: '1 mois',
     );
     return '$_temp0';
   }
@@ -5635,16 +5635,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String placementMilestoneMark(int years, String month) {
-    return 'repère $years ans · $month';
+    return 'repère $years ans · $month';
   }
 
   @override
   String get placementMilestonePea =>
-      'Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.';
+      'Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.';
 
   @override
   String get placementMilestoneLifeInsurance =>
-      'Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.';
+      'Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.';
 
   @override
   String get placementMovementsTitle => 'Mouvements';

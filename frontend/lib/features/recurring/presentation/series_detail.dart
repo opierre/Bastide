@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/l10n/category_display.dart';
+import '../../../core/l10n/date_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
@@ -196,7 +196,7 @@ class _DetailBody extends ConsumerWidget {
             message: l10n.subscriptionDetailIncrease(
               _money(series.previousAmountMinor!, series.currency, locale),
               _money(series.expectedAmountMinor, series.currency, locale),
-              DateFormat.yMMMd(locale).format(changedAt),
+              DayMonthFormat.yMMMd(locale).format(changedAt),
               // Stated with its sign: the direction of the change, not a
               // balance. « 24,00 € par an » alone would not say whether that
               // is more or less.

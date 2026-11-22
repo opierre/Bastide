@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import '../../../core/l10n/date_display.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/note_line.dart';
 import '../../../l10n/app_localizations.dart';
@@ -51,7 +51,7 @@ class RuleMatchPreviewBanner extends StatelessWidget {
         : l10n.rulePreviewCountWithSample(
             preview.matchCount,
             sample.descriptionClean,
-            DateFormat.yMMMMd(locale).format(sample.bookedDate),
+            DayMonthFormat.yMMMMd(locale).format(sample.bookedDate),
           );
 
     return NoteLine(key: const Key('rulePreviewBanner'), text: message);

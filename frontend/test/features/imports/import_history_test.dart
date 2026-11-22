@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bastide/core/l10n/date_display.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/app_table.dart';
@@ -127,13 +128,13 @@ void main() {
     expect(inRow(find.text('releve-mai.ofx')), findsOneWidget);
     expect(inRow(find.text('Compte courant')), findsOneWidget);
     expect(
-      inRow(find.text(DateFormat.yMMMd('fr').format(DateTime(2026, 6, 1)))),
+      inRow(find.text(DayMonthFormat.yMMMd('fr').format(DateTime(2026, 6, 1)))),
       findsOneWidget,
     );
     expect(
       inRow(
         find.text(
-          '1 – ${DateFormat.yMMMd('fr').format(DateTime(2026, 5, 31))}',
+          '1 – ${DayMonthFormat.yMMMd('fr').format(DateTime(2026, 5, 31))}',
         ),
       ),
       findsOneWidget,
@@ -176,7 +177,7 @@ void main() {
 
     expect(find.text('History'), findsOneWidget);
     expect(
-      find.text(DateFormat.yMMMd('en').format(DateTime(2026, 6, 1))),
+      find.text(DayMonthFormat.yMMMd('en').format(DateTime(2026, 6, 1))),
       findsOneWidget,
     );
     expect(find.text('Succeeded'), findsOneWidget);
@@ -195,8 +196,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final fr = DateFormat.MMMd('fr').format(DateTime(2026, 1, 1));
-    final end = DateFormat.yMMMd('fr').format(DateTime(2026, 5, 31));
+    final fr = DayMonthFormat.MMMd('fr').format(DateTime(2026, 1, 1));
+    final end = DayMonthFormat.yMMMd('fr').format(DateTime(2026, 5, 31));
     expect(find.text('$fr – $end'), findsOneWidget);
   });
 

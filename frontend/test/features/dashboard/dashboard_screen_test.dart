@@ -166,7 +166,7 @@ void main() {
       expect(status.tone, StatusTone.positive);
       expect(
         tester.widget<Text>(_byKey('dashboardSavingsDelta')).data,
-        ' · +1,9 pt depuis avril',
+        ' · +1,9\u00A0pt depuis avril',
       );
     });
 
@@ -182,7 +182,7 @@ void main() {
       expect(
         tester.widget<Text>(_byKey('dashboardSavingsDelta')).data,
         'Objectif ${formatRatioPct(0.2, 'fr', decimalDigits: 0)} en cours'
-        ' · −0,8 pt depuis avril',
+        ' · −0,8\u00A0pt depuis avril',
       );
       expect(
         tester.widget<RepereMeter>(_byKey('dashboardSavingsGoalBar')).tone,
@@ -211,7 +211,7 @@ void main() {
       expect(
         tester.widget<Text>(_byKey('dashboardSavingsDelta')).data,
         'Objectif ${formatRatioPct(0.3, 'fr', decimalDigits: 0)} en cours'
-        ' · +1,9 pt depuis avril',
+        ' · +1,9\u00A0pt depuis avril',
       );
     });
 
@@ -429,7 +429,7 @@ void main() {
         tester.widget<AmountText>(_byKey('dashboardAverageSaved')).amountMinor,
         specTrends().averageSavedMinor,
       );
-      expect(find.text('en moyenne sur 12 mois'), findsOneWidget);
+      expect(find.text('en moyenne sur 12\u00A0mois'), findsOneWidget);
     });
 
     testWidgets('an earlier month hatches nothing', (tester) async {
@@ -623,7 +623,7 @@ void main() {
       expect(find.text('vs April'), findsNWidgets(3));
       expect(find.text('Spending by category'), findsOneWidget);
       expect(find.text('Monthly savings'), findsOneWidget);
-      expect(find.text('on average over 12 months'), findsOneWidget);
+      expect(find.text('on average over 12\u00A0months'), findsOneWidget);
       expect(find.text('All transactions'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

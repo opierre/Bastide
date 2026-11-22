@@ -81,7 +81,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Mensuel'), findsOneWidget);
-      expect(find.text('15 mai'), findsOneWidget);
+      expect(find.text('15\u00A0mai'), findsOneWidget);
 
       // Unsigned and in the primary ink: an expected charge is not a ledger
       // entry, so the money rule's red would state something false about it.
@@ -143,12 +143,15 @@ void main() {
       find.text('Hausse : ${_money(1349)} → ${_money(1549)}'),
       findsOneWidget,
     );
-    expect(find.text('Prélèvement manquant depuis 9 jours'), findsOneWidget);
+    expect(
+      find.text('Prélèvement manquant depuis 9\u00A0jours'),
+      findsOneWidget,
+    );
 
     // The overdue row states what was expected instead of printing a past date
     // under a "next charge" header.
     expect(find.byKey(const Key('seriesNextExpected-s2')), findsOneWidget);
-    expect(find.text('attendu le 5 mai'), findsOneWidget);
+    expect(find.text('attendu le 5\u00A0mai'), findsOneWidget);
     expect(
       tester
           .widget<Text>(find.byKey(const Key('seriesNextExpected-s2')))
@@ -183,10 +186,10 @@ void main() {
       // Settled, not something to look at: no status icon.
       expect(find.byType(StatusText), findsNothing);
       expect(
-        find.text('Résilié, dernier prélèvement le 15 avril 2026'),
+        find.text('Résilié, dernier prélèvement le 15\u00A0avril 2026'),
         findsOneWidget,
       );
-      expect(find.text('15 mai'), findsNothing);
+      expect(find.text('15\u00A0mai'), findsNothing);
       expect(
         find.descendant(
           of: find.byKey(const Key('seriesRow-s1')),
@@ -611,7 +614,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Monthly'), findsNWidgets(3));
-    expect(find.text('Missed charge for 9 days'), findsOneWidget);
+    expect(find.text('Missed charge for 9\u00A0days'), findsOneWidget);
     expect(find.textContaining('Cancelled, last charge on'), findsOneWidget);
     // Netflix and the cancelled Canal+ share a price in this fixture.
     expect(find.text(_money(1549, locale: 'en')), findsNWidgets(2));

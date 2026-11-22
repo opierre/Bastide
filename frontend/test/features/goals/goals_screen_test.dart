@@ -104,7 +104,7 @@ void main() {
       'Juin 2028',
     );
     expect(find.text('Atteint en avril 2026'), findsWidgets);
-    expect(find.text('64 %'), findsOneWidget);
+    expect(find.text('64\u00A0%'), findsOneWidget);
     expect(
       tester.widget<RepereMeter>(find.byKey(const Key('goalMeter-g3'))).tone,
       RepereTone.done,
@@ -272,7 +272,7 @@ void main() {
         find.byKey(const Key('goalMeter-g1')),
       );
       expect(meter.fraction, 1.0);
-      expect(find.text('118 %'), findsOneWidget);
+      expect(find.text('118\u00A0%'), findsOneWidget);
     },
   );
 

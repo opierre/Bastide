@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
+import '../../../core/l10n/date_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
@@ -169,7 +169,7 @@ class _Summary extends ConsumerWidget {
           entries: [
             KeyValue(
               l10n.transactionInspectorDate,
-              DateFormat.yMMMMd(locale).format(transaction.bookedDate),
+              DayMonthFormat.yMMMMd(locale).format(transaction.bookedDate),
             ),
             KeyValue(l10n.transactionInspectorAccount, account?.name ?? '—'),
             KeyValue.widget(
@@ -315,7 +315,7 @@ class _RecurringRow extends ConsumerWidget {
               Text(
                 l10n.transactionRecurringNext(
                   cadenceLabel(l10n, Cadence.fromWire(series.cadence)),
-                  DateFormat.yMMMd(locale).format(series.nextExpectedDate),
+                  DayMonthFormat.yMMMd(locale).format(series.nextExpectedDate),
                 ),
                 style: tabularNumberStyle(
                   textTheme.bodySmall!,
@@ -399,7 +399,7 @@ class _History extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      DateFormat.yMMMd(locale).format(operation.bookedDate),
+                      DayMonthFormat.yMMMd(locale).format(operation.bookedDate),
                       style: tabularNumberStyle(
                         textTheme.bodyMedium!,
                       ).copyWith(color: colors.textSecondary),

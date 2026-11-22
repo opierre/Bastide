@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/l10n/date_display.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/mortgage.dart';
 
@@ -20,10 +21,12 @@ String repaymentTypeLabel(AppLocalizations l10n, RepaymentType type) =>
     };
 
 /// « 1 juin 2026 » — a due date in a summary line or a caption.
-DateFormat mortgageLongDateFormat(String locale) => DateFormat.yMMMMd(locale);
+DayMonthFormat mortgageLongDateFormat(String locale) =>
+    DayMonthFormat.yMMMMd(locale);
 
 /// « 1 sept. 2023 » — a date in a table cell or a secondary line.
-DateFormat mortgageDateFormat(String locale) => DateFormat.yMMMd(locale);
+DayMonthFormat mortgageDateFormat(String locale) =>
+    DayMonthFormat.yMMMd(locale);
 
 /// « août 2048 » — the month a loan ends, in the loans table.
 DateFormat mortgageMonthFormat(String locale) => DateFormat.yMMM(locale);

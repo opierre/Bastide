@@ -300,7 +300,7 @@ void main() {
               find.byKey(const Key('accountSectionShare-type:checking')),
             )
             .data,
-        '39,8 % du total',
+        '39,8\u00A0% du total',
       );
       // A negative group reads its share in absolute value.
       expect(
@@ -309,7 +309,7 @@ void main() {
               find.byKey(const Key('accountSectionShare-type:deferredCard')),
             )
             .data,
-        '2,0 % du total',
+        '2,0\u00A0% du total',
       );
     });
 
@@ -334,7 +334,7 @@ void main() {
       expect(find.text('Variation en mai'), findsOneWidget);
       expect(
         tester.widget<Text>(find.byKey(const Key('accountLastImport-a1'))).data,
-        '14 mai 2026',
+        '14\u00A0mai 2026',
       );
       expect(
         tester.widget<Text>(find.byKey(const Key('accountLastImport-a2'))).data,
@@ -382,7 +382,7 @@ void main() {
       expect(find.text('Current accounts'), findsOneWidget);
       expect(find.text('Change in May'), findsOneWidget);
       expect(find.text('100.0% of total'), findsOneWidget);
-      expect(find.text('May 14, 2026'), findsOneWidget);
+      expect(find.text('May\u00A014, 2026'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   });

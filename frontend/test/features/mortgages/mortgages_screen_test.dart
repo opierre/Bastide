@@ -130,7 +130,7 @@ void main() {
       expect(_text(tester, 'mortgagesMonthlyCharge'), _money(150625));
       expect(
         _text(tester, 'mortgagesChargeCaption'),
-        '2 échéances le 1 juin 2026, assurance comprise',
+        '2 échéances le 1\u00A0juin 2026, assurance comprise',
       );
       expect(_text(tester, 'mortgagesTotalOutstanding'), _money(23412921));
       expect(
@@ -151,8 +151,8 @@ void main() {
       expect(find.byKey(const Key('loanRow-m1')), findsOneWidget);
       expect(find.byKey(const Key('loanRow-m2')), findsOneWidget);
       expect(_text(tester, 'loanName-m1'), 'Appartement Lyon 3e');
-      expect(_text(tester, 'loanLender-m1'), 'BNP · 300 mois');
-      expect(_text(tester, 'loanLender-m2'), 'Crédit Agricole · 60 mois');
+      expect(_text(tester, 'loanLender-m1'), 'BNP · 300\u00A0mois');
+      expect(_text(tester, 'loanLender-m2'), 'Crédit Agricole · 60\u00A0mois');
       expect(_text(tester, 'loanRate-m1'), _pct(345, digits: 2));
       expect(_text(tester, 'loanInsurance-m1'), _money(2880));
       expect(_text(tester, 'loanInsurance-m2'), '—');
@@ -185,13 +185,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(_text(tester, 'loanLender-m1'), 'BNP · 300 months');
+      expect(_text(tester, 'loanLender-m1'), 'BNP · 300\u00A0months');
       expect(_text(tester, 'loanRate-m1'), '3.45%');
       expect(_text(tester, 'loanRepaid-m1'), '7.3% · 267 instalments left');
       expect(_text(tester, 'loanEnd-m1'), 'Aug 2048');
       expect(
         _text(tester, 'mortgagesChargeCaption'),
-        '2 instalments on June 1, 2026, insurance included',
+        '2 instalments on June\u00A01, 2026, insurance included',
       );
     });
 
@@ -239,14 +239,14 @@ void main() {
         _text(tester, 'mortgageDetailInstalmentCaption'),
         '${_money(119507)} + ${_money(2880)} d’assurance',
       );
-      expect(_text(tester, 'mortgageDetailNext'), '1 juin 2026');
+      expect(_text(tester, 'mortgageDetailNext'), '1\u00A0juin 2026');
       expect(
         _text(tester, 'mortgageDetailFacts'),
-        'Crédit immobilier · BNP · ${_money(24000000)} sur 300 mois',
+        'Crédit immobilier · BNP · ${_money(24000000)} sur 300\u00A0mois',
       );
       expect(
         _text(tester, 'mortgageDetailFirstPayment'),
-        '1re échéance le 1 sept. 2023 · frais de dossier ${_money(145000)}',
+        '1re échéance le 1\u00A0sept. 2023 · frais de dossier ${_money(145000)}',
       );
       expect(find.text('TAEG indicatif'), findsOneWidget);
       expect(find.text('taux, assurance et frais'), findsOneWidget);
@@ -318,7 +318,7 @@ void main() {
         expect(
           _richText(tester, 'ratioCaption'),
           '${_money(150625)} sur un revenu médian constaté de '
-          '${_money(285000)} (12 mois). Un revenu déclaré remplace cette '
+          '${_money(285000)} (12\u00A0mois). Un revenu déclaré remplace cette '
           'lecture. $_caveat',
         );
         // The figure stays neutral: the status text carries the warning.

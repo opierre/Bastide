@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 
+import '../../../core/l10n/date_display.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/backup.dart';
 
@@ -8,7 +9,7 @@ import '../domain/backup.dart';
 String formatBackupInstant(AppLocalizations l10n, String locale, DateTime at) {
   final local = at.toLocal();
   return l10n.settingsBackupDateTime(
-    DateFormat.yMMMMd(locale).format(local),
+    DayMonthFormat.yMMMMd(locale).format(local),
     DateFormat.Hm(locale).format(local),
   );
 }

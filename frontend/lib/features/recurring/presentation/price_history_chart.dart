@@ -87,7 +87,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
     final format = seriesAxisDateFormat(locale, [
       for (final point in points) point.bookedDate,
     ]);
-    final ticks = [for (final point in points) format.format(point.bookedDate)];
+    final ticks = [for (final point in points) format(point.bookedDate)];
     final labelStyle = ChartPaints.labelStyle(context);
     final tooltips = [
       for (var i = 0; i < points.length; i++)

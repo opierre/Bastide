@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 
+import '../../../core/l10n/date_display.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/recurring_series.dart';
 
@@ -30,10 +31,12 @@ DateFormat seriesDateFormat(String locale) => DateFormat.yMd(locale);
 
 /// An upcoming or recent charge in the table: « 15 mai », "May 15". The year
 /// is left out because these dates sit within a cadence of today.
-DateFormat seriesShortDateFormat(String locale) => DateFormat.MMMd(locale);
+DayMonthFormat seriesShortDateFormat(String locale) =>
+    DayMonthFormat.MMMd(locale);
 
 /// A date stated in a sentence or a caption: « 15 mai 2026 », "May 15, 2026".
-DateFormat seriesLongDateFormat(String locale) => DateFormat.yMMMMd(locale);
+DayMonthFormat seriesLongDateFormat(String locale) =>
+    DayMonthFormat.yMMMMd(locale);
 
 /// Axis ticks under the price curve, for the charges at [dates]. Day-and-month
 /// while the whole history fits inside a year, month-and-year beyond it: a
@@ -42,15 +45,20 @@ DateFormat seriesLongDateFormat(String locale) => DateFormat.yMMMMd(locale);
 /// place it in. Every charge is labelled, so when two of them share a month in
 /// a history longer than a year, the day comes back — otherwise two ticks
 /// would name the same month and neither would date its charge.
-DateFormat seriesAxisDateFormat(String locale, List<DateTime> dates) {
-  if (dates.isEmpty) return DateFormat.MMMd(locale);
+String Function(DateTime) seriesAxisDateFormat(
+  String locale,
+  List<DateTime> dates,
+) {
+  if (dates.isEmpty) return DayMonthFormat.MMMd(locale).format;
   final first = dates.reduce((a, b) => a.isBefore(b) ? a : b);
   final last = dates.reduce((a, b) => a.isAfter(b) ? a : b);
-  if (last.difference(first).inDays <= 365) return DateFormat.MMMd(locale);
+  if (last.difference(first).inDays <= 365) {
+    return DayMonthFormat.MMMd(locale).format;
+  }
   final months = {for (final date in dates) date.year * 12 + date.month};
   return months.length == dates.length
-      ? DateFormat.yMMM(locale)
-      : DateFormat.yMMMd(locale);
+      ? DateFormat.yMMM(locale).format
+      : DayMonthFormat.yMMMd(locale).format;
 }
 
 /// « décembre 2025 » — the month a series has been tracked since.

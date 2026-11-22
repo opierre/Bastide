@@ -306,7 +306,7 @@ void main() {
     expect(find.byKey(const Key('seriesIncreaseBanner')), findsOneWidget);
     expect(
       find.text(
-        'Hausse : ${_money(1349)} → ${_money(1549)} le 15 avr. 2026, '
+        'Hausse : ${_money(1349)} → ${_money(1549)} le 15\u00A0avr. 2026, '
         'soit +${_money(2400)} par an.',
       ),
       findsOneWidget,
@@ -496,7 +496,7 @@ void main() {
     expect(find.text('Cadence'), findsOneWidget);
     expect(find.text('Mensuel'), findsOneWidget);
     expect(find.text('Prochain prélèvement'), findsOneWidget);
-    expect(find.text('15 mai 2026'), findsOneWidget);
+    expect(find.text('15\u00A0mai 2026'), findsOneWidget);
     expect(find.text('Non catégorisé'), findsOneWidget);
     expect(find.text('Historique des prélèvements'), findsOneWidget);
     expect(

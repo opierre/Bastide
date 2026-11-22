@@ -51,6 +51,14 @@ void main() {
         expect(offenders, isEmpty);
       });
 
+      test('joins a figure and its unit with a no-break space', () {
+        final offenders = [
+          for (final MapEntry(:key, :value) in messages.entries)
+            if (_figureSpaceUnit.hasMatch(value)) key,
+        ];
+        expect(offenders, isEmpty);
+      });
+
       test('never says « pour l’instant »', () {
         final offenders = [
           for (final MapEntry(:key, :value) in messages.entries)
@@ -77,6 +85,10 @@ void main() {
       isFalse,
     );
     expect(_forNow.hasMatch("Aucun import pour l'instant"), isTrue);
+    expect(_figureSpaceUnit.hasMatch('{amount} k€'), isTrue);
+    expect(_figureSpaceUnit.hasMatch('il y a 3 h'), isTrue);
+    expect(_figureSpaceUnit.hasMatch('{amount}\u00A0k€'), isFalse);
+    expect(_figureSpaceUnit.hasMatch('{count} hausses'), isFalse);
   });
 }
 
@@ -86,6 +98,12 @@ final _dataArrow = RegExp(r'\{\w+\} → \{\w+\}');
 final _glyph = RegExp('[→←↑↓↗↘⟶➔➜✓✔✗✘]');
 
 final _forNow = RegExp('pour l[\'’]instant', caseSensitive: false);
+
+/// A figure or a placeholder, an ordinary space, then a unit: `00` §3 asks
+/// for U+00A0 there (« 320 k€ », « 35 % »).
+final _figureSpaceUnit = RegExp(
+  r'(\{\w+\}|\d) (%|€|k€|M€|×|Ko|Mo|Go|kB|KB|MB|GB|pts?|min|h|ans?|mois|jours?|semaines?|years?|months?|days?|weeks?)(?![\wÀ-ɏ])',
+);
 
 /// Every message of one ARB file, without its `@` metadata.
 Map<String, String> _messages(String locale) {

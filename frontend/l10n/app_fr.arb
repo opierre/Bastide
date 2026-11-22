@@ -670,7 +670,7 @@
   "@accountsNoInstitution": {
     "description": "Accounts section, by institution, for the accounts that name none."
   },
-  "accountsGroupShare": "{share} % du total",
+  "accountsGroupShare": "{share}\u00A0% du total",
   "@accountsGroupShare": {
     "description": "Section header: the group's share of the total, one decimal.",
     "placeholders": {
@@ -704,7 +704,7 @@
       }
     }
   },
-  "accountsAgoMinutes": "{minutes, plural, =0{à l’instant} =1{il y a 1 min} other{il y a {minutes} min}}",
+  "accountsAgoMinutes": "{minutes, plural, =0{à l’instant} =1{il y a 1\u00A0min} other{il y a {minutes}\u00A0min}}",
   "@accountsAgoMinutes": {
     "description": "How long ago the balances were recalculated, under an hour.",
     "placeholders": {
@@ -713,7 +713,7 @@
       }
     }
   },
-  "accountsAgoHours": "{hours, plural, =1{il y a 1 h} other{il y a {hours} h}}",
+  "accountsAgoHours": "{hours, plural, =1{il y a 1\u00A0h} other{il y a {hours}\u00A0h}}",
   "@accountsAgoHours": {
     "description": "How long ago the balances were recalculated, an hour or more.",
     "placeholders": {
@@ -1100,7 +1100,7 @@
   "@importDropZoneHint": {
     "description": "Sub-line inside the imports drop zone, stating that the file itself names the destination account."
   },
-  "importFileSize": "{size} Ko",
+  "importFileSize": "{size}\u00A0Ko",
   "@importFileSize": {
     "description": "Size of the staged file, shown under its name. The number is already formatted for the locale.",
     "placeholders": {
@@ -1983,7 +1983,7 @@
       }
     }
   },
-  "dashboardSavingsDeltaSince": "{delta} pt depuis {month}",
+  "dashboardSavingsDeltaSince": "{delta}\u00A0pt depuis {month}",
   "@dashboardSavingsDeltaSince": {
     "description": "The savings rate's change in percentage points since the previous month, after the goal status (« +1,9 pt depuis avril »).",
     "placeholders": {
@@ -2025,7 +2025,7 @@
   "@dashboardSavingsTrendTitle": {
     "description": "Title of the monthly savings chart (bar or line view)."
   },
-  "dashboardSavingsTrendAverage": "en moyenne sur 12 mois",
+  "dashboardSavingsTrendAverage": "en moyenne sur 12\u00A0mois",
   "@dashboardSavingsTrendAverage": {
     "description": "Follows the signed 12-month average on the right of the « Épargne mensuelle » heading."
   },
@@ -2697,7 +2697,7 @@
   "@ruleLogoCropSave": {
     "description": "Confirm button of the logo crop modal, uploading the cropped logo."
   },
-  "ruleLogoTooLarge": "Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.",
+  "ruleLogoTooLarge": "Cette image est trop lourde : choisissez un fichier de moins de {megabytes}\u00A0Mo.",
   "@ruleLogoTooLarge": {
     "description": "Error when the picked logo is over the size limit; {megabytes} is that limit.",
     "placeholders": {
@@ -2742,7 +2742,7 @@
   "@ruleLogoUrlUnreachable": {
     "description": "Error when the logo address could not be reached, answered an error or timed out."
   },
-  "ruleLogoUrlTooLarge": "Cette image dépasse {megabytes} Mo.",
+  "ruleLogoUrlTooLarge": "Cette image dépasse {megabytes}\u00A0Mo.",
   "@ruleLogoUrlTooLarge": {
     "description": "Error when the downloaded logo is over the upload size limit; {megabytes} is that limit.",
     "placeholders": {
@@ -3097,7 +3097,7 @@
   "@rulePackExportLogosTooLarge": {
     "description": "Warning on the export sheet when the logos would take the pack over the size an import accepts."
   },
-  "rulePackExportLogoElided": "‹ image de {kilobytes} Ko ›",
+  "rulePackExportLogoElided": "‹ image de {kilobytes}\u00A0Ko ›",
   "@rulePackExportLogoElided": {
     "description": "Stand-in shown in the export preview instead of an embedded logo's base64; the saved file keeps the picture.",
     "placeholders": {
@@ -3579,7 +3579,7 @@
   "@subscriptionsNextTomorrow": {
     "description": "Relative phrasing for a charge due tomorrow."
   },
-  "subscriptionsNextInDays": "{days, plural, =1{dans 1 jour} other{dans {days} jours}}",
+  "subscriptionsNextInDays": "{days, plural, =1{dans 1\u00A0jour} other{dans {days}\u00A0jours}}",
   "@subscriptionsNextInDays": {
     "description": "Relative phrasing for a charge further ahead.",
     "placeholders": {
@@ -3690,7 +3690,7 @@
       }
     }
   },
-  "subscriptionSignalMissed": "{days, plural, =1{Prélèvement manquant depuis 1 jour} other{Prélèvement manquant depuis {days} jours}}",
+  "subscriptionSignalMissed": "{days, plural, =1{Prélèvement manquant depuis 1\u00A0jour} other{Prélèvement manquant depuis {days}\u00A0jours}}",
   "@subscriptionSignalMissed": {
     "description": "Amber status pill on a row whose charge has not landed past its tolerance.",
     "placeholders": {
@@ -4191,7 +4191,7 @@
   "@goalImageCropSave": {
     "description": "Confirm action of the crop modal."
   },
-  "goalImageTooLarge": "Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.",
+  "goalImageTooLarge": "Cette image est trop lourde : choisissez un fichier de moins de {megabytes}\u00A0Mo.",
   "@goalImageTooLarge": {
     "description": "Refused banner image: over the size limit. Same wording as the avatar.",
     "placeholders": {
@@ -4554,7 +4554,7 @@
       }
     }
   },
-  "mortgagesRatioCaptionLedger": "{charge} sur un revenu médian constaté de {income} (12 mois). Un revenu déclaré remplace cette lecture.",
+  "mortgagesRatioCaptionLedger": "{charge} sur un revenu médian constaté de {income} (12\u00A0mois). Un revenu déclaré remplace cette lecture.",
   "@mortgagesRatioCaptionLedger": {
     "description": "Ratio caption when the income is the median of the ledger's last 12 complete months. Says median, never average.",
     "placeholders": {
@@ -5000,7 +5000,7 @@
   "@mortgagesTableInstalment": {
     "description": "Loans table column header: the instalment, insurance included."
   },
-  "mortgagesTableLenderTerm": "{lender} · {months} mois",
+  "mortgagesTableLenderTerm": "{lender} · {months}\u00A0mois",
   "@mortgagesTableLenderTerm": {
     "description": "Loans table cell: the lender and the term in months.",
     "placeholders": {
@@ -5024,7 +5024,7 @@
       }
     }
   },
-  "mortgageDetailFacts": "{kind} · {lender} · {principal} sur {months} mois",
+  "mortgageDetailFacts": "{kind} · {lender} · {principal} sur {months}\u00A0mois",
   "@mortgageDetailFacts": {
     "description": "First right-aligned line of the loan detail summary.",
     "placeholders": {
@@ -5119,7 +5119,7 @@
   "@simulatorTerm": {
     "description": "Simulator term slider label, and the HCSF term column label."
   },
-  "simulatorTermValue": "{years, plural, =1{1 an} other{{years} ans}} · {months} mois",
+  "simulatorTermValue": "{years, plural, =1{1\u00A0an} other{{years}\u00A0ans}} · {months}\u00A0mois",
   "@simulatorTermValue": {
     "description": "Term slider value in both units.",
     "placeholders": {
@@ -5132,7 +5132,7 @@
       }
     }
   },
-  "simulatorYears": "{years, plural, =1{1 an} other{{years} ans}}",
+  "simulatorYears": "{years, plural, =1{1\u00A0an} other{{years}\u00A0ans}}",
   "@simulatorYears": {
     "description": "A duration in whole years.",
     "placeholders": {
@@ -5142,7 +5142,7 @@
       }
     }
   },
-  "simulatorMonths": "{months} mois",
+  "simulatorMonths": "{months}\u00A0mois",
   "@simulatorMonths": {
     "description": "A duration in months.",
     "placeholders": {
@@ -5418,7 +5418,7 @@
   "@simulatorSaveSubmit": {
     "description": "Save-scenario modal submit button."
   },
-  "simulatorPriceThousands": "{amount} k€",
+  "simulatorPriceThousands": "{amount}\u00A0k€",
   "@simulatorPriceThousands": {
     "description": "A property price in thousands of euros, as scenario names read it.",
     "placeholders": {
@@ -5647,7 +5647,7 @@
       }
     }
   },
-  "propertyFormOwnershipInvalid": "Indiquez une quote-part entre 0,01 et 100 %.",
+  "propertyFormOwnershipInvalid": "Indiquez une quote-part entre 0,01 et 100\u00A0%.",
   "@propertyFormOwnershipInvalid": {
     "description": "Validation message when the ownership share is not between 0.01 and 100 percent."
   },
@@ -5951,11 +5951,11 @@
       }
     }
   },
-  "networthRangeYear": "12 mois",
+  "networthRangeYear": "12\u00A0mois",
   "@networthRangeYear": {
     "description": "Series range segment: the last 12 months."
   },
-  "networthRangeThreeYears": "3 ans",
+  "networthRangeThreeYears": "3\u00A0ans",
   "@networthRangeThreeYears": {
     "description": "Series range segment: the last 3 years."
   },
@@ -6245,7 +6245,7 @@
   "@settingsAvatarRemovePicture": {
     "description": "Button of the avatar card dropping the uploaded picture and going back to the previous default avatar."
   },
-  "settingsAvatarPictureTooLarge": "Cette image est trop lourde : choisissez un fichier de moins de {megabytes} Mo.",
+  "settingsAvatarPictureTooLarge": "Cette image est trop lourde : choisissez un fichier de moins de {megabytes}\u00A0Mo.",
   "@settingsAvatarPictureTooLarge": {
     "description": "Error when the picked picture is over the size limit; {megabytes} is that limit.",
     "placeholders": {
@@ -6519,11 +6519,11 @@
   "@accountDetailCyclesChartTitle": {
     "description": "Title of a deferred card's chart: one bar per settlement cycle."
   },
-  "accountDetailRangeSixMonths": "6 mois",
+  "accountDetailRangeSixMonths": "6\u00A0mois",
   "@accountDetailRangeSixMonths": {
     "description": "Balance chart range segment."
   },
-  "accountDetailRangeTwelveMonths": "12 mois",
+  "accountDetailRangeTwelveMonths": "12\u00A0mois",
   "@accountDetailRangeTwelveMonths": {
     "description": "Balance chart range segment."
   },
@@ -6567,7 +6567,7 @@
   "@accountDetailCycleOpen": {
     "description": "Cycle chart tooltip line for the open cycle."
   },
-  "accountDetailRisingStreak": "Votre solde progresse depuis {count} mois.",
+  "accountDetailRisingStreak": "Votre solde progresse depuis {count}\u00A0mois.",
   "@accountDetailRisingStreak": {
     "description": "Sentence under the balance chart, shown only when the balance rose at least two month-ends running.",
     "placeholders": {
@@ -7306,7 +7306,7 @@
   "@placementAgeLabel": {
     "description": "Repère label: time since the opening."
   },
-  "placementAgeYears": "{count, plural, =1{1 an} other{{count} ans}}",
+  "placementAgeYears": "{count, plural, =1{1\u00A0an} other{{count}\u00A0ans}}",
   "@placementAgeYears": {
     "description": "Age of an investment, whole years.",
     "placeholders": {
@@ -7315,7 +7315,7 @@
       }
     }
   },
-  "placementAgeMonths": "{count, plural, =1{1 mois} other{{count} mois}}",
+  "placementAgeMonths": "{count, plural, =1{1\u00A0mois} other{{count}\u00A0mois}}",
   "@placementAgeMonths": {
     "description": "Age of an investment, months.",
     "placeholders": {
@@ -7336,7 +7336,7 @@
       }
     }
   },
-  "placementMilestoneMark": "repère {years} ans · {month}",
+  "placementMilestoneMark": "repère {years}\u00A0ans · {month}",
   "@placementMilestoneMark": {
     "description": "Label of the age repère's mark: the milestone and the month it falls in.",
     "placeholders": {
@@ -7348,11 +7348,11 @@
       }
     }
   },
-  "placementMilestonePea": "Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.",
+  "placementMilestonePea": "Avant 5\u00A0ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.",
   "@placementMilestonePea": {
     "description": "Caption under the age repère of a PEA."
   },
-  "placementMilestoneLifeInsurance": "Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.",
+  "placementMilestoneLifeInsurance": "Après 8\u00A0ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.",
   "@placementMilestoneLifeInsurance": {
     "description": "Caption under the age repère of a life insurance policy."
   },
