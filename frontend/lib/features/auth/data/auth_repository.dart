@@ -111,6 +111,21 @@ class AuthRepository {
     );
   }
 
+  /// Changes the signed-in user's email, which is also a login identifier,
+  /// after re-checking [currentPassword]. Every session stays open.
+  Future<AuthUser> changeEmail({
+    required String email,
+    required String currentPassword,
+  }) async {
+    final json =
+        await _apiClient.put(
+              '/auth/me/email',
+              body: {'email': email, 'current_password': currentPassword},
+            )
+            as Map<String, dynamic>;
+    return _parseUser(json['user'] as Map<String, dynamic>);
+  }
+
   /// Changes the signed-in user's display name, which is also their username.
   Future<AuthUser> updateProfile({required String displayName}) async {
     final json =

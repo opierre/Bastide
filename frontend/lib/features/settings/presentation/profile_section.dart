@@ -11,6 +11,7 @@ import '../../auth/application/auth_controller.dart';
 import '../../auth/presentation/avatar_picker.dart';
 import '../../auth/domain/password_rule.dart';
 import '../../auth/presentation/display_name_modal.dart';
+import '../../auth/presentation/email_change_modal.dart';
 import '../../auth/presentation/password_change_modal.dart';
 import '../../auth/presentation/recovery_code_modal.dart';
 import 'setting_row.dart';
@@ -29,6 +30,7 @@ class ProfileSection extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final user = ref.watch(currentUserProvider);
     final name = user?.displayName ?? '';
+    final email = user?.email ?? '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -72,12 +74,27 @@ class ProfileSection extends ConsumerWidget {
           name: l10n.settingsEmailTitle,
           description: l10n.settingsEmailNote,
           children: [
-            Text(
-              user?.email ?? '',
-              key: const Key('settingsEmail'),
-              style: textTheme.bodyMedium?.copyWith(
-                color: context.colors.textSecondary,
-              ),
+            Wrap(
+              spacing: AppSpacing.smPlus,
+              runSpacing: AppSpacing.sm,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  email,
+                  key: const Key('settingsEmail'),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: context.colors.textSecondary,
+                  ),
+                ),
+                AppButton(
+                  key: const Key('settingsEmailButton'),
+                  label: l10n.settingsEmailButton,
+                  onPressed: () => showAppModal<void>(
+                    context: context,
+                    builder: (_) => EmailChangeModal(initialEmail: email),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
