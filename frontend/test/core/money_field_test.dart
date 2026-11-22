@@ -2,6 +2,7 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/money_field.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _wrap({
@@ -135,6 +136,56 @@ void main() {
         await tester.enterText(find.byKey(const Key('field')), partial);
         expect(controller.text, partial);
       }
+    });
+  });
+
+  group('the error', () {
+    // Long enough to wrap in a half-width modal cell, where it used to come
+    // out on one truncated line set with the amount's right alignment.
+    const message = 'Saisissez un montant supérieur à zéro.';
+
+    testWidgets('wraps from the field edge on a right-aligned amount', (
+      tester,
+    ) async {
+      final formKey = GlobalKey<FormState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('fr'),
+          theme: AppTheme.dark,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Form(
+              key: formKey,
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: 140,
+                  child: MoneyField(
+                    controller: TextEditingController(),
+                    currency: 'EUR',
+                    textAlign: TextAlign.end,
+                    validator: (_) => message,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      formKey.currentState!.validate();
+      await tester.pumpAndSettle();
+
+      final paragraph = tester.renderObject<RenderParagraph>(
+        find.text(message),
+      );
+      final lines = paragraph.getBoxesForSelection(
+        const TextSelection(baseOffset: 0, extentOffset: message.length),
+      );
+
+      // The message did wrap, and every line starts flush, as the first.
+      expect(lines.map((box) => box.top).toSet().length, greaterThan(1));
+      expect(lines.map((box) => box.left), everyElement(0));
     });
   });
 
