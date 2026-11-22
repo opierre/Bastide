@@ -4730,7 +4730,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsRecoveryModalGenerate => 'Generate';
 
   @override
-  String get settingsRecoveryModalCancel => 'Cancel';
+  String get settingsRecoveryModalSaveFile => 'Save to a file';
+
+  @override
+  String get settingsRecoveryModalSaved => 'Saved';
+
+  @override
+  String get settingsRecoveryModalSaveFailed =>
+      'The file could not be saved. Try again.';
+
+  @override
+  String get settingsRecoveryFileName => 'bastide-recovery-code.txt';
 
   @override
   String get settingsRecoveryModalDone => 'Done';
@@ -4757,9 +4767,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPasswordCurrentLabel => 'Current password';
-
-  @override
-  String get settingsPasswordModalCancel => 'Cancel';
 
   @override
   String get settingsPasswordModalSave => 'Change password';
@@ -4860,9 +4867,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsProfileNameModalSave => 'Save';
-
-  @override
-  String get settingsProfileNameModalCancel => 'Cancel';
 
   @override
   String get startupPrivacy => 'Your data stays on this computer.';

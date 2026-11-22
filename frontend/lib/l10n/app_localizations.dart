@@ -7514,11 +7514,29 @@ abstract class AppLocalizations {
   /// **'Générer'**
   String get settingsRecoveryModalGenerate;
 
-  /// Cancel button of the regeneration modal.
+  /// Secondary button of the regeneration modal writing the new code to a text file on this machine.
   ///
   /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get settingsRecoveryModalCancel;
+  /// **'Enregistrer dans un fichier'**
+  String get settingsRecoveryModalSaveFile;
+
+  /// Label the save-to-file button takes once the code has been written to a file.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistré'**
+  String get settingsRecoveryModalSaved;
+
+  /// Banner in the regeneration modal when the code could not be written to a file.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le fichier n’a pas pu être enregistré. Réessayez.'**
+  String get settingsRecoveryModalSaveFailed;
+
+  /// File name suggested when saving the new recovery code to a text file.
+  ///
+  /// In fr, this message translates to:
+  /// **'code-de-recuperation-bastide.txt'**
+  String get settingsRecoveryFileName;
 
   /// Button closing the regeneration modal once the new code has been shown.
   ///
@@ -7567,12 +7585,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Mot de passe actuel'**
   String get settingsPasswordCurrentLabel;
-
-  /// Cancel button of the password change modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get settingsPasswordModalCancel;
 
   /// Confirm button of the password change modal.
   ///
@@ -7735,12 +7747,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Enregistrer'**
   String get settingsProfileNameModalSave;
-
-  /// Button closing the change-username modal without saving.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get settingsProfileNameModalCancel;
 
   /// The privacy promise under the product name on the startup screen.
   ///
