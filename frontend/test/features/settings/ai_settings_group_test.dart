@@ -65,11 +65,14 @@ void main() {
     }
   }
 
-  Widget wrap({Locale locale = const Locale('fr')}) => ProviderScope(
+  Widget wrap({
+    Locale locale = const Locale('fr'),
+    ThemeData? theme,
+  }) => ProviderScope(
     overrides: [apiClientProvider.overrideWithValue(apiClient)],
     child: MaterialApp(
       locale: locale,
-      theme: AppTheme.dark,
+      theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       // Scrollable like the settings panel the card lives in, so a card taller
@@ -135,6 +138,54 @@ void main() {
         }
       },
     );
+
+    for (final (name, theme) in [
+      ('dark', AppTheme.dark),
+      ('light', AppTheme.light),
+    ]) {
+      testWidgets(
+        'the open list is a §6 select popover as wide as the field ($name)',
+        (tester) async {
+          useDesktopSurface(tester);
+          stub();
+
+          await tester.pumpWidget(wrap(theme: theme));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('settingsAiModelMenu')));
+          await tester.pumpAndSettle();
+
+          final field = find.byKey(const Key('settingsAiModelField'));
+          final fieldRect = tester.getRect(field);
+          final rows = [
+            for (final tag in ['gemma3n:e4b', 'qwen3:4b', 'llama3.2:3b'])
+              tester.getRect(find.byKey(Key('settingsAiModelOption-$tag'))),
+          ];
+          // Rows sit inside the popover's 4 px padding, so the popover's
+          // outer edges are the field's.
+          for (final row in rows) {
+            expect(row.left, moreOrLessEquals(fieldRect.left + AppSpacing.xs));
+            expect(
+              row.width,
+              moreOrLessEquals(fieldRect.width - 2 * AppSpacing.xs),
+            );
+            expect(row.height, AppSizes.popoverItem);
+          }
+          // Drops beneath the field rather than from its chevron.
+          expect(rows.first.top, greaterThan(fieldRect.bottom));
+
+          // The tag the field holds carries the check, and only it.
+          expect(
+            find.descendant(
+              of: find.byKey(const Key('settingsAiModelOption-gemma3n:e4b')),
+              matching: find.byKey(const Key('appMenuItemCheck')),
+            ),
+            findsOneWidget,
+          );
+          expect(find.byKey(const Key('appMenuItemCheck')), findsOneWidget);
+        },
+      );
+    }
 
     testWidgets('picking a model from the list puts it in the field', (
       tester,

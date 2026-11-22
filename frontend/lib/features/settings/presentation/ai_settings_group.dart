@@ -271,7 +271,11 @@ class _RowsState extends ConsumerState<_Rows> {
 /// does not advertise, and a closed list would leave that user with no way
 /// in. With no engine it is disabled: an empty dropdown would offer a choice
 /// that does not exist.
-class _ModelField extends StatelessWidget {
+///
+/// The list opens as the select of `00` §6 does: anchored on the whole field
+/// rather than on its chevron, as wide as the field, with the popover rows of
+/// §7 and a `check` on the tag the field holds.
+class _ModelField extends StatefulWidget {
   const _ModelField({
     required this.controller,
     required this.connection,
@@ -287,54 +291,39 @@ class _ModelField extends StatelessWidget {
   final ValueChanged<String> onPicked;
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final unreachable = connection.isUnreachable;
-
-    return Semantics(
-      label: l10n.settingsAiModelLabel,
-      child: Opacity(
-        opacity: unreachable ? 0.45 : 1,
-        child: FocusGlow(
-          child: TextField(
-            key: Key(
-              unreachable ? 'settingsAiModelReadOnly' : 'settingsAiModelField',
-            ),
-            controller: controller,
-            enabled: !unreachable,
-            style: context.textStyles.mono.copyWith(color: context.colors.text),
-            onChanged: onTyped,
-            decoration: InputDecoration(
-              suffixIconConstraints: const BoxConstraints(
-                minWidth: AppSizes.formField,
-              ),
-              suffixIcon: _ModelMenu(
-                models: unreachable ? const [] : models,
-                onPicked: onPicked,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  State<_ModelField> createState() => _ModelFieldState();
 }
 
-class _ModelMenu extends StatelessWidget {
-  const _ModelMenu({required this.models, required this.onPicked});
+class _ModelFieldState extends State<_ModelField> {
+  final _fieldKey = GlobalKey();
 
-  final List<String> models;
-  final ValueChanged<String> onPicked;
+  /// The field's width, measured off the laid-out field when the list opens,
+  /// as `AppSelect` does, so the popover lines up with the field.
+  double? _menuWidth;
+
+  void _toggle(MenuController menu) {
+    if (menu.isOpen) {
+      menu.close();
+      return;
+    }
+    final box = _fieldKey.currentContext?.findRenderObject() as RenderBox?;
+    final width = box?.size.width;
+    if (width != null && width != _menuWidth) {
+      setState(() => _menuWidth = width);
+    }
+    menu.open();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final chevron = Icon(
-      LucideIcons300.chevronDown,
-      size: AppSizes.iconSmall,
-      color: context.colors.textTertiary,
-    );
-    if (models.isEmpty) return chevron;
+    final unreachable = widget.connection.isUnreachable;
+    final models = unreachable ? const <String>[] : widget.models;
+    // A row is the field's width less the popover's padding on either side,
+    // so the popover's outer edge lines up with the field's.
+    final rowWidth = _menuWidth == null
+        ? null
+        : _menuWidth! - AppSpacing.xs * 2;
 
     return MenuAnchor(
       alignmentOffset: const Offset(0, AppSpacing.xs),
@@ -344,22 +333,74 @@ class _ModelMenu extends StatelessWidget {
           AppMenuItem(
             key: Key('settingsAiModelOption-$tag'),
             label: tag,
-            onPressed: () => onPicked(tag),
+            mono: true,
+            width: rowWidth,
+            selected: tag == widget.controller.text,
+            onPressed: () => widget.onPicked(tag),
           ),
       ],
-      builder: (context, menu, _) => Tooltip(
-        message: l10n.settingsAiModelChoose,
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            key: const Key('settingsAiModelMenu'),
-            behavior: HitTestBehavior.opaque,
-            onTap: () => menu.isOpen ? menu.close() : menu.open(),
-            child: SizedBox.square(
-              dimension: AppSizes.formField,
-              child: chevron,
+      builder: (context, menu, _) => Semantics(
+        label: l10n.settingsAiModelLabel,
+        child: Opacity(
+          opacity: unreachable ? 0.45 : 1,
+          child: FocusGlow(
+            child: KeyedSubtree(
+              key: _fieldKey,
+              child: TextField(
+                key: Key(
+                  unreachable
+                      ? 'settingsAiModelReadOnly'
+                      : 'settingsAiModelField',
+                ),
+                controller: widget.controller,
+                enabled: !unreachable,
+                style: context.textStyles.mono.copyWith(
+                  color: context.colors.text,
+                ),
+                onChanged: widget.onTyped,
+                decoration: InputDecoration(
+                  suffixIconConstraints: const BoxConstraints(
+                    minWidth: AppSizes.formField,
+                  ),
+                  suffixIcon: _ModelMenuButton(
+                    onTap: models.isEmpty ? null : () => _toggle(menu),
+                  ),
+                ),
+              ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The chevron at the end of the model field, which opens the engine's list.
+class _ModelMenuButton extends StatelessWidget {
+  const _ModelMenuButton({required this.onTap});
+
+  /// `null` when there is nothing to list: the chevron is drawn but inert.
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final chevron = Icon(
+      LucideIcons300.chevronDown,
+      size: AppSizes.iconSmall,
+      color: context.colors.textTertiary,
+    );
+    if (onTap == null) return chevron;
+
+    return Tooltip(
+      message: l10n.settingsAiModelChoose,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          key: const Key('settingsAiModelMenu'),
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: SizedBox.square(dimension: AppSizes.formField, child: chevron),
         ),
       ),
     );
