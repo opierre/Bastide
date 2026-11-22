@@ -14,10 +14,10 @@ struct _MyApplication {
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
-// Called when first Flutter frame received.
-static void first_frame_cb(MyApplication* self, FlView* view) {
-  gtk_widget_show(gtk_widget_get_toplevel(GTK_WIDGET(view)));
-}
+// Called when first Flutter frame received. The window stays hidden until the
+// app has hidden the native title bar and shows it itself (window_manager, see
+// lib/core/window/), so the native title bar never flashes on screen.
+static void first_frame_cb(MyApplication* self, FlView* view) {}
 
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
