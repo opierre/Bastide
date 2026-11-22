@@ -269,58 +269,71 @@ class _DetailSummaryLine extends ConsumerWidget {
 
     return IntrinsicHeight(
       key: const Key('seriesDetailSummaryLine'),
+      // Two groups pushed apart rather than one row of flex items: the space
+      // the items leave unused falls between the groups, so the right block
+      // ends on the panel's right edge, with the account beside « Historique
+      // des prélèvements ».
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SummaryItem(
-            label: l10n.subscriptionDetailExpectedAmount,
-            labelGap: AppSpacing.xs,
-            // Neutral and unsigned like the list's column: what the
-            // subscription costs, not a movement.
-            figure: AmountText(
-              key: const Key('seriesDetailExpectedAmount'),
-              amountMinor: series.expectedAmountMinor.abs(),
-              currency: series.currency,
-              colorize: false,
-              maxLines: 1,
-              style: textTheme.displayLarge!.copyWith(color: colors.text),
-            ),
-          ),
-          const SummaryHairline(),
           Flexible(
-            child: SummaryItem(
-              label: l10n.subscriptionDetailCadence,
-              figure: Text(
-                cadenceLabel(l10n, series.cadence),
-                key: const Key('seriesDetailCadence'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: minor.copyWith(color: colors.text),
-              ),
-            ),
-          ),
-          const SummaryHairline(),
-          Flexible(
-            child: SummaryItem(
-              label: l10n.subscriptionDetailNextCharge,
-              figure: Text(
-                settled
-                    ? l10n.subscriptionsValueNone
-                    : seriesLongDateFormat(
-                        locale,
-                      ).format(series.nextExpectedDate),
-                key: const Key('seriesDetailNextCharge'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: minor.copyWith(
-                  color: settled ? colors.textTertiary : colors.text,
+            flex: 2,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SummaryItem(
+                  label: l10n.subscriptionDetailExpectedAmount,
+                  labelGap: AppSpacing.xs,
+                  // Neutral and unsigned like the list's column: what the
+                  // subscription costs, not a movement.
+                  figure: AmountText(
+                    key: const Key('seriesDetailExpectedAmount'),
+                    amountMinor: series.expectedAmountMinor.abs(),
+                    currency: series.currency,
+                    colorize: false,
+                    maxLines: 1,
+                    style: textTheme.displayLarge!.copyWith(color: colors.text),
+                  ),
                 ),
-              ),
+                const SummaryHairline(),
+                Flexible(
+                  child: SummaryItem(
+                    label: l10n.subscriptionDetailCadence,
+                    figure: Text(
+                      cadenceLabel(l10n, series.cadence),
+                      key: const Key('seriesDetailCadence'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: minor.copyWith(color: colors.text),
+                    ),
+                  ),
+                ),
+                const SummaryHairline(),
+                Flexible(
+                  child: SummaryItem(
+                    label: l10n.subscriptionDetailNextCharge,
+                    figure: Text(
+                      settled
+                          ? l10n.subscriptionsValueNone
+                          : seriesLongDateFormat(
+                              locale,
+                            ).format(series.nextExpectedDate),
+                      key: const Key('seriesDetailNextCharge'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: minor.copyWith(
+                        color: settled ? colors.textTertiary : colors.text,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: AppSpacing.xxl),
-          Expanded(
-            flex: 2,
+          Flexible(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.end,
