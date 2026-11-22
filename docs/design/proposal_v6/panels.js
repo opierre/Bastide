@@ -100,7 +100,7 @@ P.login = () => `<div class="app auth" data-shell="0"><form>
 
 P.register = () => `<div class="app auth" data-shell="0"><form>
   <div class="brand" style="padding:0 0 8px;font-size:16px">${MARK}Bastide</div>
-  <label class="f">Nom affiché<span class="inp">Camille Dubois</span></label>
+  <label class="f">Nom d’utilisateur<span class="inp">Camille Dubois</span></label>
   <label class="f">Adresse e-mail<span class="inp">camille.dubois@proton.me</span></label>
   <label class="f">Mot de passe<span class="inp focus">••••••••••••••<span class="sp"></span>${I('eye', 's14 t3')}</span><small class="row">${I('check', 's14 pos')}14 caractères. Le minimum est de 12.</small></label>
   <div class="g2" style="gap:12px"><label class="f">Langue<span class="seg" style="justify-self:start"><span class="on">Français</span><span>English</span></span></label>
