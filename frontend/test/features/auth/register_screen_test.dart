@@ -22,14 +22,24 @@ import '../../support/fake_auth_forms.dart';
 
 /// The app's own wiring: the locale comes from [localeProvider], so the
 /// language segment switches the screen like it does in the app.
+/// The availability checks answer at once from [availability] unless
+/// [apiClient] is given: then the real, debounced controller asks it.
 Widget _wrap({
   required FakeRegisterController controller,
   Locale locale = const Locale('fr'),
   ThemeData? theme,
+  FakeRegisterAvailabilityController? availability,
+  ApiClient? apiClient,
 }) {
   return ProviderScope(
     overrides: [
       registerControllerProvider.overrideWith(() => controller),
+      if (apiClient != null)
+        apiClientProvider.overrideWithValue(apiClient)
+      else
+        registerAvailabilityProvider.overrideWith(
+          () => availability ?? FakeRegisterAvailabilityController(),
+        ),
       localeProvider.overrideWith(() => _FixedLocale(locale)),
     ],
     child: Consumer(
@@ -79,7 +89,37 @@ Future<void> _fillValidForm(WidgetTester tester) async {
     find.byKey(const Key('registerPasswordField')),
     _validPassword,
   );
+  // Lets a real availability check's debounce run out.
+  await tester.pump(registerAvailabilityDebounce);
   await tester.pumpAndSettle();
+}
+
+const _emailTaken = 'Cet e-mail a déjà un compte. Connectez-vous.';
+const _nameTaken = "Ce nom d’utilisateur est déjà pris.";
+
+/// Answers `/auth/availability` from [takenEmails] and [takenNames], or
+/// fails with [failure].
+_MockApiClient _availabilityApi({
+  Set<String> takenEmails = const {},
+  Set<String> takenNames = const {},
+  Object? failure,
+}) {
+  final apiClient = _MockApiClient();
+  when(
+    () => apiClient.post('/auth/availability', body: any(named: 'body')),
+  ).thenAnswer((invocation) async {
+    if (failure != null) throw failure;
+    final body = invocation.namedArguments[#body] as Map<String, dynamic>;
+    final email = body['email'] as String?;
+    final name = body['display_name'] as String?;
+    return {
+      'email_available': email == null ? null : !takenEmails.contains(email),
+      'display_name_available': name == null
+          ? null
+          : !takenNames.contains(name),
+    };
+  });
+  return apiClient;
 }
 
 Future<void> _tapSubmit(WidgetTester tester) async {
@@ -96,6 +136,170 @@ bool _submitEnabled(WidgetTester tester) =>
     null;
 
 void main() {
+  setUpAll(() => registerFallbackValue(<String, dynamic>{}));
+
+  group('#320: availability checked while typing', () {
+    testWidgets('asks once the user pauses, for the latest value only', (
+      tester,
+    ) async {
+      final apiClient = _availabilityApi();
+      await tester.pumpWidget(
+        _wrap(controller: FakeRegisterController(), apiClient: apiClient),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('registerEmailField')),
+        'ada@example.com',
+      );
+      await tester.pump(registerAvailabilityDebounce ~/ 2);
+      await tester.enterText(
+        find.byKey(const Key('registerEmailField')),
+        'ada@example.org',
+      );
+      await tester.pump(
+        registerAvailabilityDebounce - const Duration(milliseconds: 1),
+      );
+      verifyNever(
+        () => apiClient.post('/auth/availability', body: any(named: 'body')),
+      );
+
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => apiClient.post(
+          '/auth/availability',
+          body: {'email': 'ada@example.org'},
+        ),
+      ).called(1);
+    });
+
+    testWidgets('a malformed value is never sent', (tester) async {
+      final apiClient = _availabilityApi();
+      await tester.pumpWidget(
+        _wrap(controller: FakeRegisterController(), apiClient: apiClient),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('registerEmailField')),
+        'ada@',
+      );
+      await tester.enterText(
+        find.byKey(const Key('registerDisplayNameField')),
+        'a@',
+      );
+      await tester.pump(registerAvailabilityDebounce);
+      await tester.pumpAndSettle();
+
+      verifyNever(
+        () => apiClient.post('/auth/availability', body: any(named: 'body')),
+      );
+    });
+
+    testWidgets(
+      'a taken name and a taken e-mail show together, before any submit',
+      (tester) async {
+        final controller = FakeRegisterController();
+        await tester.pumpWidget(
+          _wrap(
+            controller: controller,
+            apiClient: _availabilityApi(
+              takenEmails: {'ada@example.com'},
+              takenNames: {'ada.lovelace'},
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await _fillValidForm(tester);
+
+        expect(find.text(_emailTaken), findsOneWidget);
+        expect(find.text(_nameTaken), findsOneWidget);
+        expect(_submitEnabled(tester), isFalse);
+        expect(controller.calls, isEmpty);
+      },
+    );
+
+    testWidgets('submit waits for the check, then one tap registers', (
+      tester,
+    ) async {
+      final controller = FakeRegisterController();
+      await tester.pumpWidget(
+        _wrap(controller: controller, apiClient: _availabilityApi()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('registerDisplayNameField')),
+        'ada.lovelace',
+      );
+      await tester.enterText(
+        find.byKey(const Key('registerEmailField')),
+        'ada@example.com',
+      );
+      await tester.enterText(
+        find.byKey(const Key('registerPasswordField')),
+        _validPassword,
+      );
+      await tester.pump();
+      // Still checking: not yet valid.
+      expect(_submitEnabled(tester), isFalse);
+
+      await tester.pump(registerAvailabilityDebounce);
+      await tester.pumpAndSettle();
+      expect(_submitEnabled(tester), isTrue);
+
+      await _tapSubmit(tester);
+      expect(controller.calls, hasLength(1));
+    });
+
+    testWidgets('fixing a taken e-mail clears its error while typing', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeRegisterController(),
+          availability: FakeRegisterAvailabilityController(
+            takenEmails: {'ada@example.com'},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await _fillValidForm(tester);
+      expect(find.text(_emailTaken), findsOneWidget);
+      expect(_submitEnabled(tester), isFalse);
+
+      await tester.enterText(
+        find.byKey(const Key('registerEmailField')),
+        'ada.byron@example.com',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(_emailTaken), findsNothing);
+      expect(_submitEnabled(tester), isTrue);
+    });
+
+    testWidgets('a failed check does not hold the form', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeRegisterController(),
+          apiClient: _availabilityApi(
+            failure: const ApiFailure(code: 'NETWORK_ERROR', message: 'down'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await _fillValidForm(tester);
+
+      expect(find.text(_emailTaken), findsNothing);
+      expect(_submitEnabled(tester), isTrue);
+    });
+  });
+
   testWidgets('the v2 column: no strength meter, the currency microcopy', (
     tester,
   ) async {
@@ -411,6 +615,11 @@ void main() {
         () => apiClient.post('/auth/login', body: any(named: 'body')),
       ).thenThrow(
         const ApiFailure(code: 'INVALID_CREDENTIALS', message: 'invalid'),
+      );
+      when(
+        () => apiClient.post('/auth/availability', body: any(named: 'body')),
+      ).thenAnswer(
+        (_) async => {'email_available': true, 'display_name_available': true},
       );
       when(
         () => apiClient.post('/auth/register', body: any(named: 'body')),
