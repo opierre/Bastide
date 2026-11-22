@@ -202,13 +202,14 @@ tr.dim td{color:var(--tx3)}
 
 /* ───────── v6: window controls in the title bar ───────── */
 .top.win{padding-right:0}
-.wc{display:flex;align-self:stretch;margin-left:8px}
+/* 8 px after the last control (the bar's 10 px gap less 2); 48 tall, over the bar's hairline */
+.wc{display:flex;align-self:flex-start;height:48px;margin-left:-2px}
 .wc span{width:46px;display:grid;place-items:center;color:var(--tx2)}
 .wc span.h-on{background:var(--hover);color:var(--tx)}
 .wc span.p-on{background:var(--line2);color:var(--tx)}
 .wc span.x.h-on{background:var(--neg);color:var(--bg)}
 .wc span.x.p-on{background:color-mix(in srgb,var(--neg) 85%,var(--tx));color:var(--bg)}
-.top.idle h1,.top.idle .wc span{color:var(--tx3)}
+.top.idle h1,.top.idle .wc span:not(.h-on):not(.p-on){color:var(--tx3)}
 .drag{background-image:repeating-linear-gradient(45deg,color-mix(in srgb,var(--ac) 22%,transparent) 0 1.5px,transparent 1.5px 5px);outline:1px dashed var(--ac);outline-offset:-1px}
 .mac{display:flex;gap:8px;align-items:center}
 .mac i{width:12px;height:12px;border-radius:50%;display:block}

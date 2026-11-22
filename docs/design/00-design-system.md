@@ -171,7 +171,7 @@ Mockup: any panel.
   `textSecondary` (`minus`, `square`, `copy` for restore, `x`). Hover: `hover` ground, icon
   `text`. Pressed: `lineStrong` ground. Fermer on hover: `negative` ground, icon `bg`; pressed:
   `negative` at 85 % over `text` (lighter in dark, darker in light, as the primary's hover). While the window is inactive the title and the icons take
-  `textTertiary`. Tooltips and accessible labels « Réduire », « Agrandir », « Restaurer »,
+  `textTertiary`; hover and pressed keep their colours. Tooltips and accessible labels « Réduire », « Agrandir », « Restaurer »,
   « Fermer ».
 - **Drag area:** the empty stretch of the title bar and the sidebar's brand row. Double-click
   maximizes or restores. Controls, crumb and title do not drag.
