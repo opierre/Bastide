@@ -1,8 +1,8 @@
-"""Tests for the goals surface: CRUD, validation, archiving, and user scoping.
+"""Tests for the goals surface: CRUD, validation, archiving, deleting, and user scoping.
 
 What is at stake here is that a goal stays a *virtual envelope*: it carries no account, its
-progress is derived rather than stored, and deleting one archives it instead of taking its
-history with it.
+progress is derived rather than stored, archiving keeps its history, and deleting one takes
+only its own history with it, never an account or a transaction.
 """
 
 from datetime import date
@@ -30,6 +30,14 @@ def list_goals(client: TestClient, headers: dict[str, str], **params: str) -> li
     response = client.get("/api/v1/goals", params=params, headers=headers)
     assert response.status_code == 200, response.json()
     return list(response.json())
+
+
+def archive_goal(client: TestClient, headers: dict[str, str], goal_id: str) -> None:
+    """Archive a goal the way the panel does, by patching its status."""
+    response = client.patch(
+        f"/api/v1/goals/{goal_id}", json={"status": "archived"}, headers=headers
+    )
+    assert response.status_code == 200, response.json()
 
 
 def allocate(
@@ -150,14 +158,13 @@ def test_patching_refuses_an_account_and_a_non_positive_target(client: TestClien
 # --- archiving ------------------------------------------------------------------------------
 
 
-def test_deleting_archives_the_goal_and_hides_it_from_the_grid(client: TestClient) -> None:
+def test_archiving_hides_the_goal_from_the_grid(client: TestClient) -> None:
     headers = register(client)
     kept = create_goal(client, headers, name="Voyage Japon")
     archived = create_goal(client, headers, name="Nouvelle cuisine")
 
-    response = client.delete(f"/api/v1/goals/{archived['id']}", headers=headers)
+    archive_goal(client, headers, archived["id"])
 
-    assert response.status_code == 204
     assert [goal["id"] for goal in list_goals(client, headers)] == [kept["id"]]
     assert [goal["id"] for goal in list_goals(client, headers, status="archived")] == [
         archived["id"]
@@ -167,7 +174,7 @@ def test_deleting_archives_the_goal_and_hides_it_from_the_grid(client: TestClien
 def test_an_archived_goal_can_be_restored(client: TestClient) -> None:
     headers = register(client)
     goal_id = create_goal(client, headers)["id"]
-    client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+    archive_goal(client, headers, goal_id)
 
     response = client.patch(f"/api/v1/goals/{goal_id}", json={"status": "active"}, headers=headers)
 
@@ -184,6 +191,49 @@ def test_a_client_may_not_claim_reached(client: TestClient) -> None:
     response = client.patch(f"/api/v1/goals/{goal_id}", json={"status": "reached"}, headers=headers)
 
     assert response.status_code == 422
+
+
+# --- deleting ------------------------------------------------------------------------------
+
+
+def test_deleting_removes_the_goal_and_its_allocations(client: TestClient) -> None:
+    headers = register(client)
+    kept = create_goal(client, headers, name="Voyage Japon")
+    deleted = create_goal(client, headers, name="Nouvelle cuisine")
+    allocate(client, headers, deleted["id"], 30_000, note="Virement mensuel")
+    allocate(client, headers, kept["id"], 12_000)
+
+    response = client.delete(f"/api/v1/goals/{deleted['id']}", headers=headers)
+
+    assert response.status_code == 204
+    assert [goal["id"] for goal in list_goals(client, headers)] == [kept["id"]]
+    assert list_goals(client, headers, status="archived") == []
+    gone = client.get(f"/api/v1/goals/{deleted['id']}/allocations", headers=headers)
+    assert gone.status_code == 404
+    assert gone.json()["error"]["code"] == "GOAL_NOT_FOUND"
+    assert read_goal(client, headers, kept["id"])["progress_minor"] == 12_000
+
+
+def test_an_archived_goal_can_be_deleted(client: TestClient) -> None:
+    headers = register(client)
+    goal_id = create_goal(client, headers)["id"]
+    archive_goal(client, headers, goal_id)
+
+    response = client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+
+    assert response.status_code == 204
+    assert list_goals(client, headers, status="archived") == []
+
+
+def test_deleting_a_goal_twice_is_not_found(client: TestClient) -> None:
+    headers = register(client)
+    goal_id = create_goal(client, headers)["id"]
+    client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+
+    response = client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "GOAL_NOT_FOUND"
 
 
 # --- user scoping ---------------------------------------------------------------------------
@@ -285,7 +335,7 @@ def test_editing_an_archived_goal_leaves_it_archived(client: TestClient) -> None
     headers = register(client)
     goal_id = create_goal(client, headers, target_minor=400_000)["id"]
     allocate(client, headers, goal_id, 400_000)
-    client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+    archive_goal(client, headers, goal_id)
 
     response = client.patch(
         f"/api/v1/goals/{goal_id}", json={"target_minor": 200_000}, headers=headers
@@ -298,7 +348,7 @@ def test_editing_an_archived_goal_leaves_it_archived(client: TestClient) -> None
 def test_an_archived_goal_keeps_its_status_while_its_ledger_moves(client: TestClient) -> None:
     headers = register(client)
     goal_id = create_goal(client, headers, target_minor=400_000)["id"]
-    client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+    archive_goal(client, headers, goal_id)
 
     allocate(client, headers, goal_id, 400_000)
 
@@ -311,7 +361,7 @@ def test_restoring_recomputes_reached_from_the_allocations(client: TestClient) -
     headers = register(client)
     goal_id = create_goal(client, headers, target_minor=400_000)["id"]
     allocate(client, headers, goal_id, 400_000)
-    client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+    archive_goal(client, headers, goal_id)
 
     client.patch(f"/api/v1/goals/{goal_id}", json={"target_minor": 800_000}, headers=headers)
     restored = client.patch(
@@ -326,7 +376,7 @@ def test_restoring_a_goal_whose_target_was_lowered_reports_reached(client: TestC
     headers = register(client)
     goal_id = create_goal(client, headers, target_minor=800_000)["id"]
     allocate(client, headers, goal_id, 400_000)
-    client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+    archive_goal(client, headers, goal_id)
 
     client.patch(f"/api/v1/goals/{goal_id}", json={"target_minor": 400_000}, headers=headers)
     restored = client.patch(
@@ -342,7 +392,7 @@ def test_archiving_preserves_the_allocation_history(client: TestClient) -> None:
     goal_id = create_goal(client, headers)["id"]
     allocate(client, headers, goal_id, 30_000, note="Virement mensuel")
 
-    client.delete(f"/api/v1/goals/{goal_id}", headers=headers)
+    archive_goal(client, headers, goal_id)
 
     response = client.get(f"/api/v1/goals/{goal_id}/allocations", headers=headers)
     assert response.status_code == 200

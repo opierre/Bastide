@@ -3,7 +3,7 @@
 from collections.abc import Sequence
 from datetime import date
 
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, delete, func, select
 from sqlalchemy.orm import Session, undefer
 
 from app.features.goals.models import Goal, GoalAllocation, GoalImage
@@ -56,6 +56,16 @@ class GoalRepository:
         self._db.commit()
         self._db.refresh(goal)
         return goal
+
+    def delete_goal(self, goal: Goal) -> None:
+        """Delete a goal; its allocations and banner image go with it.
+
+        The allocations are removed explicitly rather than left to the foreign key's cascade,
+        so the delete does not depend on the connection having foreign keys switched on.
+        """
+        self._db.execute(delete(GoalAllocation).where(GoalAllocation.goal_id == goal.id))
+        self._db.delete(goal)
+        self._db.commit()
 
     def get_image(self, goal: Goal) -> GoalImage | None:
         """The goal's banner with its bytes, which listing goals leaves unloaded."""
