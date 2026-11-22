@@ -621,7 +621,7 @@ MD.ruleLogoCrop = () => modal(420, 'Recadrer le logo', 'Faites glisser l’image
 MD.ruleLogoUrl = (err = false) => modal(420, 'Logo depuis une adresse', 'Collez l’adresse d’une image. Bastide la télécharge depuis cet ordinateur, puis vous la recadrez.', `
   ${F('Adresse de l’image', inp(err ? 'https://exemple.org/logo' : 'https://…', `mono ${err ? 'err' : 'ph focus'}`), err ? 'Cette adresse ne mène pas à une image.' : '', { err })}`, CANCEL + B('Télécharger', 'pri'));
 MD.packExport = () => modal(560, 'Exporter mes règles', '', `
-  ${note('triangle-alert', 'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR LOYER DUPONT ».')}
+  ${bnr('triangle-alert', 'warn', 'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR LOYER DUPONT ».')}
   ${chk(true, 'Inclure les logos')}
   ${note('image', '3 logos inclus.')}
   <span class="sm t2">Contenu du fichier : 12 règles</span>
