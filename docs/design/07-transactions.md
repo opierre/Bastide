@@ -52,7 +52,7 @@ Two panes: list (flexible) · inspector (440 px, `00` §7).
 Nothing selected: the pane shows the note « Sélectionnez une opération pour voir son détail. »
 
 ### Category picker (popover, 230 px)
-A 28 px search field « Changer de catégorie », then categories and subcategories as items
+The picker search field of `00` §6 (32 px, leading `search`) « Changer de catégorie », then categories and subcategories as items
 (category label), a `check` on the current one. Choosing closes it and applies.
 
 ### Period modal (420 px)

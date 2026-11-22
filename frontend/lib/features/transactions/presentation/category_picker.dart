@@ -8,6 +8,7 @@ import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/focus_ring.dart';
 import '../../../core/widgets/inline_banner.dart';
+import '../../../core/widgets/picker_search_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/transaction_selection.dart';
 import '../application/transactions_controller.dart';
@@ -16,7 +17,8 @@ import 'transaction_error_localizer.dart';
 
 /// Opens the category picker under [anchorContext]'s widget
 /// (`docs/design/07-transactions.md` §Category picker): a 230 px popover with
-/// the 28 px « Changer de catégorie » search field, then every category and
+/// the « Changer de catégorie » search field (the shared 32 px
+/// [PickerSearchField]), then every category and
 /// subcategory as a category label, a `check` on the current one. Choosing
 /// one closes it and applies it.
 ///
@@ -108,36 +110,14 @@ class _CategoryPickerBodyState extends ConsumerState<_CategoryPickerBody> {
     final categoriesAsync = ref.watch(transactionCategoriesProvider);
     final note = textTheme.bodySmall?.copyWith(color: colors.textSecondary);
 
-    OutlineInputBorder border(Color color) => OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppRadii.control),
-      borderSide: BorderSide(color: color),
-    );
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextField(
-          key: const Key('categoryPickerSearchField'),
-          autofocus: true,
+        PickerSearchField(
+          fieldKey: const Key('categoryPickerSearchField'),
+          hint: l10n.categoryPickerSearchHint,
           onChanged: (value) => setState(() => _query = value),
-          style: textTheme.bodyMedium,
-          textAlignVertical: TextAlignVertical.center,
-          decoration: InputDecoration(
-            hintText: l10n.categoryPickerSearchHint,
-            isDense: true,
-            filled: true,
-            fillColor: colors.field,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm + AppSpacing.xxs,
-            ),
-            constraints: const BoxConstraints.tightFor(
-              height: AppSizes.toolbarSelect,
-            ),
-            border: border(colors.lineStrong),
-            enabledBorder: border(colors.lineStrong),
-            focusedBorder: border(colors.accent),
-          ),
         ),
         const SizedBox(height: AppSpacing.xs),
         ConstrainedBox(

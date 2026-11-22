@@ -491,6 +491,13 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Changer de catégorie'), findsOneWidget);
+      // The shared picker search field, at the Text field size (#330).
+      expect(
+        tester
+            .getSize(find.byKey(const Key('categoryPickerSearchField')))
+            .height,
+        AppSizes.formField,
+      );
       // Categories and their subcategories, each a category label.
       expect(
         find.byKey(const Key('categoryPickerItem-c-insurance')),

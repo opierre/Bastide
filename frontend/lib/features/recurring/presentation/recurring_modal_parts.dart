@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_checkbox.dart';
 import '../../../core/widgets/focus_ring.dart';
-import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/state_views.dart';
 import '../domain/series_preview.dart';
@@ -190,44 +188,6 @@ class RecurringModalLinkLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Align(alignment: AlignmentDirectional.centerStart, child: link);
-}
-
-/// The search field both pickers open on: a 32 px field (`00` §6) with a
-/// 14 px `search` icon and a placeholder.
-class PickerSearchField extends StatelessWidget {
-  const PickerSearchField({
-    super.key,
-    required this.fieldKey,
-    required this.hint,
-    required this.onChanged,
-  });
-
-  final Key fieldKey;
-  final String hint;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return FocusGlow(
-      child: TextField(
-        key: fieldKey,
-        autofocus: true,
-        onChanged: onChanged,
-        style: Theme.of(context).textTheme.bodyMedium,
-        decoration: InputDecoration(
-          hintText: hint,
-          prefixIcon: const Padding(
-            padding: EdgeInsetsDirectional.only(
-              start: AppSpacing.sm + AppSpacing.xxs,
-              end: AppSpacing.sm,
-            ),
-            child: Icon(LucideIcons300.search, size: AppSizes.iconSmall),
-          ),
-          prefixIconConstraints: const BoxConstraints(),
-        ),
-      ),
-    );
-  }
 }
 
 /// A picker's list while it loads: the rows' silhouette in `hover` blocks

@@ -6,6 +6,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/modal_parts.dart';
+import '../../../core/widgets/picker_search_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/add_to_series_controller.dart';
 import '../application/subscriptions_controller.dart';
