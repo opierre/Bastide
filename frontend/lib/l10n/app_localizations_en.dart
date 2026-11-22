@@ -1717,12 +1717,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get categoryDeleteConfirmTitle => 'Delete this category?';
+  String categoryDeleteConfirmTitle(String name) {
+    return 'Delete the category “$name”?';
+  }
 
   @override
-  String categoryDeleteConfirmBody(String name) {
-    return '“$name” and its subcategories will be deleted. The transactions in them become uncategorized again.';
-  }
+  String get categoryDeleteConfirmLead =>
+      'Its subcategories will be deleted too. The transactions in them become uncategorized again.';
 
   @override
   String get categoryFormCreateTitle => 'New category';
@@ -1763,7 +1764,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'The color follows the category everywhere: charts, legends and labels.';
 
   @override
-  String get categoryFormCancel => 'Cancel';
+  String categoryColorName(String slot) {
+    String _temp0 = intl.Intl.selectLogic(slot, {
+      'cat1': 'Blue',
+      'cat2': 'Orange',
+      'cat3': 'Green',
+      'cat4': 'Amber',
+      'cat5': 'Pink',
+      'cat6': 'Violet',
+      'other': 'Gray',
+    });
+    return '$_temp0';
+  }
 
   @override
   String get categoryFormSave => 'Save';

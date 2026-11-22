@@ -9,41 +9,50 @@ import '../domain/category.dart';
 
 /// Asks before a category is deleted. Resolves `true` only on an explicit yes.
 ///
-/// Deleting is not reversible and takes the subcategories with it, so the
-/// question names the category and says so. Shared by the tree's menu and the
-/// edit modal, which each handle the failure in their own place: a toast over
-/// the panel, a banner inside the modal.
+/// Shared by the tree's menu and the edit modal, which each handle the
+/// failure in their own place: a toast over the panel, a banner inside the
+/// modal.
 Future<bool> confirmCategoryDelete(
   BuildContext context,
   AppCategory category,
 ) async {
-  final l10n = AppLocalizations.of(context)!;
   final confirmed = await showAppModal<bool>(
     context: context,
-    builder: (dialogContext) => AppModal(
-      title: l10n.categoryDeleteConfirmTitle,
+    builder: (_) => CategoryDeleteModal(category: category),
+  );
+  return confirmed ?? false;
+}
+
+/// « Supprimer la catégorie « … » ? » (`08-categories-rules.md` §Other
+/// modals, proposal v6 `m-categories`), 480 px: a destructive confirmation
+/// without a body whose lead says the subcategories go too and their
+/// transactions become uncategorized. Focus lands on « Annuler ».
+class CategoryDeleteModal extends StatelessWidget {
+  const CategoryDeleteModal({super.key, required this.category});
+
+  final AppCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return AppModal(
+      key: const Key('categoryDeleteModal'),
+      title: l10n.categoryDeleteConfirmTitle(
+        localizedCategoryName(l10n, category.name),
+      ),
       width: AppCategoriesPanel.categoryFormWidth,
+      kind: AppModalKind.destructive,
+      subtitle: Text(l10n.categoryDeleteConfirmLead),
       actions: [
-        AppButton(
-          label: l10n.categoryFormCancel,
-          onPressed: () => Navigator.of(dialogContext).pop(false),
-        ),
+        const AppModalCancel(key: Key('categoryDeleteCancel')),
         AppButton(
           key: const Key('categoryDeleteConfirmButton'),
           label: l10n.categoryDelete,
           variant: AppButtonVariant.destructive,
-          onPressed: () => Navigator.of(dialogContext).pop(true),
+          onPressed: () => Navigator.of(context).pop(true),
         ),
       ],
-      child: Text(
-        l10n.categoryDeleteConfirmBody(
-          localizedCategoryName(l10n, category.name),
-        ),
-        style: Theme.of(dialogContext).textTheme.bodyMedium?.copyWith(
-          color: dialogContext.colors.textSecondary,
-        ),
-      ),
-    ),
-  );
-  return confirmed ?? false;
+    );
+  }
 }

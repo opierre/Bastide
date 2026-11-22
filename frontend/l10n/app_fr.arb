@@ -2142,19 +2142,19 @@
       }
     }
   },
-  "categoryDeleteConfirmTitle": "Supprimer cette catégorie ?",
+  "categoryDeleteConfirmTitle": "Supprimer la catégorie « {name} » ?",
   "@categoryDeleteConfirmTitle": {
-    "description": "Title of the delete-category confirmation dialog."
-  },
-  "categoryDeleteConfirmBody": "« {name} » et ses sous-catégories seront supprimées. Les transactions concernées redeviendront non catégorisées.",
-  "@categoryDeleteConfirmBody": {
-    "description": "Body of the delete-category confirmation. Names what else goes with it, since the deletion cascades.",
+    "description": "Title of the delete-category confirmation; also its accessible name.",
     "placeholders": {
       "name": {
         "type": "String",
         "example": "Épargne projet"
       }
     }
+  },
+  "categoryDeleteConfirmLead": "Ses sous-catégories seront supprimées aussi. Les transactions concernées redeviendront non catégorisées.",
+  "@categoryDeleteConfirmLead": {
+    "description": "Lead of the delete-category confirmation. Names what else goes with it, since the deletion cascades."
   },
   "categoryFormCreateTitle": "Nouvelle catégorie",
   "@categoryFormCreateTitle": {
@@ -2204,9 +2204,15 @@
   "@categoryFormColorHelper": {
     "description": "Helper under the colour picker, explaining that the hue is reused across the app."
   },
-  "categoryFormCancel": "Annuler",
-  "@categoryFormCancel": {
-    "description": "Cancel button in the category modal and the delete confirmation."
+  "categoryColorName": "{slot, select, cat1{Bleu} cat2{Orange} cat3{Vert} cat4{Ambre} cat5{Rose} cat6{Violet} other{Gris}}",
+  "@categoryColorName": {
+    "description": "Accessible name and tooltip of a colour square in the category form, by slot.",
+    "placeholders": {
+      "slot": {
+        "type": "String",
+        "example": "cat1"
+      }
+    }
   },
   "categoryFormSave": "Enregistrer",
   "@categoryFormSave": {
