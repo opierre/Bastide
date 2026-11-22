@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
 import '../data/backup_repository.dart';
+import '../data/database_repository.dart';
 import '../domain/backup.dart';
 import 'settings_controller.dart';
 import 'user_data_reload.dart';
@@ -179,7 +180,7 @@ class BackupController extends Notifier<BackupState> {
 /// it is set beside the file's, and a count from when the panel loaded is
 /// not a claim worth making before a replace.
 final currentDataProvider = FutureProvider.autoDispose<CurrentData>((ref) {
-  return ref.watch(backupRepositoryProvider).current();
+  return ref.watch(databaseRepositoryProvider).current();
 });
 
 final backupControllerProvider =

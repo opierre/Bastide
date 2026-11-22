@@ -106,7 +106,7 @@ void main() {
       () => apiClient.get('/settings'),
     ).thenAnswer((_) async => _settingsJson());
     when(
-      () => apiClient.get('/backup/current'),
+      () => apiClient.get('/database/summary'),
     ).thenAnswer((_) async => _currentJson());
   });
 
@@ -467,7 +467,7 @@ void main() {
 
     testWidgets('says nothing when the backup is as recent as the latest '
         'import', (tester) async {
-      when(() => apiClient.get('/backup/current')).thenAnswer(
+      when(() => apiClient.get('/database/summary')).thenAnswer(
         (_) async => _currentJson(lastImportAt: '2026-09-04T08:00:00Z'),
       );
       await openModal(tester);
@@ -479,7 +479,7 @@ void main() {
       tester,
     ) async {
       when(
-        () => apiClient.get('/backup/current'),
+        () => apiClient.get('/database/summary'),
       ).thenAnswer((_) async => _currentJson(lastImportAt: null));
       await openModal(tester);
 
@@ -489,7 +489,7 @@ void main() {
 
     testWidgets('current data that cannot load offers a retry', (tester) async {
       when(
-        () => apiClient.get('/backup/current'),
+        () => apiClient.get('/database/summary'),
       ).thenThrow(failure('INTERNAL'));
       await openModal(tester);
 
@@ -497,7 +497,7 @@ void main() {
       expect(valueOf(tester, 'Transactions', 2), '—');
 
       when(
-        () => apiClient.get('/backup/current'),
+        () => apiClient.get('/database/summary'),
       ).thenAnswer((_) async => _currentJson());
       await tester.tap(find.byKey(const Key('modalLoadErrorRetry')));
       await tester.pumpAndSettle();
