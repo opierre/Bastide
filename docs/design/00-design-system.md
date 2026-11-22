@@ -231,7 +231,7 @@ Disabled is 45 % opacity and not focusable.
 | **Button, large** | 36 px, padding 0 14, centred label. Auth screens and modal-wide actions. |
 | **Text field** | 32 px, padding 0 10, radius 6, `field`, 1 px `lineStrong`. Label above, 12 `textSecondary`, 5 px gap. Helper below, 11 `textTertiary`. Error: `negative` border, helper in `negative`. Amounts right-aligned. Read-only: no border, value in `textSecondary` with a leading `lock` 14 px. A unit (€, %) sits inside the field. |
 | **Select** | Field look with a trailing `chevron-down` 14 px `textTertiary`. 28 px in a toolbar, 32 px in a form. Opens a popover as wide as the field. |
-| **Search field** | 240 px × 28 px, `search` icon, placeholder « Rechercher », `Ctrl K` hint in a 1 px `lineStrong` box, radius 4, 11 px. Inside a modal: a full-width 32 px form field with the leading `search` icon and no hint. |
+| **Search field** | 240 px × 28 px, `search` icon, placeholder « Rechercher », `Ctrl K` hint in a 1 px `lineStrong` box, radius 4, 11 px. Inside a modal or a popover, to filter a picker's list as you type: a full-width 32 px form field (the Text field size) with the leading `search` icon and no hint. Every such field has this one size. |
 | **Segmented** | 1 px `lineStrong`, radius 6, padding 2, gap 2, `field` ground; segment padding 2 10, radius 4, 13 `textSecondary`; selected: `hover` ground, `text`, 500. |
 | **Tabs** | Row on a `line` hairline; tab padding 10 0, 20 px apart, 13 `textSecondary`; selected: `text` 500 and a 2 px `text` underline. A count follows the label in `textTertiary`. |
 | **Toggle** | 28 × 16, radius 8, `lineStrong` off, `accent` on; 12 px knob in `bg`. |

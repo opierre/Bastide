@@ -9,10 +9,12 @@ import 'package:bastide/core/widgets/app_slider.dart';
 import 'package:bastide/core/widgets/app_tabs.dart';
 import 'package:bastide/core/widgets/app_toggle.dart';
 import 'package:bastide/core/widgets/focus_ring.dart';
+import 'package:bastide/core/widgets/picker_search_field.dart';
 import 'package:bastide/core/widgets/search_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import 'host.dart';
 
@@ -504,6 +506,30 @@ void main() {
       await tester.pump();
       expect(queries.last, '');
       expect(find.text('Ctrl K'), findsOneWidget);
+    });
+  });
+
+  group('PickerSearchField', () {
+    testWidgets('a 32 px field, the Text field size, with a search icon', (
+      tester,
+    ) async {
+      final queries = <String>[];
+      await pumpHost(
+        tester,
+        PickerSearchField(
+          fieldKey: const Key('picker'),
+          hint: 'Changer de catégorie',
+          onChanged: queries.add,
+        ),
+      );
+      expect(
+        tester.getSize(find.byKey(const Key('picker'))).height,
+        AppSizes.formField,
+      );
+      expect(find.text('Changer de catégorie'), findsOneWidget);
+      expect(find.byIcon(LucideIcons300.search), findsOneWidget);
+      await tester.enterText(find.byKey(const Key('picker')), 'loyer');
+      expect(queries.last, 'loyer');
     });
   });
 
