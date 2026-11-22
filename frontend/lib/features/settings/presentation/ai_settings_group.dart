@@ -138,7 +138,7 @@ class _RowsState extends ConsumerState<_Rows> {
         // the toggle is on or off.
         SettingRow(
           key: const Key('settingsAiPrivacy'),
-          name: l10n.settingsAiSubtitle,
+          name: l10n.settingsAiToggleLabel,
           description: l10n.settingsAiPrivacy,
           children: [
             AppToggle(

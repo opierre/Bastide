@@ -705,7 +705,6 @@
   "runBannerDismiss": "Dismiss",
   "runStartFailed": "Categorization can’t be started right now.",
   "settingsAiTitle": "Local AI",
-  "settingsAiSubtitle": "AI categorization",
   "settingsAiToggleLabel": "AI categorization",
   "settingsAiPrivacy": "Your transactions’ labels are sent to a model that runs on this computer. Nothing leaves your machine.",
   "settingsAiBaseUrlLabel": "Engine address",

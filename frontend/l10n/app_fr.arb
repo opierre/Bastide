@@ -3214,13 +3214,9 @@
   "@settingsAiTitle": {
     "description": "Title of the local-AI card in the settings Données tab."
   },
-  "settingsAiSubtitle": "Catégorisation par IA",
-  "@settingsAiSubtitle": {
-    "description": "Label of the AI card's opt-in toggle, shown beside it."
-  },
   "settingsAiToggleLabel": "Catégorisation par IA",
   "@settingsAiToggleLabel": {
-    "description": "Accessible label of the card's opt-in toggle."
+    "description": "Name of the AI card's opt-in row, shown beside its toggle, and the toggle's accessible label."
   },
   "settingsAiPrivacy": "Les libellés de vos opérations sont envoyés à un modèle qui s’exécute sur cet ordinateur. Rien ne quitte votre machine.",
   "@settingsAiPrivacy": {

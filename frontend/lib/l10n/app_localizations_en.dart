@@ -2575,9 +2575,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiTitle => 'Local AI';
 
   @override
-  String get settingsAiSubtitle => 'AI categorization';
-
-  @override
   String get settingsAiToggleLabel => 'AI categorization';
 
   @override

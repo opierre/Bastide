@@ -2589,9 +2589,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsAiTitle => 'IA locale';
 
   @override
-  String get settingsAiSubtitle => 'Catégorisation par IA';
-
-  @override
   String get settingsAiToggleLabel => 'Catégorisation par IA';
 
   @override
