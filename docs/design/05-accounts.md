@@ -52,7 +52,10 @@ monogram instead of a type icon. Accounts without an institution go to « Sans �
 | Section closed | Only its header bar, with all four corners rounded. |
 | Empty | Empty state: « Ajoutez votre premier compte » · « Créez un compte, ou importez un relevé : Bastide crée le compte qu’il décrit. » · primary « Ajouter un compte », secondary « Aller aux imports ». |
 | Loading | Total line and three header-bar silhouettes. |
-| Account form | Modal 480 px, title « Nouveau compte » / « Modifier le compte »: Nom · Type (select) · Établissement (text with the monogram or user logo previewed inside the field) · Solde d’ouverture (amount, neutral) · Devise (read-only, « EUR, euro », helper « La devise est celle de votre profil. »). Footer « Annuler » · « Enregistrer ». |
+| Account form | Modal 480 px, title « Nouveau compte » / « Modifier le compte »: Nom · Type (select) · Établissement (text with the monogram or user logo previewed inside the field) · Solde initial (amount, neutral) · Devise (read-only, « EUR, euro », helper « La devise est celle de votre profil. »). Footer « Annuler » · « Enregistrer ». |
+| Archive confirmation | Modal 420 px, a `00` §7 confirmation: « Archiver ce compte ? », lead « Vous pourrez toujours consulter son historique, mais il n’apparaîtra plus dans votre liste de comptes. », footer « Annuler » · ink primary « Archiver » (reversible). |
+| Link a card | Modal 480 px, title « Lier une carte », lead naming the paying account; Carte (select with the monogram). Footer « Annuler » · « Lier ». |
+| Settlement rule | Modal 480 px, title « Règle de prélèvement de la carte », lead explaining that the monthly debit is a transfer; Le libellé du prélèvement contient (Geist Mono, proposed) · S’applique à partir du (date, proposed). Footer « Plus tard » · « Enregistrer la règle ». |
 | Linked-cards menu | Popover listing each card: name, « Modifier », « Archiver », and « Règle de prélèvement » for a deferred card. |
 
 ## Behaviour (kept)

@@ -66,17 +66,18 @@ Heading, then Notes:
   leur déblocage. Les mois sans donnée sont absents. »
 
 ## Modals
-- **Property form** (620 px): « Nouveau bien » / « Modifier le bien ». Two columns: Libellé ·
-  Nature (select) · Adresse (optional, full width, ≤ 255 characters) · Valeur déclarée · Date
-  d’estimation · Quote-part détenue (the label carries « part : {amount} » live) · Prix
-  d’acquisition · Date d’acquisition. Footer « Annuler » · « Enregistrer ».
+- **Property form** (620 px): « Nouveau bien » / « Modifier le bien ». Two columns: Libellé (full
+  width) · Adresse (facultative, full width, ≤ 255 characters) · Nature (select) · Quote-part
+  détenue (the label carries « part : {amount} » live) · Valeur déclarée · Date d’estimation ·
+  Prix d’acquisition · Date d’acquisition. Footer « Annuler » · « Enregistrer ».
 - **Nouvelle estimation** (420 px): lead « {label} : {value} estimés le {date}. La nouvelle
   estimation remplace celle-ci. » Valeur · Date.
 - **Historique déclaré** (560 px): lead « Le total de tous vos comptes à la fin d’un mois,
   pour la période avant vos imports. Un mois couvert par vos imports garde le chiffre
   importé. » One row: Mois (« MM/AAAA ») · Total des comptes · primary « Enregistrer ». Then
-  the list, newest first, rows 48 px: month · neutral text « Couvert par vos imports » when the
-  ledger has it · amount · icon buttons edit and delete. Footer « Fermer ».
+  the list, newest first, rows 36 px: month · « Couvert par vos imports » when the ledger has
+  it · amount · icon buttons edit and delete. A covered month is a dimmed row and keeps only
+  delete: its declared figure is no longer used. Footer « Fermer » (`00` §7 list editor).
 
 ## States
 | State | What shows |

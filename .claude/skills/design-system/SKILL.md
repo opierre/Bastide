@@ -10,7 +10,7 @@ not restate it: **read that file before writing any UI code**, then the spec of 
 are touching (`docs/design/01-index.md` lists them and their tickets).
 
 Order of authority: `00-design-system.md`, then the panel spec, then the mockup
-(`docs/design/proposal_v5/index.html#panel=<id>`). Written specs win over the mockup.
+(`docs/design/proposal_v6/index.html#panel=<id>`; modals under `#panel=m-frame` and `m-<feature>`). Written specs win over the mockup.
 
 ## Before you write a widget
 

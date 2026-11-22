@@ -80,12 +80,16 @@ No amortisation curve in the detail: the table carries the numbers, the list's c
 ## Loan form (modal, 600 px)
 Title « Nouveau crédit » / « Modifier le crédit ». Two-column grid: Libellé (full width) ·
 Prêteur · Type (Crédit immobilier, Prêt travaux, Crédit à la consommation, Crédit auto) ·
-Capital emprunté · Taux nominal · Durée (unit « mois ») · 1re échéance · Assurance par mois ·
-Frais de dossier · Bien financé (select, optional; an option shows the property's address on
+Remboursement (Échéance constante, In fine) · Capital emprunté · Taux nominal · Durée (unit « mois ») · 1re échéance · Assurance par mois ·
+Frais de dossier · Bien financé (facultatif, select; an option shows the property's address on
 a second line). Under the grid, a read-only line that updates live: « Mensualité calculée »
 13/600 + « échéance totale {x} · intérêts totaux {y} » `textSecondary`. Footer: ghost
 « Supprimer » on the left (edit only; its confirmation says the loan leaves the net worth) ·
 « Annuler » · « Enregistrer ».
+
+**Delete confirmation** (440 px), destructive: « Supprimer le crédit « {libellé} » ? », lead
+« Il ne sera plus déduit de votre patrimoine dans la Synthèse, et son tableau d’amortissement
+disparaît. Vos comptes ne sont pas modifiés. »
 
 ## States
 List with declared income · list above the reference (ledger income) · list without income ·

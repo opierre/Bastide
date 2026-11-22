@@ -6,8 +6,10 @@ exist: add it here first, then to `frontend/lib/core/theme/tokens.dart`.
 - **Order of authority:** this file, then the panel spec (`02` to `18`), then the mockup.
   Where the mockup and a written spec disagree, the written spec wins. Known differences are
   listed in §15.
-- **Mockup:** `docs/design/proposal_v5/index.html`, opened in a browser. Each spec names its
-  screen as `#panel=<id>`. Every figure, name and date in the mockup is invented.
+- **Mockup:** `docs/design/proposal_v6/index.html`, opened in a browser. Each spec names its
+  screen as `#panel=<id>`. Every figure, name and date in the mockup is invented. v6 repeats
+  `proposal_v5` and adds every modal (`#panel=m-frame` and one page per feature) and the
+  window controls (`#panel=window`).
 - **Reference frame:** 1440 × 900. French copy sizes every box; English uses the same geometry.
 - This file replaces `00-shared-design-block.md` (v1: iris gradient, navy ground, grain). The v1
   text is in the git history and no longer applies.
@@ -107,7 +109,7 @@ never text colour. The net-worth composition bar reuses the slots in order for i
 ## 3. Typography
 
 One family: **Geist** (400, 500, 600). **Geist Mono** (400) only for raw bank labels, rule
-patterns, file names, file paths and URLs. Space Grotesk is removed.
+patterns, file names, file paths, URLs and codes to copy (a recovery code). Space Grotesk is removed.
 
 | Size / weight | Tracking | Use |
 |---|---|---|
@@ -120,7 +122,7 @@ patterns, file names, file paths and URLs. Space Grotesk is removed.
 | 13 / 500 | 0 | Emphasised cell, button label, active nav item, active tab |
 | 13 / 600 | 0 | Section heading inside a panel |
 | 12 / 400 | 0 | Field labels, column headers, captions, group labels |
-| 11 / 400 | 0 | Notes, chart axis labels, meter labels. Nothing smaller. |
+| 11 / 400 | 0 | Notes, chart axis labels, meter labels. Nothing smaller, except a monogram's initials (10/600, §6). |
 
 Line height 1.45 for text, 1.1 for figures. No uppercase labels, no letter-spaced labels.
 All numerals tabular.
@@ -162,6 +164,25 @@ Mockup: any panel.
 - **Title bar**, 48 px, `bg`, bottom hairline, padding 0 24: optional parent crumb
   (13 `textTertiary`, « Comptes / », a link), title 14/600, spacer, contextual controls (28 px,
   8 px apart). **No subtitle, no descriptor.**
+- **Window controls** (Windows and Linux): the app draws its own; there is no native title
+  bar. Réduire, Agrandir / Restaurer, Fermer sit at the right end of the title bar, 8 px after
+  the last contextual control; the bar then has no right padding, so Fermer meets the window
+  corner. Each control is 46 × 48, no border, no radius, a 16 px Lucide icon in
+  `textSecondary` (`minus`, `square`, `copy` for restore, `x`). Hover: `hover` ground, icon
+  `text`. Pressed: `lineStrong` ground. Fermer on hover: `negative` ground, icon `bg`; pressed:
+  `negative` at 85 % over `text` (lighter in dark, darker in light, as the primary's hover). While the window is inactive the title and the icons take
+  `textTertiary`. Tooltips and accessible labels « Réduire », « Agrandir », « Restaurer »,
+  « Fermer ».
+- **Drag area:** the empty stretch of the title bar and the sidebar's brand row. Double-click
+  maximizes or restores. Controls, crumb and title do not drag.
+- **macOS:** the system's three window buttons, drawn by macOS, 16 px from the left edge in
+  the sidebar's brand row; the brand row starts 14 px after them; no controls on the right.
+  The buttons do not drag; the rest of the brand row does. With the sidebar collapsed, the
+  buttons keep their place and overhang the title bar by 12 px; its 24 px padding leaves 12 px
+  before the crumb or title, and the rail hides the mark. On auth screens the buttons sit
+  top-left and the top 48 px band drags.
+- **Auth screens** (no title bar), Windows and Linux: the three controls float in the top-right corner and the
+  top 48 px band drags the window.
 - **Content region:** padding 24 32, sections 24 apart. A panel marked "flush" has no padding
   and draws its own (tables and panes that run edge to edge).
 - No bottom bar. No texture or decoration on the window frame.
@@ -173,6 +194,9 @@ Navigation icons (Lucide): `layout-dashboard`, `wallet`, `arrow-left-right`, `do
 
 Every control has: rest, hover, focus, pressed, disabled. Focus is always visible: 2 px `accent`
 outline, 1 px offset; text fields instead take an `accent` border and a 3 px `accentSoft` ring.
+A field in error keeps its `negative` border when focused and takes the ring in `negative` at
+14 %. A control drawn only as an icon or a swatch has an accessible name and a tooltip in the
+user's language (« Tirelire », « Bleu »), never an internal identifier.
 Disabled is 45 % opacity and not focusable.
 
 | Control | Recipe |
@@ -181,10 +205,11 @@ Disabled is 45 % opacity and not focusable.
 | **Button, primary** | Same geometry, `primary` ground, `onPrimary` label, no border. Hover: 8 % lighter in dark, 8 % darker in light. One per view. Loading: 14 px spinner replaces the icon, label stays, width does not change. |
 | **Button, ghost** | No border, no ground, `textSecondary`. Hover `hover`. For dismiss and tertiary actions. |
 | **Button, danger** | Secondary with `negative` label and a `negative` 45 % border. The solid `negative` fill exists only inside a destructive confirmation modal. |
+| **Button, destructive** | Primary geometry, `negative` ground, `bg` label, no border. Hover as primary. Only as the confirm action of a destructive confirmation modal. |
 | **Button, large** | 36 px, padding 0 14, centred label. Auth screens and modal-wide actions. |
 | **Text field** | 32 px, padding 0 10, radius 6, `field`, 1 px `lineStrong`. Label above, 12 `textSecondary`, 5 px gap. Helper below, 11 `textTertiary`. Error: `negative` border, helper in `negative`. Amounts right-aligned. Read-only: no border, value in `textSecondary` with a leading `lock` 14 px. A unit (€, %) sits inside the field. |
 | **Select** | Field look with a trailing `chevron-down` 14 px `textTertiary`. 28 px in a toolbar, 32 px in a form. Opens a popover as wide as the field. |
-| **Search field** | 240 px × 28 px, `search` icon, placeholder « Rechercher », `Ctrl K` hint in a 1 px `lineStrong` box, radius 4, 11 px. |
+| **Search field** | 240 px × 28 px, `search` icon, placeholder « Rechercher », `Ctrl K` hint in a 1 px `lineStrong` box, radius 4, 11 px. Inside a modal: a full-width 32 px form field with the leading `search` icon and no hint. |
 | **Segmented** | 1 px `lineStrong`, radius 6, padding 2, gap 2, `field` ground; segment padding 2 10, radius 4, 13 `textSecondary`; selected: `hover` ground, `text`, 500. |
 | **Tabs** | Row on a `line` hairline; tab padding 10 0, 20 px apart, 13 `textSecondary`; selected: `text` 500 and a 2 px `text` underline. A count follows the label in `textTertiary`. |
 | **Toggle** | 28 × 16, radius 8, `lineStrong` off, `accent` on; 12 px knob in `bg`. |
@@ -207,10 +232,75 @@ Disabled is 45 % opacity and not focusable.
 | **Banner** | For something the user can act on. 1 px `lineStrong`, radius 8, padding 8 12, `surface`; leading 14 px icon, 13 px text, actions on the right, optional ghost close. Neutral by default; the icon alone takes `warning` or `negative`. |
 | **Note** | For something to know. 14 px `textTertiary` icon + 12 `textSecondary` text, no box. |
 | **Popover / menu** | `surface`, 1 px `lineStrong`, radius 8, `shadow`, padding 4; items 28 px, radius 4, hover `hover`; a `check` 14 px on the selected item. |
-| **Modal** | `surface`, radius 12, `shadow`, on `scrim`; padding 24; title 16/600, optional lead 13 `textSecondary`; fields 14 px apart; footer right-aligned, secondary then primary, 8 px apart. Widths are given per panel. Only for a task that needs protected focus (a form, a confirmation). |
+| **Modal** | `surface`, radius 12, `shadow`, on `scrim`; padding 24; title 16/600, optional lead 13 `textSecondary`; fields 14 px apart; footer right-aligned, secondary then primary, 8 px apart. Widths are given per panel. Only for a task that needs protected focus (a form, a confirmation). Full recipe under « Modal » below. |
 | **Toast** | Bottom-right, 24 px from the edges; `surface`, 1 px `lineStrong`, radius 8, `shadow`, padding 10 14; status icon + 13 px text, optional second line 12 `textSecondary`; leaves after 4 s. |
 | **Inspector pane** | Right pane, 440 px, `rail`, left hairline, padding 24, blocks 16 apart separated by hairlines. Shows the row selected in the list on its left. Used by Transactions, Objectifs, Placements. |
 | **Drop target** | 1 px dashed `lineStrong`, radius 8, padding 18 20; icon, one line of text, one line of help, a secondary button. Drag-over: `accent` dashed border and `accentSoft` ground. |
+
+### Modal
+
+Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
+
+- **Frame:** `surface`, radius 12, `shadow`, no border, centred on `scrim`; at most the window
+  height minus 24 px above and below.
+- **Header:** padding 24 24 14; title 16/600; optional lead 13 `textSecondary` 4 px under it.
+  No icon or glyph plate before the title, no close button. A long title wraps, its lines
+  balanced; it never truncates and never widens the modal. The lead
+  never leaves one word alone on its last line.
+- **Body:** padding 0 24, fields 14 px apart, two-column grids with a 16 px gutter. Fields in
+  a row align by their input: a helper under one does not push its neighbour down. A grid
+  leaves no empty cell before its last row. Only the body scrolls; while it does, a `line`
+  hairline separates it from the header and the footer, 14 px from the body's content. An
+  introductory sentence is the header's lead, not the body's first line. List rows inside a
+  body follow §4: 36 px, 48 px when they have two lines, radius 4 when selectable.
+- **Footer:** padding 24; actions right-aligned, secondary then primary, 8 px apart, wrapping
+  to a second line rather than overflowing. A tertiary ghost action (« Supprimer » in an edit
+  form, « Retour à l’aperçu » in a second step) sits alone on the left. Navigation to another
+  place is not a footer action: it is a link in the body. The secondary reads « Annuler »,
+  or « Plus tard » when Bastide proposed the task itself (the settlement rule). A modal
+  without a body (a confirmation) keeps the footer 24 px under the lead.
+- **Widths:** 420, 440, 480, 500, 520, 560, 600, 620; each panel spec names its modal's width.
+  A modal never widens for a label.
+- **Closing:** Escape and a click on the scrim act as the secondary action on a confirmation
+  and on a form nobody has changed. Once a form holds unsaved input, the scrim does nothing,
+  and Escape or « Annuler » asks « Abandonner les modifications ? » (420 px, lead naming the
+  form; « Continuer la saisie » · ink « Abandonner »; its own Escape returns to the form).
+  Nothing closes while a save is running, nor a modal with a single way out.
+- **Keyboard:** focus stays inside the modal (Tab cycles header, body, footer, left to right).
+  It lands on the first field of a form, on « Annuler » in a destructive confirmation, on the
+  primary action in a reversible one, and on the copy action in a single way out. Enter
+  submits a form from a single-line field. On close, focus returns to what opened the modal.
+  The modal is named by its title and described by its lead.
+- **Variants:**
+  - Confirmation: the title asks the question, the lead says what changes, the primary action
+    repeats the title's verb (« Archiver ») or names its effect when the verb alone would be
+    vague (« Remplacer mes données » for a restore). Reversible actions keep the ink primary.
+  - Destructive confirmation: the same, with the destructive button (§6) as the confirm
+    action. The title names what goes (« Supprimer la règle « CARREFOUR » ? »), never
+    « cette règle ». When the action needs typing a word, the button stays disabled until it matches.
+  - Single way out: something shown once (a recovery code); one primary action, Escape and
+    the scrim do nothing. Initial focus goes to the copy action, never to the closing one, so
+    Enter cannot dismiss it; a secondary « Enregistrer dans un fichier » writes it to a text
+    file on this machine.
+  - Acknowledgement: a result to read (a refused pack, logos not added); body only, one
+    primary « Fermer »; Escape and the scrim close it.
+  - List editor: a modal that edits a list in place (Historique déclaré); the entry row in the
+    body carries the primary action, the footer has a single secondary « Fermer ».
+  - Crop: the lead says what to do, then the body holds the window the picture shows through, centred, radius 8, 1 px `line`:
+    320 × 320 for a square crop, the body's full width at the target ratio otherwise (44:19 for
+    a goal banner). Under it, as wide as the window, a « Zoom » slider (§6) between `zoom-out`
+    and `zoom-in` icons, 1 to 5 ×, value printed (« 2,2 × »). Drag moves, wheel, pinch or the
+    slider zooms; with the window focused, arrow keys move and + / − zoom. The avatar crop
+    draws the round avatar's circle and veils the corners with `scrim`. The circle sits on the photo,
+    not on the theme: 1 px white at 80 % with 1 px black at 30 % outside, in both themes.
+  - Zoom: the picture alone, 240 × 240, radius 12, `shadow`, on `scrim`; any click or Escape
+    closes it.
+- **States:** a refused field takes the field error of §6; a failed save shows a Banner with
+  a `negative` icon at the top of the body and keeps the input; a running save shows the
+  spinner in the primary button and disables the other actions and the fields, and a second
+  click does nothing (a confirmation's action behaves the same); a loading body shows its silhouette
+  (as §7 « Loading »); a body that cannot load shows a Banner with a `warning` icon and a
+  secondary « Réessayer ».
 
 ### States of a panel
 
@@ -348,6 +438,11 @@ French first, English at parity (same keys, same structure). The interface is ca
 9. Failures say what failed, that nothing was modified, and what to do next.
 10. Readings that bind no one (HCSF ratio, TAEG, fiscal milestones) say so in body text:
     « Lecture indicative, qui n’engage aucun prêteur. »
+11. An optional field says so in its label, « Note (facultative) », « Bien financé
+    (facultatif) »; a required field carries no mark. No « optionnel », no helper that only
+    says « Facultative ».
+12. A typed confirmation word is lower-case in the label (« Saisissez « supprimer » pour
+    confirmer ») and matches in any case.
 
 **String changes** (apply the same change to `app_en.arb`)
 
@@ -402,7 +497,9 @@ The written values win.
 - Inspector panes are 380, 440 and 460 px wide in the mockup; the token is 440.
 - The mockup's charts use a 52 px gutter and basic hover titles; the frame here is 56 px with
   the hover card of §9.
-- Modals, toasts, popover menus other than the category picker, loading and error states are
-  specified here and not drawn.
+- Toasts, popover menus other than the category picker, and the loading and error states of
+  panels are specified here and not drawn. Modals and the window controls are drawn in
+  proposal v6, which also takes the tertiary text token and the 13, 12, 11 scale for its
+  controls.
 - The mockup's « Logos » and « Textures » pages keep the eight-mark and three-texture
   comparison code; only Plan and tomettes are retained.

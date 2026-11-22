@@ -69,6 +69,16 @@ Title « Modifier le paiement récurrent ». Nom · Compte (read-only: a series 
 account) · Montant · Cadence (select) · Catégorie (select with the category label). Footer
 « Annuler » · « Enregistrer ».
 
+## Other modals (`00` §7)
+- **Ajouter à « {série} »** (560 px): lead « Les opérations qui ne font partie d’aucune série,
+  les plus proches en premier. »; a search field, the candidate charges as checkable rows
+  (date, bank label in Geist Mono over the account, amount), link « Afficher plus ». Primary
+  counts the selection: « Ajouter {n} opérations ».
+- **Marquer comme récurrent** (520 px), the dialog `07-transactions.md` opens: the preview
+  (confidence as status text with its reasons on one line, said once: no banner repeats them; proposed cadence and amount, checkable charges), link « Ajouter à
+  une série existante… »; when the charge matches a series, the lead says so and the body links
+  to it; the series picker puts « Retour à l’aperçu » as the left ghost action.
+
 ## States
 | State | What shows |
 |---|---|

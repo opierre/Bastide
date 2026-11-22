@@ -98,14 +98,17 @@ Flush panel, two panes: **list** (flexible, padding 24 32) · **inspector** (440
    in `text`; a declared value unsigned in `textSecondary`. A row opens its edit modal.
 
 ### Modals (all 440 px)
+Mockup: `proposal_v6/index.html#panel=m-investments`. Editing a placement puts the ghost
+« Supprimer » on the left of the footer; its destructive confirmation says the history goes.
+Clôturer keeps the ink primary: nothing is lost.
 - **Nouveau placement / Modifier:** Nom · Enveloppe (select from the catalogue) ·
-  Établissement · Date d’ouverture · Valeur actuelle (optional) · Versements déjà effectués
-  (optional; creates one opening movement at the opening date). Footer « Annuler » ·
+  Établissement · Date d’ouverture · Valeur actuelle (facultative) · Versements déjà effectués
+  (facultatif; creates one opening movement at the opening date). Footer « Annuler » ·
   « Enregistrer ».
 - **Saisir la valeur:** lead = the placement's name. Valeur · Date (default today, not in the
   future) · Note. Helper: « Recopiez la valeur totale indiquée sur votre relevé. »
 - **Versement ou retrait:** Montant (helper « Un montant négatif est un retrait. ») · Date ·
-  Note · Transaction liée (optional select of recent transfers of the same amount).
+  Note · Transaction liée (facultative; select of recent transfers of the same amount).
 - **Clôturer:** asks the closing date and the final amount received; the placement leaves the
   net worth from that date and stays listed, dimmed.
 

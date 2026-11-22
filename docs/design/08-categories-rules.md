@@ -53,20 +53,43 @@ Flush panel, two panes: **category tree** (340 px, right hairline, padding 16 12
 Title « Nouvelle règle » / « Modifier la règle ». One row: Champ · Condition · Priorité. Then
 Motif (Geist Mono) · Catégorie cible (select) · a Note « Correspond à 7 opérations existantes,
 dont « CB CARREFOUR PARIS 15 » du 14 mai 2026. » · Logo (22 px preview, secondary « Choisir une
-image », ghost « Retirer »; on a new rule only the helper « Enregistrez la règle pour lui
+image » (« Remplacer… » once a logo is set) and « Depuis une adresse… », ghost « Retirer »; on a new rule only the helper « Enregistrez la règle pour lui
 ajouter un logo. ») · toggle « Active ». Footer: ghost « Supprimer » on the left (edit only,
 confirmed) · « Annuler » · « Enregistrer ».
 
 ### Category form (modal, 480 px)
 Nom · Type (Dépense, Revenu, Transfert) · Parent (select, optional) · Icône (a grid of the
-curated Lucide set, 32 px cells, selected cell `hover` + `accent` outline) · Couleur (the seven
-category slots as 20 px squares). With a parent set, Type, Icône and Couleur are hidden and the
+curated Lucide set, 32 px cells, selected cell `hover` + `accent` outline; each cell is named in
+French, « Tirelire » for `piggy-bank`) · Couleur (the seven category slots as 20 px squares, named
+Bleu, Orange, Vert, Ambre, Rose, Violet, Gris; the selected one takes the `accent` outline and a
+12 px `check` in `bg`). With a parent set, Type, Icône and Couleur are hidden and the
 modal's lead repeats the parent's category label.
 
 ### Rule packs
 The import and export sheets keep their content and become modals (560 px) built from the
 standard table, checkbox and note components. The built-in pack button hides once that pack is
 imported.
+
+### Other modals (`00` §7)
+- **Delete a rule** (480 px), destructive confirmation: « Supprimer la règle « {motif} » ? »,
+  lead « Les opérations qu’elle a déjà classées gardent leur catégorie. »
+- **Delete a category** (480 px), destructive confirmation: « Supprimer la catégorie
+  « {nom} » ? », lead « Ses sous-catégories seront supprimées aussi. Les transactions
+  concernées redeviendront non catégorisées. »
+- **Logo crop** (420 px), square crop 320 × 320; footer « Annuler » · « Utiliser ce logo ».
+- **Logo from an address** (420 px): lead « Collez l’adresse d’une image. Bastide la
+  télécharge depuis cet ordinateur, puis vous la recadrez. »; Adresse de l’image (Geist Mono);
+  footer « Annuler » · « Télécharger ».
+- **Logo zoom** (240 px), the zoom variant.
+- **Pack refused** and **logos not added** (480 px), acknowledgements with a single « Fermer ».
+  A pack refused for a regex rule says: « Rien n’a été importé. Ce pack contient une règle
+  « regex », que Bastide n’accepte pas d’un fichier partagé : écrite par quelqu’un d’autre,
+  elle pourrait ralentir fortement l’application. Les conditions « contient », « égal à » et
+  « plage » sont acceptées. »
+- **Logos downloading** (the import modal, 560 px): progress « Téléchargement des logos… {n} /
+  {total} » with a meter and the note that the rules are already imported. Secondary
+  « Arrêter les téléchargements » closes it; the logos not yet downloaded join the « logos not
+  added » result.
 
 ## States
 | State | What shows |
