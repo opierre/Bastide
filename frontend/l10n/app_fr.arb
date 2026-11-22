@@ -2005,7 +2005,7 @@
   "@dashboardSavingsTrendTitle": {
     "description": "Title of the monthly savings chart (bar or line view)."
   },
-  "dashboardSavingsTrendAverage": "en moyenne sur 12 mois",
+  "dashboardSavingsTrendAverage": "en moyenne sur 12\u00A0mois",
   "@dashboardSavingsTrendAverage": {
     "description": "Follows the signed 12-month average on the right of the « Épargne mensuelle » heading."
   },
@@ -3507,7 +3507,7 @@
   "@subscriptionsNextTomorrow": {
     "description": "Relative phrasing for a charge due tomorrow."
   },
-  "subscriptionsNextInDays": "{days, plural, =1{dans 1 jour} other{dans {days} jours}}",
+  "subscriptionsNextInDays": "{days, plural, =1{dans 1\u00A0jour} other{dans {days}\u00A0jours}}",
   "@subscriptionsNextInDays": {
     "description": "Relative phrasing for a charge further ahead.",
     "placeholders": {
@@ -3618,7 +3618,7 @@
       }
     }
   },
-  "subscriptionSignalMissed": "{days, plural, =1{Prélèvement manquant depuis 1 jour} other{Prélèvement manquant depuis {days} jours}}",
+  "subscriptionSignalMissed": "{days, plural, =1{Prélèvement manquant depuis 1\u00A0jour} other{Prélèvement manquant depuis {days}\u00A0jours}}",
   "@subscriptionSignalMissed": {
     "description": "Amber status pill on a row whose charge has not landed past its tolerance.",
     "placeholders": {
@@ -4482,7 +4482,7 @@
       }
     }
   },
-  "mortgagesRatioCaptionLedger": "{charge} sur un revenu médian constaté de {income} (12 mois). Un revenu déclaré remplace cette lecture.",
+  "mortgagesRatioCaptionLedger": "{charge} sur un revenu médian constaté de {income} (12\u00A0mois). Un revenu déclaré remplace cette lecture.",
   "@mortgagesRatioCaptionLedger": {
     "description": "Ratio caption when the income is the median of the ledger's last 12 complete months. Says median, never average.",
     "placeholders": {
@@ -4928,7 +4928,7 @@
   "@mortgagesTableInstalment": {
     "description": "Loans table column header: the instalment, insurance included."
   },
-  "mortgagesTableLenderTerm": "{lender} · {months} mois",
+  "mortgagesTableLenderTerm": "{lender} · {months}\u00A0mois",
   "@mortgagesTableLenderTerm": {
     "description": "Loans table cell: the lender and the term in months.",
     "placeholders": {
@@ -4952,7 +4952,7 @@
       }
     }
   },
-  "mortgageDetailFacts": "{kind} · {lender} · {principal} sur {months} mois",
+  "mortgageDetailFacts": "{kind} · {lender} · {principal} sur {months}\u00A0mois",
   "@mortgageDetailFacts": {
     "description": "First right-aligned line of the loan detail summary.",
     "placeholders": {
@@ -5047,7 +5047,7 @@
   "@simulatorTerm": {
     "description": "Simulator term slider label, and the HCSF term column label."
   },
-  "simulatorTermValue": "{years, plural, =1{1 an} other{{years} ans}} · {months} mois",
+  "simulatorTermValue": "{years, plural, =1{1\u00A0an} other{{years}\u00A0ans}} · {months}\u00A0mois",
   "@simulatorTermValue": {
     "description": "Term slider value in both units.",
     "placeholders": {
@@ -5060,7 +5060,7 @@
       }
     }
   },
-  "simulatorYears": "{years, plural, =1{1 an} other{{years} ans}}",
+  "simulatorYears": "{years, plural, =1{1\u00A0an} other{{years}\u00A0ans}}",
   "@simulatorYears": {
     "description": "A duration in whole years.",
     "placeholders": {
@@ -5070,7 +5070,7 @@
       }
     }
   },
-  "simulatorMonths": "{months} mois",
+  "simulatorMonths": "{months}\u00A0mois",
   "@simulatorMonths": {
     "description": "A duration in months.",
     "placeholders": {
@@ -5879,11 +5879,11 @@
       }
     }
   },
-  "networthRangeYear": "12 mois",
+  "networthRangeYear": "12\u00A0mois",
   "@networthRangeYear": {
     "description": "Series range segment: the last 12 months."
   },
-  "networthRangeThreeYears": "3 ans",
+  "networthRangeThreeYears": "3\u00A0ans",
   "@networthRangeThreeYears": {
     "description": "Series range segment: the last 3 years."
   },
@@ -6447,11 +6447,11 @@
   "@accountDetailCyclesChartTitle": {
     "description": "Title of a deferred card's chart: one bar per settlement cycle."
   },
-  "accountDetailRangeSixMonths": "6 mois",
+  "accountDetailRangeSixMonths": "6\u00A0mois",
   "@accountDetailRangeSixMonths": {
     "description": "Balance chart range segment."
   },
-  "accountDetailRangeTwelveMonths": "12 mois",
+  "accountDetailRangeTwelveMonths": "12\u00A0mois",
   "@accountDetailRangeTwelveMonths": {
     "description": "Balance chart range segment."
   },
@@ -6495,7 +6495,7 @@
   "@accountDetailCycleOpen": {
     "description": "Cycle chart tooltip line for the open cycle."
   },
-  "accountDetailRisingStreak": "Votre solde progresse depuis {count} mois.",
+  "accountDetailRisingStreak": "Votre solde progresse depuis {count}\u00A0mois.",
   "@accountDetailRisingStreak": {
     "description": "Sentence under the balance chart, shown only when the balance rose at least two month-ends running.",
     "placeholders": {
@@ -7234,7 +7234,7 @@
   "@placementAgeLabel": {
     "description": "Repère label: time since the opening."
   },
-  "placementAgeYears": "{count, plural, =1{1 an} other{{count} ans}}",
+  "placementAgeYears": "{count, plural, =1{1\u00A0an} other{{count}\u00A0ans}}",
   "@placementAgeYears": {
     "description": "Age of an investment, whole years.",
     "placeholders": {
@@ -7243,7 +7243,7 @@
       }
     }
   },
-  "placementAgeMonths": "{count, plural, =1{1 mois} other{{count} mois}}",
+  "placementAgeMonths": "{count, plural, =1{1\u00A0mois} other{{count}\u00A0mois}}",
   "@placementAgeMonths": {
     "description": "Age of an investment, months.",
     "placeholders": {
@@ -7264,7 +7264,7 @@
       }
     }
   },
-  "placementMilestoneMark": "repère {years} ans · {month}",
+  "placementMilestoneMark": "repère {years}\u00A0ans · {month}",
   "@placementMilestoneMark": {
     "description": "Label of the age repère's mark: the milestone and the month it falls in.",
     "placeholders": {
@@ -7276,11 +7276,11 @@
       }
     }
   },
-  "placementMilestonePea": "Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.",
+  "placementMilestonePea": "Avant 5\u00A0ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.",
   "@placementMilestonePea": {
     "description": "Caption under the age repère of a PEA."
   },
-  "placementMilestoneLifeInsurance": "Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.",
+  "placementMilestoneLifeInsurance": "Après 8\u00A0ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.",
   "@placementMilestoneLifeInsurance": {
     "description": "Caption under the age repère of a life insurance policy."
   },

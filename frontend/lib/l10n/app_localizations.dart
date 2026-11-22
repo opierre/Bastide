@@ -2614,7 +2614,7 @@ abstract class AppLocalizations {
   /// Follows the signed 12-month average on the right of the « Épargne mensuelle » heading.
   ///
   /// In fr, this message translates to:
-  /// **'en moyenne sur 12 mois'**
+  /// **'en moyenne sur 12 mois'**
   String get dashboardSavingsTrendAverage;
 
   /// Title of the recent-transactions card.
@@ -4485,7 +4485,7 @@ abstract class AppLocalizations {
   /// Relative phrasing for a charge further ahead.
   ///
   /// In fr, this message translates to:
-  /// **'{days, plural, =1{dans 1 jour} other{dans {days} jours}}'**
+  /// **'{days, plural, =1{dans 1 jour} other{dans {days} jours}}'**
   String subscriptionsNextInDays(int days);
 
   /// Label of the summary-line figure counting the series that carry a price rise or a missed charge. Hidden at 0.
@@ -4617,7 +4617,7 @@ abstract class AppLocalizations {
   /// Amber status pill on a row whose charge has not landed past its tolerance.
   ///
   /// In fr, this message translates to:
-  /// **'{days, plural, =1{Prélèvement manquant depuis 1 jour} other{Prélèvement manquant depuis {days} jours}}'**
+  /// **'{days, plural, =1{Prélèvement manquant depuis 1 jour} other{Prélèvement manquant depuis {days} jours}}'**
   String subscriptionSignalMissed(int days);
 
   /// Gray status pill on a recurring payment the user ended. It stays listed, dimmed.
@@ -5636,7 +5636,7 @@ abstract class AppLocalizations {
   /// Ratio caption when the income is the median of the ledger's last 12 complete months. Says median, never average.
   ///
   /// In fr, this message translates to:
-  /// **'{charge} sur un revenu médian constaté de {income} (12 mois). Un revenu déclaré remplace cette lecture.'**
+  /// **'{charge} sur un revenu médian constaté de {income} (12 mois). Un revenu déclaré remplace cette lecture.'**
   String mortgagesRatioCaptionLedger(String charge, String income);
 
   /// Ratio caption when no income is known: no ratio is drawn.
@@ -6170,7 +6170,7 @@ abstract class AppLocalizations {
   /// Loans table cell: the lender and the term in months.
   ///
   /// In fr, this message translates to:
-  /// **'{lender} · {months} mois'**
+  /// **'{lender} · {months} mois'**
   String mortgagesTableLenderTerm(String lender, int months);
 
   /// Loans table cell under the repère: the share repaid and the instalments left.
@@ -6182,7 +6182,7 @@ abstract class AppLocalizations {
   /// First right-aligned line of the loan detail summary.
   ///
   /// In fr, this message translates to:
-  /// **'{kind} · {lender} · {principal} sur {months} mois'**
+  /// **'{kind} · {lender} · {principal} sur {months} mois'**
   String mortgageDetailFacts(
     String kind,
     String lender,
@@ -6289,19 +6289,19 @@ abstract class AppLocalizations {
   /// Term slider value in both units.
   ///
   /// In fr, this message translates to:
-  /// **'{years, plural, =1{1 an} other{{years} ans}} · {months} mois'**
+  /// **'{years, plural, =1{1 an} other{{years} ans}} · {months} mois'**
   String simulatorTermValue(int months, num years);
 
   /// A duration in whole years.
   ///
   /// In fr, this message translates to:
-  /// **'{years, plural, =1{1 an} other{{years} ans}}'**
+  /// **'{years, plural, =1{1 an} other{{years} ans}}'**
   String simulatorYears(num years);
 
   /// A duration in months.
   ///
   /// In fr, this message translates to:
-  /// **'{months} mois'**
+  /// **'{months} mois'**
   String simulatorMonths(int months);
 
   /// Switch adding the user's active loans to the HCSF reading.
@@ -7181,13 +7181,13 @@ abstract class AppLocalizations {
   /// Series range segment: the last 12 months.
   ///
   /// In fr, this message translates to:
-  /// **'12 mois'**
+  /// **'12 mois'**
   String get networthRangeYear;
 
   /// Series range segment: the last 3 years.
   ///
   /// In fr, this message translates to:
-  /// **'3 ans'**
+  /// **'3 ans'**
   String get networthRangeThreeYears;
 
   /// Series range segment: the whole history.
@@ -7889,13 +7889,13 @@ abstract class AppLocalizations {
   /// Balance chart range segment.
   ///
   /// In fr, this message translates to:
-  /// **'6 mois'**
+  /// **'6 mois'**
   String get accountDetailRangeSixMonths;
 
   /// Balance chart range segment.
   ///
   /// In fr, this message translates to:
-  /// **'12 mois'**
+  /// **'12 mois'**
   String get accountDetailRangeTwelveMonths;
 
   /// Balance chart range segment: the whole history.
@@ -7943,7 +7943,7 @@ abstract class AppLocalizations {
   /// Sentence under the balance chart, shown only when the balance rose at least two month-ends running.
   ///
   /// In fr, this message translates to:
-  /// **'Votre solde progresse depuis {count} mois.'**
+  /// **'Votre solde progresse depuis {count} mois.'**
   String accountDetailRisingStreak(int count);
 
   /// Summary line label of a deferred card: the mean of its last settled cycles.
@@ -8757,13 +8757,13 @@ abstract class AppLocalizations {
   /// Age of an investment, whole years.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 an} other{{count} ans}}'**
+  /// **'{count, plural, =1{1 an} other{{count} ans}}'**
   String placementAgeYears(int count);
 
   /// Age of an investment, months.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 mois} other{{count} mois}}'**
+  /// **'{count, plural, =1{1 mois} other{{count} mois}}'**
   String placementAgeMonths(int count);
 
   /// Age of an investment: years then months.
@@ -8775,19 +8775,19 @@ abstract class AppLocalizations {
   /// Label of the age repère's mark: the milestone and the month it falls in.
   ///
   /// In fr, this message translates to:
-  /// **'repère {years} ans · {month}'**
+  /// **'repère {years} ans · {month}'**
   String placementMilestoneMark(int years, String month);
 
   /// Caption under the age repère of a PEA.
   ///
   /// In fr, this message translates to:
-  /// **'Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.'**
+  /// **'Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.'**
   String get placementMilestonePea;
 
   /// Caption under the age repère of a life insurance policy.
   ///
   /// In fr, this message translates to:
-  /// **'Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.'**
+  /// **'Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.'**
   String get placementMilestoneLifeInsurance;
 
   /// Inspector section heading: payments, withdrawals and declared values.

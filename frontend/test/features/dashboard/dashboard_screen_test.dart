@@ -429,7 +429,7 @@ void main() {
         tester.widget<AmountText>(_byKey('dashboardAverageSaved')).amountMinor,
         specTrends().averageSavedMinor,
       );
-      expect(find.text('en moyenne sur 12 mois'), findsOneWidget);
+      expect(find.text('en moyenne sur 12\u00A0mois'), findsOneWidget);
     });
 
     testWidgets('an earlier month hatches nothing', (tester) async {
@@ -623,7 +623,7 @@ void main() {
       expect(find.text('vs April'), findsNWidgets(3));
       expect(find.text('Spending by category'), findsOneWidget);
       expect(find.text('Monthly savings'), findsOneWidget);
-      expect(find.text('on average over 12 months'), findsOneWidget);
+      expect(find.text('on average over 12\u00A0months'), findsOneWidget);
       expect(find.text('All transactions'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

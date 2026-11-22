@@ -1612,7 +1612,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardSavingsTrendTitle => 'Épargne mensuelle';
 
   @override
-  String get dashboardSavingsTrendAverage => 'en moyenne sur 12 mois';
+  String get dashboardSavingsTrendAverage => 'en moyenne sur 12 mois';
 
   @override
   String get dashboardRecentActivityTitle => 'Activité récente';
@@ -2851,8 +2851,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: 'dans $days jours',
-      one: 'dans 1 jour',
+      other: 'dans $days jours',
+      one: 'dans 1 jour',
     );
     return '$_temp0';
   }
@@ -2945,8 +2945,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: 'Prélèvement manquant depuis $days jours',
-      one: 'Prélèvement manquant depuis 1 jour',
+      other: 'Prélèvement manquant depuis $days jours',
+      one: 'Prélèvement manquant depuis 1 jour',
     );
     return '$_temp0';
   }
@@ -3571,7 +3571,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String mortgagesRatioCaptionLedger(String charge, String income) {
-    return '$charge sur un revenu médian constaté de $income (12 mois). Un revenu déclaré remplace cette lecture.';
+    return '$charge sur un revenu médian constaté de $income (12 mois). Un revenu déclaré remplace cette lecture.';
   }
 
   @override
@@ -3885,7 +3885,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String mortgagesTableLenderTerm(String lender, int months) {
-    return '$lender · $months mois';
+    return '$lender · $months mois';
   }
 
   @override
@@ -3907,7 +3907,7 @@ class AppLocalizationsFr extends AppLocalizations {
     String principal,
     int months,
   ) {
-    return '$kind · $lender · $principal sur $months mois';
+    return '$kind · $lender · $principal sur $months mois';
   }
 
   @override
@@ -3973,10 +3973,10 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       years,
       locale: localeName,
-      other: '$yearsString ans',
-      one: '1 an',
+      other: '$yearsString ans',
+      one: '1 an',
     );
-    return '$_temp0 · $months mois';
+    return '$_temp0 · $months mois';
   }
 
   @override
@@ -3989,15 +3989,15 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       years,
       locale: localeName,
-      other: '$yearsString ans',
-      one: '1 an',
+      other: '$yearsString ans',
+      one: '1 an',
     );
     return '$_temp0';
   }
 
   @override
   String simulatorMonths(int months) {
-    return '$months mois';
+    return '$months mois';
   }
 
   @override
@@ -4569,10 +4569,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get networthRangeYear => '12 mois';
+  String get networthRangeYear => '12 mois';
 
   @override
-  String get networthRangeThreeYears => '3 ans';
+  String get networthRangeThreeYears => '3 ans';
 
   @override
   String get networthRangeAll => 'Tout';
@@ -4994,10 +4994,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountDetailCyclesChartTitle => 'Dépenses par cycle';
 
   @override
-  String get accountDetailRangeSixMonths => '6 mois';
+  String get accountDetailRangeSixMonths => '6 mois';
 
   @override
-  String get accountDetailRangeTwelveMonths => '12 mois';
+  String get accountDetailRangeTwelveMonths => '12 mois';
 
   @override
   String get accountDetailRangeAll => 'Tout';
@@ -5027,7 +5027,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String accountDetailRisingStreak(int count) {
-    return 'Votre solde progresse depuis $count mois.';
+    return 'Votre solde progresse depuis $count mois.';
   }
 
   @override
@@ -5563,8 +5563,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count ans',
-      one: '1 an',
+      other: '$count ans',
+      one: '1 an',
     );
     return '$_temp0';
   }
@@ -5574,8 +5574,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count mois',
-      one: '1 mois',
+      other: '$count mois',
+      one: '1 mois',
     );
     return '$_temp0';
   }
@@ -5587,16 +5587,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String placementMilestoneMark(int years, String month) {
-    return 'repère $years ans · $month';
+    return 'repère $years ans · $month';
   }
 
   @override
   String get placementMilestonePea =>
-      'Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.';
+      'Avant 5 ans, un retrait clôt en principe le plan. Lecture indicative, qui ne vaut pas conseil fiscal.';
 
   @override
   String get placementMilestoneLifeInsurance =>
-      'Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.';
+      'Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, qui ne vaut pas conseil fiscal.';
 
   @override
   String get placementMovementsTitle => 'Mouvements';

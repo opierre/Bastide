@@ -199,11 +199,11 @@ void main() {
     expect(_text(tester, 'scenarioName-live'), '320\u00A0k€');
     expect(
       _text(tester, 'scenarioSub-live'),
-      'en cours · ${formatRate(325, 'fr')} · 25 ans',
+      'en cours · ${formatRate(325, 'fr')} · 25\u00A0ans',
     );
     expect(
       _text(tester, 'scenarioSub-s1'),
-      '${formatRate(325, 'fr')} · 25 ans',
+      '${formatRate(325, 'fr')} · 25\u00A0ans',
     );
     expect(
       _text(tester, 'scenarioInstalment-s1'),
@@ -334,7 +334,7 @@ void main() {
     expect(_text(tester, 'compareHeader-live'), 'Simulation en cours');
     expect(_text(tester, 'compareLiveMarker'), 'en cours');
     expect(_text(tester, 'compareHeader-s1'), 'Villeurbanne, 265 k€');
-    expect(_text(tester, 'compare-term-s1'), '25 ans');
+    expect(_text(tester, 'compare-term-s1'), '25\u00A0ans');
 
     expect(_text(tester, 'compare-price-live'), '—');
     expect(_text(tester, 'compare-costShare-live'), '—');

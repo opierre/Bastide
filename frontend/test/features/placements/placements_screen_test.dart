@@ -121,15 +121,15 @@ void main() {
       _text(tester, 'placementCeilingValue-i1'),
       '${_money(2700000)} sur ${_money(15000000)}',
     );
-    expect(_text(tester, 'placementAgeValue-i1'), '3 ans 2 mois');
+    expect(_text(tester, 'placementAgeValue-i1'), '3\u00A0ans 2\u00A0mois');
     final age = tester.widget<RepereMeter>(
       find.byKey(const Key('placementAgeMeter-i1')),
     );
-    expect(age.markLabel, 'repère 5 ans · mars 2028');
+    expect(age.markLabel, 'repère 5\u00A0ans · mars 2028');
     expect(age.tone, RepereTone.normal);
     expect(
       find.text(
-        'Avant 5 ans, un retrait clôt en principe le plan. Lecture '
+        'Avant 5\u00A0ans, un retrait clôt en principe le plan. Lecture '
         'indicative, qui ne vaut pas conseil fiscal.',
       ),
       findsOneWidget,
@@ -220,7 +220,7 @@ void main() {
     );
     expect(
       find.text(
-        'Après 8 ans, la fiscalité des retraits s’allège. Lecture indicative, '
+        'Après 8\u00A0ans, la fiscalité des retraits s’allège. Lecture indicative, '
         'qui ne vaut pas conseil fiscal.',
       ),
       findsOneWidget,

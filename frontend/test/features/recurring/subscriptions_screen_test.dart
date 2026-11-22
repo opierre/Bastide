@@ -143,7 +143,10 @@ void main() {
       find.text('Hausse : ${_money(1349)} → ${_money(1549)}'),
       findsOneWidget,
     );
-    expect(find.text('Prélèvement manquant depuis 9 jours'), findsOneWidget);
+    expect(
+      find.text('Prélèvement manquant depuis 9\u00A0jours'),
+      findsOneWidget,
+    );
 
     // The overdue row states what was expected instead of printing a past date
     // under a "next charge" header.
@@ -611,7 +614,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Monthly'), findsNWidgets(3));
-    expect(find.text('Missed charge for 9 days'), findsOneWidget);
+    expect(find.text('Missed charge for 9\u00A0days'), findsOneWidget);
     expect(find.textContaining('Cancelled, last charge on'), findsOneWidget);
     // Netflix and the cancelled Canal+ share a price in this fixture.
     expect(find.text(_money(1549, locale: 'en')), findsNWidgets(2));

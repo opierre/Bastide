@@ -151,11 +151,11 @@ void main() {
     expect(_text(tester, 'resultTaeg'), '—');
     expect(_text(tester, 'hcsfRatioValue'), '—');
     expect(_text(tester, 'hcsfCapacityValue'), '—');
-    expect(_text(tester, 'hcsfTermValue'), '25 ans');
+    expect(_text(tester, 'hcsfTermValue'), '25\u00A0ans');
     expect(find.byKey(const Key('hcsfRatioGauge')), findsNothing);
     expect(find.byKey(const Key('projectionEmpty')), findsOneWidget);
     expect(find.byKey(const Key('projectionPlot')), findsNothing);
-    expect(_text(tester, 'simulatorTermValue'), '25 ans · 300 mois');
+    expect(_text(tester, 'simulatorTermValue'), '25\u00A0ans · 300\u00A0mois');
     expect(
       _text(tester, 'simulatorIncludeExistingSub'),
       'Ajoute ${_money(150625)} par mois à la lecture',
@@ -448,7 +448,10 @@ void main() {
     expect(_text(tester, 'resultTaeg'), '3.67%');
     expect(_text(tester, 'resultInstalmentLabel'), 'Monthly instalment');
     expect(_text(tester, 'resultTaegLabel'), 'Indicative APR');
-    expect(_text(tester, 'simulatorTermValue'), '25 years · 300 months');
+    expect(
+      _text(tester, 'simulatorTermValue'),
+      '25\u00A0years · 300\u00A0months',
+    );
     expect(
       _text(tester, 'hcsfRatioCaption'),
       '€1,418.41 against a declared income of €4,600.00',

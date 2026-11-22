@@ -102,7 +102,7 @@ final _forNow = RegExp('pour l[\'’]instant', caseSensitive: false);
 /// A figure or a placeholder, an ordinary space, then a unit: `00` §3 asks
 /// for U+00A0 there (« 320 k€ », « 35 % »).
 final _figureSpaceUnit = RegExp(
-  r'(\{\w+\}|\d) (%|€|k€|M€|×|Ko|Mo|Go|kB|KB|MB|GB|pts?|min|h)(?![\wÀ-ɏ])',
+  r'(\{\w+\}|\d) (%|€|k€|M€|×|Ko|Mo|Go|kB|KB|MB|GB|pts?|min|h|ans?|mois|jours?|semaines?|years?|months?|days?|weeks?)(?![\wÀ-ɏ])',
 );
 
 /// Every message of one ARB file, without its `@` metadata.

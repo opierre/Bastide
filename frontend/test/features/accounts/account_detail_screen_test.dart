@@ -184,7 +184,10 @@ void main() {
     expect(find.text('Solde en fin de mois'), findsOneWidget);
     expect(find.byKey(const Key('accountDetailBalanceChart')), findsOneWidget);
     // Four month-ends rising in a row: said, because it is true.
-    expect(find.text('Votre solde progresse depuis 4 mois.'), findsOneWidget);
+    expect(
+      find.text('Votre solde progresse depuis 4\u00A0mois.'),
+      findsOneWidget,
+    );
     expect(find.text('Cartes rattachées'), findsOneWidget);
     expect(find.text('Visa Premier'), findsOneWidget);
     expect(find.text('•••• 4821'), findsOneWidget);
