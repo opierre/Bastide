@@ -4347,6 +4347,27 @@
   "@goalFormSave": {
     "description": "Confirm action when editing a goal."
   },
+  "goalFormDelete": "Supprimer",
+  "@goalFormDelete": {
+    "description": "Ghost delete button on the footer of the edit goal modal."
+  },
+  "goalDeleteTitle": "Supprimer l’objectif « {name} » ?",
+  "@goalDeleteTitle": {
+    "description": "Title of the delete goal confirmation.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goalDeleteLead": "Ses allocations et son image seront supprimées. Pour garder son historique, archivez-le plutôt. Vos comptes ne sont pas modifiés.",
+  "@goalDeleteLead": {
+    "description": "Lead of the delete goal confirmation."
+  },
+  "goalDeleteSubmit": "Supprimer",
+  "@goalDeleteSubmit": {
+    "description": "Delete goal confirmation button."
+  },
   "allocationModalTitle": "Nouvelle allocation",
   "@allocationModalTitle": {
     "description": "Title of the allocation modal."

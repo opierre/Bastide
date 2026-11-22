@@ -299,6 +299,42 @@ void main() {
     },
   );
 
+  test('deleting a goal drops it from the grid after a reload', () async {
+    stubLoad(
+      goals: [
+        _goalJson(),
+        _goalJson(id: 'g2', name: 'Vélo'),
+      ],
+    );
+    when(() => apiClient.delete('/goals/g1')).thenAnswer((_) async => null);
+    await container.read(goalsControllerProvider.future);
+
+    stubLoad(
+      goals: [_goalJson(id: 'g2', name: 'Vélo')],
+    );
+    await container.read(goalsControllerProvider.notifier).delete('g1');
+
+    final state = container.read(goalsControllerProvider).value!;
+    expect(state.goals.map((goal) => goal.id), ['g2']);
+    expect(state.archived, isEmpty);
+    expect(state.actionError, isNull);
+    verify(() => apiClient.delete('/goals/g1')).called(1);
+  });
+
+  test('a refused delete keeps the goal and reports itself', () async {
+    stubLoad();
+    when(() => apiClient.delete('/goals/g1')).thenThrow(
+      const ApiFailure(code: 'GOAL_NOT_FOUND', message: 'Goal not found.'),
+    );
+    await container.read(goalsControllerProvider.future);
+
+    await container.read(goalsControllerProvider.notifier).delete('g1');
+
+    final state = container.read(goalsControllerProvider).value!;
+    expect(state.goals, hasLength(1));
+    expect((state.actionError! as ApiFailure).code, 'GOAL_NOT_FOUND');
+  });
+
   test('a refused write keeps the grid standing and reports itself', () async {
     stubLoad();
     when(

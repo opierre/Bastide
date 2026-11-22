@@ -19,6 +19,10 @@ class _RecordingGoalsController extends FakeGoalsController {
   _RecordingGoalsController() : super(initialGoals: const []);
 
   final createCalls = <(String, int, DateTime?)>[];
+  final deleteCalls = <String>[];
+
+  @override
+  Future<void> delete(String goalId) async => deleteCalls.add(goalId);
 
   @override
   Future<Goal> create({
@@ -277,6 +281,75 @@ void main() {
 
     expect(find.text('Modifier l’objectif'), findsOneWidget);
     expect(find.text('06/2028'), findsOneWidget);
+  });
+
+  testWidgets('only an edit offers « Supprimer »', (tester) async {
+    await tester.pumpWidget(_wrap(controller: _RecordingGoalsController()));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('goalFormDelete')), findsNothing);
+
+    await tester.pumpWidget(
+      _wrap(controller: _RecordingGoalsController(), initial: testGoal()),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('goalFormDelete')), findsOneWidget);
+  });
+
+  testWidgets('deleting a goal asks for a confirmation first', (tester) async {
+    final controller = _RecordingGoalsController();
+    await tester.pumpWidget(_wrap(controller: controller, initial: testGoal()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('goalFormDelete')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Supprimer l’objectif « Fonds d\'urgence » ?'), findsOne);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('goalDeleteLead'))).data,
+      'Ses allocations et son image seront supprimées. Pour garder son '
+      'historique, archivez-le plutôt. Vos comptes ne sont pas modifiés.',
+    );
+    // A destructive confirmation: focus on « Annuler », so Enter deletes
+    // nothing by mistake.
+    final focused = FocusManager.instance.primaryFocus!.context!;
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('goalDeleteCancel')),
+        matching: find.byWidget(focused.widget),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('goalDeleteCancel')));
+    await tester.pumpAndSettle();
+    expect(controller.deleteCalls, isEmpty);
+    expect(find.byKey(const Key('goalDeleteModal')), findsNothing);
+    expect(find.byKey(const Key('goalFormModal')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('goalFormDelete')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('goalDeleteSubmit')));
+    await tester.pumpAndSettle();
+
+    expect(controller.deleteCalls, ['g1']);
+    expect(find.byKey(const Key('goalDeleteModal')), findsNothing);
+  });
+
+  testWidgets('the confirmation reads in English', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        controller: _RecordingGoalsController(),
+        initial: testGoal(),
+        locale: const Locale('en'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('goalFormDelete')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Delete the goal “Fonds d\'urgence”?'), findsOne);
+    expect(find.text('Delete'), findsWidgets);
   });
 
   testWidgets('cancelling a filled form asks before dropping it', (

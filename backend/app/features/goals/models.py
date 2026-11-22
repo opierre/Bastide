@@ -35,7 +35,7 @@ class Goal(Base):
         onupdate=lambda: datetime.now(UTC),
     )
     # Loaded with the goal (without its pixels), so whether a goal has a banner never costs a
-    # query per goal. A goal is only ever archived, but were one deleted its image would go too.
+    # query per goal. Deleting a goal deletes its image too.
     image: Mapped[GoalImage | None] = relationship(
         lazy="selectin", cascade="all, delete-orphan", passive_deletes=True
     )

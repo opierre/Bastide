@@ -91,8 +91,8 @@ async def delete_goal(
     service: Annotated[GoalService, Depends(_service)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> None:
-    """Archive a goal (never hard-deletes â€” the allocations are history)."""
-    service.archive(user.id, goal_id)
+    """Delete a goal with its allocations and banner image. Archiving is how to keep it."""
+    service.delete(user.id, goal_id)
 
 
 @router.get(

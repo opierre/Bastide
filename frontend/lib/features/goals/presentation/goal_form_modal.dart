@@ -16,6 +16,7 @@ import '../application/goal_image_controller.dart';
 import '../application/goals_controller.dart';
 import '../data/goals_repository.dart';
 import '../domain/goal.dart';
+import 'delete_goal_modal.dart';
 import 'goal_image_crop_modal.dart';
 import 'goal_labels.dart';
 import 'goal_month_field.dart';
@@ -116,6 +117,13 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
     if (!_dirty) setState(() => _dirty = true);
   }
 
+  /// The destructive confirmation, over the form; the form closes once the
+  /// goal is gone.
+  Future<void> _delete() async {
+    final deleted = await showDeleteGoalModal(context, goal: widget.initial!);
+    if (deleted == true && mounted) Navigator.of(context).pop();
+  }
+
   Future<void> _submit() async {
     if (_isSubmitting) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -205,6 +213,14 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
       busy: _isSubmitting,
       saveError: _errorText,
       onSubmit: _submit,
+      leadingAction: _isEditing
+          ? AppButton(
+              key: const Key('goalFormDelete'),
+              label: l10n.goalFormDelete,
+              variant: AppButtonVariant.ghost,
+              onPressed: _isSubmitting ? null : _delete,
+            )
+          : null,
       actions: [
         const AppModalCancel(key: Key('goalFormCancel')),
         PrimaryButton(

@@ -161,15 +161,16 @@ class GoalService:
         goal.status = _settled_status(goal, progress_minor)
         return self._view(self._repository.save(goal), progress_minor)
 
-    def archive(self, user_id: str, goal_id: str) -> None:
-        """Archive a goal. Never hard-deletes: the allocations are history and survive.
+    def delete(self, user_id: str, goal_id: str) -> None:
+        """Delete a goal with its allocations and banner image (archiving is how to keep it).
+
+        Touches no account and no transaction: the allocations were only ever on paper.
 
         Raises:
             GoalNotFoundError: no such goal, or it belongs to another user.
         """
         goal, _ = self.get(user_id, goal_id)
-        goal.status = ARCHIVED
-        self._repository.save(goal)
+        self._repository.delete_goal(goal)
 
     def get_image(self, user_id: str, goal_id: str) -> GoalImage:
         """The banner picture the user gave one of their goals, with its bytes.
