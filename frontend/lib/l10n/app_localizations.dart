@@ -674,6 +674,36 @@ abstract class AppLocalizations {
   /// **'État des mises à jour indisponible.'**
   String get settingsUpdatesUnavailable;
 
+  /// Toast after « Vérifier maintenant » when no newer release exists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bastide est à jour'**
+  String get settingsUpdatesToastLatest;
+
+  /// Toast after « Vérifier maintenant » when a newer release exists.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle version disponible : Bastide {version}'**
+  String settingsUpdatesToastAvailable(String version);
+
+  /// Title of the toast when « Vérifier maintenant » got no answer.
+  ///
+  /// In fr, this message translates to:
+  /// **'La vérification a échoué'**
+  String get settingsUpdatesToastFailed;
+
+  /// Second line of the failed-check toast when GitHub was out of reach.
+  ///
+  /// In fr, this message translates to:
+  /// **'GitHub n’a pas pu être joint. Réessayez plus tard.'**
+  String get settingsUpdatesToastOffline;
+
+  /// Second line of the failed-check toast when the backend could not be asked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bastide n’a pas pu lancer la vérification. Réessayez.'**
+  String get settingsUpdatesToastError;
+
   /// Local-privacy statement in the About section.
   ///
   /// In fr, this message translates to:

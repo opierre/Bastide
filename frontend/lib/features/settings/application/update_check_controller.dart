@@ -34,6 +34,22 @@ class UpdateCheckState {
   int get hashCode => Object.hash(status, isBusy, isChecking);
 }
 
+/// How a « Vérifier maintenant » ended, for the toast that reports it.
+enum UpdateCheckOutcome {
+  /// GitHub answered and no newer release is published.
+  upToDate,
+
+  /// GitHub answered with a newer release; the state's
+  /// [UpdateStatus.latestVersion] names it.
+  updateAvailable,
+
+  /// The backend ran the check, but GitHub could not be reached.
+  unreachable,
+
+  /// The backend could not be asked at all.
+  failed,
+}
+
 /// Loads the update status when Settings › À propos opens, and turns the
 /// opt-in check on or off.
 ///
@@ -78,21 +94,31 @@ class UpdateCheckController extends AsyncNotifier<UpdateCheckState> {
 
   /// « Vérifier maintenant »: asks GitHub now, whatever the daily limit. The
   /// backend reuses a check under a minute old, so repeated taps stay local.
-  Future<void> checkNow() async {
+  ///
+  /// Returns how the check ended, so the card can say it is over; `null` when
+  /// no check ran because another action was still in flight.
+  Future<UpdateCheckOutcome?> checkNow() async {
     final current = state.value;
-    if (current == null || current.isBusy) return;
+    if (current == null || current.isBusy) return null;
     state = AsyncData(
       UpdateCheckState(status: current.status, isBusy: true, isChecking: true),
     );
+    final UpdateStatus status;
     try {
-      final status = await ref
-          .read(settingsRepositoryProvider)
-          .checkForUpdates();
-      state = AsyncData(UpdateCheckState(status: status));
+      status = await ref.read(settingsRepositoryProvider).checkForUpdates();
     } catch (_) {
       // Nothing new could be read: keep what was shown.
       state = AsyncData(UpdateCheckState(status: current.status));
+      return UpdateCheckOutcome.failed;
     }
+    state = AsyncData(UpdateCheckState(status: status));
+    // Unreachable first: a newer release found by an earlier check is still
+    // shown, but this check did not get an answer.
+    if (!status.reachable) return UpdateCheckOutcome.unreachable;
+    if (status.updateAvailable && status.latestVersion != null) {
+      return UpdateCheckOutcome.updateAvailable;
+    }
+    return UpdateCheckOutcome.upToDate;
   }
 }
 

@@ -442,6 +442,32 @@
   "@settingsUpdatesUnavailable": {
     "description": "The app could not read the update status from its backend."
   },
+  "settingsUpdatesToastLatest": "Bastide est à jour",
+  "@settingsUpdatesToastLatest": {
+    "description": "Toast after « Vérifier maintenant » when no newer release exists."
+  },
+  "settingsUpdatesToastAvailable": "Nouvelle version disponible : Bastide {version}",
+  "@settingsUpdatesToastAvailable": {
+    "description": "Toast after « Vérifier maintenant » when a newer release exists.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.2.0"
+      }
+    }
+  },
+  "settingsUpdatesToastFailed": "La vérification a échoué",
+  "@settingsUpdatesToastFailed": {
+    "description": "Title of the toast when « Vérifier maintenant » got no answer."
+  },
+  "settingsUpdatesToastOffline": "GitHub n’a pas pu être joint. Réessayez plus tard.",
+  "@settingsUpdatesToastOffline": {
+    "description": "Second line of the failed-check toast when GitHub was out of reach."
+  },
+  "settingsUpdatesToastError": "Bastide n’a pas pu lancer la vérification. Réessayez.",
+  "@settingsUpdatesToastError": {
+    "description": "Second line of the failed-check toast when the backend could not be asked."
+  },
   "settingsAboutPrivacy": "Toutes vos données restent sur cet ordinateur. Bastide ne se connecte à aucune banque et n’envoie rien sur Internet, hormis la vérification des mises à jour si vous l’activez.",
   "@settingsAboutPrivacy": {
     "description": "Local-privacy statement in the About section."
