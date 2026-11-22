@@ -561,7 +561,7 @@ MD.settlement = () => modal(480, 'Règle de prélèvement de la carte', 'Chaque 
 
 /* ── profile ── */
 MD.displayName = () => modal(420, 'Changer de nom d’utilisateur', 'Le nouveau nom remplace l’ancien pour vous connecter.', `
-  ${F('Nom d’utilisateur', inp('camille.d', 'focus'), 'Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, « . », « _ » ou « - ».')}`, CANCEL + B('Enregistrer', 'pri'));
+  ${F('Nom d’utilisateur', inp('Camille Durand', 'focus'), 'Sert aussi à vous connecter. 3 à 32 caractères&nbsp;: lettres, chiffres, espaces, «&nbsp;.&nbsp;», «&nbsp;_&nbsp;» ou «&nbsp;-&nbsp;».')}`, CANCEL + B('Enregistrer', 'pri'));
 MD.password = () => modal(420, 'Changer le mot de passe', 'Votre code de récupération reste valable.', `
   ${F('Mot de passe actuel', pwF('••••••••••'))}
   ${F('Nouveau mot de passe', pwF('••••••••••••••', 'focus'), `<span class="row">${I('check', 's14 pos')}14 caractères. Le minimum est de 12.</span>`)}

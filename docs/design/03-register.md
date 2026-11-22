@@ -11,7 +11,9 @@ between children.
 
 1. Brand row (mark 20 px + « Bastide » 16/600).
 2. Field « Nom d’utilisateur » (en: "Username"), the name Settings › Profil uses. It is
-   also a login identifier.
+   also a login identifier. Rule, shared with the Settings modal (`09-settings.md`): 3 to 32
+   characters, letters, digits, spaces, « . », « _ » or « - ». Spaces are allowed, so
+   « Camille Dubois » is valid.
 3. Field « Adresse e-mail ».
 4. Field « Mot de passe » with the show/hide button. Helper line under it (11 px):
    - not yet valid: « 12 caractères minimum. » in `textTertiary`;
