@@ -7,7 +7,7 @@ import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
-import '../application/auth_controller.dart';
+import '../application/auth_form_controllers.dart';
 import 'auth_error_localizer.dart';
 import 'auth_scaffold.dart';
 import 'forgot_password_screen.dart';
@@ -43,15 +43,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool get _passwordEmpty => _passwordController.text.isEmpty;
 
   Future<void> _submit() async {
-    if (ref.read(authControllerProvider).isLoading) return;
+    if (ref.read(loginControllerProvider).isLoading) return;
     if (_identifierEmpty || _passwordEmpty) {
       setState(() => _attempted = true);
       return;
     }
     setState(() => _attempted = false);
     await ref
-        .read(authControllerProvider.notifier)
-        .login(
+        .read(loginControllerProvider.notifier)
+        .submit(
           identifier: _identifierController.text.trim(),
           password: _passwordController.text,
         );
@@ -60,12 +60,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final authState = ref.watch(authControllerProvider);
-    final isSubmitting = authState.isLoading;
+    final submission = ref.watch(loginControllerProvider);
+    final isSubmitting = submission.isLoading;
 
     // A rejected pair is a failure of the pair, not of one field: both fields
     // take the error border and the reason is said once, under the password.
-    final error = authState.hasError ? authState.error : null;
+    final error = submission.hasError ? submission.error : null;
     final credentialsRejected =
         error is ApiFailure && error.code == 'INVALID_CREDENTIALS';
 

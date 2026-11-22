@@ -7,6 +7,7 @@ import 'package:bastide/core/storage/token_store.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/app_modal.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
+import 'package:bastide/features/auth/application/auth_form_controllers.dart';
 import 'package:bastide/features/auth/application/recovery_controllers.dart';
 import 'package:bastide/features/auth/presentation/forgot_password_screen.dart';
 import 'package:bastide/features/auth/presentation/recovery_code_modal.dart';
@@ -101,10 +102,11 @@ void main() {
         () => apiClient.post('/auth/register', body: any(named: 'body')),
       ).thenAnswer((_) async => _sessionJson());
 
+      container.listen(registerControllerProvider, (_, _) {});
       await container.read(authControllerProvider.future);
       await container
-          .read(authControllerProvider.notifier)
-          .register(
+          .read(registerControllerProvider.notifier)
+          .submit(
             email: 'ada@example.com',
             password: _strongPassword,
             displayName: 'Ada',
@@ -121,10 +123,11 @@ void main() {
         () => apiClient.post('/auth/login', body: any(named: 'body')),
       ).thenAnswer((_) async => {..._sessionJson()}..remove('recovery_code'));
 
+      container.listen(loginControllerProvider, (_, _) {});
       await container.read(authControllerProvider.future);
       await container
-          .read(authControllerProvider.notifier)
-          .login(identifier: 'ada@example.com', password: 'secret');
+          .read(loginControllerProvider.notifier)
+          .submit(identifier: 'ada@example.com', password: 'secret');
 
       expect(container.read(pendingRecoveryCodeProvider), isNull);
     });

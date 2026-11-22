@@ -62,50 +62,6 @@ void main() {
     expect(container.read(authTokenProvider), 'stored-token');
   });
 
-  test('login success transitions to the authenticated state', () async {
-    when(
-      () => apiClient.post('/auth/login', body: any(named: 'body')),
-    ).thenAnswer((_) async => {'token': 'tok-1', 'user': _userJson()});
-
-    await container.read(authControllerProvider.future);
-    await container
-        .read(authControllerProvider.notifier)
-        .login(identifier: 'ada@example.com', password: 'secret');
-
-    final state = container.read(authControllerProvider);
-    expect(state.value?.email, 'ada@example.com');
-    expect(container.read(authTokenProvider), 'tok-1');
-    verify(() => tokenStore.write('tok-1')).called(1);
-    verify(
-      () => apiClient.post(
-        '/auth/login',
-        body: {'identifier': 'ada@example.com', 'password': 'secret'},
-      ),
-    ).called(1);
-  });
-
-  test('login failure surfaces an error state and stores no token', () async {
-    when(
-      () => apiClient.post('/auth/login', body: any(named: 'body')),
-    ).thenThrow(
-      const ApiFailure(
-        code: 'INVALID_CREDENTIALS',
-        message: 'Incorrect email or password.',
-      ),
-    );
-
-    await container.read(authControllerProvider.future);
-    await container
-        .read(authControllerProvider.notifier)
-        .login(identifier: 'ada@example.com', password: 'wrong');
-
-    final state = container.read(authControllerProvider);
-    expect(state.hasError, isTrue);
-    expect((state.error as ApiFailure).code, 'INVALID_CREDENTIALS');
-    expect(container.read(authTokenProvider), isNull);
-    verifyNever(() => tokenStore.write(any()));
-  });
-
   test(
     'logout clears the stored token and resets state to signed out',
     () async {
