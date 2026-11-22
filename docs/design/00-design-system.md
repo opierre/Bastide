@@ -6,10 +6,10 @@ exist: add it here first, then to `frontend/lib/core/theme/tokens.dart`.
 - **Order of authority:** this file, then the panel spec (`02` to `18`), then the mockup.
   Where the mockup and a written spec disagree, the written spec wins. Known differences are
   listed in §15.
-- **Mockup:** `docs/design/proposal_v5/index.html`, opened in a browser. Each spec names its
-  screen as `#panel=<id>`. Every figure, name and date in the mockup is invented.
-  `docs/design/proposal_v6/index.html` repeats v5 and adds every modal (`#panel=m-frame` and
-  one page per feature) and the window controls (`#panel=window`).
+- **Mockup:** `docs/design/proposal_v6/index.html`, opened in a browser. Each spec names its
+  screen as `#panel=<id>`. Every figure, name and date in the mockup is invented. v6 repeats
+  `proposal_v5` and adds every modal (`#panel=m-frame` and one page per feature) and the
+  window controls (`#panel=window`).
 - **Reference frame:** 1440 × 900. French copy sizes every box; English uses the same geometry.
 - This file replaces `00-shared-design-block.md` (v1: iris gradient, navy ground, grain). The v1
   text is in the git history and no longer applies.
@@ -169,15 +169,19 @@ Mockup: any panel.
   the last contextual control; the bar then has no right padding, so Fermer meets the window
   corner. Each control is 46 × 48, no border, no radius, a 16 px Lucide icon in
   `textSecondary` (`minus`, `square`, `copy` for restore, `x`). Hover: `hover` ground, icon
-  `text`. Pressed: `line` ground. Fermer on hover: `negative` ground, icon `bg`; pressed:
-  `negative` at 85 % over `bg`. While the window is inactive the title and the icons take
+  `text`. Pressed: `lineStrong` ground. Fermer on hover: `negative` ground, icon `bg`; pressed:
+  `negative` at 85 % over `text` (lighter in dark, darker in light, as the primary's hover). While the window is inactive the title and the icons take
   `textTertiary`. Tooltips and accessible labels « Réduire », « Agrandir », « Restaurer »,
   « Fermer ».
 - **Drag area:** the empty stretch of the title bar and the sidebar's brand row. Double-click
   maximizes or restores. Controls, crumb and title do not drag.
 - **macOS:** the system's three window buttons, drawn by macOS, 16 px from the left edge in
   the sidebar's brand row; the brand row starts 14 px after them; no controls on the right.
-- **Auth screens** (no title bar): the three controls float in the top-right corner and the
+  The buttons do not drag; the rest of the brand row does. With the sidebar collapsed, the
+  buttons keep their place and overhang the title bar by 12 px; its 24 px padding leaves 12 px
+  before the crumb or title, and the rail hides the mark. On auth screens the buttons sit
+  top-left and the top 48 px band drags.
+- **Auth screens** (no title bar), Windows and Linux: the three controls float in the top-right corner and the
   top 48 px band drags the window.
 - **Content region:** padding 24 32, sections 24 apart. A panel marked "flush" has no padding
   and draws its own (tables and panes that run edge to edge).
@@ -286,7 +290,8 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
     a goal banner). Under it, as wide as the window, a « Zoom » slider (§6) between `zoom-out`
     and `zoom-in` icons, 1 to 5 ×, value printed (« 2,2 × »). Drag moves, wheel, pinch or the
     slider zooms; with the window focused, arrow keys move and + / − zoom. The avatar crop
-    draws the round avatar's circle and veils the corners.
+    draws the round avatar's circle and veils the corners with `scrim`. The circle sits on the photo,
+    not on the theme: 1 px white at 80 % with 1 px black at 30 % outside, in both themes.
   - Zoom: the picture alone, 240 × 240, radius 12, `shadow`, on `scrim`; any click or Escape
     closes it.
 - **States:** a refused field takes the field error of §6; a failed save shows a Banner with

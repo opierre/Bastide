@@ -27,7 +27,7 @@
 1. Read `00-design-system.md` first. A panel spec never restates a token or a component recipe;
    it names the component (« Summary line », « Table », « Inspector pane », « repère ») and says
    what goes in it.
-2. Open the mockup at `proposal_v5/index.html#panel=<id>&theme=dark` (or `light`). The mockup
+2. Open the mockup at `proposal_v6/index.html#panel=<id>&theme=dark` (or `light`). The mockup
    shows one state; the spec lists all of them.
 3. **Structure is binding, sample data is not.** Names, amounts and dates in the mockup and in
    the specs are invented examples (persona Camille Dubois, May 2026, EUR). Never copy real
