@@ -6,10 +6,14 @@ import '../../../core/widgets/app_checkbox.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/inline_banner.dart';
+import '../../../core/widgets/category_label.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../categories/domain/category.dart';
+import '../../categories/presentation/category_color.dart';
 import '../../rules/application/rule_preview_controller.dart';
 import '../../rules/application/rules_controller.dart';
 import '../../rules/domain/rule.dart';
@@ -36,9 +40,10 @@ Future<RuleFromTransactionResult?> showAlwaysCategorizeModal(
 }
 
 /// The 520 px rule form the review queue's learning step opens
-/// (`docs/design/07` frame ⑧): champ/condition/motif pre-filled from the
-/// server's suggestion, the target category, « Appliquer aux transactions
-/// existantes », and the live match count.
+/// (`proposal_v6` `m-transactions`, `docs/design/07` §Rule modal): the lead,
+/// Champ · Condition side by side, Motif pre-filled from the server's
+/// suggestion, the target category, « Appliquer aux opérations existantes »,
+/// the live match count, and « Annuler » · ink « Créer la règle ».
 ///
 /// Deliberately the same widgets as the rules panel's editor — the selects,
 /// the labels, and [RuleMatchPreviewBanner] — rather than a second form. Two
@@ -60,6 +65,11 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
   final _formKey = GlobalKey<FormState>();
   final _patternController = TextEditingController();
 
+  /// Motif takes the focus (`docs/design/07` §Rule modal) once the form
+  /// replaces the loading silhouette.
+  final _patternFocus = FocusNode(debugLabel: 'alwaysRulePattern');
+  bool _formShown = false;
+
   RuleMatchField _matchField = RuleMatchField.descriptionClean;
   RuleMatchType _matchType = RuleMatchType.contains;
   late String? _categoryId = widget.transaction.category?.id;
@@ -71,11 +81,17 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
 
   bool _isSubmitting = false;
   bool _prefilled = false;
-  String? _errorText;
+
+  /// The user has changed something since the pre-fill: Escape then asks
+  /// before dropping the rule.
+  bool _dirty = false;
+  bool _categoryMissing = false;
+  String? _saveError;
 
   @override
   void dispose() {
     _patternController.dispose();
+    _patternFocus.dispose();
     super.dispose();
   }
 
@@ -90,6 +106,10 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _requestPreview());
   }
 
+  void _touch() {
+    if (!_dirty) setState(() => _dirty = true);
+  }
+
   void _requestPreview() {
     if (!mounted) return;
     ref
@@ -102,17 +122,16 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
   }
 
   Future<void> _submit() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    final l10n = AppLocalizations.of(context)!;
+    if (_isSubmitting) return;
+    final patternValid = _formKey.currentState?.validate() ?? false;
     final categoryId = _categoryId;
-    if (categoryId == null) {
-      setState(() => _errorText = l10n.ruleFormCategoryRequired);
-      return;
-    }
+    setState(() => _categoryMissing = categoryId == null);
+    if (!patternValid || categoryId == null) return;
+    final l10n = AppLocalizations.of(context)!;
 
     setState(() {
       _isSubmitting = true;
-      _errorText = null;
+      _saveError = null;
     });
 
     try {
@@ -130,9 +149,10 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
       Navigator.of(context).pop(result);
     } catch (error) {
       if (!mounted) return;
+      // The input stays as it was; the frame shows the banner.
       setState(() {
         _isSubmitting = false;
-        _errorText = localizeRuleError(l10n, error);
+        _saveError = localizeRuleError(l10n, error);
       });
     }
   }
@@ -144,26 +164,26 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
         ref.watch(transactionCategoriesProvider).value ?? const <AppCategory>[];
     final suggestion = ref.watch(ruleSuggestionProvider(widget.transaction.id));
     final previewState = ref.watch(rulePreviewControllerProvider);
-    final patternRejected = isRulePatternInvalid(previewState.error);
 
     suggestion.whenData(_prefill);
+    if (!suggestion.isLoading && !_formShown) {
+      _formShown = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _patternFocus.requestFocus();
+      });
+    }
 
     return AppModal(
+      key: const Key('alwaysRuleModal'),
       title: l10n.reviewAlwaysCategorize,
-      subtitle: Text(
-        l10n.alwaysRuleLead,
-        key: const Key('alwaysRuleLead'),
-        style: Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(color: context.colors.textSecondary),
-      ),
-      width: AppTransactions.ruleModalWidth,
+      subtitle: Text(l10n.alwaysRuleLead, key: const Key('alwaysRuleLead')),
+      width: AppModalSizes.w520,
+      dirty: _dirty,
+      busy: _isSubmitting,
+      saveError: _saveError,
+      onSubmit: _submit,
       actions: [
-        AppButton(
-          key: const Key('alwaysRuleCancel'),
-          label: l10n.ruleFormCancel,
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(key: Key('alwaysRuleCancel')),
         PrimaryButton(
           key: const Key('alwaysRuleSubmit'),
           label: l10n.alwaysRuleSubmit,
@@ -171,123 +191,180 @@ class _AlwaysCategorizeModalState extends ConsumerState<AlwaysCategorizeModal> {
           onPressed: _isSubmitting ? null : _submit,
         ),
       ],
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_errorText != null) ...[
-              InlineBanner(
-                key: const Key('alwaysRuleError'),
-                message: _errorText!,
-              ),
-              const SizedBox(height: AppSpacing.fieldGap),
-            ],
-            // A pre-fill that didn't arrive is not a broken form: every field
-            // it would have filled is editable, so the modal says so and stays
-            // open.
-            if (suggestion.hasError) ...[
-              InlineBanner(
-                key: const Key('alwaysRuleSuggestionFailed'),
-                tone: BannerTone.warning,
-                message: l10n.alwaysRuleSuggestionFailed,
-              ),
-              const SizedBox(height: AppSpacing.fieldGap),
-            ],
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      // The pre-fill is the body's content: while it loads the body is its
+      // silhouette (`00` §7 « Modal », States), so nothing typed is
+      // overwritten when the suggestion lands.
+      child: suggestion.isLoading
+          ? const ModalLoadingBody(
               children: [
-                Expanded(
-                  child: LabeledField(
-                    label: l10n.ruleFormFieldLabel,
-                    child: AppSelect<RuleMatchField>(
-                      key: const Key('alwaysRuleField'),
-                      value: _matchField,
-                      onChanged: (value) {
-                        setState(() => _matchField = value);
-                        _requestPreview();
-                      },
-                      items: [
-                        for (final field in RuleMatchField.values)
-                          AppSelectItem(
-                            value: field,
-                            label: ruleFieldLabel(l10n, field),
-                          ),
-                      ],
-                    ),
-                  ),
+                Row(
+                  children: [
+                    Expanded(child: SkeletonBlock(height: AppSizes.formField)),
+                    SizedBox(width: AppModalSizes.columnGutter),
+                    Expanded(child: SkeletonBlock(height: AppSizes.formField)),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.smPlus),
-                Expanded(
-                  child: LabeledField(
-                    label: l10n.ruleFormConditionLabel,
-                    child: AppSelect<RuleMatchType>(
-                      key: const Key('alwaysRuleCondition'),
-                      value: _matchType,
-                      onChanged: (value) {
-                        setState(() => _matchType = value);
-                        _requestPreview();
-                      },
-                      items: [
-                        for (final type in RuleMatchType.values)
-                          AppSelectItem(
-                            value: type,
-                            label: ruleConditionLabel(l10n, type),
-                          ),
-                      ],
-                    ),
-                  ),
+                SkeletonBlock(height: AppSizes.formField),
+                SkeletonBlock(height: AppSizes.formField),
+                FractionallySizedBox(
+                  alignment: AlignmentDirectional.centerStart,
+                  widthFactor: 0.55,
+                  child: SkeletonBlock(height: AppSpacing.smPlus),
                 ),
               ],
+            )
+          : _form(l10n, categories, previewState, suggestion.hasError),
+    );
+  }
+
+  Widget _form(
+    AppLocalizations l10n,
+    List<AppCategory> categories,
+    RulePreviewState previewState,
+    bool suggestionFailed,
+  ) {
+    final patternRejected = isRulePatternInvalid(previewState.error);
+    const gap = SizedBox(height: AppSpacing.fieldGap);
+
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // A pre-fill that didn't arrive is not a broken form: every field
+          // it would have filled is editable, so the modal says so and stays
+          // open.
+          if (suggestionFailed) ...[
+            InlineBanner(
+              key: const Key('alwaysRuleSuggestionFailed'),
+              tone: BannerTone.warning,
+              message: l10n.alwaysRuleSuggestionFailed,
             ),
-            const SizedBox(height: AppSpacing.fieldGap),
-            LabeledField(
-              label: l10n.ruleFormPatternLabel,
-              helper: rulePatternHelper(l10n, _matchType),
-              errorText: patternRejected ? l10n.ruleErrorPatternInvalid : null,
-              child: TextFormField(
-                key: const Key('alwaysRulePattern'),
-                controller: _patternController,
-                autofocus: true,
-                style: context.textStyles.mono.copyWith(
-                  color: context.colors.text,
-                ),
-                decoration: InputDecoration(
-                  hintText: rulePatternHint(l10n, _matchType),
-                ),
-                onChanged: (_) => _requestPreview(),
-                validator: (value) => (value == null || value.trim().isEmpty)
-                    ? l10n.ruleFormPatternRequired
-                    : null,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.fieldGap),
-            LabeledField(
-              label: l10n.alwaysRuleCategoryLabel,
-              child: AppSelect<String?>(
-                key: const Key('alwaysRuleCategory'),
-                value: _categoryId,
-                onChanged: (value) => setState(() => _categoryId = value),
+            gap,
+          ],
+          ModalFieldRow(
+            start: ModalFieldCell(
+              label: l10n.ruleFormFieldLabel,
+              input: AppSelect<RuleMatchField>(
+                key: const Key('alwaysRuleField'),
+                value: _matchField,
+                onChanged: (value) {
+                  setState(() {
+                    _matchField = value;
+                    _dirty = true;
+                  });
+                  _requestPreview();
+                },
                 items: [
-                  AppSelectItem(value: null, label: l10n.ruleFormCategoryNone),
-                  for (final category in categories)
+                  for (final field in RuleMatchField.values)
                     AppSelectItem(
-                      value: category.id,
-                      label: categoryPath(l10n, category, categories),
+                      value: field,
+                      label: ruleFieldLabel(l10n, field),
                     ),
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.fieldGap),
-            _ApplyNowCheckbox(
-              value: _applyNow,
-              label: l10n.alwaysRuleApplyExisting,
-              onChanged: (value) => setState(() => _applyNow = value),
+            end: ModalFieldCell(
+              label: l10n.ruleFormConditionLabel,
+              input: AppSelect<RuleMatchType>(
+                key: const Key('alwaysRuleCondition'),
+                value: _matchType,
+                onChanged: (value) {
+                  setState(() {
+                    _matchType = value;
+                    _dirty = true;
+                  });
+                  _requestPreview();
+                },
+                items: [
+                  for (final type in RuleMatchType.values)
+                    AppSelectItem(
+                      value: type,
+                      label: ruleConditionLabel(l10n, type),
+                    ),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.fieldGap),
-            RuleMatchPreviewBanner(state: previewState),
-          ],
-        ),
+          ),
+          gap,
+          LabeledField(
+            label: l10n.ruleFormPatternLabel,
+            helper: rulePatternHelper(l10n, _matchType),
+            errorText: patternRejected ? l10n.ruleErrorPatternInvalid : null,
+            child: TextFormField(
+              key: const Key('alwaysRulePattern'),
+              controller: _patternController,
+              focusNode: _patternFocus,
+              style: context.textStyles.mono.copyWith(
+                color: context.colors.text,
+              ),
+              decoration: InputDecoration(
+                hintText: rulePatternHint(l10n, _matchType),
+              ),
+              onChanged: (_) {
+                _touch();
+                _requestPreview();
+              },
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? l10n.ruleFormPatternRequired
+                  : null,
+            ),
+          ),
+          gap,
+          LabeledField(
+            label: l10n.alwaysRuleCategoryLabel,
+            errorText: _categoryMissing ? l10n.ruleFormCategoryRequired : null,
+            child: AppSelect<String?>(
+              key: const Key('alwaysRuleCategory'),
+              value: _categoryId,
+              onChanged: (value) => setState(() {
+                _categoryId = value;
+                _dirty = true;
+                if (value != null) _categoryMissing = false;
+              }),
+              items: [
+                AppSelectItem(value: null, label: l10n.ruleFormCategoryNone),
+                for (final category in categories)
+                  AppSelectItem(
+                    value: category.id,
+                    label: categoryPath(l10n, category, categories),
+                    leading: _CategoryDot(category: category),
+                  ),
+              ],
+            ),
+          ),
+          gap,
+          _ApplyNowCheckbox(
+            value: _applyNow,
+            label: l10n.alwaysRuleApplyExisting,
+            onChanged: (value) => setState(() {
+              _applyNow = value;
+              _dirty = true;
+            }),
+          ),
+          gap,
+          RuleMatchPreviewBanner(state: previewState),
+        ],
+      ),
+    );
+  }
+}
+
+/// The category label's 8 px dot (`00` §7) in front of each category of the
+/// select, so the closed field reads as the label the mockup draws.
+class _CategoryDot extends StatelessWidget {
+  const _CategoryDot({required this.category});
+
+  final AppCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: CategoryLabel.dotSize,
+      height: CategoryLabel.dotSize,
+      decoration: BoxDecoration(
+        color: context.categoryColors.forSlot(categorySlot(category)),
+        borderRadius: BorderRadius.circular(AppRadii.bar),
       ),
     );
   }

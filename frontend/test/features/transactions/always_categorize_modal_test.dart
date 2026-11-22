@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/features/rules/application/rule_preview_controller.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
 import 'package:bastide/features/transactions/domain/transaction.dart';
 import 'package:bastide/features/transactions/presentation/always_categorize_modal.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -245,7 +249,12 @@ void main() {
     await tester.tap(find.byKey(const Key('alwaysRuleSubmit')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('alwaysRuleError')), findsOneWidget);
+    // A field error under « Catégorie cible », not a banner.
+    expect(
+      find.text('Choisissez la catégorie que cette règle attribue.'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('appModalSaveError')), findsNothing);
     verifyNever(
       () => apiClient.post('/rules/from-transaction', body: any(named: 'body')),
     );
@@ -265,6 +274,128 @@ void main() {
     expect(find.byKey(const Key('alwaysRuleSuggestionFailed')), findsOneWidget);
     expect(find.byKey(const Key('alwaysRulePattern')), findsOneWidget);
     expect(find.byKey(const Key('alwaysRuleSubmit')), findsOneWidget);
+  });
+
+  testWidgets(
+    'sits on the 520 px frame with « Annuler » · « Créer la règle »',
+    (tester) async {
+      useDesktopSurface(tester);
+      await tester.pumpWidget(wrap());
+      await settlePreview(tester);
+
+      expect(
+        tester.getSize(find.byKey(const Key('appModalFrame'))).width,
+        AppModalSizes.w520,
+      );
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.byType(Dialog), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('alwaysRuleCancel')),
+          matching: find.text('Annuler'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Créer la règle'), findsOneWidget);
+    },
+  );
+
+  testWidgets('Champ and Condition share one row, aligned by their input', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+    await tester.pumpWidget(wrap());
+    await settlePreview(tester);
+
+    final field = tester.getRect(find.byKey(const Key('alwaysRuleField')));
+    final condition = tester.getRect(
+      find.byKey(const Key('alwaysRuleCondition')),
+    );
+    expect(field.top, condition.top);
+    expect(field.right, lessThan(condition.left));
+  });
+
+  testWidgets('Motif takes the focus once the pre-fill lands', (tester) async {
+    useDesktopSurface(tester);
+    await tester.pumpWidget(wrap());
+    await settlePreview(tester);
+
+    final editable = tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(const Key('alwaysRulePattern')),
+        matching: find.byType(EditableText),
+      ),
+    );
+    expect(editable.focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('the body is a silhouette while the suggestion loads', (
+    tester,
+  ) async {
+    final pending = Completer<Map<String, dynamic>>();
+    when(
+      () => apiClient.get('/rules/suggestion', query: any(named: 'query')),
+    ).thenAnswer((_) => pending.future);
+
+    useDesktopSurface(tester);
+    await tester.pumpWidget(wrap());
+    await tester.pump();
+
+    expect(find.byKey(const Key('modalLoadingBody')), findsOneWidget);
+    expect(find.byKey(const Key('alwaysRulePattern')), findsNothing);
+
+    pending.complete({
+      'match_field': 'description_clean',
+      'match_type': 'contains',
+      'pattern': 'ASSUR MAIF',
+    });
+    await settlePreview(tester);
+
+    expect(find.byKey(const Key('modalLoadingBody')), findsNothing);
+    expect(find.byKey(const Key('alwaysRulePattern')), findsOneWidget);
+  });
+
+  testWidgets('a failed save shows the frame banner and keeps the input', (
+    tester,
+  ) async {
+    when(
+      () => apiClient.post('/rules/from-transaction', body: any(named: 'body')),
+    ).thenThrow(const ApiFailure(code: 'NETWORK_ERROR', message: 'down'));
+
+    useDesktopSurface(tester);
+    await tester.pumpWidget(wrap());
+    await settlePreview(tester);
+
+    await tester.tap(find.byKey(const Key('alwaysRuleCategory')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Logement › Assurance habitation').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('alwaysRuleSubmit')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('appModalSaveError')), findsOneWidget);
+    expect(
+      tester
+          .widget<TextFormField>(find.byKey(const Key('alwaysRulePattern')))
+          .controller
+          ?.text,
+      'ASSUR MAIF',
+    );
+  });
+
+  testWidgets('Escape on an edited rule asks before dropping it', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+    await tester.pumpWidget(wrap());
+    await settlePreview(tester);
+
+    await tester.enterText(find.byKey(const Key('alwaysRulePattern')), 'ASSUR');
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('appModalDiscard')), findsOneWidget);
   });
 
   testWidgets('renders under en with no leftover French', (tester) async {

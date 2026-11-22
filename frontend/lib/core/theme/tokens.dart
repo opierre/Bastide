@@ -771,10 +771,6 @@ abstract final class AppTransactions {
   static const pickerWidth = 230.0;
   static const pickerListHeight = 280.0;
 
-  /// The period modal and the rule modal.
-  static const periodModalWidth = 420.0;
-  static const ruleModalWidth = 520.0;
-
   /// The review tab: the progress block of its first row, the Note beside
   /// it, and the table's columns (date, proposal, actions, amount).
   static const progressWidth = 260.0;
