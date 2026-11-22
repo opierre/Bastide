@@ -850,7 +850,9 @@ def test_inspect_of_an_archive_without_the_latest_import(
     assert response.json()["last_import_at"] is None
 
 
-def test_current_summarises_the_live_data(client: TestClient, tmp_path: Path) -> None:
+def test_database_summary_is_the_restores_current_column(
+    client: TestClient, tmp_path: Path
+) -> None:
     headers = _register(client, "amelie@example.com")
     _register(client, "bruno@example.com")
     with _session(tmp_path) as db:
@@ -860,7 +862,7 @@ def test_current_summarises_the_live_data(client: TestClient, tmp_path: Path) ->
         # Another user's later import is not the caller's.
         _seed(db, "bruno@example.com")
 
-    response = client.get("/api/v1/backup/current", headers=headers)
+    response = client.get("/api/v1/database/summary", headers=headers)
 
     assert response.status_code == 200
     body = response.json()
@@ -877,14 +879,10 @@ def test_current_summarises_the_live_data(client: TestClient, tmp_path: Path) ->
     assert body["counts"]["accounts"] == 1
 
 
-def test_current_of_an_empty_profile(client: TestClient) -> None:
+def test_database_summary_of_an_empty_profile_has_no_import(client: TestClient) -> None:
     headers = _register(client, "amelie@example.com")
 
-    body = client.get("/api/v1/backup/current", headers=headers).json()
+    body = client.get("/api/v1/database/summary", headers=headers).json()
 
     assert body["last_import_at"] is None
     assert set(body["counts"].values()) == {0}
-
-
-def test_current_requires_auth(client: TestClient) -> None:
-    assert client.get("/api/v1/backup/current").status_code == 401

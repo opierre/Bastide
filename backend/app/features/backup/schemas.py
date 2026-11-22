@@ -31,12 +31,3 @@ class BackupSummary(BaseModel):
     #: for an archive written before the manifest carried it.
     last_import_at: datetime | None = None
     counts: BackupCounts
-
-
-class CurrentDataSummary(BaseModel):
-    """The caller's data as it stands, in the terms of `BackupSummary`: the « Actuel » column
-    the restore confirmation sets beside the archive's."""
-
-    app_version: str
-    last_import_at: datetime | None
-    counts: BackupCounts

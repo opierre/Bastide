@@ -17,6 +17,7 @@ from app.core.user_data import (
     ColumnSpec,
     describe,
     encode,
+    latest_import,
     owned_by,
     table,
 )
@@ -49,21 +50,8 @@ class BackupRepository:
         for row in self._db.execute(query).mappings():
             yield {key: encode(value) for key, value in row.items()}
 
-    def count_rows(self, name: str, user_id: str) -> int:
-        """How many rows of one table the user owns."""
-        count = self._db.scalar(
-            select(func.count()).select_from(table(name)).where(owned_by(name, user_id))
-        )
-        return count or 0
-
     def latest_import_at(self, user_id: str) -> datetime | None:
-        """When the user's newest import ran; a failed one brought no data and does not count."""
-        batches = table("import_batches")
-        return self._db.scalar(
-            select(func.max(batches.c.imported_at)).where(
-                owned_by("import_batches", user_id), batches.c.status != "failed"
-            )
-        )
+        return self._db.scalar(latest_import(user_id))
 
     def system_category_ids(self) -> set[str]:
         categories = table("categories")
