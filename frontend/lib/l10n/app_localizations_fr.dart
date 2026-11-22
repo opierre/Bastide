@@ -2081,6 +2081,40 @@ class AppLocalizationsFr extends AppLocalizations {
       'Enregistrez la règle pour lui ajouter un logo.';
 
   @override
+  String get modalCancel => 'Annuler';
+
+  @override
+  String get modalClose => 'Fermer';
+
+  @override
+  String get modalRetry => 'Réessayer';
+
+  @override
+  String get modalDiscardTitle => 'Abandonner les modifications ?';
+
+  @override
+  String modalDiscardLead(String form) {
+    return 'Ce que vous avez saisi dans « $form » sera perdu.';
+  }
+
+  @override
+  String get modalDiscardContinue => 'Continuer la saisie';
+
+  @override
+  String get modalDiscardConfirm => 'Abandonner';
+
+  @override
+  String get modalCropWindow => 'Cadrage';
+
+  @override
+  String get modalCropZoom => 'Zoom';
+
+  @override
+  String modalCropZoomValue(String value) {
+    return '$value ×';
+  }
+
+  @override
   String get logoZoomOpen => 'Afficher le logo en grand';
 
   @override

@@ -2070,6 +2070,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ruleFormLogoSaveFirst => 'Save the rule to add a logo to it.';
 
   @override
+  String get modalCancel => 'Cancel';
+
+  @override
+  String get modalClose => 'Close';
+
+  @override
+  String get modalRetry => 'Retry';
+
+  @override
+  String get modalDiscardTitle => 'Discard your changes?';
+
+  @override
+  String modalDiscardLead(String form) {
+    return 'What you entered in “$form” will be lost.';
+  }
+
+  @override
+  String get modalDiscardContinue => 'Keep editing';
+
+  @override
+  String get modalDiscardConfirm => 'Discard';
+
+  @override
+  String get modalCropWindow => 'Framing';
+
+  @override
+  String get modalCropZoom => 'Zoom';
+
+  @override
+  String modalCropZoomValue(String value) {
+    return '$value ×';
+  }
+
+  @override
   String get logoZoomOpen => 'Show the logo larger';
 
   @override
