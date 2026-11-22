@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/session/current_user_provider.dart';
 import '../../../core/theme/app_theme.dart';
@@ -8,9 +9,9 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/app_select.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/note_line.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/accounts_controller.dart';
@@ -45,7 +46,7 @@ Future<Account?> showAccountForm(
       created != null &&
       created.type == AccountType.deferredCard &&
       context.mounted) {
-    await showSettlementRuleDialog(context, created);
+    await showSettlementRuleDialog(context, created, proposed: true);
   }
   return created;
 }
@@ -113,6 +114,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   bool _isSubmitting = false;
   String? _errorText;
 
+  /// The user has changed something: the scrim no longer closes the form,
+  /// and « Annuler » asks before dropping it (`00` §7 « Modal », Closing).
+  bool _dirty = false;
+
   bool get _isEditing => widget.initial != null;
 
   /// The statement declared a closing balance, so the balance field states it
@@ -167,6 +172,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       proposedSettlementAccountId(candidates, institution: _institution);
 
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     final l10n = AppLocalizations.of(context)!;
     final isCard = _type == AccountType.deferredCard;
     final settlementAccountId = isCard
@@ -268,18 +274,50 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     final balanceAsOf = _balanceFromStatement
         ? widget.prefill?.balanceAsOf
         : null;
+    final isCard = _type == AccountType.deferredCard;
+    const gap = SizedBox(height: AppSpacing.fieldGap);
+
+    // « Débit de la carte »: how a card is debited. A card statement can't
+    // say, so on creation from one it stands in place of the type list;
+    // otherwise the type « Carte à débit différé » adds it under the
+    // institution (proposal v6, `m-accounts`).
+    final cardDebit = LabeledField(
+      label: l10n.accountCardDebitLabel,
+      helper: l10n.accountCardDebitHelper,
+      child: AppSegmented<AccountType>(
+        key: const Key('accountCardDebitField'),
+        value: _type,
+        segments: [
+          AppSegment(
+            key: const Key('accountCardDebitDeferred'),
+            value: AccountType.deferredCard,
+            label: l10n.accountCardDebitDeferred,
+          ),
+          AppSegment(
+            key: const Key('accountCardDebitCredit'),
+            value: AccountType.credit,
+            label: l10n.accountCardDebitCredit,
+          ),
+        ],
+        onChanged: (value) => setState(() {
+          _type = value;
+          _dirty = true;
+        }),
+      ),
+    );
 
     return AppModal(
-      width: 480,
+      key: const Key('accountFormModal'),
+      width: AppModalSizes.w480,
       title: _isEditing
           ? l10n.accountFormEditTitle
           : l10n.accountFormCreateTitle,
+      dirty: _dirty,
+      busy: _isSubmitting,
+      saveError: _errorText,
+      onSubmit: _submit,
       actions: [
-        AppButton(
-          key: const Key('accountFormCancelButton'),
-          label: l10n.accountFormCancel,
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(key: Key('accountFormCancelButton')),
         PrimaryButton(
           key: const Key('accountFormSubmitButton'),
           label: l10n.accountFormSubmitEdit,
@@ -289,17 +327,22 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       ],
       child: Form(
         key: _formKey,
+        // Typed input makes the form dirty: the scrim no longer closes it.
+        onChanged: () {
+          if (!_dirty) setState(() => _dirty = true);
+        },
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Something to know, not to act on: a note, not a banner.
             if (!_isEditing && widget.prefill != null) ...[
-              InlineBanner(
+              NoteLine(
                 key: const Key('accountFormPrefillNote'),
-                message: l10n.accountFormPrefilledNote,
-                tone: BannerTone.info,
+                text: l10n.accountFormPrefilledNote,
+                icon: LucideIcons300.fileText,
               ),
-              const SizedBox(height: AppSpacing.fieldGap),
+              gap,
             ],
             LabeledField(
               label: l10n.accountNameLabel,
@@ -311,29 +354,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                     : null,
               ),
             ),
-            const SizedBox(height: AppSpacing.fieldGap),
+            gap,
             if (_asksCardDebit)
-              LabeledField(
-                label: l10n.accountCardDebitLabel,
-                helper: l10n.accountCardDebitHelper,
-                child: AppSegmented<AccountType>(
-                  key: const Key('accountCardDebitField'),
-                  value: _type,
-                  segments: [
-                    AppSegment(
-                      key: const Key('accountCardDebitDeferred'),
-                      value: AccountType.deferredCard,
-                      label: l10n.accountCardDebitDeferred,
-                    ),
-                    AppSegment(
-                      key: const Key('accountCardDebitCredit'),
-                      value: AccountType.credit,
-                      label: l10n.accountCardDebitCredit,
-                    ),
-                  ],
-                  onChanged: (value) => setState(() => _type = value),
-                ),
-              )
+              cardDebit
             else
               LabeledField(
                 label: l10n.accountTypeLabel,
@@ -347,26 +370,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                         label: accountTypeLabel(l10n, type),
                       ),
                   ],
-                  onChanged: (value) => setState(() => _type = value),
+                  onChanged: (value) => setState(() {
+                    _type = value;
+                    _dirty = true;
+                  }),
                 ),
               ),
-            if (_type == AccountType.deferredCard) ...[
-              const SizedBox(height: AppSpacing.fieldGap),
-              _SettlementAccountField(
-                candidates: settlementCandidates(
-                  ref.watch(accountsControllerProvider).value ?? const [],
-                  cardId: widget.initial?.id,
-                  currentId: widget.initial?.settlementAccountId,
-                ),
-                selectedFor: _settlementAccountIdFor,
-                errorText: _settlementError,
-                onChanged: (id) => setState(() {
-                  _settlementAccountId = id;
-                  _settlementError = null;
-                }),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.fieldGap),
+            gap,
             LabeledField(
               label: l10n.accountInstitutionLabel,
               helper: _institutionFromStatement
@@ -411,24 +421,35 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                           : null,
                     ),
             ),
-            const SizedBox(height: AppSpacing.fieldGap),
+            if (isCard && !_asksCardDebit) ...[gap, cardDebit],
+            if (isCard) ...[
+              gap,
+              _SettlementAccountField(
+                candidates: settlementCandidates(
+                  ref.watch(accountsControllerProvider).value ?? const [],
+                  cardId: widget.initial?.id,
+                  currentId: widget.initial?.settlementAccountId,
+                ),
+                selectedFor: _settlementAccountIdFor,
+                errorText: _settlementError,
+                onChanged: (id) => setState(() {
+                  _settlementAccountId = id;
+                  _settlementError = null;
+                  _dirty = true;
+                }),
+              ),
+            ],
+            gap,
             LabeledField(
-              // The same stored figure, named for what it means at each end of
-              // the account's life: on creation there is no history behind it,
-              // so what the user types is the balance the account holds today —
-              // which is also what a statement's account block reports. Once
-              // transactions land on top, it is only where the account started.
-              //
-              // A statement that dates its balance gets that date in the label:
-              // the file's closing balance was current on the day it was cut,
-              // and calling a three-week-old figure "solde actuel" invites the
-              // user to correct it to today's — which is exactly the number the
-              // first import must not be given.
-              label: _isEditing
-                  ? l10n.accountOpeningBalanceLabel
-                  : balanceAsOf != null
+              // « Solde initial » (`05-accounts.md`, proposal v6): the figure
+              // the account starts from. A statement that dates its balance
+              // gets that date in the label instead: the file's closing
+              // balance was current on the day it was cut, and naming the day
+              // stops the user "correcting" it to today's figure, which is
+              // exactly the number the first import must not be given.
+              label: balanceAsOf != null
                   ? l10n.accountBalanceAsOfLabel(balanceAsOf)
-                  : l10n.accountCurrentBalanceLabel,
+                  : l10n.accountOpeningBalanceLabel,
               // On create from a statement that declares its balance, the figure
               // is the statement's and is shown as settled — the note says where
               // it came from. A statement without one leaves the field empty and
@@ -444,12 +465,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   : widget.prefill != null
                   ? l10n.accountBalanceStatementNote
                   : null,
-              // The currency rides at the end of the amount rather than in a
-              // field of its own: it is a unit, not a value the form is asking
-              // for, and a whole labelled row — dashed plate, lock glyph and all
-              // — spent on three unchangeable letters read as a question the
-              // user had to answer. Here it simply says what the figure beside
-              // it is denominated in, which is the only thing it ever meant.
+              // The currency rides at the end of the amount, as a unit rather
+              // than a value the form is asking for.
               child: _balanceFromStatement
                   ? ReadOnlyField(
                       key: const Key('accountOpeningBalanceField'),
@@ -463,6 +480,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                         decimal: true,
                         signed: true,
                       ),
+                      // Amounts are right-aligned in a form (`00` §6).
+                      textAlign: TextAlign.end,
                       // A form value is a neutral figure, not a movement, so it
                       // keeps the primary text color rather than a sign color.
                       style: tabularNumberStyle(
@@ -476,7 +495,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                           _validateOpeningBalance(value, l10n),
                     ),
             ),
-            const SizedBox(height: AppSpacing.fieldGap),
+            gap,
             // One currency per user (see the multi-currency skill): shown, never
             // asked for.
             LabeledField(
@@ -487,13 +506,6 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 value: l10n.accountCurrencyValue(currency),
               ),
             ),
-            if (_errorText != null) ...[
-              const SizedBox(height: AppSpacing.fieldGap),
-              InlineBanner(
-                key: const Key('accountFormErrorText'),
-                message: _errorText!,
-              ),
-            ],
           ],
         ),
       ),

@@ -5,7 +5,6 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/app_toast.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -33,9 +32,10 @@ Future<bool> showLinkCardDialog(BuildContext context, Account account) async {
   return true;
 }
 
-/// Picks the deferred card to settle on [account]. Only cards with no
-/// settlement account are offered; linking goes through the same account
-/// update the card's own form uses.
+/// « Lier une carte » (`05-accounts.md`, proposal v6 `m-accounts`): picks the
+/// deferred card to settle on [account]. Only cards with no settlement
+/// account are offered; linking goes through the same account update the
+/// card's own form uses.
 class LinkCardDialog extends ConsumerStatefulWidget {
   const LinkCardDialog({super.key, required this.account});
 
@@ -53,7 +53,7 @@ class _LinkCardDialogState extends ConsumerState<LinkCardDialog> {
   Future<void> _link(List<Account> cards) async {
     final l10n = AppLocalizations.of(context)!;
     final card = cards.where((card) => card.id == _cardId).firstOrNull;
-    if (card == null) return;
+    if (card == null || _isSaving) return;
     setState(() {
       _isSaving = true;
       _errorText = null;
@@ -77,61 +77,48 @@ class _LinkCardDialogState extends ConsumerState<LinkCardDialog> {
     final cards = ref.watch(linkableCardsProvider);
     // A card linked meanwhile (from its own form) drops out of the choice.
     final selected = cards.any((card) => card.id == _cardId) ? _cardId : null;
+    final link = selected == null || _isSaving ? null : () => _link(cards);
 
     return AppModal(
-      width: 480,
+      key: const Key('linkCardModal'),
+      width: AppModalSizes.w480,
       title: l10n.linkCardTitle,
+      // The introductory sentence is the header's lead (`00` §7, Body).
+      subtitle: Text(l10n.linkCardBody(widget.account.name)),
+      // A chosen card is unsaved input: the scrim no longer drops it.
+      dirty: selected != null,
+      busy: _isSaving,
+      saveError: _errorText,
+      onSubmit: link,
       actions: [
-        TextButton(
+        AppModalCancel(
           key: const Key('linkCardCancelButton'),
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.linkCardCancel),
+          label: l10n.linkCardCancel,
         ),
         PrimaryButton(
           key: const Key('linkCardConfirmButton'),
           label: l10n.linkCardConfirm,
           isLoading: _isSaving,
-          onPressed: selected == null ? null : () => _link(cards),
+          onPressed: link,
         ),
       ],
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            l10n.linkCardBody(widget.account.name),
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          LabeledField(
-            label: l10n.linkCardLabel,
-            child: AppSelect<String?>(
-              key: const Key('linkCardField'),
-              value: selected,
-              items: [
-                if (selected == null)
-                  AppSelectItem(value: null, label: l10n.linkCardPlaceholder),
-                for (final card in cards)
-                  AppSelectItem(
-                    value: card.id,
-                    label: '${card.name} · ${card.institution}',
-                    leading: InstitutionAvatar(
-                      name: card.institution,
-                      size: 20,
-                    ),
-                  ),
-              ],
-              onChanged: (id) => setState(() => _cardId = id),
-            ),
-          ),
-          if (_errorText != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            InlineBanner(
-              key: const Key('linkCardErrorText'),
-              message: _errorText!,
-            ),
+      child: LabeledField(
+        label: l10n.linkCardLabel,
+        child: AppSelect<String?>(
+          key: const Key('linkCardField'),
+          value: selected,
+          items: [
+            if (selected == null)
+              AppSelectItem(value: null, label: l10n.linkCardPlaceholder),
+            for (final card in cards)
+              AppSelectItem(
+                value: card.id,
+                label: '${card.name} · ${card.institution}',
+                leading: InstitutionAvatar(name: card.institution, size: 20),
+              ),
           ],
-        ],
+          onChanged: (id) => setState(() => _cardId = id),
+        ),
       ),
     );
   }

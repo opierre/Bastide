@@ -763,9 +763,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settlementRuleSaveFailed => 'Couldn’t save the rule. Try again.';
 
   @override
-  String get accountFormCancel => 'Cancel';
-
-  @override
   String get accountArchiveConfirmTitle => 'Archive this account?';
 
   @override
@@ -854,9 +851,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountOpeningBalanceLabel => 'Opening balance';
-
-  @override
-  String get accountCurrentBalanceLabel => 'Current balance';
 
   @override
   String accountBalanceAsOfLabel(DateTime date) {

@@ -10,6 +10,7 @@ import 'package:bastide/features/accounts/domain/account_overview.dart';
 import 'package:bastide/features/accounts/domain/settlement_rule.dart';
 import 'package:bastide/features/accounts/presentation/account_detail_screen.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
+import 'package:bastide/core/widgets/app_modal.dart';
 import 'package:bastide/core/widgets/bar_charts.dart';
 import 'package:bastide/features/accounts/presentation/link_card_dialog.dart';
 import 'package:bastide/features/accounts/presentation/settlement_rule_dialog.dart';
@@ -272,6 +273,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SettlementRuleDialog), findsOneWidget);
+    // Bastide raised the warning, so it proposed the task: « Plus tard ».
+    expect(
+      tester
+          .widget<SettlementRuleDialog>(find.byType(SettlementRuleDialog))
+          .proposed,
+      isTrue,
+    );
   });
 
   testWidgets('no card to link, no link action', (tester) async {
@@ -323,6 +331,20 @@ void main() {
     await tester.tap(find.byKey(const Key('accountDetailLinkCard')));
     await tester.pumpAndSettle();
     expect(find.byType(LinkCardDialog), findsOneWidget);
+    // The sentence naming the paying account is the header's lead.
+    expect(
+      find.descendant(
+        of: find.byType(AppModal),
+        matching: find.textContaining(
+          'Choisissez la carte à débit différé dont le relevé mensuel',
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester.widget<AppModal>(find.byType(AppModal)).subtitle,
+      isA<Text>(),
+    );
 
     await tester.tap(find.byKey(const Key('linkCardField')));
     await tester.pumpAndSettle();
@@ -370,7 +392,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LinkCardDialog), findsOneWidget);
-    expect(find.byKey(const Key('linkCardErrorText')), findsOneWidget);
+    expect(find.byKey(const Key('appModalSaveError')), findsOneWidget);
   });
 
   testWidgets('the link action is offered in English', (tester) async {
@@ -465,6 +487,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SettlementRuleDialog), findsOneWidget);
+    // The user asked for it: « Annuler ».
+    expect(
+      tester
+          .widget<SettlementRuleDialog>(find.byType(SettlementRuleDialog))
+          .proposed,
+      isFalse,
+    );
   });
 
   testWidgets('a current account without cards draws no card block', (

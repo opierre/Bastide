@@ -1,6 +1,10 @@
 import 'package:bastide/core/session/current_user_provider.dart';
+import 'package:bastide/core/theme/tokens.dart';
+import 'package:bastide/core/widgets/app_modal.dart';
+import 'package:bastide/core/widgets/inline_banner.dart';
 import 'package:bastide/core/widgets/institution_avatar.dart';
 import 'package:bastide/core/widgets/labeled_field.dart';
+import 'package:bastide/core/widgets/note_line.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
 import 'package:bastide/features/accounts/presentation/account_form.dart';
@@ -208,10 +212,10 @@ void main() {
     await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
     await tester.pumpAndSettle();
 
-    // Nothing has been imported yet, so the figure the user types is the
-    // balance the account holds today — which is what a statement reports.
-    expect(find.text('Solde actuel'), findsOneWidget);
-    expect(find.text('Solde initial'), findsNothing);
+    // « Solde initial » (`05-accounts.md`, proposal v6): the figure the
+    // account starts from.
+    expect(find.text('Solde initial'), findsOneWidget);
+    expect(find.text('Solde actuel'), findsNothing);
     // Typed from scratch, nothing will correct it later, so no promise is made.
     expect(
       find.text(
@@ -257,7 +261,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Solde actuel'), findsOneWidget);
+    expect(find.text('Solde initial'), findsOneWidget);
   });
 
   testWidgets(
@@ -453,6 +457,10 @@ void main() {
     expect(controller.createCalls, isEmpty);
     expect(find.text('Choisissez le compte prélevé.'), findsOneWidget);
 
+    // The card fields sit under the institution, below the fold of the
+    // test window: the body scrolls to them.
+    await tester.ensureVisible(find.byKey(const Key('accountSettlementField')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('accountSettlementField')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Courant · LCL').last);
@@ -671,4 +679,194 @@ void main() {
       );
     },
   );
+
+  group('proposal v6 (m-accounts)', () {
+    final card = Account(
+      id: 'card-1',
+      name: 'Carte Voyage',
+      type: AccountType.deferredCard,
+      institution: 'Banque Exemple',
+      currency: 'EUR',
+      settlementAccountId: 'checking-1',
+      openingBalanceMinor: -31240,
+      balanceMinor: -31240,
+      archived: false,
+      createdAt: DateTime.utc(2026, 1, 1),
+      updatedAt: DateTime.utc(2026, 1, 1),
+    );
+
+    testWidgets('« Nouveau compte »: 480, the fields in the v6 order', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
+      await tester.pumpAndSettle();
+
+      final modal = tester.widget<AppModal>(find.byType(AppModal));
+      expect(modal.width, AppModalSizes.w480);
+      expect(modal.title, 'Nouveau compte');
+      double top(String label) => tester.getTopLeft(find.text(label)).dy;
+      expect(top('Nom'), lessThan(top('Type')));
+      expect(top('Type'), lessThan(top('Établissement')));
+      expect(top('Établissement'), lessThan(top('Solde initial')));
+      expect(top('Solde initial'), lessThan(top('Devise')));
+      expect(find.text('Annuler'), findsOneWidget);
+      expect(find.text('Enregistrer'), findsOneWidget);
+      // Amounts are right-aligned (`00` §6).
+      expect(
+        tester
+            .widget<TextField>(
+              find.descendant(
+                of: find.byKey(const Key('accountOpeningBalanceField')),
+                matching: find.byType(TextField),
+              ),
+            )
+            .textAlign,
+        TextAlign.end,
+      );
+    });
+
+    testWidgets('from a statement, the prefill is a note, not a banner', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeAccountsController(),
+          prefill: const AccountPrefill(name: 'Livret A'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byType(NoteLine),
+          matching: find.text('Champs pré-remplis depuis votre relevé.'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byType(InlineBanner), findsNothing);
+    });
+
+    testWidgets(
+      '« Modifier le compte » for a card: Débit de la carte and Prélevée sur '
+      'follow the institution',
+      (tester) async {
+        await tester.pumpWidget(
+          _wrap(
+            controller: FakeAccountsController(
+              initialAccounts: [_checking(), card],
+            ),
+            initial: card,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Modifier le compte'), findsOneWidget);
+        expect(find.byKey(const Key('accountTypeField')), findsOneWidget);
+        double top(Key key) => tester.getTopLeft(find.byKey(key)).dy;
+        expect(
+          top(const Key('accountInstitutionField')),
+          lessThan(top(const Key('accountCardDebitField'))),
+        );
+        expect(
+          top(const Key('accountCardDebitField')),
+          lessThan(top(const Key('accountSettlementField'))),
+        );
+        expect(
+          top(const Key('accountSettlementField')),
+          lessThan(top(const Key('accountOpeningBalanceField'))),
+        );
+        expect(
+          find.text(
+            'Une carte à débit différé est prélevée en une fois sur votre '
+            'compte courant chaque mois.',
+          ),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets('the long form scrolls its body between hairlines', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1280, 560);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakeAccountsController(
+            initialAccounts: [_checking(), card],
+          ),
+          initial: card,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('appModalHeaderHairline')), findsOneWidget);
+      expect(find.byKey(const Key('appModalFooterHairline')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('choosing « Crédit » turns the card into a credit account', (
+      tester,
+    ) async {
+      final controller = FakeAccountsController(
+        initialAccounts: [_checking(), card],
+      );
+      await tester.pumpWidget(_wrap(controller: controller, initial: card));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('accountCardDebitCredit')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('accountCardDebitField')), findsNothing);
+      expect(find.byKey(const Key('accountSettlementField')), findsNothing);
+      await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+      await tester.pumpAndSettle();
+      expect(controller.updateCalls.single.type, AccountType.credit);
+      expect(controller.updateCalls.single.settlementAccountId, isNull);
+    });
+
+    testWidgets('typed input asks before it is dropped', (tester) async {
+      await tester.pumpWidget(_wrap(controller: FakeAccountsController()));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('accountNameField')),
+        'Compte joint',
+      );
+      // The frame learns the form is dirty on the next frame.
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('accountFormCancelButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('appModalDiscard')), findsOneWidget);
+    });
+
+    testWidgets('a failed save shows the error at the top, input kept', (
+      tester,
+    ) async {
+      final controller = FakeAccountsController()
+        ..errorOnCreate = Exception('boom');
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('accountNameField')),
+        'Compte joint',
+      );
+      await tester.enterText(
+        find.byKey(const Key('accountInstitutionField')),
+        'Banque Exemple',
+      );
+      await tester.enterText(
+        find.byKey(const Key('accountOpeningBalanceField')),
+        '1250',
+      );
+      await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('appModalSaveError')), findsOneWidget);
+      expect(find.text('Compte joint'), findsOneWidget);
+    });
+  });
 }

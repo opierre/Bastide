@@ -1201,12 +1201,6 @@ abstract class AppLocalizations {
   /// **'Impossible d’enregistrer la règle. Réessayez.'**
   String get settlementRuleSaveFailed;
 
-  /// Cancel action on the account form and archive confirmation dialogs.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get accountFormCancel;
-
   /// Title of the archive confirmation dialog.
   ///
   /// In fr, this message translates to:
@@ -1374,12 +1368,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Solde initial'**
   String get accountOpeningBalanceLabel;
-
-  /// Label for the same balance field when creating an account: with no history behind it yet, what the user enters is the balance the account holds today.
-  ///
-  /// In fr, this message translates to:
-  /// **'Solde actuel'**
-  String get accountCurrentBalanceLabel;
 
   /// Label for the balance field when creating an account from a statement that dates its declared balance (OFX DTASOF): names the day the figure belongs to rather than calling it the current balance.
   ///

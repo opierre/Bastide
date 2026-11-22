@@ -94,7 +94,7 @@ class _CardWarning extends ConsumerWidget {
                 if (issue.kind == CardSettlementIssueKind.noSettlementAccount) {
                   await showAccountForm(context, initial: card);
                 } else {
-                  await showSettlementRuleDialog(context, card);
+                  await showSettlementRuleDialog(context, card, proposed: true);
                 }
                 if (context.mounted) {
                   ref.invalidate(cardSettlementStatusProvider);
