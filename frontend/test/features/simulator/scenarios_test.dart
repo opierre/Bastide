@@ -1,7 +1,10 @@
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/app_button.dart';
 import 'package:bastide/core/widgets/app_checkbox.dart';
+import 'package:bastide/core/widgets/app_modal.dart';
+import 'package:bastide/core/widgets/labeled_field.dart';
 import 'package:bastide/core/widgets/note_line.dart';
 import 'package:bastide/features/simulator/application/simulator_controller.dart';
 import 'package:bastide/features/simulator/data/simulations_repository.dart';
@@ -11,6 +14,7 @@ import 'package:bastide/features/simulator/presentation/simulator_labels.dart';
 import 'package:bastide/features/simulator/presentation/simulator_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -22,12 +26,13 @@ class MockSimulationsRepository extends Mock implements SimulationsRepository {}
 Widget _wrap(
   MockSimulationsRepository repository, {
   Locale locale = const Locale('fr'),
+  ThemeData? theme,
 }) {
   return ProviderScope(
     overrides: [simulationsRepositoryProvider.overrideWithValue(repository)],
     child: MaterialApp(
       locale: locale,
-      theme: AppTheme.dark,
+      theme: theme ?? AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const Scaffold(
@@ -246,6 +251,164 @@ void main() {
       () => repository.rename('s1', 'Villeurbanne, 270\u00A0k€'),
     ).called(1);
     expect(_text(tester, 'scenarioName-s1'), 'Villeurbanne, 270\u00A0k€');
+  });
+
+  /// Opens the rename modal on `s1` from its row menu.
+  Future<void> openRename(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('scenarioMenu-s1')));
+    await _settle(tester);
+    await tester.tap(find.byKey(const Key('scenarioRename-s1')));
+    await _settle(tester);
+  }
+
+  for (final (themeName, theme) in [
+    ('dark', AppTheme.dark),
+    ('light', AppTheme.light),
+  ]) {
+    for (final (locale, title, cancel, save) in [
+      ('fr', 'Renommer le scénario', 'Annuler', 'Enregistrer'),
+      ('en', 'Rename scenario', 'Cancel', 'Save'),
+    ]) {
+      testWidgets('$themeName, $locale: the name modal is the v2 frame, '
+          '420 px, no lead, one field, cancel then primary save', (
+        tester,
+      ) async {
+        _useDesktopSurface(tester);
+        await tester.pumpWidget(
+          _wrap(repository, locale: Locale(locale), theme: theme),
+        );
+        await _load(tester);
+        await openRename(tester);
+
+        final modal = tester.widget<AppModal>(
+          find.byKey(const Key('saveScenarioModal')),
+        );
+        expect(modal.width, AppModalSizes.w420);
+        expect(modal.subtitle, isNull);
+        expect(modal.kind, AppModalKind.form);
+        expect(
+          tester.getSize(find.byKey(const Key('appModalFrame'))).width,
+          AppModalSizes.w420,
+        );
+        expect(_text(tester, 'appModalTitle'), title);
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('appModalFrame')),
+            matching: find.byType(LabeledField),
+          ),
+          findsOneWidget,
+        );
+
+        final cancelButton = find.descendant(
+          of: find.byKey(const Key('saveScenarioCancel')),
+          matching: find.text(cancel),
+        );
+        final saveButton = find.descendant(
+          of: find.byKey(const Key('saveScenarioSubmit')),
+          matching: find.text(save),
+        );
+        expect(cancelButton, findsOneWidget);
+        expect(saveButton, findsOneWidget);
+        expect(
+          tester.getTopLeft(cancelButton).dx,
+          lessThan(tester.getTopLeft(saveButton).dx),
+        );
+        expect(
+          tester
+              .widget<AppButton>(find.byKey(const Key('saveScenarioSubmit')))
+              .variant,
+          AppButtonVariant.primary,
+        );
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
+
+  testWidgets('an emptied name is refused on the field, nothing is sent', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(repository));
+    await _load(tester);
+    await openRename(tester);
+
+    await tester.enterText(find.byKey(const Key('saveScenarioName')), '  ');
+    await tester.tap(find.byKey(const Key('saveScenarioSubmit')));
+    await _settle(tester);
+
+    expect(find.text('Donnez un nom au scénario.'), findsOneWidget);
+    verifyNever(() => repository.rename(any(), any()));
+    expect(find.byKey(const Key('saveScenarioModal')), findsOneWidget);
+  });
+
+  testWidgets('Enter in the field submits the form', (tester) async {
+    _useDesktopSurface(tester);
+    when(() => repository.rename(any(), any())).thenAnswer(
+      (invocation) async =>
+          testScenario(label: invocation.positionalArguments[1] as String),
+    );
+    await tester.pumpWidget(_wrap(repository));
+    await _load(tester);
+    await openRename(tester);
+
+    await tester.enterText(
+      find.byKey(const Key('saveScenarioName')),
+      'Bron, 240 k€',
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await _settle(tester);
+
+    verify(() => repository.rename('s1', 'Bron, 240 k€')).called(1);
+    expect(find.byKey(const Key('saveScenarioModal')), findsNothing);
+  });
+
+  testWidgets('a failed save shows the banner and keeps the input', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    when(() => repository.rename(any(), any())).thenThrow(Exception('offline'));
+    await tester.pumpWidget(_wrap(repository));
+    await _load(tester);
+    await openRename(tester);
+
+    await tester.enterText(
+      find.byKey(const Key('saveScenarioName')),
+      'Bron, 240 k€',
+    );
+    await tester.tap(find.byKey(const Key('saveScenarioSubmit')));
+    await _settle(tester);
+
+    expect(find.byKey(const Key('appModalSaveError')), findsOneWidget);
+    final nameField = tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(const Key('saveScenarioName')),
+        matching: find.byType(EditableText),
+      ),
+    );
+    expect(nameField.controller.text, 'Bron, 240 k€');
+  });
+
+  testWidgets('Escape closes an untouched name modal, and asks before '
+      'dropping an edited one', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap(repository));
+    await _load(tester);
+
+    await openRename(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await _settle(tester);
+    expect(find.byKey(const Key('saveScenarioModal')), findsNothing);
+
+    await openRename(tester);
+    await tester.enterText(find.byKey(const Key('saveScenarioName')), 'Bron');
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await _settle(tester);
+    expect(find.byKey(const Key('appModalDiscard')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('appModalDiscardConfirm')));
+    await _settle(tester);
+    expect(find.byKey(const Key('saveScenarioModal')), findsNothing);
+    verifyNever(() => repository.rename(any(), any()));
   });
 
   testWidgets('delete removes a saved row at once, with no confirmation', (

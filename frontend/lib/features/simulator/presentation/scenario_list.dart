@@ -334,9 +334,6 @@ class _ScenarioRowState extends ConsumerState<_ScenarioRow> {
   }
 }
 
-/// The save dialog's and the rename dialog's width (`14` §States).
-const _nameModalWidth = 420.0;
-
 Future<void> showSaveScenarioModal(BuildContext context) {
   return showAppModal<void>(
     context: context,
@@ -354,10 +351,11 @@ Future<void> showRenameScenarioModal(
   );
 }
 
-/// « Enregistrer le scénario », modal 420 px: one name, prefilled on the
-/// « lieu, prix k€ » pattern with the caret waiting in front of the comma
-/// for the place. With [renaming] the same modal renames a saved scenario,
-/// prefilled with its current name.
+/// « Enregistrer le scénario » (`proposal_v6` `m-simulator`): 420 px, no
+/// lead, one « Nom » field, « Annuler » · ink « Enregistrer ». The name is
+/// prefilled on the « lieu, prix k€ » pattern with the caret waiting in
+/// front of the comma for the place. With [renaming] the same modal is
+/// « Renommer le scénario », prefilled with the scenario's current name.
 class SaveScenarioModal extends ConsumerStatefulWidget {
   const SaveScenarioModal({super.key, this.renaming});
 
@@ -368,11 +366,27 @@ class SaveScenarioModal extends ConsumerStatefulWidget {
 }
 
 class _SaveScenarioModalState extends ConsumerState<SaveScenarioModal> {
-  final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
+
+  /// The prefilled name: the form is dirty once the field leaves it.
+  String _initialName = '';
   bool _filled = false;
   bool _isSubmitting = false;
-  String? _errorText;
+  bool _nameMissing = false;
+  String? _saveError;
+
+  @override
+  void initState() {
+    super.initState();
+    _name.addListener(_onNameChanged);
+  }
+
+  void _onNameChanged() {
+    // Typing clears the field error; the dirty flag follows the text.
+    setState(() {
+      if (_name.text.trim().isNotEmpty) _nameMissing = false;
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -380,6 +394,7 @@ class _SaveScenarioModalState extends ConsumerState<SaveScenarioModal> {
     if (_filled) return;
     _filled = true;
     if (widget.renaming case final scenario?) {
+      _initialName = scenario.label;
       _name.value = TextEditingValue(
         text: scenario.label,
         selection: TextSelection(
@@ -397,10 +412,11 @@ class _SaveScenarioModalState extends ConsumerState<SaveScenarioModal> {
     if (price == null) return;
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
+    _initialName = l10n.simulatorSaveNamePrefill(
+      scenarioPriceLabel(l10n, locale, price),
+    );
     _name.value = TextEditingValue(
-      text: l10n.simulatorSaveNamePrefill(
-        scenarioPriceLabel(l10n, locale, price),
-      ),
+      text: _initialName,
       // The place goes first: the caret waits in front of the comma.
       selection: const TextSelection.collapsed(offset: 0),
     );
@@ -413,13 +429,17 @@ class _SaveScenarioModalState extends ConsumerState<SaveScenarioModal> {
   }
 
   Future<void> _submit() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (_isSubmitting) return;
+    final name = _name.text.trim();
+    if (name.isEmpty) {
+      setState(() => _nameMissing = true);
+      return;
+    }
     setState(() {
       _isSubmitting = true;
-      _errorText = null;
+      _saveError = null;
     });
     final controller = ref.read(simulatorControllerProvider.notifier);
-    final name = _name.text.trim();
     try {
       if (widget.renaming case final scenario?) {
         await controller.renameScenario(scenario.id, name);
@@ -430,9 +450,10 @@ class _SaveScenarioModalState extends ConsumerState<SaveScenarioModal> {
       Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) return;
+      // The input stays as it was; the frame shows the banner.
       setState(() {
         _isSubmitting = false;
-        _errorText = localizeSimulatorError(
+        _saveError = localizeSimulatorError(
           AppLocalizations.of(context)!,
           error,
         );
@@ -443,55 +464,36 @@ class _SaveScenarioModalState extends ConsumerState<SaveScenarioModal> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final nameError = _nameMissing ? l10n.simulatorSaveNameRequired : null;
 
     return AppModal(
       key: const Key('saveScenarioModal'),
       title: widget.renaming == null
           ? l10n.simulatorSaveScenario
           : l10n.simulatorRenameTitle,
-      width: _nameModalWidth,
+      width: AppModalSizes.w420,
+      dirty: _name.text != _initialName,
+      busy: _isSubmitting,
+      saveError: _saveError,
+      onSubmit: _submit,
       actions: [
-        AppButton(
-          key: const Key('saveScenarioCancel'),
-          label: l10n.simulatorCancel,
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(key: Key('saveScenarioCancel')),
         AppButton(
           key: const Key('saveScenarioSubmit'),
           label: l10n.simulatorSaveSubmit,
           variant: AppButtonVariant.primary,
           isLoading: _isSubmitting,
-          onPressed: _isSubmitting ? null : _submit,
+          onPressed: _submit,
         ),
       ],
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_errorText != null) ...[
-              InlineBanner(
-                key: const Key('saveScenarioError'),
-                message: _errorText!,
-              ),
-              const SizedBox(height: AppSpacing.fieldGap),
-            ],
-            LabeledField(
-              label: l10n.simulatorSaveName,
-              child: TextFormField(
-                key: const Key('saveScenarioName'),
-                controller: _name,
-                autofocus: true,
-                validator: (value) {
-                  final trimmed = value?.trim() ?? '';
-                  return trimmed.isEmpty
-                      ? l10n.simulatorSaveNameRequired
-                      : null;
-                },
-                onFieldSubmitted: (_) => _submit(),
-              ),
-            ),
-          ],
+      child: LabeledField(
+        label: l10n.simulatorSaveName,
+        errorText: nameError,
+        child: TextField(
+          key: const Key('saveScenarioName'),
+          controller: _name,
+          autofocus: true,
+          decoration: nameError == null ? null : errorFieldDecoration(context),
         ),
       ),
     );
