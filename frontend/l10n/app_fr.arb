@@ -2683,10 +2683,6 @@
   "@ruleLogoCropLead": {
     "description": "Lead text of the logo crop modal."
   },
-  "ruleLogoCropCancel": "Annuler",
-  "@ruleLogoCropCancel": {
-    "description": "Cancel button of the logo crop modal."
-  },
   "ruleLogoCropSave": "Utiliser ce logo",
   "@ruleLogoCropSave": {
     "description": "Confirm button of the logo crop modal, uploading the cropped logo."
@@ -2720,10 +2716,6 @@
   "@ruleLogoUrlHint": {
     "description": "Placeholder of the web address field in the logo-from-address dialog."
   },
-  "ruleLogoUrlCancel": "Annuler",
-  "@ruleLogoUrlCancel": {
-    "description": "Cancel button of the logo-from-address dialog."
-  },
   "ruleLogoUrlFetch": "Télécharger",
   "@ruleLogoUrlFetch": {
     "description": "Confirm button of the logo-from-address dialog: downloads the picture."
@@ -2749,10 +2741,6 @@
   "@ruleLogoUrlNotAPicture": {
     "description": "Error when the downloaded file is not a picture."
   },
-  "ruleFormCancel": "Annuler",
-  "@ruleFormCancel": {
-    "description": "Cancel button of the rule editor."
-  },
   "ruleFormSave": "Enregistrer",
   "@ruleFormSave": {
     "description": "Submit button of the rule editor."
@@ -2761,13 +2749,19 @@
   "@ruleFormDelete": {
     "description": "Delete action in the rule editor's footer, shown only when editing."
   },
-  "ruleDeleteConfirmTitle": "Supprimer cette règle ?",
+  "ruleDeleteConfirmTitle": "Supprimer la règle « {pattern} » ?",
   "@ruleDeleteConfirmTitle": {
-    "description": "Title of the confirmation before a rule is deleted."
+    "description": "Title of the confirmation before a rule is deleted; also its accessible name.",
+    "placeholders": {
+      "pattern": {
+        "type": "String",
+        "example": "CARREFOUR"
+      }
+    }
   },
-  "ruleDeleteConfirmBody": "Les opérations qu’elle a déjà classées gardent leur catégorie.",
-  "@ruleDeleteConfirmBody": {
-    "description": "Body of the confirmation before a rule is deleted."
+  "ruleDeleteConfirmLead": "Les opérations qu’elle a déjà classées gardent leur catégorie.",
+  "@ruleDeleteConfirmLead": {
+    "description": "Lead of the confirmation before a rule is deleted."
   },
   "rulePreviewLoading": "Recherche des transactions correspondantes…",
   "@rulePreviewLoading": {
@@ -2837,14 +2831,6 @@
   "@rulePackExportAction": {
     "description": "Tooltip on the rules view's button opening the export review sheet."
   },
-  "rulePackCancel": "Annuler",
-  "@rulePackCancel": {
-    "description": "Cancel button on the pack import and export sheets."
-  },
-  "rulePackClose": "Fermer",
-  "@rulePackClose": {
-    "description": "Button closing the refused-pack explanation."
-  },
   "rulePackRefusedTitle": "Ce fichier n’a pas été accepté",
   "@rulePackRefusedTitle": {
     "description": "Title of the dialog explaining why a pack was refused."
@@ -2862,7 +2848,7 @@
       }
     }
   },
-  "rulePackRefusedRegex": "Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d’un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».",
+  "rulePackRefusedRegex": "Rien n’a été importé. Ce pack contient une règle « regex », que Bastide n’accepte pas d’un fichier partagé : écrite par quelqu’un d’autre, elle pourrait ralentir fortement l’application. Les conditions « contient », « égal à » et « plage » sont acceptées.",
   "@rulePackRefusedRegex": {
     "description": "Refusal reason: the pack contains a regex rule. Names the risk, and the three types that are accepted."
   },
@@ -2939,7 +2925,7 @@
   "@rulePackExportTitle": {
     "description": "Title of the export review sheet."
   },
-  "rulePackExportPrivacyNotice": "Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».",
+  "rulePackExportPrivacyNotice": "Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR LOYER DUPONT ».",
   "@rulePackExportPrivacyNotice": {
     "description": "Warning at the top of the export sheet. Names a concrete example, because the abstract warning is the one nobody reads."
   },

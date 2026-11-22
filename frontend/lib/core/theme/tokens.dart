@@ -715,6 +715,14 @@ abstract final class AppCategoriesPanel {
   static const categoryFormWidth = 480.0;
   static const packModalWidth = 560.0;
 
+  /// The rule editor's « Priorité » column, beside Champ and Condition
+  /// (`proposal_v6` `m-rules`, its `g3m` grid).
+  static const priorityColumn = 96.0;
+
+  /// The export modal's file preview: a `field` well that scrolls
+  /// (`proposal_v6` `m-rules`, « Exporter mes règles »).
+  static const packPreviewHeight = 168.0;
+
   /// A cell of the category form's icon grid, and a colour square.
   static const iconCell = 32.0;
   static const colorSquare = 20.0;

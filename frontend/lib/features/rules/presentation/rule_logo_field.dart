@@ -7,7 +7,6 @@ import '../../../core/pictures/picture_download.dart';
 import '../../../core/pictures/pictures.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/monogram_avatar.dart';
@@ -161,7 +160,7 @@ class _RuleLogoCropModal extends ConsumerWidget {
       image: image,
       title: l10n.ruleLogoCropTitle,
       lead: l10n.ruleLogoCropLead,
-      cancelLabel: l10n.ruleLogoCropCancel,
+      cancelLabel: l10n.modalCancel,
       saveLabel: l10n.ruleLogoCropSave,
       busy: state.busy,
       failureMessage: switch (state.failure) {
@@ -188,9 +187,11 @@ String ruleLogoDownloadFailureText(
   PictureDownloadFailure.notAPicture => l10n.ruleLogoUrlNotAPicture,
 };
 
-/// Asks for a picture's address and downloads it once the user confirms.
-/// Closes with the decoded picture, for the crop step; a refused download
-/// keeps it open with the reason.
+/// « Logo depuis une adresse » (`08-categories-rules.md` §Other modals,
+/// proposal v6 `m-rules`), 420 px: the lead says what happens, one Geist Mono
+/// field for the address. Downloads once the user confirms and closes with
+/// the decoded picture, for the crop step; a refused download keeps it open
+/// with the reason under the field.
 class _RuleLogoUrlModal extends ConsumerStatefulWidget {
   const _RuleLogoUrlModal();
 
@@ -219,14 +220,22 @@ class _RuleLogoUrlModalState extends ConsumerState<_RuleLogoUrlModal> {
     final l10n = AppLocalizations.of(context)!;
     final state = ref.watch(ruleLogoUrlControllerProvider);
     final busy = state.busy;
+    final error = switch (state.failure) {
+      final failure? => ruleLogoDownloadFailureText(l10n, failure),
+      null => null,
+    };
     return AppModal(
+      key: const Key('ruleLogoUrlModal'),
       title: l10n.ruleLogoUrlTitle,
-      width: 420,
+      subtitle: Text(l10n.ruleLogoUrlLead),
+      width: AppModalSizes.w420,
+      busy: busy,
+      // A pasted address is input like any other: the scrim no longer drops
+      // it.
+      dirty: _address.text.isNotEmpty,
+      onSubmit: _fetch,
       actions: [
-        AppButton(
-          label: l10n.ruleLogoUrlCancel,
-          onPressed: busy ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(key: Key('ruleLogoUrlCancel')),
         PrimaryButton(
           key: const Key('ruleLogoUrlFetch'),
           label: l10n.ruleLogoUrlFetch,
@@ -234,33 +243,22 @@ class _RuleLogoUrlModalState extends ConsumerState<_RuleLogoUrlModal> {
           onPressed: busy ? null : _fetch,
         ),
       ],
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            l10n.ruleLogoUrlLead,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          LabeledField(
-            label: l10n.ruleLogoUrlLabel,
-            child: TextField(
-              key: const Key('ruleLogoUrlField'),
-              controller: _address,
-              autofocus: true,
-              enabled: !busy,
-              keyboardType: TextInputType.url,
-              decoration: InputDecoration(hintText: l10n.ruleLogoUrlHint),
-              onSubmitted: busy ? null : (_) => _fetch(),
-            ),
-          ),
-          if (state.failure case final failure?) ...[
-            const SizedBox(height: AppSpacing.md),
-            InlineBanner(message: ruleLogoDownloadFailureText(l10n, failure)),
-          ],
-        ],
+      child: LabeledField(
+        label: l10n.ruleLogoUrlLabel,
+        errorText: error,
+        child: TextField(
+          key: const Key('ruleLogoUrlField'),
+          controller: _address,
+          autofocus: true,
+          keyboardType: TextInputType.url,
+          style: context.textStyles.mono.copyWith(color: context.colors.text),
+          decoration:
+              (error == null
+                      ? const InputDecoration()
+                      : errorFieldDecoration(context))
+                  .copyWith(hintText: l10n.ruleLogoUrlHint),
+          onChanged: (_) => setState(() {}),
+        ),
       ),
     );
   }

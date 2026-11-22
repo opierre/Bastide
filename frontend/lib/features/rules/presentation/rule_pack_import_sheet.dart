@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/app_modal.dart';
-import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/app_checkbox.dart';
+import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_table.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/monogram_avatar.dart';
 import '../../../core/widgets/note_line.dart';
-import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/repere_meter.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../categories/application/categories_controller.dart';
+import '../../categories/domain/category.dart';
 import '../application/rule_pack_import_controller.dart';
 import '../application/rule_packs_controller.dart';
 import '../domain/rule_pack.dart';
 import 'rule_error_localizer.dart';
 import 'rule_pack_logo_chip.dart';
 import 'rule_pack_report.dart';
+import 'rule_row.dart';
 
 /// Runs the import flow end to end: choose a source, read what it would do,
 /// and only then offer to write it.
@@ -40,7 +44,10 @@ Future<void> startRulePackImport(
         : await controller.previewBuiltin(builtinId);
   } on RulePackRejected catch (rejected) {
     if (!context.mounted) return;
-    await _showRefusal(context, rejected.reason);
+    await showAppModal<void>(
+      context: context,
+      builder: (_) => RulePackRefusedModal(reason: rejected.reason),
+    );
     return;
   } catch (error) {
     if (!context.mounted) return;
@@ -60,41 +67,46 @@ Future<void> startRulePackImport(
   );
 }
 
-/// Explains why a file was turned away, in the terms the refusal was made in —
-/// never as a generic failure. The user has to act on this (pick another file,
-/// or edit this one), and « une erreur est survenue » tells them nothing about
-/// which.
-Future<void> _showRefusal(BuildContext context, RulePackRefusal reason) {
-  final l10n = AppLocalizations.of(context)!;
-  final message = switch (reason) {
-    RulePackRefusal.malformed => l10n.rulePackRefusedMalformed,
-    RulePackRefusal.unsupportedVersion => l10n.rulePackRefusedVersion(
-      rulePackFormatVersion,
-    ),
-    RulePackRefusal.regexNotAllowed => l10n.rulePackRefusedRegex,
-  };
+/// « Ce fichier n’a pas été accepté » (`08-categories-rules.md` §Other
+/// modals, proposal v6 `m-rules`), 480 px: an acknowledgement whose banner
+/// says why the file was turned away, in the terms the refusal was made in
+/// and never as a generic failure. The user has to act on this (pick another
+/// file, or edit this one), and « une erreur est survenue » tells them
+/// nothing about which.
+class RulePackRefusedModal extends StatelessWidget {
+  const RulePackRefusedModal({super.key, required this.reason});
 
-  return showAppModal<void>(
-    context: context,
-    builder: (dialogContext) => AppModal(
+  final RulePackRefusal reason;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final message = switch (reason) {
+      RulePackRefusal.malformed => l10n.rulePackRefusedMalformed,
+      RulePackRefusal.unsupportedVersion => l10n.rulePackRefusedVersion(
+        rulePackFormatVersion,
+      ),
+      RulePackRefusal.regexNotAllowed => l10n.rulePackRefusedRegex,
+    };
+    return AppModal(
+      key: const Key('rulePackRefusedModal'),
       title: l10n.rulePackRefusedTitle,
-      width: 480,
-      actions: [
-        PrimaryButton(
-          label: l10n.rulePackClose,
-          onPressed: () => Navigator.of(dialogContext).pop(),
-        ),
-      ],
+      width: AppModalSizes.w480,
+      kind: AppModalKind.acknowledgement,
+      actions: const [AppModalClose(key: Key('rulePackRefusedClose'))],
       child: InlineBanner(
         key: const Key('rulePackRefusal'),
-        tone: BannerTone.warning,
+        tone: BannerTone.error,
         message: message,
       ),
-    ),
-  );
+    );
+  }
 }
 
-/// The confirmation sheet: the pack's report, then the choice to import it.
+/// The import modal, 560 px (`docs/design/08` §Rule packs, proposal v6
+/// `m-rules`), titled with the pack's name: the pack's report, its rules on
+/// the standard table, then the choice to import it. While the run downloads
+/// logos, the body gives way to their progress.
 class RulePackImportSheet extends ConsumerStatefulWidget {
   const RulePackImportSheet({super.key, required this.pending});
 
@@ -124,17 +136,15 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
         );
   }
 
-  /// An import with no logos to download ends as it always did: the sheet
-  /// closes on a toast. One that downloaded logos keeps the sheet open, so
-  /// its result replaces the progress bar the user was watching.
+  /// Every import ends the same way, whether or not it downloaded logos: the
+  /// modal closes on a toast, and the logos that didn't make it follow in
+  /// their own acknowledgement.
   void _onStateChanged(
     RulePackImportState? previous,
     RulePackImportState next,
   ) {
     final result = next.result;
-    if (result == null || previous?.result != null || next.hasLogoDownloads) {
-      return;
-    }
+    if (result == null || previous?.result != null) return;
     final l10n = AppLocalizations.of(context)!;
     final navigator = Navigator.of(context);
     navigator.pop();
@@ -146,13 +156,13 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
           : l10n.rulesApplyToastBody,
     );
     // The import succeeded either way; the logos that didn't make it (an
-    // embedded picture that isn't one) are listed so the user knows which
-    // rules still show a monogram, and why.
+    // embedded picture that isn't one, a download that failed) are listed so
+    // the user knows which rules still show a monogram, and why.
     if (result.logoFailures.isNotEmpty) {
       showAppModal<void>(
         context: navigator.context,
         builder: (_) =>
-            RulePackLogoFailuresDialog(failures: result.logoFailures),
+            RulePackLogoFailuresModal(failures: result.logoFailures),
       );
     }
   }
@@ -168,135 +178,105 @@ class _RulePackImportSheetState extends ConsumerState<RulePackImportSheet> {
     final l10n = AppLocalizations.of(context)!;
     ref.listen(rulePackImportControllerProvider, _onStateChanged);
     final state = ref.watch(rulePackImportControllerProvider);
-    final errorText = _errorText(l10n, state);
 
-    // The run cannot be cancelled, and closing the sheet would lose its
-    // result: the sheet stays until the import ends, unless following it
-    // failed — then the user is not held hostage to a run they can't see.
+    // The run cannot be cancelled, and closing the modal would lose its
+    // result: it stays until the import ends, unless following it failed;
+    // then the user is not held hostage to a run they can't see.
     final canClose = !state.isInFlight || state.error != null;
+    final downloading = state.isDownloading && state.error == null;
 
-    if (state.result case final result? when state.hasLogoDownloads) {
-      return AppModal(
-        title: _preview.name,
-        width: AppCategoriesPanel.packModalWidth,
-        actions: [
-          PrimaryButton(
-            key: const Key('rulePackImportDone'),
-            label: l10n.rulePackClose,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-        child: _ImportResultView(result: result, appliedNow: _applyNow),
-      );
-    }
-
-    final isImporting = state.isInFlight;
-    return PopScope(
-      canPop: canClose,
-      child: AppModal(
-        title: _preview.name,
-        width: AppCategoriesPanel.packModalWidth,
-        actions: [
+    return AppModal(
+      key: const Key('rulePackImportModal'),
+      title: _preview.name,
+      width: AppCategoriesPanel.packModalWidth,
+      // The rules are being written: the form is locked and « Importer »
+      // spins. The logo downloads that follow show their own progress.
+      busy: state.isInFlight && !downloading && state.error == null,
+      saveError: _errorText(l10n, state),
+      onCancel: canClose ? null : () {},
+      actions: [
+        if (canClose)
+          const AppModalCancel(key: Key('rulePackImportCancel'))
+        else
           AppButton(
             key: const Key('rulePackImportCancel'),
-            label: l10n.rulePackCancel,
-            onPressed: canClose ? () => Navigator.of(context).pop() : null,
+            label: l10n.modalCancel,
+            onPressed: null,
           ),
-          if (!state.isDownloading)
-            PrimaryButton(
-              key: const Key('rulePackImportConfirm'),
-              label: l10n.rulePackImportConfirm,
-              isLoading: isImporting,
-              onPressed: isImporting || !_preview.hasAnythingToImport
-                  ? null
-                  : _import,
-            ),
-        ],
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (errorText != null) ...[
-              InlineBanner(
-                key: const Key('rulePackImportError'),
-                message: errorText,
-              ),
-              const SizedBox(height: AppSpacing.md),
-            ],
-            if (state.run case final run? when state.isDownloading)
-              _LogoDownloadProgress(run: run)
-            else
-              ..._form(context, l10n, isImporting),
-          ],
-        ),
-      ),
+        if (!downloading)
+          PrimaryButton(
+            key: const Key('rulePackImportConfirm'),
+            label: l10n.rulePackImportConfirm,
+            isLoading: state.isInFlight,
+            onPressed: state.isInFlight || !_preview.hasAnythingToImport
+                ? null
+                : _import,
+          ),
+      ],
+      child: switch (state.run) {
+        final run? when downloading => _LogoDownloadProgress(run: run),
+        _ => _form(l10n, state.isInFlight),
+      },
     );
   }
 
-  List<Widget> _form(
-    BuildContext context,
-    AppLocalizations l10n,
-    bool isImporting,
-  ) {
-    return [
-      // The headline the whole confirmation step exists for.
-      NoteLine(
-        key: const Key('rulePackHeadline'),
-        text: l10n.rulePackWouldMatch(_preview.wouldMatchCount),
-      ),
-      const SizedBox(height: AppSpacing.md),
-      RulePackReport(preview: _preview),
-      if (widget.pending.pack case final pack? when pack.rules.isNotEmpty) ...[
-        const SizedBox(height: AppSpacing.md),
-        _PackRulesList(rules: pack.rules),
-      ],
-      const SizedBox(height: AppSpacing.md),
-      if (_preview.linksLogos) ...[
-        _LogoDownloadCheckbox(
-          value: _downloadLogos,
-          label: l10n.rulePackLogoDownload(_preview.logoDownloadCount),
-          onChanged: isImporting
-              ? null
-              : (value) => setState(() => _downloadLogos = value),
+  Widget _form(AppLocalizations l10n, bool isImporting) {
+    const gap = SizedBox(height: AppSpacing.fieldGap);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // The headline the whole confirmation step exists for.
+        NoteLine(
+          key: const Key('rulePackHeadline'),
+          icon: LucideIcons300.listChecks,
+          text: l10n.rulePackWouldMatch(_preview.wouldMatchCount),
         ),
-        const SizedBox(height: AppSpacing.xs),
-        Padding(
-          // Aligned with the label, past the box and its gap.
-          padding: const EdgeInsetsDirectional.only(
-            start: AppCheckbox.size + AppSpacing.sm,
-          ),
-          child: Text(
-            l10n.rulePackLogoDownloadHelper,
-            key: const Key('rulePackLogoDownloadHelper'),
-            style: context.textStyles.helper,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-      ],
-      Row(
-        children: [
-          AppCheckbox(
-            key: const Key('rulePackApplyNow'),
-            value: _applyNow,
-            semanticLabel: l10n.rulePackApplyNowLabel,
+        gap,
+        RulePackReport(preview: _preview),
+        if (widget.pending.pack case final pack?
+            when pack.rules.isNotEmpty) ...[
+          gap,
+          _PackRulesTable(rules: pack.rules),
+        ],
+        gap,
+        if (_preview.linksLogos) ...[
+          _LabeledCheckbox(
+            key: const Key('rulePackDownloadLogos'),
+            value: _downloadLogos,
+            label: l10n.rulePackLogoDownload(_preview.logoDownloadCount),
             onChanged: isImporting
                 ? null
-                : (value) => setState(() => _applyNow = value),
+                : (value) => setState(() => _downloadLogos = value),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
+          const SizedBox(height: AppSpacing.xs),
+          Padding(
+            // Aligned with the label, past the box and its gap.
+            padding: const EdgeInsetsDirectional.only(
+              start: AppCheckbox.size + AppSpacing.sm,
+            ),
             child: Text(
-              l10n.rulePackApplyNowLabel,
-              style: Theme.of(context).textTheme.bodyMedium,
+              l10n.rulePackLogoDownloadHelper,
+              key: const Key('rulePackLogoDownloadHelper'),
+              style: context.textStyles.helper,
             ),
           ),
+          gap,
         ],
-      ),
-      const SizedBox(height: AppSpacing.sm),
-    ];
+        _LabeledCheckbox(
+          key: const Key('rulePackApplyNow'),
+          value: _applyNow,
+          label: l10n.rulePackApplyNowLabel,
+          onChanged: isImporting
+              ? null
+              : (value) => setState(() => _applyNow = value),
+        ),
+      ],
+    );
   }
 }
 
-/// The logo downloads, settled out of total, while the run fetches them.
+/// The logo downloads, settled out of total, while the run fetches them: the
+/// count over a meter, and the note that the rules are already in.
 class _LogoDownloadProgress extends StatelessWidget {
   const _LogoDownloadProgress({required this.run});
 
@@ -305,131 +285,102 @@ class _LogoDownloadProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final progress = l10n.rulePackLogoProgress(run.logoDone, run.logoTotal);
 
     return Column(
       key: const Key('rulePackLogoProgress'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          l10n.rulePackLogoProgress(run.logoDone, run.logoTotal),
+          progress,
           key: const Key('rulePackLogoProgressLabel'),
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
-        const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-        RepereMeter(
-          fraction: run.logoProgress,
-          semanticLabel: l10n.rulePackLogoProgress(run.logoDone, run.logoTotal),
-        ),
-        const SizedBox(height: AppSpacing.sm + AppSpacing.xs),
-        Text(l10n.rulePackLogoProgressNotice, style: context.textStyles.helper),
         const SizedBox(height: AppSpacing.sm),
+        RepereMeter(fraction: run.logoProgress, semanticLabel: progress),
+        const SizedBox(height: AppSpacing.fieldGap),
+        NoteLine(text: l10n.rulePackLogoProgressNotice),
       ],
     );
   }
 }
 
-/// What an import that downloaded logos did, in the sheet that showed its
-/// progress: the same words as the toast an import without logos ends on,
-/// then the logos that could not be attached.
-class _ImportResultView extends StatelessWidget {
-  const _ImportResultView({required this.result, required this.appliedNow});
-
-  final RulePackImportResult result;
-  final bool appliedNow;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return Column(
-      key: const Key('rulePackImportResult'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        InlineBanner(
-          key: const Key('rulePackImportedBanner'),
-          tone: BannerTone.success,
-          message: l10n.rulePackImportedTitle(result.createdCount),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          appliedNow
-              ? l10n.rulePackImportedBody(result.recategorizedCount)
-              : l10n.rulesApplyToastBody,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        if (result.logoFailures.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            l10n.rulePackLogoFailuresTitle(result.logoFailures.length),
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          RulePackLogoFailuresList(failures: result.logoFailures),
-        ],
-        const SizedBox(height: AppSpacing.sm),
-      ],
-    );
-  }
-}
-
-/// The logo and the pattern of a pack's rule, on the standard table.
+/// The columns of the pack's rule table: the 22 px logo or monogram, the
+/// pattern, the target category on the right.
 const _packRuleColumns = [
-  AppTableColumn(label: '', width: MonogramAvatar.small + AppSpacing.smPlus),
+  AppTableColumn(label: '', width: MonogramAvatar.small),
   AppTableColumn(label: ''),
+  AppTableColumn(label: '', numeric: true),
 ];
 
-/// The pack's rules, each behind its logo or monogram, so the user sees what
-/// the pack brings rule by rule and not only as counts.
-class _PackRulesList extends StatelessWidget {
-  const _PackRulesList({required this.rules});
+/// « Règles du pack »: each rule on the standard table without a header,
+/// behind its logo or monogram, so the user sees what the pack brings rule
+/// by rule and not only as counts.
+class _PackRulesTable extends ConsumerWidget {
+  const _PackRulesTable({required this.rules});
 
   final List<RulePackEntry> rules;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final categories =
+        ref.watch(categoriesControllerProvider).value ?? const <AppCategory>[];
+    // A pack names system categories by their key, which is what a system
+    // category stores as its name.
+    final byKey = {
+      for (final category in categories)
+        if (category.isSystem) category.name: category,
+    };
+    final byId = {for (final category in categories) category.id: category};
 
     return Column(
+      key: const Key('rulePackRulesList'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(l10n.rulePackRulesLabel, style: context.textStyles.sectionLabel),
-        const SizedBox(height: AppSpacing.xsPlus),
-        ConstrainedBox(
-          // A pack can hold up to a thousand rules: the list scrolls inside a
-          // bounded plate instead of stretching the sheet.
-          constraints: const BoxConstraints(maxHeight: 200),
-          child: ListView.builder(
-            key: const Key('rulePackRulesList'),
-            shrinkWrap: true,
-            itemCount: rules.length,
-            itemBuilder: (context, index) {
-              final rule = rules[index];
-              return AppTableRow(
-                key: Key('rulePackRule-$index'),
-                columns: _packRuleColumns,
-                cells: [
-                  RulePackLogoChip(entry: rule),
-                  Text(
-                    rule.pattern,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.mono,
-                  ),
-                ],
-              );
-            },
-          ),
+        Text(
+          l10n.rulePackRulesLabel,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
         ),
+        const SizedBox(height: AppSpacing.fieldGap),
+        for (final (index, rule) in rules.indexed)
+          AppTableRow(
+            key: Key('rulePackRule-$index'),
+            columns: _packRuleColumns,
+            cells: [
+              RulePackLogoChip(entry: rule, size: MonogramAvatar.small),
+              Text(
+                rule.pattern,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.mono.copyWith(
+                  color: context.colors.text,
+                ),
+              ),
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: switch (byKey[rule.categoryKey]) {
+                  final category? => RuleTargetLabel(
+                    category: category,
+                    parent: byId[category.parentId],
+                  ),
+                  null => RuleTargetLabel(category: null, parent: null),
+                },
+              ),
+            ],
+          ),
       ],
     );
   }
 }
 
-/// « Télécharger les logos (N) »: the standard checkbox and its label, both
-/// toggling the choice.
-class _LogoDownloadCheckbox extends StatelessWidget {
-  const _LogoDownloadCheckbox({
+/// The standard checkbox and its label, both toggling the choice.
+class _LabeledCheckbox extends StatelessWidget {
+  const _LabeledCheckbox({
+    super.key,
     required this.value,
     required this.label,
     required this.onChanged,
@@ -448,7 +399,6 @@ class _LogoDownloadCheckbox extends StatelessWidget {
           ? SystemMouseCursors.basic
           : SystemMouseCursors.click,
       child: GestureDetector(
-        key: const Key('rulePackDownloadLogos'),
         onTap: onChanged == null ? null : () => onChanged(!value),
         behavior: HitTestBehavior.opaque,
         child: Row(
@@ -469,12 +419,12 @@ class _LogoDownloadCheckbox extends StatelessWidget {
   }
 }
 
-/// The logos an import could not attach, each with its reason.
-///
-/// Shown after the import has already succeeded: the banner says so first, so
-/// the list reads as a footnote to a done import rather than as a failure.
-class RulePackLogoFailuresDialog extends StatelessWidget {
-  const RulePackLogoFailuresDialog({super.key, required this.failures});
+/// « N logos n’ont pas pu être ajoutés » (`08-categories-rules.md` §Other
+/// modals, proposal v6 `m-rules`), 480 px: an acknowledgement shown after the
+/// import has already succeeded. The banner says so first, so the list reads
+/// as a footnote to a done import rather than as a failure.
+class RulePackLogoFailuresModal extends StatelessWidget {
+  const RulePackLogoFailuresModal({super.key, required this.failures});
 
   final List<RulePackLogoFailure> failures;
 
@@ -483,59 +433,37 @@ class RulePackLogoFailuresDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return AppModal(
+      key: const Key('rulePackLogoFailuresModal'),
       title: l10n.rulePackLogoFailuresTitle(failures.length),
-      width: 480,
-      actions: [
-        PrimaryButton(
-          key: const Key('rulePackLogoFailuresClose'),
-          label: l10n.rulePackClose,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ],
+      width: AppModalSizes.w480,
+      kind: AppModalKind.acknowledgement,
+      actions: const [AppModalClose(key: Key('rulePackLogoFailuresClose'))],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           InlineBanner(
             key: const Key('rulePackLogoFailuresNotice'),
-            tone: BannerTone.info,
+            tone: BannerTone.warning,
             message: l10n.rulePackLogoFailuresNotice,
           ),
-          const SizedBox(height: AppSpacing.md),
-          RulePackLogoFailuresList(failures: failures),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.fieldGap),
+          for (final (i, failure) in failures.indexed) ...[
+            if (i > 0) const SizedBox(height: AppSpacing.xsPlus),
+            NoteLine(
+              key: Key('rulePackLogoFailure-${failure.index}'),
+              icon: LucideIcons300.circleX,
+              text: switch (failure.reason) {
+                RulePackLogoFailureReason.invalidImage =>
+                  l10n.rulePackLogoFailureInvalidImage(failure.pattern),
+                RulePackLogoFailureReason.tooLarge =>
+                  l10n.rulePackLogoFailureTooLarge(failure.pattern),
+                RulePackLogoFailureReason.downloadFailed =>
+                  l10n.rulePackLogoFailureDownloadFailed(failure.pattern),
+              },
+            ),
+          ],
         ],
       ),
-    );
-  }
-}
-
-/// Each logo an import could not attach, with its reason.
-class RulePackLogoFailuresList extends StatelessWidget {
-  const RulePackLogoFailuresList({super.key, required this.failures});
-
-  final List<RulePackLogoFailure> failures;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final failure in failures)
-          Padding(
-            key: Key('rulePackLogoFailure-${failure.index}'),
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(switch (failure.reason) {
-              RulePackLogoFailureReason.invalidImage =>
-                l10n.rulePackLogoFailureInvalidImage(failure.pattern),
-              RulePackLogoFailureReason.tooLarge =>
-                l10n.rulePackLogoFailureTooLarge(failure.pattern),
-              RulePackLogoFailureReason.downloadFailed =>
-                l10n.rulePackLogoFailureDownloadFailed(failure.pattern),
-            }, style: context.textStyles.helper),
-          ),
-      ],
     );
   }
 }

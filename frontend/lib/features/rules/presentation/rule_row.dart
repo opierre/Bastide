@@ -230,3 +230,23 @@ class RuleTargetLabel extends StatelessWidget {
     );
   }
 }
+
+/// The category label's 8 px dot (`00` §7) in front of each category of a
+/// target select, so the closed field reads as the label the mockup draws.
+class RuleCategoryDot extends StatelessWidget {
+  const RuleCategoryDot({super.key, required this.category});
+
+  final AppCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: CategoryLabel.dotSize,
+      height: CategoryLabel.dotSize,
+      decoration: BoxDecoration(
+        color: context.categoryColors.forSlot(categorySlot(category)),
+        borderRadius: BorderRadius.circular(AppRadii.bar),
+      ),
+    );
+  }
+}
