@@ -10,6 +10,7 @@ import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/note_line.dart';
 import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/status_text.dart';
+import '../../../core/widgets/summary_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/goals_controller.dart';
 import '../data/goals_repository.dart';
@@ -134,7 +135,6 @@ class _SummaryLine extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
-    final colors = context.colors;
     String money(int minor) => formatAmount(
       amountMinor: minor,
       currency: state.currency,
@@ -147,14 +147,15 @@ class _SummaryLine extends StatelessWidget {
       required String figure,
       required TextStyle style,
       double gap = AppSpacing.xs,
-    }) => Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, maxLines: 1, style: context.textStyles.statLabel),
-        SizedBox(height: gap),
-        Text(figure, key: key, maxLines: 1, style: tabularNumberStyle(style)),
-      ],
+    }) => SummaryItem(
+      label: label,
+      labelGap: gap,
+      figure: Text(
+        figure,
+        key: key,
+        maxLines: 1,
+        style: tabularNumberStyle(style),
+      ),
     );
 
     return IntrinsicHeight(
@@ -170,10 +171,7 @@ class _SummaryLine extends StatelessWidget {
               style: textTheme.displayLarge!,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-            child: SizedBox(width: 1, child: ColoredBox(color: colors.line)),
-          ),
+          const SummaryHairline(),
           Flexible(
             child: item(
               key: const Key('goalsSummarySavings'),

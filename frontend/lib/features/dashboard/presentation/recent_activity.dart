@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/app_table.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/section_heading.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/dashboard_trends.dart';
-import 'section_link.dart';
 
 /// « Activité récente » (`docs/design/04-dashboard.md` §5a): a table without
 /// header, as many 36 px rows as the height allows (six at 900 px). Each row:
@@ -41,7 +41,7 @@ class RecentActivity extends StatelessWidget {
       children: [
         SectionHeading(
           title: l10n.dashboardRecentActivityTitle,
-          trailing: SectionLink(
+          trailing: AppLink(
             key: const Key('dashboardViewAllTransactions'),
             label: l10n.dashboardViewAllTransactions,
             onTap: onViewAll,

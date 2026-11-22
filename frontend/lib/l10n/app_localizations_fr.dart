@@ -2152,9 +2152,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ruleLogoCropLead => 'Faites glisser l’image pour cadrer le logo.';
 
   @override
-  String get ruleLogoCropCancel => 'Annuler';
-
-  @override
   String get ruleLogoCropSave => 'Utiliser ce logo';
 
   @override
@@ -2179,9 +2176,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ruleLogoUrlHint => 'https://…';
 
   @override
-  String get ruleLogoUrlCancel => 'Annuler';
-
-  @override
   String get ruleLogoUrlFetch => 'Télécharger';
 
   @override
@@ -2201,19 +2195,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ruleLogoUrlNotAPicture => 'Cette adresse ne mène pas à une image.';
 
   @override
-  String get ruleFormCancel => 'Annuler';
-
-  @override
   String get ruleFormSave => 'Enregistrer';
 
   @override
   String get ruleFormDelete => 'Supprimer';
 
   @override
-  String get ruleDeleteConfirmTitle => 'Supprimer cette règle ?';
+  String ruleDeleteConfirmTitle(String pattern) {
+    return 'Supprimer la règle « $pattern » ?';
+  }
 
   @override
-  String get ruleDeleteConfirmBody =>
+  String get ruleDeleteConfirmLead =>
       'Les opérations qu’elle a déjà classées gardent leur catégorie.';
 
   @override
@@ -2273,12 +2266,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rulePackExportAction => 'Exporter mes règles';
 
   @override
-  String get rulePackCancel => 'Annuler';
-
-  @override
-  String get rulePackClose => 'Fermer';
-
-  @override
   String get rulePackRefusedTitle => 'Ce fichier n’a pas été accepté';
 
   @override
@@ -2292,7 +2279,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rulePackRefusedRegex =>
-      'Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d’un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».';
+      'Rien n’a été importé. Ce pack contient une règle « regex », que Bastide n’accepte pas d’un fichier partagé : écrite par quelqu’un d’autre, elle pourrait ralentir fortement l’application. Les conditions « contient », « égal à » et « plage » sont acceptées.';
 
   @override
   String rulePackWouldMatch(int count) {
@@ -2368,7 +2355,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rulePackExportPrivacyNotice =>
-      'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR SALAIRE DUPONT ».';
+      'Relisez avant d’enregistrer. Un motif peut contenir des informations personnelles, comme le nom de votre propriétaire : « VIR LOYER DUPONT ».';
 
   @override
   String rulePackExportContents(int count) {
@@ -2587,9 +2574,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAiTitle => 'IA locale';
-
-  @override
-  String get settingsAiSubtitle => 'Catégorisation par IA';
 
   @override
   String get settingsAiToggleLabel => 'Catégorisation par IA';

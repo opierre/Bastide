@@ -10,6 +10,7 @@ import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/monogram_avatar.dart';
 import '../../../core/widgets/note_line.dart';
 import '../../../core/widgets/status_text.dart';
+import '../../../core/widgets/summary_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/placements_controller.dart';
 import '../domain/investment.dart';
@@ -150,10 +151,6 @@ class _SummaryLine extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
-    final colors = context.colors;
-    final caption = tabularNumberStyle(
-      textTheme.bodySmall!,
-    ).copyWith(color: colors.textTertiary);
     String money(int minor, {bool signed = false}) =>
         placementMoney(minor, summary.currency, locale, signed: signed);
     final lastValued = summary.lastValuedOn;
@@ -165,16 +162,21 @@ class _SummaryLine extends StatelessWidget {
       required String label,
       required String figure,
       required TextStyle style,
-      Widget? under,
-    }) => Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, maxLines: 1, style: context.textStyles.statLabel),
-        const SizedBox(height: AppSpacing.xs),
-        Text(figure, key: key, maxLines: 1, style: tabularNumberStyle(style)),
-        if (under != null) ...[const SizedBox(height: AppSpacing.xs), under],
-      ],
+      String? caption,
+      Key? captionKey,
+      Widget? below,
+    }) => SummaryItem(
+      label: label,
+      labelGap: AppSpacing.xs,
+      caption: caption,
+      captionKey: captionKey,
+      below: below,
+      figure: Text(
+        figure,
+        key: key,
+        maxLines: 1,
+        style: tabularNumberStyle(style),
+      ),
     );
 
     return IntrinsicHeight(
@@ -190,35 +192,23 @@ class _SummaryLine extends StatelessWidget {
               label: l10n.placementsSummaryValue,
               figure: money(summary.declaredValueMinor),
               style: textTheme.displayLarge!,
-              under: Text(
-                lastValued == null
-                    ? l10n.placementsSummaryCount(summary.openCount)
-                    : l10n.placementsSummaryCaption(
-                        summary.openCount,
-                        placementDateLabel(locale, lastValued),
-                      ),
-                key: const Key('placementsSummaryCaption'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: caption,
-              ),
+              caption: lastValued == null
+                  ? l10n.placementsSummaryCount(summary.openCount)
+                  : l10n.placementsSummaryCaption(
+                      summary.openCount,
+                      placementDateLabel(locale, lastValued),
+                    ),
+              captionKey: const Key('placementsSummaryCaption'),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-            child: SizedBox(width: 1, child: ColoredBox(color: colors.line)),
-          ),
+          const SummaryHairline(),
           Flexible(
             child: item(
               key: const Key('placementsSummaryNetPayments'),
               label: l10n.placementsSummaryNetPayments,
               figure: money(summary.netPaymentsMinor),
               style: textTheme.displaySmall!,
-              under: Text(
-                l10n.placementsSummaryNetPaymentsCaption,
-                maxLines: 1,
-                style: caption,
-              ),
+              caption: l10n.placementsSummaryNetPaymentsCaption,
             ),
           ),
           const SizedBox(width: AppSpacing.xxl),
@@ -231,7 +221,7 @@ class _SummaryLine extends StatelessWidget {
                   : l10n.placementsNoValue,
               style: textTheme.displaySmall!,
               // A neutral trend line: a gain is not income until withdrawn.
-              under: !hasValue || gainBps == null
+              below: !hasValue || gainBps == null
                   ? null
                   : StatusText(
                       key: const Key('placementsSummaryGainShare'),

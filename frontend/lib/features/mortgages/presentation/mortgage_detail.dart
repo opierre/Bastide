@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/summary_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
 import '../domain/mortgage.dart';
@@ -139,7 +140,7 @@ class _DetailSummaryLine extends StatelessWidget {
               captionKey: const Key('mortgageDetailInstalmentCaption'),
             ),
           ),
-          const LoanSummaryHairline(),
+          const SummaryHairline(),
           Flexible(
             child: LoanSummaryItem(
               label: l10n.mortgagesOutstandingLabel,
@@ -151,7 +152,7 @@ class _DetailSummaryLine extends StatelessWidget {
               ),
             ),
           ),
-          const LoanSummaryHairline(),
+          const SummaryHairline(),
           Flexible(
             child: LoanSummaryItem(
               label: l10n.mortgageNextLabel,
@@ -241,7 +242,7 @@ class _CostLine extends StatelessWidget {
               caption: l10n.mortgageCostRateCaption,
             ),
           ),
-          const LoanSummaryHairline(),
+          const SummaryHairline(),
           Flexible(
             child: LoanSummaryItem(
               label: l10n.mortgageCostTaegLabel,
@@ -250,7 +251,7 @@ class _CostLine extends StatelessWidget {
               caption: l10n.mortgageCostTaegCaption,
             ),
           ),
-          const LoanSummaryHairline(),
+          const SummaryHairline(),
           Flexible(
             child: LoanSummaryItem(
               label: l10n.mortgageCostInterestLabel,
@@ -261,7 +262,7 @@ class _CostLine extends StatelessWidget {
               ),
             ),
           ),
-          const LoanSummaryHairline(),
+          const SummaryHairline(),
           Flexible(
             child: LoanSummaryItem(
               label: l10n.mortgageCostTotalLabel,

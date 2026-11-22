@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/app_popover.dart';
 import '../../../core/widgets/app_table.dart';
 import '../../../core/widgets/inline_banner.dart';
@@ -13,7 +14,6 @@ import '../../../l10n/app_localizations.dart';
 import '../../properties/application/properties_controller.dart';
 import '../../properties/domain/property.dart';
 import '../../properties/presentation/property_form_modal.dart';
-import 'networth_link.dart';
 
 /// « Biens » (`15-synthese.md` §5a): the declared properties as a table, a
 /// row menu (Modifier · Nouvelle estimation · Archiver), and the archived ones
@@ -111,7 +111,7 @@ class NetworthProperties extends ConsumerWidget {
             runSpacing: AppSpacing.xs,
             children: [
               NoteLine(text: l10n.networthNoPropertyNote),
-              NetworthLink(
+              AppLink(
                 key: const Key('propertiesEmptyAdd'),
                 label: l10n.networthAddProperty,
                 onTap: () => showPropertyForm(context, currency: currency),

@@ -1,9 +1,12 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
+import 'package:bastide/core/widgets/app_modal.dart';
 import 'package:bastide/features/categories/application/categories_controller.dart';
 import 'package:bastide/features/rules/application/rule_preview_controller.dart';
 import 'package:bastide/features/rules/application/rules_controller.dart';
+import 'package:bastide/features/rules/domain/rule.dart';
 import 'package:bastide/features/rules/presentation/rule_editor_modal.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +32,11 @@ Map<String, dynamic> _previewJson({int count = 7, bool withSample = true}) => {
       : <dynamic>[],
 };
 
-Widget _wrap(MockApiClient apiClient, {FakeRulesController? rules}) {
+Widget _wrap(
+  MockApiClient apiClient, {
+  FakeRulesController? rules,
+  Rule? initial,
+}) {
   return ProviderScope(
     overrides: [
       apiClientProvider.overrideWithValue(apiClient),
@@ -57,7 +64,7 @@ Widget _wrap(MockApiClient apiClient, {FakeRulesController? rules}) {
       home: Scaffold(
         body: Builder(
           builder: (context) => TextButton(
-            onPressed: () => showRuleEditor(context),
+            onPressed: () => showRuleEditor(context, initial: initial),
             child: const Text('open'),
           ),
         ),
@@ -262,6 +269,108 @@ void main() {
       ).called(1);
     },
   );
+
+  testWidgets('Champ, Condition and Priorité share one row, on the 520 px '
+      'frame', (tester) async {
+    await tester.pumpWidget(_wrap(apiClient));
+    await _openEditor(tester);
+
+    expect(
+      tester.getSize(find.byKey(const Key('appModalFrame'))).width,
+      AppModalSizes.w520,
+    );
+    final field = tester.getTopLeft(find.byKey(const Key('ruleFormField')));
+    final condition = tester.getTopLeft(
+      find.byKey(const Key('ruleFormCondition')),
+    );
+    final priority = tester.getTopLeft(
+      find.byKey(const Key('ruleFormPriority')),
+    );
+    expect(condition.dy, field.dy);
+    expect(priority.dy, field.dy);
+    expect(
+      tester.getSize(find.byKey(const Key('ruleFormPriority'))).width,
+      AppCategoriesPanel.priorityColumn,
+    );
+    // A new rule has no logo yet: only the helper says why.
+    expect(
+      find.text('Enregistrez la règle pour lui ajouter un logo.'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('ruleFormDelete')), findsNothing);
+  });
+
+  testWidgets('a missing category is said under its field, not in a banner', (
+    tester,
+  ) async {
+    when(
+      () => apiClient.post('/rules/preview', body: any(named: 'body')),
+    ).thenAnswer((_) async => _previewJson());
+
+    await tester.pumpWidget(_wrap(apiClient));
+    await _openEditor(tester);
+    await tester.enterText(
+      find.byKey(const Key('ruleFormPattern')),
+      'CARREFOUR',
+    );
+    await _settlePreview(tester);
+
+    await tester.tap(find.byKey(const Key('ruleFormSubmit')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Choisissez la catégorie que cette règle attribue.'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('appModalSaveError')), findsNothing);
+    verifyNever(() => apiClient.post('/rules', body: any(named: 'body')));
+  });
+
+  testWidgets('« Supprimer » asks first, in a destructive confirmation named '
+      'after the rule', (tester) async {
+    when(
+      () => apiClient.post('/rules/preview', body: any(named: 'body')),
+    ).thenAnswer((_) async => _previewJson());
+    final rule = testRule(pattern: 'BOULANGERIE DU MARCHE');
+
+    await tester.pumpWidget(
+      _wrap(
+        apiClient,
+        initial: rule,
+        rules: FakeRulesController(initialRules: [rule]),
+      ),
+    );
+    await _openEditor(tester);
+    await _settlePreview(tester);
+
+    await tester.tap(find.byKey(const Key('ruleFormDelete')));
+    await tester.pumpAndSettle();
+
+    final confirm = tester.widget<AppModal>(
+      find.byKey(const Key('ruleDeleteModal')),
+    );
+    expect(confirm.kind, AppModalKind.destructive);
+    expect(confirm.width, AppModalSizes.w480);
+    expect(confirm.child, isNull);
+    expect(
+      find.text('Supprimer la règle « BOULANGERIE DU MARCHE » ?'),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        'Les opérations qu’elle a déjà classées gardent leur '
+        'catégorie.',
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('ruleDeleteCancel')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('ruleDeleteModal')), findsNothing);
+    expect(find.byKey(const Key('ruleEditorModal')), findsOneWidget);
+    verifyNever(() => apiClient.delete(any()));
+  });
 
   testWidgets('the debounce is the documented one', (tester) async {
     expect(rulePreviewDebounce, const Duration(milliseconds: 350));

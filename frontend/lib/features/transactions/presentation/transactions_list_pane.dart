@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/app_table.dart';
 import '../../../core/widgets/category_label.dart';
@@ -23,7 +24,6 @@ import '../domain/transaction.dart';
 import 'category_picker.dart';
 import 'date_range_modal.dart';
 import 'transaction_labels.dart';
-import 'transactions_link.dart';
 
 /// The list pane of the « Toutes » tab (`07-transactions.md` §List pane): the
 /// filter row, the table grouped by day, and the pager.
@@ -365,7 +365,7 @@ class _NoResult extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
-          TransactionsLink(
+          AppLink(
             key: const Key('transactionsClearFilters'),
             label: l10n.transactionsClearFilters,
             small: false,

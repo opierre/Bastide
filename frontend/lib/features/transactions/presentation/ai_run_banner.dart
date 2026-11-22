@@ -4,12 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/repere_meter.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../categorization/application/run_controller.dart';
 import '../../categorization/domain/categorization_run.dart';
-import 'transactions_link.dart';
 
 /// The banner that replaces the review tab's progress row while a run is
 /// classifying (`07-transactions.md` §Tab « À vérifier »): the banner recipe
@@ -125,7 +125,7 @@ class RunOutcomeBanner extends ConsumerWidget {
         onDismiss: controller.dismissBanner,
         dismissTooltip: l10n.runBannerDismiss,
         actions: [
-          TransactionsLink(
+          AppLink(
             key: const Key('aiRunBannerAction'),
             label: l10n.runBannerPartialAction,
             small: false,

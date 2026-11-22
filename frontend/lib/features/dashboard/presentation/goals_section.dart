@@ -4,12 +4,12 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/app_table.dart';
 import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/section_heading.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../goals/domain/goal.dart';
-import 'section_link.dart';
 
 /// « Objectifs » (`docs/design/04-dashboard.md` §5b): a table without header,
 /// up to four active goals by creation order. Each row: the name, the repère
@@ -41,7 +41,7 @@ class GoalsSection extends StatelessWidget {
       children: [
         SectionHeading(
           title: l10n.dashboardGoalsTitle,
-          trailing: SectionLink(
+          trailing: AppLink(
             key: const Key('dashboardGoalsViewAll'),
             label: l10n.dashboardGoalsViewAll,
             onTap: onViewAll,

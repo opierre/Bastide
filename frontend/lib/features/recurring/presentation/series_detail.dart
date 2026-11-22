@@ -15,6 +15,7 @@ import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/note_line.dart';
 import '../../../core/widgets/section_heading.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/summary_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
@@ -23,7 +24,6 @@ import 'price_history_chart.dart';
 import 'recurring_error_localizer.dart';
 import 'recurring_labels.dart';
 import 'series_form_modal.dart';
-import 'summary_item.dart';
 
 /// One series in full (`docs/design/10` § Series detail): the summary line,
 /// the price-rise banner with its yearly cost, the charge history drawn as a

@@ -22,7 +22,7 @@ import 'recurring_labels.dart';
 import 'series_detail.dart';
 import 'series_form_modal.dart';
 import 'series_row.dart';
-import 'summary_item.dart';
+import '../../../core/widgets/summary_line.dart';
 
 /// « Abonnements » (`docs/design/10-subscriptions.md`): the summary line, the
 /// merge suggestions when there are any, then the table sorted by next

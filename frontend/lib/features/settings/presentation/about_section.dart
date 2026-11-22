@@ -6,6 +6,7 @@ import '../../../core/app_info.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/brand_mark.dart';
 import '../../../core/widgets/tomettes.dart';
 import '../../../l10n/app_localizations.dart';
@@ -256,7 +257,7 @@ class _CreditsRow extends StatelessWidget {
             ),
           ],
         ),
-        SettingsLink(
+        AppLink(
           key: const Key('settingsAboutAllLicenses'),
           label: l10n.settingsAboutAllLicenses,
           small: false,

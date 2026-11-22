@@ -309,8 +309,8 @@ void main() {
         await tester.pump();
       }
 
-      testWidgets('shows the logo progress advancing to the total, then the '
-          'result in the same sheet', (tester) async {
+      testWidgets('shows the logo progress advancing to the total, then '
+          'closes on the toast and lists the logos not added', (tester) async {
         snapshotIs(
           packImportRunJson(
             status: 'finished',
@@ -362,9 +362,12 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.byKey(const Key('rulePackLogoProgress')), findsNothing);
-        expect(find.byKey(const Key('rulePackImportResult')), findsOneWidget);
+        // An import that downloaded logos ends like any other: the sheet
+        // closes on the toast, and the logos that failed follow in their
+        // acknowledgement.
+        expect(find.byType(RulePackImportSheet), findsNothing);
         expect(find.text(l10n.rulePackImportedTitle(3)), findsOneWidget);
+        expect(find.byType(RulePackLogoFailuresModal), findsOneWidget);
         expect(find.text(l10n.rulePackLogoFailuresTitle(1)), findsOneWidget);
         expect(
           find.text(
@@ -373,9 +376,9 @@ void main() {
           findsOneWidget,
         );
 
-        await tester.tap(find.byKey(const Key('rulePackImportDone')));
+        await tester.tap(find.byKey(const Key('rulePackLogoFailuresClose')));
         await tester.pumpAndSettle();
-        expect(find.byType(RulePackImportSheet), findsNothing);
+        expect(find.byType(RulePackLogoFailuresModal), findsNothing);
       });
 
       testWidgets('an import with no logo to download closes on the toast, '

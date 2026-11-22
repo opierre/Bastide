@@ -7,6 +7,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/status_text.dart';
+import '../../../core/widgets/summary_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/dashboard_summary.dart';
 
@@ -67,7 +68,7 @@ class ReadingLine extends StatelessWidget {
             width: leadWidth,
             child: _SavingsItem(summary: summary, previous: previous),
           ),
-          const _Separator(),
+          const SummaryHairline(),
           Flexible(
             child: figure(
               id: 'income',
@@ -76,7 +77,7 @@ class ReadingLine extends StatelessWidget {
               deltaPct: summary.incomeDeltaPct,
             ),
           ),
-          const _Separator(),
+          const SummaryHairline(),
           Flexible(
             child: figure(
               id: 'expense',
@@ -86,7 +87,7 @@ class ReadingLine extends StatelessWidget {
               riseIsBad: true,
             ),
           ),
-          const _Separator(),
+          const SummaryHairline(),
           Flexible(
             child: figure(
               id: 'net',
@@ -101,17 +102,6 @@ class ReadingLine extends StatelessWidget {
       ),
     );
   }
-}
-
-/// A vertical `line` hairline with the summary line's 40 px either side.
-class _Separator extends StatelessWidget {
-  const _Separator();
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-    child: SizedBox(width: 1, child: ColoredBox(color: context.colors.line)),
-  );
 }
 
 /// The lead: « Taux d’épargne », the rate at 40 px, the repère on a scale of
@@ -239,44 +229,30 @@ class _FigureItem extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
     final amountMinor = this.amountMinor;
-    final trend = this.trend;
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textStyles.statLabel,
-        ),
-        const SizedBox(height: AppSpacing.xsPlus),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: AlignmentDirectional.centerStart,
-          child: amountMinor == null
-              ? Text(
-                  l10n.dashboardNoValue,
-                  key: Key('dashboardReadingValue-$id'),
-                  style: textTheme.displayMedium?.copyWith(
-                    color: context.colors.textTertiary,
-                  ),
-                )
-              : AmountText(
-                  key: Key('dashboardReadingValue-$id'),
-                  amountMinor: amountMinor,
-                  currency: currency,
-                  showPositiveSign: true,
-                  colorize: colorize,
-                  style: textTheme.displayMedium,
+    return SummaryItem(
+      label: label,
+      below: trend,
+      figure: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerStart,
+        child: amountMinor == null
+            ? Text(
+                l10n.dashboardNoValue,
+                key: Key('dashboardReadingValue-$id'),
+                style: textTheme.displayMedium?.copyWith(
+                  color: context.colors.textTertiary,
                 ),
-        ),
-        if (trend != null) ...[
-          const SizedBox(height: AppSpacing.xsPlus),
-          trend,
-        ],
-      ],
+              )
+            : AmountText(
+                key: Key('dashboardReadingValue-$id'),
+                amountMinor: amountMinor,
+                currency: currency,
+                showPositiveSign: true,
+                colorize: colorize,
+                style: textTheme.displayMedium,
+              ),
+      ),
     );
   }
 }

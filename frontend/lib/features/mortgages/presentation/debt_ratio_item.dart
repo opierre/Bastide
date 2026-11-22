@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
@@ -142,7 +143,7 @@ class DebtRatioItem extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Align(
               alignment: AlignmentDirectional.centerStart,
-              child: _Link(
+              child: AppLink(
                 key: const Key('ratioDeclareIncomeLink'),
                 label: l10n.mortgagesRatioDeclareLink,
                 onTap: declare,
@@ -161,45 +162,6 @@ class DebtRatioItem extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-/// The link of `00` §6: `accent`, 12 px, underlined on hover.
-class _Link extends StatefulWidget {
-  const _Link({super.key, required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  State<_Link> createState() => _LinkState();
-}
-
-class _LinkState extends State<_Link> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Semantics(
-      link: true,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: Text(
-            widget.label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: colors.accent,
-              decoration: _hovered ? TextDecoration.underline : null,
-              decorationColor: colors.accent,
-            ),
-          ),
-        ),
       ),
     );
   }
