@@ -259,15 +259,25 @@ class ModalFieldCell {
 
 /// Two fields side by side, 16 px apart, aligned by their input (`00` §7
 /// « Modal », Body): a label on two lines moves both inputs down together,
-/// and a helper under one does not push its neighbour.
+/// and a helper under one does not push its neighbour. A [middle] cell makes
+/// it three, as the rule editor's Champ · Condition · Priorité; [endWidth]
+/// fixes the last column instead of sharing the width.
 ///
-/// A [Table] rather than two columns: its rows are as tall as their tallest
+/// A [Table] rather than columns: its rows are as tall as their tallest
 /// cell, which is the CSS subgrid of the mockup.
 class ModalFieldRow extends StatelessWidget {
-  const ModalFieldRow({super.key, required this.start, required this.end});
+  const ModalFieldRow({
+    super.key,
+    required this.start,
+    required this.end,
+    this.middle,
+    this.endWidth,
+  });
 
   final ModalFieldCell start;
+  final ModalFieldCell? middle;
   final ModalFieldCell end;
+  final double? endWidth;
 
   static const _labelGap = 5.0;
 
@@ -277,14 +287,17 @@ class ModalFieldRow extends StatelessWidget {
       context,
     ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary);
 
-    Widget label(ModalFieldCell cell) => Padding(
-      padding: const EdgeInsets.only(bottom: _labelGap),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(child: Text(cell.label, style: labelStyle)),
-          ?cell.trailing,
-        ],
+    Widget label(ModalFieldCell cell) => TableCell(
+      verticalAlignment: TableCellVerticalAlignment.bottom,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: _labelGap),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(child: Text(cell.label, style: labelStyle)),
+            ?cell.trailing,
+          ],
+        ),
       ),
     );
 
@@ -298,28 +311,28 @@ class ModalFieldRow extends StatelessWidget {
     };
 
     const gutter = SizedBox(width: AppModalSizes.columnGutter);
+    final cells = [start, ?middle, end];
+    final endWidth = this.endWidth;
+    List<Widget> row(Widget Function(ModalFieldCell) build) => [
+      for (final (i, cell) in cells.indexed) ...[
+        if (i > 0) gutter,
+        build(cell),
+      ],
+    ];
     return Table(
-      columnWidths: const {
-        0: FlexColumnWidth(),
-        1: FixedColumnWidth(AppModalSizes.columnGutter),
-        2: FlexColumnWidth(),
+      columnWidths: {
+        for (var i = 0; i < cells.length; i++) ...{
+          if (i > 0)
+            2 * i - 1: const FixedColumnWidth(AppModalSizes.columnGutter),
+          2 * i: i == cells.length - 1 && endWidth != null
+              ? FixedColumnWidth(endWidth)
+              : const FlexColumnWidth(),
+        },
       },
       children: [
-        TableRow(
-          children: [
-            TableCell(
-              verticalAlignment: TableCellVerticalAlignment.bottom,
-              child: label(start),
-            ),
-            gutter,
-            TableCell(
-              verticalAlignment: TableCellVerticalAlignment.bottom,
-              child: label(end),
-            ),
-          ],
-        ),
-        TableRow(children: [start.input, gutter, end.input]),
-        TableRow(children: [below(start), gutter, below(end)]),
+        TableRow(children: row(label)),
+        TableRow(children: row((cell) => cell.input)),
+        TableRow(children: row(below)),
       ],
     );
   }
