@@ -127,6 +127,14 @@ patterns, file names, file paths, URLs and codes to copy (a recovery code). Spac
 Line height 1.45 for text, 1.1 for figures. No uppercase labels, no letter-spaced labels.
 All numerals tabular.
 
+**No-break spaces.** A line never breaks inside a figure, between a figure and its unit, or
+between a day and its month. In French, `intl` groups thousands with U+202F (narrow no-break
+space) and puts U+00A0 (no-break space) before « € » and « % » (« 1 234,56 € », « 35 % »):
+keep what it emits, never an ordinary space. Any other unit after a figure (« 320 k€ »,
+« 2,2 × ») takes U+00A0. A date in words takes U+00A0 between the day and the month
+(« 12 mai 2026 », « May 12, 2026 »); `DateFormat` writes an ordinary space there, so the
+formatter replaces it.
+
 ## 4. Shape, spacing, density
 
 - **Radius:** 6 on controls (buttons, fields, nav items, segmented, tabs' focus), 4 on items
@@ -171,7 +179,7 @@ Mockup: any panel.
   `textSecondary` (`minus`, `square`, `copy` for restore, `x`). Hover: `hover` ground, icon
   `text`. Pressed: `lineStrong` ground. Fermer on hover: `negative` ground, icon `bg`; pressed:
   `negative` at 85 % over `text` (lighter in dark, darker in light, as the primary's hover). While the window is inactive the title and the icons take
-  `textTertiary`. Tooltips and accessible labels « Réduire », « Agrandir », « Restaurer »,
+  `textTertiary`; hover and pressed keep their colours. Tooltips and accessible labels « Réduire », « Agrandir », « Restaurer »,
   « Fermer ».
 - **Drag area:** the empty stretch of the title bar and the sidebar's brand row. Double-click
   maximizes or restores. Controls, crumb and title do not drag.
@@ -248,7 +256,8 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
   balanced; it never truncates and never widens the modal. The lead
   never leaves one word alone on its last line.
 - **Body:** padding 0 24, fields 14 px apart, two-column grids with a 16 px gutter. Fields in
-  a row align by their input: a helper under one does not push its neighbour down. A grid
+  a row align by their input: a helper under one does not push its neighbour down, and a
+  label on two lines moves both inputs down together. A grid
   leaves no empty cell before its last row. Only the body scrolls; while it does, a `line`
   hairline separates it from the header and the footer, 14 px from the body's content. An
   introductory sentence is the header's lead, not the body's first line. List rows inside a

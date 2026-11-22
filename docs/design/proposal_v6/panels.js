@@ -100,7 +100,7 @@ P.login = () => `<div class="app auth" data-shell="0"><form>
 
 P.register = () => `<div class="app auth" data-shell="0"><form>
   <div class="brand" style="padding:0 0 8px;font-size:16px">${MARK}Bastide</div>
-  <label class="f">Nom affiché<span class="inp">Camille Dubois</span></label>
+  <label class="f">Nom d’utilisateur<span class="inp">Camille Dubois</span></label>
   <label class="f">Adresse e-mail<span class="inp">camille.dubois@proton.me</span></label>
   <label class="f">Mot de passe<span class="inp focus">••••••••••••••<span class="sp"></span>${I('eye', 's14 t3')}</span><small class="row">${I('check', 's14 pos')}14 caractères. Le minimum est de 12.</small></label>
   <div class="g2" style="gap:12px"><label class="f">Langue<span class="seg" style="justify-self:start"><span class="on">Français</span><span>English</span></span></label>
@@ -587,7 +587,7 @@ MD.restore = () => modal(500, 'Restaurer cette sauvegarde ?', '', `
   ${kvList([['Exporté le', '11 mai 2026 à 14:32'], ['Version de l’application', '0.2.0'], ...COUNTS])}
   ${bnr('triangle-alert', 'warn', 'Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.')}`, `<span class="lead-act">${B('Exporter d’abord', 'ghost', 'download')}</span>` + CANCEL + B('Remplacer mes données', 'dsolid'));
 MD.reset = (typed = 'suppr') => modal(500, 'Réinitialiser la base de données ?', 'Tout le contenu du profil Camille Dubois sera supprimé définitivement :', `
-  ${kvList([COUNTS[0], COUNTS[1], ['Catégories personnalisées', '3'], ...COUNTS.slice(3)])}
+  <dl class="kv">${[COUNTS[0], COUNTS[1], ['Catégories personnalisées', '3'], ...COUNTS.slice(3)].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
   ${note('info', 'Les catégories fournies, vos préférences et le réglage IA sont conservés.')}
   ${F('Saisissez « supprimer » pour confirmer', inp(typed, 'mono focus'), 'Majuscules ou minuscules, peu importe.')}`, `<span class="lead-act">${B('Exporter d’abord', 'ghost', 'download')}</span>` + CANCEL + `<span class="btn dsolid" ${typed.toLowerCase() === 'supprimer' ? '' : 'style="opacity:.45"'}>Tout supprimer</span>`);
 
@@ -670,7 +670,7 @@ MD.seriesEdit = () => modal(480, 'Modifier le paiement récurrent', '', `
   <div class="g2m">${F('Montant', inp('15,49 €', 'r'))}${F('Cadence', selF('Mensuel'))}</div>
   ${F('Catégorie', selF(cat('Loisirs')))}`, CANCEL + B('Enregistrer', 'pri'));
 const CHARGES = [[1, '12 mai 2026', 'PRLV SEPA STREAMCO', 'BNP Compte courant', '−15,49 €'], [1, '28 avr. 2026', 'CB STREAMCO PARIS', 'Revolut', '−15,49 €'], [0, '25 avr. 2026', 'CB LE PETIT BOUCHON LYON', 'Revolut', '−42,50 €'], [0, '19 avr. 2026', 'CB SNCF CONNECT', 'Revolut', '−86,40 €'], [0, '14 avr. 2026', 'CB CARREFOUR LYON 3', 'BNP Compte courant', '−63,18 €']];
-const chargeRows = rows => `<table class="mtable">${rows.map(r => `<tr><td style="width:24px"><span class="chk ${r[0] ? 'on' : ''}">${r[0] ? I('check') : ''}</span></td><td class="t2" style="width:96px">${r[1]}</td><td><div class="col" style="padding:4px 0"><span class="mono">${r[2]}</span>${r[3] ? `<span class="xs t3">${r[3]}</span>` : ''}</div></td><td class="n">${amt(r[4])}</td></tr>`).join('')}</table>`;
+const chargeRows = rows => `<table class="mtable pick">${rows.map(r => `<tr class="${r[3] ? 'two' : ''}"><td style="width:34px"><span class="chk ${r[0] ? 'on' : ''}">${r[0] ? I('check') : ''}</span></td><td class="t2" style="width:96px">${r[1]}</td><td><div class="col"><span class="mono">${r[2]}</span>${r[3] ? `<span class="xs t3">${r[3]}</span>` : ''}</div></td><td class="n">${amt(r[4])}</td></tr>`).join('')}</table>`;
 MD.addCharges = () => modal(560, 'Ajouter à « Netflix »', 'Les opérations qui ne font partie d’aucune série, les plus proches en premier.', `
   <span class="inp ph">${I('search', 's14')}Rechercher un libellé</span>
   ${chargeRows(CHARGES)}
@@ -735,7 +735,7 @@ MD.investmentForm = (edit = false) => modal(440, edit ? 'Modifier le placement' 
   ${F('Nom', inp('PEA', edit ? '' : 'focus'))}
   ${F('Enveloppe', selF('Plan d’épargne en actions (PEA)'))}
   <div class="g2m">${F('Établissement', inp(`${mg('BD')}Boursorama`))}${F('Date d’ouverture', dateF('14/03/2023'))}</div>
-  ${edit ? '' : `<div class="g2m">${F('Valeur actuelle (facultative)', inp('0,00 €', 'r ph'))}${F('Versements déjà effectués (facultatif)', inp('0,00 €', 'r ph'), 'Comptés comme un versement à l’ouverture.')}</div>`}`,
+  ${edit ? '' : `<div class="g2m ia">${F('Valeur actuelle (facultative)', inp('0,00 €', 'r ph'))}${F('Versements déjà effectués (facultatif)', inp('0,00 €', 'r ph'), 'Comptés comme un versement à l’ouverture.')}</div>`}`,
   `${edit ? `<span class="lead-act">${B('Supprimer', 'ghost')}</span>` : ''}${CANCEL}${B('Enregistrer', 'pri')}`);
 MD.investmentValue = () => modal(440, 'Saisir la valeur', 'PEA', `
   ${F('Valeur', inp('31 840,00 €', 'r focus'), 'Recopiez la valeur totale indiquée sur votre relevé.')}
@@ -764,9 +764,9 @@ P['m-frame'] = galleryM('Cadre commun des modales', 'Toutes les modales de l’a
   `<h2>Anatomie</h2><dl class="spec">
     <dt>Cadre</dt><dd>surface, rayon 12, ombre, sans bordure ; sur le voile (scrim), centré ; hauteur au plus celle de la fenêtre moins 24 px en haut et en bas.</dd>
     <dt>En-tête</dt><dd>padding 24 24 14 ; titre 16/600 ; chapeau facultatif 13 textSecondary, 4 px sous le titre. Pas d’icône devant le titre, pas de croix de fermeture.</dd>
-    <dt>Corps</dt><dd>padding 0 24 ; champs à 14 px les uns des autres ; deux champs côte à côte s’alignent sur leur saisie, une aide sous l’un ne décale pas l’autre. Seul le corps défile ; quand il défile, un filet line le sépare de l’en-tête et du pied, à 14 px de son contenu.</dd>
+    <dt>Corps</dt><dd>padding 0 24 ; champs à 14 px les uns des autres ; deux champs côte à côte s’alignent sur leur saisie, une aide sous l’un ne décale pas l’autre, un libellé sur deux lignes descend les deux saisies ensemble. Seul le corps défile ; quand il défile, un filet line le sépare de l’en-tête et du pied, à 14 px de son contenu.</dd>
     <dt>Pied</dt><dd>padding 24 ; actions à droite, secondaire puis principale, 8 px d’écart, passant à la ligne plutôt que de déborder ; une action tertiaire fantôme (« Supprimer », « Retour à l’aperçu ») se place seule à gauche. Une navigation n’est pas une action du pied : elle devient un lien dans le corps.</dd>
-    <dt>Fermeture</dt><dd>Échap et un clic sur le voile valent « Annuler », sauf pendant un enregistrement et sur une modale sans issue (code de récupération affiché).</dd>
+    <dt>Fermeture</dt><dd>Échap et un clic sur le voile valent « Annuler » sur une confirmation et sur un formulaire inchangé. Dès qu’un formulaire contient une saisie non enregistrée, le voile ne fait rien, et Échap ou « Annuler » demandent « Abandonner les modifications ? » (420 px, chapeau nommant le formulaire ; « Continuer la saisie » · « Abandonner » en encre ; son propre Échap ramène au formulaire). Rien ne se ferme pendant un enregistrement, ni une modale sans issue (code de récupération affiché).</dd>
     <dt>Clavier</dt><dd>Le focus reste dans la modale (Tab boucle). Il arrive sur le premier champ d’un formulaire, sur « Annuler » dans une confirmation destructive, sur l’action principale dans une confirmation réversible, sur « Copier » dans une modale sans issue. Entrée valide un formulaire depuis un champ d’une ligne. À la fermeture, le focus revient sur ce qui a ouvert la modale. La modale est nommée par son titre et décrite par son chapeau.</dd>
     <dt>Apparition</dt><dd>opacité, 120 ms ease-out ; aucune avec « réduire les animations ».</dd></dl>`,
   `<h2>Largeurs</h2><p class="t2" style="margin-bottom:12px">Huit largeurs, fixées par le contenu. La modale ne s’élargit jamais pour un libellé.</p>
@@ -879,7 +879,7 @@ P['m-context'] = () => P.categories() + `<div style="position:absolute;inset:0;b
 /* ════════ v6: the title bar and its window controls ════════ */
 const WC = (st = {}) => `<div class="wc" role="group" aria-label="Fenêtre">${[['min', 'minus', 'Réduire'], ['max', st.max ? 'copy' : 'square', st.max ? 'Restaurer' : 'Agrandir'], ['x', 'x', 'Fermer']].map(([k, ic, l]) => `<span class="${k === 'x' ? 'x' : ''} ${st.hover === k ? 'h-on' : ''} ${st.press === k ? 'p-on' : ''}" title="${l}" aria-label="${l}">${I(ic)}</span>`).join('')}</div>`;
 const barStrip = (t, st = {}, o = {}) => `<div class="app strip" data-theme="${t}" data-accent="encre" data-tex="off"><header class="top win ${st.idle ? 'idle' : ''}">${o.crumb ? `<span class="crumb">${o.crumb} /</span>` : ''}<h1>${o.title || 'Tableau de bord'}</h1><span class="sp ${o.drag ? 'drag' : ''}" style="align-self:stretch"></span>${o.actions ?? MONTH}${WC(st)}</header></div>`;
-const STATES = [['Repos', {}], ['Survol de « Réduire »', { hover: 'min' }], ['Survol de « Agrandir »', { hover: 'max' }], ['Appui sur « Agrandir »', { press: 'max' }], ['Survol de « Fermer »', { hover: 'x' }], ['Appui sur « Fermer »', { press: 'x' }], ['Fenêtre agrandie : « Restaurer »', { max: 1 }], ['Fenêtre inactive', { idle: 1 }]];
+const STATES = [['Repos', {}], ['Survol de « Réduire »', { hover: 'min' }], ['Survol de « Agrandir »', { hover: 'max' }], ['Appui sur « Agrandir »', { press: 'max' }], ['Survol de « Fermer »', { hover: 'x' }], ['Appui sur « Fermer »', { press: 'x' }], ['Fenêtre agrandie : « Restaurer »', { max: 1 }], ['Fenêtre inactive', { idle: 1 }], ['Fenêtre inactive, survol de « Réduire »', { idle: 1, hover: 'min' }], ['Fenêtre inactive, appui sur « Fermer »', { idle: 1, press: 'x' }]];
 const MACL = `<span class="mac" aria-hidden="true"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></span>`;
 const macCollapsedStrip = t => `<div class="app strip" data-theme="${t}" data-accent="encre" data-tex="off" style="display:grid!important;grid-template-columns:56px 1fr;position:relative"><div style="background:var(--rail);border-right:1px solid var(--line);height:48px"></div><header class="top" style="padding-left:24px"><h1>Tableau de bord</h1><span class="sp drag" style="align-self:stretch"></span>${MONTH}</header><span style="position:absolute;left:16px;top:0;height:48px;display:flex;align-items:center">${MACL}</span></div>`;
 const macAuthStrip = t => `<div class="app strip" data-theme="${t}" data-accent="encre" data-tex="off" style="position:relative;height:120px!important"><span style="position:absolute;left:16px;top:0;height:48px;display:flex;align-items:center">${MACL}</span><div class="drag" style="position:absolute;inset:0 0 auto 84px;height:48px"></div><div class="col t3 sm" style="position:absolute;inset:60px 0 0;align-items:center">Écran de connexion sur macOS</div></div>`;
@@ -893,7 +893,7 @@ P.window = theme => `<div class="app mg-page" data-theme="${theme}" data-accent=
     <dt>Bouton</dt><dd>46 × 48, sans bordure ni rayon, icône Lucide 16 px textSecondary : minus, square (agrandir), copy (restaurer), x.</dd>
     <dt>Place</dt><dd>À 8 px du dernier contrôle du panneau ; la barre perd son padding droit, le bouton « Fermer » touche le coin de la fenêtre.</dd>
     <dt>Survol, appui</dt><dd>Survol : fond hover, icône text. Appui : fond lineStrong. « Fermer » : fond negative, icône bg ; à l’appui, negative à 85 % sur text, donc plus clair en sombre et plus foncé en clair, comme le survol du bouton principal. Changement immédiat.</dd>
-    <dt>Fenêtre inactive</dt><dd>Le titre et les icônes passent en textTertiary ; les survols restent les mêmes.</dd>
+    <dt>Fenêtre inactive</dt><dd>Le titre et les icônes passent en textTertiary ; le survol et l’appui gardent leurs couleurs.</dd>
     <dt>Zone de déplacement</dt><dd>Toute la partie vide de la barre de titre et la ligne de marque de la barre latérale (hachurées ci-dessous). Un double-clic agrandit ou restaure. Les contrôles, le fil d’Ariane et le titre ne déplacent pas la fenêtre.</dd>
     <dt>Infobulles</dt><dd>« Réduire », « Agrandir » / « Restaurer », « Fermer » ; mêmes libellés pour l’accessibilité.</dd>
     <dt>macOS</dt><dd>Les trois pastilles du système, dessinées par macOS, à 16 px du bord gauche dans la ligne de marque ; la marque les suit à 14 px ; pas de contrôles à droite. Les pastilles ne déplacent pas la fenêtre ; le reste de la ligne de marque, si. Barre latérale repliée : les pastilles gardent leur place et débordent de 12 px sur la barre de titre, dont le padding de 24 px laisse 12 px avant le titre ; la marque disparaît du rail. Écrans d’accès : les pastilles en haut à gauche, la bande des 48 px déplace la fenêtre.</dd>
@@ -925,13 +925,20 @@ S.accent = 'encre';
 const DOCS = ['system', 'logos', 'textures', 'splash', 'window', 'm-frame', 'm-accounts', 'm-profile', 'm-data', 'm-categories', 'm-rules', 'm-transactions', 'm-subscriptions', 'm-goals', 'm-loans', 'm-investments', 'm-networth', 'm-simulator'];
 S.logo = 'plan'; S.tex = 'tomettes';
 const $ = s => document.querySelector(s);
+/* 00 §3 « No-break spaces »: thousands take U+202F, a unit U+00A0, a day and its month U+00A0, as the app's formatters write them */
+const MONTHS = String.raw`janv\.|févr\.|mars|avr\.|mai|juin|juil\.|août|sept\.|oct\.|nov\.|déc\.|janvier|février|avril|juillet|septembre|octobre|novembre|décembre`;
+const NOBREAK = [[/(\d) (?=\d{3}(?!\d))/g, '$1\u202f'], [/(\d) (?=(?:k?€|%|×)(?!\p{L}))/gu, '$1\u00a0'], [new RegExp(String.raw`(?<![\d,])(\d{1,2}|1er) (?=(?:${MONTHS})(?!\p{L}))`, 'gu'), '$1\u00a0']];
+function noBreak(root) {
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let n; (n = w.nextNode());) { const t = NOBREAK.reduce((v, [re, to]) => v.replace(re, to), n.nodeValue); if (t !== n.nodeValue) n.nodeValue = t; }
+}
 function render() {
   MARK = markSvg(S.logo); TEX = S.tex !== 'off' || S.panel === 'textures';
   const p = P[S.panel], fit = $('#fit'), multi = typeof p === 'object';
   if (multi && !p[S.variant]) S.variant = 'A';
   let html = DOCS.includes(S.panel) ? p(S.theme, S.accent) : multi ? p[S.variant][1]() : p();
   if (!DOCS.includes(S.panel)) html = html.startsWith('<div class="app') ? html.replace('<div class="app', `<div data-theme="${S.theme}" data-accent="${S.accent}" data-tex="${S.tex}" class="app`) : `<div class="app" data-theme="${S.theme}" data-accent="${S.accent}" data-tex="${S.tex}">${html}</div>`;
-  fit.innerHTML = html; fit.classList.toggle('doc', DOCS.includes(S.panel));
+  fit.innerHTML = html; fit.classList.toggle('doc', DOCS.includes(S.panel)); noBreak(fit);
   $('#g-var').style.display = multi ? '' : 'none';
   $('#s-var').innerHTML = multi ? Object.entries(p).map(([k, v]) => `<button data-v="${k}">${v[0]}</button>`).join('') : '';
   for (const [id, key] of [['#s-var', 'variant'], ['#s-theme', 'theme']]) document.querySelectorAll(id + ' button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.v === S[key]); b.onclick = () => { S[key] = b.dataset.v; render(); }; });
