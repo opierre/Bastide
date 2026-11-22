@@ -4359,7 +4359,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get propertyFormLabelRequired => 'Give this property a name.';
 
   @override
-  String get propertyFormAddress => 'Address';
+  String get propertyFormAddress => 'Address (optional)';
 
   @override
   String get propertyFormKind => 'Type';
@@ -4400,9 +4400,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get propertyFormCalendar => 'Pick a date';
-
-  @override
-  String get propertyFormCancel => 'Cancel';
 
   @override
   String get propertyFormSave => 'Save';
@@ -4645,9 +4642,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networthDeclaredSave => 'Save';
 
   @override
-  String get networthDeclaredClose => 'Close';
-
-  @override
   String get networthDeclaredEmpty => 'No declared total.';
 
   @override
@@ -4662,9 +4656,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get networthDeclaredLoadFailed =>
       'Couldn’t load the declared history.';
-
-  @override
-  String get networthDeclaredRetry => 'Retry';
 
   @override
   String get networthDeclaredErrorNotFound => 'This total no longer exists.';

@@ -6881,7 +6881,7 @@ abstract class AppLocalizations {
   /// Property form field: the property's optional postal address, free text.
   ///
   /// In fr, this message translates to:
-  /// **'Adresse'**
+  /// **'Adresse (facultative)'**
   String get propertyFormAddress;
 
   /// Property form field: the property's nature (select).
@@ -6955,12 +6955,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Choisir une date'**
   String get propertyFormCalendar;
-
-  /// Cancel action on the property modals.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get propertyFormCancel;
 
   /// Primary action of the edit-property form.
   ///
@@ -7358,12 +7352,6 @@ abstract class AppLocalizations {
   /// **'Enregistrer'**
   String get networthDeclaredSave;
 
-  /// Closes the declared-history modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Fermer'**
-  String get networthDeclaredClose;
-
   /// Shown in the modal when nothing is declared.
   ///
   /// In fr, this message translates to:
@@ -7393,12 +7381,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Impossible de charger l’historique déclaré.'**
   String get networthDeclaredLoadFailed;
-
-  /// Retry action on the declared-history list.
-  ///
-  /// In fr, this message translates to:
-  /// **'Réessayer'**
-  String get networthDeclaredRetry;
 
   /// DECLARED_BALANCE_NOT_FOUND.
   ///

@@ -698,6 +698,12 @@ abstract final class AppNetworth {
   static const propertyShareColumn = 96.0;
   static const propertyValueColumn = 140.0;
   static const menuColumn = AppSizes.button + AppSpacing.smPlus;
+
+  /// « Historique déclaré » (mockup `#panel=m-networth`): the month field of
+  /// the entry row, then the month and icon-button columns of the list.
+  static const declaredMonthField = 130.0;
+  static const declaredMonthColumn = 100.0;
+  static const declaredActionsColumn = 72.0;
 }
 
 /// The Placements panel of `docs/design/17-placements.md`.

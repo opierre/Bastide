@@ -1,6 +1,7 @@
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/app_button.dart';
 import 'package:bastide/core/widgets/chart_scale.dart';
 import 'package:bastide/features/networth/application/networth_controller.dart';
 import 'package:bastide/features/networth/domain/networth_summary.dart';
@@ -379,10 +380,60 @@ void main() {
           value,
     ];
 
-    testWidgets('lists the totals newest first, the covered one chipped', (
+    testWidgets('a 560 px list editor whose footer only closes', (
       tester,
     ) async {
       await open(tester);
+
+      expect(tester.getSize(find.byKey(const Key('appModalFrame'))).width, 560);
+      final close = tester.widget<AppButton>(
+        find.byKey(const Key('appModalClose')),
+      );
+      expect(close.variant, AppButtonVariant.secondary);
+      expect(close.label, 'Fermer');
+      expect(find.byKey(const Key('appModalCancel')), findsNothing);
+
+      // The entry row carries the primary action, level with the inputs.
+      final month = tester.getRect(find.byKey(const Key('declaredMonth')));
+      final amount = tester.getRect(find.byKey(const Key('declaredAmount')));
+      final save = tester.getRect(find.byKey(const Key('declaredSave')));
+      expect(month.width, 130);
+      expect(amount.top, month.top);
+      expect(save.bottom, month.bottom);
+      expect(save.left - amount.right, 16);
+
+      // Focus lands on the entry row's first field.
+      final field = tester.widget<EditableText>(
+        find.descendant(
+          of: find.byKey(const Key('declaredMonth')),
+          matching: find.byType(EditableText),
+        ),
+      );
+      expect(field.focusNode.hasFocus, isTrue);
+
+      await tester.tap(find.byKey(const Key('appModalClose')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('declaredMonth')), findsNothing);
+    });
+
+    testWidgets('lists the totals newest first, the covered one dimmed', (
+      tester,
+    ) async {
+      await open(tester);
+
+      // A covered month keeps only delete: its figure is no longer used.
+      expect(find.byKey(const Key('declaredEdit-06/2025')), findsNothing);
+      expect(find.byKey(const Key('declaredDelete-06/2025')), findsOneWidget);
+      expect(find.byKey(const Key('declaredEdit-11/2024')), findsOneWidget);
+      final colors = AppTheme.dark.extension<AppColors>()!;
+      expect(
+        tester.widget<Text>(find.text('juin 2025')).style?.color,
+        colors.textTertiary,
+      );
+      expect(
+        tester.widget<Text>(find.text('nov. 2024')).style?.color,
+        colors.text,
+      );
 
       expect(rowKeys(tester), ['declaredRow-06/2025', 'declaredRow-11/2024']);
       expect(
@@ -456,7 +507,7 @@ void main() {
         find.text('Seul un mois terminé peut être déclaré.'),
         findsOneWidget,
       );
-      expect(find.byKey(const Key('declaredError')), findsNothing);
+      expect(find.byKey(const Key('appModalSaveError')), findsNothing);
     });
 
     testWidgets('edit loads a month into the form, delete removes it', (
@@ -477,7 +528,7 @@ void main() {
     testWidgets('reads in English', (tester) async {
       await open(tester, locale: const Locale('en'));
 
-      expect(find.text('June 2025'), findsOneWidget);
+      expect(find.text('Jun 2025'), findsOneWidget);
       expect(find.text('Covered by your imports'), findsOneWidget);
       expect(find.text('Accounts total'), findsOneWidget);
     });

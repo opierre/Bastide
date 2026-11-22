@@ -2,7 +2,6 @@ import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/app_button.dart';
-import 'package:bastide/core/widgets/app_modal.dart';
 import 'package:bastide/features/properties/application/properties_controller.dart';
 import 'package:bastide/features/properties/domain/property.dart';
 import 'package:bastide/features/properties/presentation/property_form_modal.dart';
@@ -42,9 +41,7 @@ Finder _dateInput(String key) => find.descendant(
 );
 
 /// The modal's own box, the one that carries its width.
-Finder _modalBox() => find
-    .descendant(of: find.byType(AppModal), matching: find.byType(Container))
-    .first;
+Finder _modalBox() => find.byKey(const Key('appModalFrame'));
 
 String? _text(WidgetTester tester, String key) =>
     tester.widget<Text>(find.byKey(Key(key))).data;
@@ -110,7 +107,7 @@ void main() {
         findsOneWidget,
       );
       final cancel = tester.widget<AppButton>(
-        find.byKey(const Key('propertyFormCancel')),
+        find.byKey(const Key('appModalCancel')),
       );
       expect(cancel.variant, AppButtonVariant.secondary);
       expect(cancel.label, 'Annuler');
@@ -135,6 +132,17 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.getSize(_modalBox()).width, 420);
+    final value = formatAmount(
+      amountMinor: 14500000,
+      currency: 'EUR',
+      locale: 'fr',
+    );
+    expect(
+      _text(tester, 'propertyRevalueSubtitle'),
+      'Studio Villeurbanne : $value estimés le 5 mars 2026. '
+      'La nouvelle estimation remplace celle-ci.',
+    );
+    expect(find.byKey(const Key('appModalCancel')), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('propertyRevalueSubmit')),
@@ -142,6 +150,67 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets(
+    'label and address run full width, then the pairs leave no empty cell',
+    (tester) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(
+        _wrap(
+          controller: FakePropertiesController(),
+          modal: const PropertyFormModal(currency: 'EUR'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      Rect box(String key) => tester.getRect(find.byKey(Key(key)));
+      final label = box('propertyFormLabel');
+      final address = box('propertyFormAddress');
+      expect(address.width, label.width);
+      expect(address.top, greaterThan(label.bottom));
+
+      // Nature · Quote-part, Valeur · Date d’estimation, Prix · Date
+      // d’acquisition: each pair on one line, 16 px apart.
+      for (final (start, end) in [
+        ('propertyFormKind', 'propertyFormOwnership'),
+        ('propertyFormValue', 'propertyFormValuedOn'),
+        ('propertyFormAcquisitionPrice', 'propertyFormAcquiredOn'),
+      ]) {
+        expect(box(start).top, box(end).top, reason: start);
+        expect(box(end).left - box(start).right, 16, reason: start);
+        expect(box(start).top, greaterThan(address.bottom));
+      }
+      expect(box('propertyFormKind').left, label.left);
+      expect(box('propertyFormAcquiredOn').right, label.right);
+    },
+  );
+
+  testWidgets('the first field takes focus, and typed input is not lost', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakePropertiesController(),
+        modal: const PropertyFormModal(currency: 'EUR'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final label = tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(const Key('propertyFormLabel')),
+        matching: find.byType(EditableText),
+      ),
+    );
+    expect(label.focusNode.hasFocus, isTrue);
+
+    await tester.enterText(find.byKey(const Key('propertyFormLabel')), 'T2');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('appModalCancel')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('appModalDiscard')), findsOneWidget);
   });
 
   testWidgets('an empty submit explains each missing field and saves nothing', (
@@ -238,7 +307,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Adresse'), findsOneWidget);
+    expect(find.text('Adresse (facultative)'), findsOneWidget);
     await _fillStudio(tester);
     await tester.enterText(
       find.byKey(const Key('propertyFormAddress')),
@@ -270,7 +339,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Address'), findsOneWidget);
+    expect(find.text('Address (optional)'), findsOneWidget);
     expect(find.text('8 allée des Tilleuls'), findsOneWidget);
     await tester.enterText(find.byKey(const Key('propertyFormAddress')), ' ');
     await tester.tap(find.byKey(const Key('propertyFormSubmit')));
@@ -357,7 +426,7 @@ void main() {
       find.text('Une date d’estimation ne peut pas être dans le futur.'),
       findsOneWidget,
     );
-    expect(find.byKey(const Key('propertyFormError')), findsNothing);
+    expect(find.byKey(const Key('appModalSaveError')), findsNothing);
   });
 
   testWidgets('a new valuation sends the value with its date', (tester) async {

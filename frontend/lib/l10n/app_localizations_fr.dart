@@ -4378,7 +4378,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get propertyFormLabelRequired => 'Donnez un nom à ce bien.';
 
   @override
-  String get propertyFormAddress => 'Adresse';
+  String get propertyFormAddress => 'Adresse (facultative)';
 
   @override
   String get propertyFormKind => 'Nature';
@@ -4420,9 +4420,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get propertyFormCalendar => 'Choisir une date';
-
-  @override
-  String get propertyFormCancel => 'Annuler';
 
   @override
   String get propertyFormSave => 'Enregistrer';
@@ -4667,9 +4664,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get networthDeclaredSave => 'Enregistrer';
 
   @override
-  String get networthDeclaredClose => 'Fermer';
-
-  @override
   String get networthDeclaredEmpty => 'Aucun montant déclaré.';
 
   @override
@@ -4684,9 +4678,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get networthDeclaredLoadFailed =>
       'Impossible de charger l’historique déclaré.';
-
-  @override
-  String get networthDeclaredRetry => 'Réessayer';
 
   @override
   String get networthDeclaredErrorNotFound => 'Ce montant n’existe plus.';

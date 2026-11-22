@@ -197,7 +197,7 @@ void main() {
     expect(find.byKey(const Key('propertyRevalueSubmit')), findsOneWidget);
     expect(
       _text(tester, 'propertyRevalueSubtitle'),
-      'Studio Villeurbanne : ${_money(14500000)} estimés le 05/03/2026. '
+      'Studio Villeurbanne : ${_money(14500000)} estimés le 5 mars 2026. '
       'La nouvelle estimation remplace celle-ci.',
     );
   });
