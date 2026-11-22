@@ -1,6 +1,11 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'dart:async';
+
+import 'package:bastide/core/widgets/inline_banner.dart';
+import 'package:bastide/core/widgets/modal_parts.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
+import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
 import 'package:bastide/features/recurring/data/recurring_repository.dart';
 import 'package:bastide/features/recurring/domain/recurring_series.dart';
@@ -53,6 +58,7 @@ Future<ProviderContainer> _open(
   required MockRecurringRepository repository,
   FakeSubscriptionsController? controller,
   Locale locale = const Locale('fr'),
+  bool settle = true,
 }) async {
   final container = ProviderContainer(
     // Riverpod's automatic retry would hide the failed-preview state.
@@ -99,7 +105,13 @@ Future<ProviderContainer> _open(
     ),
   );
   await tester.tap(find.byKey(const Key('open')));
-  await tester.pumpAndSettle();
+  if (settle) {
+    await tester.pumpAndSettle();
+  } else {
+    // The loading silhouette pulses for as long as the preview runs.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+  }
   return container;
 }
 
@@ -128,13 +140,33 @@ void main() {
 
     await _open(tester, repository: repository);
 
+    expect(
+      find.text(
+        'Voici les opérations que Bastide regrouperait. '
+        'Décochez celles qui n’en font pas partie.',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Confiance élevée'), findsOneWidget);
-    expect(find.text('3 opérations trouvées'), findsOneWidget);
-    expect(find.text('Rythme mensuel reconnu'), findsOneWidget);
-    expect(find.text('Montant stable'), findsOneWidget);
+    // The reasons, said once on one line.
+    expect(
+      find.text(
+        '3 opérations trouvées · Rythme mensuel reconnu · Montant stable',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Mensuel'), findsOneWidget);
-    expect(find.text('3 opérations cochées'), findsOneWidget);
-    expect(find.byKey(const Key('markRecurringLowWarning')), findsNothing);
+    // The expected amount reads unsigned, as the panel prints a price.
+    expect(find.text('9,99\u00a0€'), findsOneWidget);
+    // A day never parts from its month: the dates carry no-break spaces.
+    final summary = tester.widget<Text>(
+      find.byKey(const Key('markRecurringSummary')),
+    );
+    expect(
+      summary.data!.replaceAll(' ', ' '),
+      '3 opérations cochées · du 15 janv. 2026 au 15 mars 2026',
+    );
+    expect(find.byType(InlineBanner), findsNothing);
   });
 
   testWidgets('a medium-confidence preview names what is missing', (
@@ -156,8 +188,8 @@ void main() {
     await _open(tester, repository: repository, locale: const Locale('en'));
 
     expect(find.text('Medium confidence'), findsOneWidget);
-    expect(find.text('Fewer than three charges'), findsOneWidget);
-    expect(find.byKey(const Key('markRecurringLowWarning')), findsNothing);
+    expect(find.textContaining('Fewer than three charges'), findsOneWidget);
+    expect(find.byType(InlineBanner), findsNothing);
   });
 
   testWidgets('a low-confidence preview warns but still lets the user save', (
@@ -177,7 +209,12 @@ void main() {
     await _open(tester, repository: repository, controller: controller);
 
     expect(find.text('Confiance faible'), findsOneWidget);
-    expect(find.byKey(const Key('markRecurringLowWarning')), findsOneWidget);
+    // Low confidence is said in the status text alone: no banner repeats it.
+    final status = tester.widget<StatusText>(
+      find.byKey(const Key('markRecurringConfidence')),
+    );
+    expect(status.tone, StatusTone.warning);
+    expect(find.byType(InlineBanner), findsNothing);
     expect(find.text('Irrégulier'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('markRecurringSave')));
@@ -197,7 +234,7 @@ void main() {
     await tester.tap(find.byKey(const Key('markRecurringTick-t2')));
     await tester.pumpAndSettle();
 
-    expect(find.text('2 opérations cochées'), findsOneWidget);
+    expect(find.textContaining('2 opérations cochées'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('markRecurringSave')));
     await tester.pumpAndSettle();
@@ -262,9 +299,18 @@ void main() {
     });
 
     await _open(tester, repository: repository);
-    expect(find.text("Impossible de préparer l’aperçu."), findsOneWidget);
+    expect(
+      find.text('Impossible de préparer l’aperçu. Rien n’a été modifié.'),
+      findsOneWidget,
+    );
+    // The lead describes a body that is not there.
+    expect(find.textContaining('Voici les opérations'), findsNothing);
+    final save = tester.widget<PrimaryButton>(
+      find.byKey(const Key('markRecurringSave')),
+    );
+    expect(save.onPressed, isNull);
 
-    await tester.tap(find.byKey(const Key('markRecurringRetry')));
+    await tester.tap(find.byKey(const Key('modalLoadErrorRetry')));
     await tester.pumpAndSettle();
 
     expect(find.text('Confiance élevée'), findsOneWidget);
@@ -298,8 +344,15 @@ void main() {
     await _open(tester, repository: repository, controller: controller);
 
     expect(find.byKey(const Key('markRecurringExisting')), findsOneWidget);
-    expect(find.textContaining('« Streamco »'), findsOneWidget);
-    expect(find.text('2 opérations cochées'), findsOneWidget);
+    expect(
+      find.text(
+        'Cette dépense correspond à « Streamco », déjà suivi dans vos '
+        'abonnements. Cochez les opérations à y ajouter.',
+      ),
+      findsOneWidget,
+    );
+    // The series is a link in the body, not a footer action.
+    expect(find.text('Voir la série « Streamco »'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('markRecurringTick-t2')));
     await tester.pumpAndSettle();
@@ -335,6 +388,50 @@ void main() {
     expect(controller.attachCalls, isEmpty);
     expect(find.text('subscriptions'), findsOneWidget);
     expect(container.read(selectedSeriesProvider), 's9');
+  });
+
+  testWidgets('while the preview loads, the body is its silhouette', (
+    tester,
+  ) async {
+    final preview = Completer<PreviewOutcome>();
+    when(() => repository.preview('t3')).thenAnswer((_) => preview.future);
+
+    await _open(tester, repository: repository, settle: false);
+
+    expect(find.byType(ModalLoadingBody), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.textContaining('Voici les opérations'), findsNothing);
+    final save = tester.widget<PrimaryButton>(
+      find.byKey(const Key('markRecurringSave')),
+    );
+    expect(save.onPressed, isNull);
+
+    preview.complete(Proposal(_preview(PreviewConfidence.high)));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ModalLoadingBody), findsNothing);
+    expect(find.text('Confiance élevée'), findsOneWidget);
+  });
+
+  testWidgets('the charges read newest first, one line each, 36 px', (
+    tester,
+  ) async {
+    when(
+      () => repository.preview('t3'),
+    ).thenAnswer((_) async => Proposal(_preview(PreviewConfidence.high)));
+
+    await _open(tester, repository: repository);
+
+    final tops = [
+      for (final id in ['t3', 't2', 't1'])
+        tester.getTopLeft(find.byKey(Key('markRecurringTick-$id'))).dy,
+    ];
+    expect(tops[0], lessThan(tops[1]));
+    expect(tops[1], lessThan(tops[2]));
+    expect(
+      tester.getSize(find.byKey(const Key('markRecurringTick-t1'))).height,
+      36,
+    );
   });
 
   group('add to an existing series', () {
@@ -483,6 +580,24 @@ void main() {
     ) async {
       await _open(tester, repository: repository);
       await openPicker(tester);
+
+      expect(
+        find.text(
+          'Choisissez la série dont fait partie cette opération. '
+          'Bastide retiendra son libellé pour les prochaines.',
+        ),
+        findsOneWidget,
+      );
+      // The back action sits alone on the footer's left.
+      final back = tester.getTopLeft(find.byKey(const Key('seriesPickerBack')));
+      final cancel = tester.getTopLeft(
+        find.byKey(const Key('markRecurringCancel')),
+      );
+      expect(back.dx, lessThan(cancel.dx));
+      expect(
+        tester.getSize(find.byKey(const Key('seriesPickerRow-s1'))).height,
+        48,
+      );
       await tester.tap(find.byKey(const Key('seriesPickerBack')));
       await tester.pumpAndSettle();
 
@@ -512,7 +627,7 @@ void main() {
 
       expect(find.text('Impossible de charger vos séries.'), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('seriesPickerRetry')));
+      await tester.tap(find.byKey(const Key('modalLoadErrorRetry')));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('seriesPickerRow-s1')), findsOneWidget);

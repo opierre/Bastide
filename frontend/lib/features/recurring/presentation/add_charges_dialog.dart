@@ -3,22 +3,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/date_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
-import '../../../core/widgets/inline_banner.dart';
+import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/primary_button.dart';
-import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/add_to_series_controller.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
 import '../domain/series_preview.dart';
 import 'recurring_error_localizer.dart';
-import 'recurring_labels.dart';
-import 'series_picker.dart';
-import 'transaction_check_row.dart';
+import 'recurring_modal_parts.dart';
 
-/// Opens « Ajouter une opération » for [series]: the outflows in no series,
+/// Opens « Ajouter à « … » » for [series]: the outflows in no series,
 /// closest first, several selectable at once.
 Future<void> showAddChargesDialog(
   BuildContext context,
@@ -28,6 +26,12 @@ Future<void> showAddChargesDialog(
   builder: (_) => AddChargesDialog(series: series),
 );
 
+/// The 560 px « Ajouter à « {série} » » modal (`docs/design/10` § Other
+/// modals, `proposal_v6` `m-subscriptions`): the lead, a search field, the
+/// candidate charges as checkable rows (date, bank label in Geist Mono over
+/// the account, amount), the « Afficher plus » link, and « Annuler » · ink
+/// « Ajouter {n} opérations ». A long series name wraps in the title, its
+/// lines balanced by the frame, and never widens the modal.
 class AddChargesDialog extends ConsumerStatefulWidget {
   const AddChargesDialog({super.key, required this.series});
 
@@ -44,7 +48,8 @@ class _AddChargesDialogState extends ConsumerState<AddChargesDialog> {
 
   Timer? _searchTimer;
   bool _isSaving = false;
-  String? _errorText;
+  bool _loadMoreFailed = false;
+  String? _saveError;
 
   ChargePickerController get _controller =>
       ref.read(chargePickerControllerProvider(widget.series.id).notifier);
@@ -61,20 +66,21 @@ class _AddChargesDialogState extends ConsumerState<AddChargesDialog> {
   }
 
   Future<void> _loadMore() async {
+    setState(() => _loadMoreFailed = false);
     try {
       await _controller.loadMore();
-    } catch (error) {
+    } catch (_) {
       if (!mounted) return;
-      setState(
-        () => _errorText = AppLocalizations.of(context)!.chargePickerLoadError,
-      );
+      setState(() => _loadMoreFailed = true);
     }
   }
 
   Future<void> _save() async {
+    if (_isSaving) return;
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isSaving = true;
-      _errorText = null;
+      _saveError = null;
     });
     try {
       await _controller.save();
@@ -84,10 +90,7 @@ class _AddChargesDialogState extends ConsumerState<AddChargesDialog> {
       if (!mounted) return;
       setState(() {
         _isSaving = false;
-        _errorText = localizeRecurringError(
-          AppLocalizations.of(context)!,
-          error,
-        );
+        _saveError = localizeRecurringError(l10n, error);
       });
     }
   }
@@ -95,20 +98,21 @@ class _AddChargesDialogState extends ConsumerState<AddChargesDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
     final provider = chargePickerControllerProvider(widget.series.id);
     final state = ref.watch(provider);
     final ticked = state.value?.ticked.length ?? 0;
 
     return AppModal(
+      key: const Key('chargePickerModal'),
       title: l10n.chargePickerTitle(widget.series.label),
-      width: 560,
+      subtitle: Text(l10n.chargePickerIntro),
+      width: AppModalSizes.w560,
+      // Ticked charges are the user's input.
+      dirty: ticked > 0,
+      busy: _isSaving,
+      saveError: _saveError,
       actions: [
-        OutlinedButton(
-          key: const Key('chargePickerCancel'),
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.markRecurringCancel),
-        ),
+        const AppModalCancel(key: Key('chargePickerCancel')),
         PrimaryButton(
           key: const Key('chargePickerSave'),
           label: l10n.chargePickerSave(ticked),
@@ -120,34 +124,19 @@ class _AddChargesDialogState extends ConsumerState<AddChargesDialog> {
         key: const Key('chargePicker'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.chargePickerIntro,
-            style: textTheme.bodySmall?.copyWith(
-              color: context.colors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          if (_errorText != null) ...[
-            InlineBanner(
-              key: const Key('chargePickerError'),
-              message: _errorText!,
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
           PickerSearchField(
             fieldKey: const Key('chargePickerSearch'),
             hint: l10n.chargePickerSearchHint,
             onChanged: _onSearch,
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.fieldGap),
           switch (state) {
             AsyncValue(isLoading: true) => const PickerLoading(
               key: Key('chargePickerLoading'),
             ),
-            AsyncValue(hasError: true) => ErrorStateView(
+            AsyncValue(hasError: true) => ModalLoadError(
+              key: const Key('chargePickerError'),
               message: l10n.chargePickerLoadError,
-              retryLabel: l10n.markRecurringRetry,
-              retryKey: const Key('chargePickerRetry'),
               onRetry: () => ref.invalidate(provider),
             ),
             AsyncValue(:final value?) when value.items.isEmpty => PickerMessage(
@@ -158,7 +147,7 @@ class _AddChargesDialogState extends ConsumerState<AddChargesDialog> {
             ),
             AsyncValue(:final value?) => _CandidateList(
               state: value,
-              enabled: !_isSaving,
+              loadMoreFailed: _loadMoreFailed,
               onToggle: _controller.toggle,
               onLoadMore: _loadMore,
             ),
@@ -173,62 +162,64 @@ class _AddChargesDialogState extends ConsumerState<AddChargesDialog> {
 class _CandidateList extends ConsumerWidget {
   const _CandidateList({
     required this.state,
-    required this.enabled,
+    required this.loadMoreFailed,
     required this.onToggle,
     required this.onLoadMore,
   });
 
   final ChargePickerState state;
-  final bool enabled;
+  final bool loadMoreFailed;
   final ValueChanged<PreviewTransaction> onToggle;
   final VoidCallback onLoadMore;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final dates = seriesDateFormat(Localizations.localeOf(context).toString());
+    final dates = DayMonthFormat.yMMMd(
+      Localizations.localeOf(context).toString(),
+    );
     final accounts = {
       for (final account
           in ref.watch(subscriptionAccountsProvider).value ?? const [])
         account.id: account.displayName,
     };
 
-    return PickerListFrame(
-      child: ListView(
-        shrinkWrap: true,
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-        children: [
-          for (final transaction in state.items)
-            TransactionCheckRow(
-              tickKey: Key('chargePickerTick-${transaction.id}'),
-              transaction: transaction,
-              date: dates.format(transaction.bookedDate),
-              caption: accounts[transaction.accountId],
-              ticked: state.ticked.containsKey(transaction.id),
-              onChanged: enabled ? () => onToggle(transaction) : null,
-            ),
-          if (state.hasMore)
-            Center(
-              child: state.isLoadingMore
-                  ? Padding(
-                      padding: EdgeInsets.all(AppSpacing.sm),
-                      child: SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: context.colors.accent,
-                        ),
-                      ),
-                    )
-                  : TextButton(
-                      key: const Key('chargePickerLoadMore'),
-                      onPressed: onLoadMore,
-                      child: Text(l10n.chargePickerLoadMore),
-                    ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ModalList(
+          children: [
+            for (final transaction in state.items)
+              ChargeRow(
+                key: Key('chargePickerTick-${transaction.id}'),
+                transaction: transaction,
+                date: dates.format(transaction.bookedDate),
+                caption: accounts[transaction.accountId],
+                ticked: state.ticked.containsKey(transaction.id),
+                onChanged: () => onToggle(transaction),
+              ),
+          ],
+        ),
+        if (state.hasMore) ...[
+          const SizedBox(height: AppSpacing.fieldGap),
+          if (loadMoreFailed)
+            ModalLoadError(
+              key: const Key('chargePickerLoadMoreError'),
+              message: l10n.chargePickerLoadError,
+              onRetry: onLoadMore,
+            )
+          else if (state.isLoadingMore)
+            const PickerLoading(key: Key('chargePickerLoadingMore'), rows: 2)
+          else
+            RecurringModalLinkLine(
+              link: RecurringModalLink(
+                key: const Key('chargePickerLoadMore'),
+                label: l10n.chargePickerLoadMore,
+                onTap: onLoadMore,
+              ),
             ),
         ],
-      ),
+      ],
     );
   }
 }

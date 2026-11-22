@@ -3237,9 +3237,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subscriptionFormCategoryNone => 'Aucune';
 
   @override
-  String get subscriptionFormCancel => 'Annuler';
-
-  @override
   String get subscriptionFormSave => 'Enregistrer';
 
   @override
@@ -5287,10 +5284,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get markRecurringReasonNoRhythm => 'Aucun rythme régulier';
 
   @override
-  String get markRecurringLowWarning =>
-      'Aucun rythme régulier n’a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.';
-
-  @override
   String get markRecurringCadenceLabel => 'Rythme proposé';
 
   @override
@@ -5309,8 +5302,14 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String markRecurringTickedRange(String from, String to) {
-    return 'du $from au $to';
+  String markRecurringTickedRange(int count, String from, String to) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count opérations cochées',
+      one: '1 opération cochée',
+    );
+    return '$_temp0 · du $from au $to';
   }
 
   @override
@@ -5321,13 +5320,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get markRecurringSave => 'Enregistrer la série';
 
   @override
-  String get markRecurringCancel => 'Annuler';
-
-  @override
-  String get markRecurringLoadError => 'Impossible de préparer l’aperçu.';
-
-  @override
-  String get markRecurringRetry => 'Réessayer';
+  String get markRecurringLoadError =>
+      'Impossible de préparer l’aperçu. Rien n’a été modifié.';
 
   @override
   String get subscriptionErrorPreviewInflow =>
@@ -5347,7 +5341,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get markRecurringViewSeries => 'Voir la série';
+  String markRecurringViewSeries(String label) {
+    return 'Voir la série « $label »';
+  }
 
   @override
   String get markRecurringAddToSeries => 'Ajouter à cette série';

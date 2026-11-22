@@ -5063,12 +5063,6 @@ abstract class AppLocalizations {
   /// **'Aucune'**
   String get subscriptionFormCategoryNone;
 
-  /// Cancel action in the recurring payment modal footer.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get subscriptionFormCancel;
-
   /// Confirm action when editing a recurring payment.
   ///
   /// In fr, this message translates to:
@@ -8354,12 +8348,6 @@ abstract class AppLocalizations {
   /// **'Aucun rythme régulier'**
   String get markRecurringReasonNoRhythm;
 
-  /// Warning banner shown when the preview's confidence is low.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucun rythme régulier n’a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.'**
-  String get markRecurringLowWarning;
-
   /// Label of the proposed cadence in the dialog summary.
   ///
   /// In fr, this message translates to:
@@ -8378,11 +8366,11 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{Aucune opération cochée} =1{1 opération cochée} other{{count} opérations cochées}}'**
   String markRecurringTickedCount(int count);
 
-  /// Summary line: the dates of the oldest and newest ticked transactions.
+  /// Summary line under the charges: how many are ticked, and the dates of the oldest and newest of them.
   ///
   /// In fr, this message translates to:
-  /// **'du {from} au {to}'**
-  String markRecurringTickedRange(String from, String to);
+  /// **'{count, plural, =1{1 opération cochée} other{{count} opérations cochées}} · du {from} au {to}'**
+  String markRecurringTickedRange(int count, String from, String to);
 
   /// Hint shown when every transaction is unticked.
   ///
@@ -8396,23 +8384,11 @@ abstract class AppLocalizations {
   /// **'Enregistrer la série'**
   String get markRecurringSave;
 
-  /// Closes the dialog without saving.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get markRecurringCancel;
-
   /// Shown when the preview request failed.
   ///
   /// In fr, this message translates to:
-  /// **'Impossible de préparer l’aperçu.'**
+  /// **'Impossible de préparer l’aperçu. Rien n’a été modifié.'**
   String get markRecurringLoadError;
-
-  /// Retries the preview request.
-  ///
-  /// In fr, this message translates to:
-  /// **'Réessayer'**
-  String get markRecurringRetry;
 
   /// Error RECURRING_PREVIEW_INFLOW: a preview was asked for an inflow.
   ///
@@ -8438,11 +8414,11 @@ abstract class AppLocalizations {
   /// **'Cette dépense correspond à « {label} », déjà suivi dans vos abonnements. Cochez les opérations à y ajouter.'**
   String markRecurringExistingIntro(String label);
 
-  /// Closes the dialog and opens the existing series in Abonnements.
+  /// Link in the dialog body: closes it and opens the existing series in Abonnements.
   ///
   /// In fr, this message translates to:
-  /// **'Voir la série'**
-  String get markRecurringViewSeries;
+  /// **'Voir la série « {label} »'**
+  String markRecurringViewSeries(String label);
 
   /// Primary button adding the ticked transactions to the existing series.
   ///

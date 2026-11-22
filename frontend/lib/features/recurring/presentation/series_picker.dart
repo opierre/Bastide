@@ -1,53 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/institution_avatar.dart';
-import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/modal_parts.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/add_to_series_controller.dart';
 import '../application/subscriptions_controller.dart';
 import '../domain/recurring_series.dart';
 import 'recurring_labels.dart';
+import 'recurring_modal_parts.dart';
 
 /// The « Ajouter à une série existante… » step of the mark-as-recurring
-/// dialog: the user's series on every account, searchable by label, each with
-/// its account, cadence and expected amount. Tapping one only selects it: the
-/// dialog's « Confirmer » adds the transaction.
+/// modal (`proposal_v6` `m-subscriptions`, « choisir une série »): a search
+/// field, then the user's series on every account, each with its account,
+/// cadence and expected amount. Tapping one only selects it: the modal's
+/// « Confirmer » adds the transaction. The lead is the modal's; while it
+/// saves, the modal's frame disables the body.
 class SeriesPickerBody extends ConsumerWidget {
-  const SeriesPickerBody({super.key, required this.enabled});
-
-  final bool enabled;
+  const SeriesPickerBody({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
     final state = ref.watch(seriesPickerControllerProvider);
 
     return Column(
       key: const Key('seriesPicker'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          l10n.seriesPickerIntro,
-          style: textTheme.bodySmall?.copyWith(
-            color: context.colors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
         PickerSearchField(
           fieldKey: const Key('seriesPickerSearch'),
           hint: l10n.seriesPickerSearchHint,
           onChanged: ref.read(seriesPickerControllerProvider.notifier).search,
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.fieldGap),
         switch (state) {
-          AsyncValue(hasError: true) when !state.isLoading => ErrorStateView(
+          AsyncValue(hasError: true) when !state.isLoading => ModalLoadError(
+            key: const Key('seriesPickerError'),
             message: l10n.seriesPickerLoadError,
-            retryLabel: l10n.markRecurringRetry,
-            retryKey: const Key('seriesPickerRetry'),
             onRetry: () => ref.invalidate(seriesPickerControllerProvider),
           ),
           AsyncValue(:final value?) when value.series.isEmpty => PickerMessage(
@@ -58,23 +51,18 @@ class SeriesPickerBody extends ConsumerWidget {
             key: const Key('seriesPickerNoMatch'),
             text: l10n.seriesPickerNoMatch(value.query.trim()),
           ),
-          AsyncValue(:final value?) => PickerListFrame(
-            child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-              children: [
-                for (final series in value.visible)
-                  _SeriesPickRow(
-                    series: series,
-                    selected: series.id == value.selectedId,
-                    onTap: enabled
-                        ? () => ref
-                              .read(seriesPickerControllerProvider.notifier)
-                              .select(series.id)
-                        : null,
-                  ),
-              ],
-            ),
+          AsyncValue(:final value?) => ModalList(
+            children: [
+              for (final series in value.visible)
+                _SeriesPickRow(
+                  key: Key('seriesPickerRow-${series.id}'),
+                  series: series,
+                  selected: series.id == value.selectedId,
+                  onTap: () => ref
+                      .read(seriesPickerControllerProvider.notifier)
+                      .select(series.id),
+                ),
+            ],
           ),
           _ => const PickerLoading(key: Key('seriesPickerLoading')),
         },
@@ -83,8 +71,12 @@ class SeriesPickerBody extends ConsumerWidget {
   }
 }
 
+/// A 48 px row: the monogram, the label over « compte · cadence · montant »
+/// in `textTertiary`. The chosen series takes `accentSoft`, a `check`, and
+/// its detail line turns `textSecondary`.
 class _SeriesPickRow extends ConsumerWidget {
   const _SeriesPickRow({
+    super.key,
     required this.series,
     required this.selected,
     required this.onTap,
@@ -92,11 +84,12 @@ class _SeriesPickRow extends ConsumerWidget {
 
   final RecurringSeries series;
   final bool selected;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     final textTheme = Theme.of(context).textTheme;
     final locale = Localizations.localeOf(context).toString();
     final accounts = ref.watch(subscriptionAccountsProvider).value ?? const [];
@@ -104,173 +97,59 @@ class _SeriesPickRow extends ConsumerWidget {
         .where((candidate) => candidate.id == series.accountId)
         .firstOrNull;
 
-    return Semantics(
+    return ModalListRow(
+      twoLines: true,
       selected: selected,
-      child: Material(
-        color: selected ? context.colors.accentSoft : Colors.transparent,
-        child: InkWell(
-          key: Key('seriesPickerRow-${series.id}'),
-          onTap: onTap,
-          hoverColor: context.colors.hover,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm + AppSpacing.xs,
-              vertical: AppSpacing.sm,
-            ),
-            child: Row(
+      onTap: onTap,
+      child: Row(
+        children: [
+          InstitutionAvatar(name: series.label, logo: series.logo),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InstitutionAvatar(
-                  name: series.label,
-                  size: 28,
-                  logo: series.logo,
+                Text(
+                  series.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.bodyMedium,
                 ),
-                const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        series.label,
-                        style: textTheme.bodyMedium,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        l10n.seriesPickerRowDetail(
-                          account?.displayName ?? '',
-                          cadenceLabel(l10n, series.cadence),
-                          // What the subscription costs, unsigned, as the panel
-                          // prints it everywhere else.
-                          formatAmount(
-                            amountMinor: series.expectedAmountMinor.abs(),
-                            currency: series.currency,
-                            locale: locale,
-                          ),
-                        ),
-                        style: textTheme.bodySmall?.copyWith(
-                          color: context.colors.textSecondary,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                Text(
+                  l10n.seriesPickerRowDetail(
+                    account?.displayName ?? '',
+                    cadenceLabel(l10n, series.cadence),
+                    // What the subscription costs, unsigned, as the panel
+                    // prints it everywhere else.
+                    formatAmount(
+                      amountMinor: series.expectedAmountMinor.abs(),
+                      currency: series.currency,
+                      locale: locale,
+                    ),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.helper.copyWith(
+                    color: selected
+                        ? colors.textSecondary
+                        : colors.textTertiary,
                   ),
                 ),
-                // The tick repeats the tint, so the choice never rests on color.
-                if (selected) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  Icon(
-                    Icons.check_rounded,
-                    key: Key('seriesPickerSelected'),
-                    size: 18,
-                    color: context.colors.accent,
-                  ),
-                ],
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The inset search field both pickers open on.
-class PickerSearchField extends StatelessWidget {
-  const PickerSearchField({
-    super.key,
-    required this.fieldKey,
-    required this.hint,
-    required this.onChanged,
-  });
-
-  final Key fieldKey;
-  final String hint;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      key: fieldKey,
-      autofocus: true,
-      onChanged: onChanged,
-      style: Theme.of(context).textTheme.bodyMedium,
-      decoration: InputDecoration(
-        isDense: true,
-        hintText: hint,
-        prefixIcon: const Icon(Icons.search_rounded, size: 16),
-        prefixIconConstraints: const BoxConstraints(
-          minWidth: 30,
-          minHeight: 30,
-        ),
-        filled: true,
-        fillColor: context.colors.field,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadii.sm),
-          borderSide: BorderSide(color: context.colors.line),
-        ),
-      ),
-    );
-  }
-}
-
-/// The inset well a picker's list scrolls in, capped so the dialog keeps its
-/// actions on screen.
-class PickerListFrame extends StatelessWidget {
-  const PickerListFrame({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 300),
-      child: Container(
-        decoration: BoxDecoration(
-          color: context.colors.field,
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: context.colors.line),
-        ),
-        child: child,
-      ),
-    );
-  }
-}
-
-class PickerLoading extends StatelessWidget {
-  const PickerLoading({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 120,
-      child: Center(
-        child: SizedBox(
-          width: 22,
-          height: 22,
-          child: CircularProgressIndicator(
-            strokeWidth: 2.5,
-            color: context.colors.accent,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class PickerMessage extends StatelessWidget {
-  const PickerMessage({super.key, required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: context.colors.textSecondary),
+          // The check repeats the tint, so the choice never rests on colour.
+          if (selected) ...[
+            const SizedBox(width: AppSpacing.sm),
+            Icon(
+              LucideIcons300.check,
+              key: const Key('seriesPickerSelected'),
+              size: AppSizes.iconSmall,
+              color: colors.accent,
+            ),
+          ],
+        ],
       ),
     );
   }
