@@ -4804,7 +4804,7 @@
   "@mortgageFormFees": {
     "description": "Loan form: upfront fees field."
   },
-  "mortgageFormProperty": "Bien financé",
+  "mortgageFormProperty": "Bien financé (facultatif)",
   "@mortgageFormProperty": {
     "description": "Loan form: optional property link."
   },
@@ -4848,13 +4848,18 @@
   "@mortgageFormDelete": {
     "description": "Ghost button of the loan form, edit only."
   },
-  "mortgageDeleteTitle": "Supprimer ce crédit ?",
+  "mortgageDeleteTitle": "Supprimer le crédit « {label} » ?",
   "@mortgageDeleteTitle": {
-    "description": "Delete confirmation title."
+    "description": "Delete confirmation title, naming the loan.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
   },
-  "mortgageDeleteBody": "Il quittera le passif de la Synthèse et, s’il est rattaché à un bien, la base de l’IFI.",
+  "mortgageDeleteBody": "Il ne sera plus déduit de votre patrimoine dans la Synthèse, et son tableau d’amortissement disparaît. Vos comptes ne sont pas modifiés.",
   "@mortgageDeleteBody": {
-    "description": "Delete confirmation: both consequences."
+    "description": "Delete confirmation lead: what changes and what does not."
   },
   "mortgageDeleteConfirm": "Supprimer",
   "@mortgageDeleteConfirm": {

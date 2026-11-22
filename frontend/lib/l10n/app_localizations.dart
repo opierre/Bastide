@@ -6026,7 +6026,7 @@ abstract class AppLocalizations {
   /// Loan form: optional property link.
   ///
   /// In fr, this message translates to:
-  /// **'Bien financé'**
+  /// **'Bien financé (facultatif)'**
   String get mortgageFormProperty;
 
   /// Loan form: no property linked.
@@ -6077,16 +6077,16 @@ abstract class AppLocalizations {
   /// **'Supprimer'**
   String get mortgageFormDelete;
 
-  /// Delete confirmation title.
+  /// Delete confirmation title, naming the loan.
   ///
   /// In fr, this message translates to:
-  /// **'Supprimer ce crédit ?'**
-  String get mortgageDeleteTitle;
+  /// **'Supprimer le crédit « {label} » ?'**
+  String mortgageDeleteTitle(String label);
 
-  /// Delete confirmation: both consequences.
+  /// Delete confirmation lead: what changes and what does not.
   ///
   /// In fr, this message translates to:
-  /// **'Il quittera le passif de la Synthèse et, s’il est rattaché à un bien, la base de l’IFI.'**
+  /// **'Il ne sera plus déduit de votre patrimoine dans la Synthèse, et son tableau d’amortissement disparaît. Vos comptes ne sont pas modifiés.'**
   String get mortgageDeleteBody;
 
   /// Delete confirmation: confirm.

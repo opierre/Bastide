@@ -3793,7 +3793,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mortgageFormFees => 'Frais de dossier';
 
   @override
-  String get mortgageFormProperty => 'Bien financé';
+  String get mortgageFormProperty => 'Bien financé (facultatif)';
 
   @override
   String get mortgageFormPropertyNone => 'Aucun';
@@ -3824,11 +3824,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mortgageFormDelete => 'Supprimer';
 
   @override
-  String get mortgageDeleteTitle => 'Supprimer ce crédit ?';
+  String mortgageDeleteTitle(String label) {
+    return 'Supprimer le crédit « $label » ?';
+  }
 
   @override
   String get mortgageDeleteBody =>
-      'Il quittera le passif de la Synthèse et, s’il est rattaché à un bien, la base de l’IFI.';
+      'Il ne sera plus déduit de votre patrimoine dans la Synthèse, et son tableau d’amortissement disparaît. Vos comptes ne sont pas modifiés.';
 
   @override
   String get mortgageDeleteConfirm => 'Supprimer';

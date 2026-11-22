@@ -3775,7 +3775,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgageFormFees => 'Upfront fees';
 
   @override
-  String get mortgageFormProperty => 'Financed property';
+  String get mortgageFormProperty => 'Financed property (optional)';
 
   @override
   String get mortgageFormPropertyNone => 'None';
@@ -3806,11 +3806,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgageFormDelete => 'Delete';
 
   @override
-  String get mortgageDeleteTitle => 'Delete this loan?';
+  String mortgageDeleteTitle(String label) {
+    return 'Delete the loan “$label”?';
+  }
 
   @override
   String get mortgageDeleteBody =>
-      'It will leave the liabilities in Net worth and, if it is linked to a property, the IFI base.';
+      'It will no longer be deducted from your net worth in Net worth, and its amortisation schedule disappears. Your accounts are not changed.';
 
   @override
   String get mortgageDeleteConfirm => 'Delete';
