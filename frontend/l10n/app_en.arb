@@ -610,7 +610,7 @@
   "ruleLogoInvalid": "This file isn’t a PNG, JPEG or WebP picture.",
   "ruleLogoError": "The logo couldn’t be saved. Try again.",
   "ruleLogoCropTitle": "Crop the logo",
-  "ruleLogoCropLead": "Drag and zoom to frame the logo.",
+  "ruleLogoCropLead": "Drag the image to frame the logo.",
   "ruleLogoCropCancel": "Cancel",
   "ruleLogoCropSave": "Use this logo",
   "ruleFormLogoFromUrl": "From an address…",
@@ -885,7 +885,7 @@
   "goalImageRemove": "Remove image",
   "goalImageAdd": "Add an image",
   "goalImageCropTitle": "Crop the image",
-  "goalImageCropLead": "Drag and zoom to frame the banner.",
+  "goalImageCropLead": "Drag the image to frame the banner.",
   "goalImageCropSave": "Use this image",
   "goalImageTooLarge": "This picture is too large: choose a file under {megabytes} MB.",
   "goalImageInvalid": "This file isn’t a PNG, JPEG or WebP picture.",
@@ -1336,7 +1336,7 @@
   "@settingsAvatarCropTitle": {
     "description": "Title of the modal where the user crops the picked picture to a square."
   },
-  "settingsAvatarCropLead": "Drag and zoom to frame your avatar.",
+  "settingsAvatarCropLead": "Drag the image to frame your avatar.",
   "@settingsAvatarCropLead": {
     "description": "Lead text of the crop modal."
   },

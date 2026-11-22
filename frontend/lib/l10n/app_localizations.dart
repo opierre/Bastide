@@ -3562,7 +3562,7 @@ abstract class AppLocalizations {
   /// Lead text of the logo crop modal.
   ///
   /// In fr, this message translates to:
-  /// **'Faites glisser et zoomez pour cadrer le logo.'**
+  /// **'Faites glisser l’image pour cadrer le logo.'**
   String get ruleLogoCropLead;
 
   /// Cancel button of the logo crop modal.
@@ -5228,7 +5228,7 @@ abstract class AppLocalizations {
   /// Lead of the banner crop modal.
   ///
   /// In fr, this message translates to:
-  /// **'Faites glisser et zoomez pour cadrer la bannière.'**
+  /// **'Faites glisser l’image pour cadrer la bannière.'**
   String get goalImageCropLead;
 
   /// Confirm action of the crop modal.
@@ -7691,7 +7691,7 @@ abstract class AppLocalizations {
   /// Lead text of the crop modal.
   ///
   /// In fr, this message translates to:
-  /// **'Faites glisser et zoomez pour cadrer votre avatar.'**
+  /// **'Faites glisser l’image pour cadrer votre avatar.'**
   String get settingsAvatarCropLead;
 
   /// Cancel button of the crop modal.

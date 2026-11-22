@@ -2131,8 +2131,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ruleLogoCropTitle => 'Recadrer le logo';
 
   @override
-  String get ruleLogoCropLead =>
-      'Faites glisser et zoomez pour cadrer le logo.';
+  String get ruleLogoCropLead => 'Faites glisser l’image pour cadrer le logo.';
 
   @override
   String get ruleLogoCropCancel => 'Annuler';
@@ -3334,7 +3333,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get goalImageCropLead =>
-      'Faites glisser et zoomez pour cadrer la bannière.';
+      'Faites glisser l’image pour cadrer la bannière.';
 
   @override
   String get goalImageCropSave => 'Utiliser cette image';
@@ -4863,7 +4862,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsAvatarCropLead =>
-      'Faites glisser et zoomez pour cadrer votre avatar.';
+      'Faites glisser l’image pour cadrer votre avatar.';
 
   @override
   String get settingsAvatarCropCancel => 'Annuler';

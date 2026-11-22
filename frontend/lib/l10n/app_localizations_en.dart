@@ -2119,7 +2119,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ruleLogoCropTitle => 'Crop the logo';
 
   @override
-  String get ruleLogoCropLead => 'Drag and zoom to frame the logo.';
+  String get ruleLogoCropLead => 'Drag the image to frame the logo.';
 
   @override
   String get ruleLogoCropCancel => 'Cancel';
@@ -3318,7 +3318,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalImageCropTitle => 'Crop the image';
 
   @override
-  String get goalImageCropLead => 'Drag and zoom to frame the banner.';
+  String get goalImageCropLead => 'Drag the image to frame the banner.';
 
   @override
   String get goalImageCropSave => 'Use this image';
@@ -4835,7 +4835,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAvatarCropTitle => 'Crop the picture';
 
   @override
-  String get settingsAvatarCropLead => 'Drag and zoom to frame your avatar.';
+  String get settingsAvatarCropLead => 'Drag the image to frame your avatar.';
 
   @override
   String get settingsAvatarCropCancel => 'Cancel';

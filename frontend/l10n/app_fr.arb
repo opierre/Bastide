@@ -2665,7 +2665,7 @@
   "@ruleLogoCropTitle": {
     "description": "Title of the modal where the user crops the picked logo to a square."
   },
-  "ruleLogoCropLead": "Faites glisser et zoomez pour cadrer le logo.",
+  "ruleLogoCropLead": "Faites glisser l’image pour cadrer le logo.",
   "@ruleLogoCropLead": {
     "description": "Lead text of the logo crop modal."
   },
@@ -4163,7 +4163,7 @@
   "@goalImageCropTitle": {
     "description": "Title of the banner crop modal."
   },
-  "goalImageCropLead": "Faites glisser et zoomez pour cadrer la bannière.",
+  "goalImageCropLead": "Faites glisser l’image pour cadrer la bannière.",
   "@goalImageCropLead": {
     "description": "Lead of the banner crop modal."
   },
@@ -6246,7 +6246,7 @@
   "@settingsAvatarCropTitle": {
     "description": "Title of the modal where the user crops the picked picture to a square."
   },
-  "settingsAvatarCropLead": "Faites glisser et zoomez pour cadrer votre avatar.",
+  "settingsAvatarCropLead": "Faites glisser l’image pour cadrer votre avatar.",
   "@settingsAvatarCropLead": {
     "description": "Lead text of the crop modal."
   },
