@@ -333,13 +333,24 @@ void main() {
     await tester.tap(delete);
     await tester.pumpAndSettle();
 
-    expect(find.text('Supprimer cette allocation ?'), findsOneWidget);
+    // The line is named by its date, the 1st written out as French does.
+    expect(find.text('Supprimer l’allocation du 1er mai 2026 ?'), findsOne);
     expect(
       tester
           .widget<Text>(find.byKey(const Key('goalAllocationDeleteLead')))
           .data,
-      'Le montant mis de côté baisse de ${_money(30000)}. '
-      'Vos comptes ne sont pas modifiés.',
+      "Le montant mis de côté pour « Fonds d'urgence » baisse de "
+      '${_money(30000)}. Vos comptes ne sont pas modifiés.',
+    );
+    // A destructive confirmation: focus on « Annuler », so Enter deletes
+    // nothing by mistake.
+    final focused = FocusManager.instance.primaryFocus!.context!;
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('goalAllocationDeleteCancel')),
+        matching: find.byWidget(focused.widget),
+      ),
+      findsOneWidget,
     );
 
     await tester.tap(find.byKey(const Key('goalAllocationDeleteSubmit')));
@@ -357,7 +368,13 @@ void main() {
       _wrap(
         controller: FakeGoalsController(initialGoals: specGoals()),
         locale: const Locale('en'),
-        allocations: [testAllocation(amountMinor: -10000, note: null)],
+        allocations: [
+          testAllocation(
+            amountMinor: -10000,
+            note: null,
+            allocatedOn: DateTime(2026, 5, 12),
+          ),
+        ],
       ),
     );
     await tester.pumpAndSettle();
@@ -365,13 +382,13 @@ void main() {
     await tester.tap(find.byKey(const Key('goalAllocationDelete-al1')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Delete this allocation?'), findsOneWidget);
+    expect(find.text('Delete the allocation of May 12, 2026?'), findsOne);
     expect(
       tester
           .widget<Text>(find.byKey(const Key('goalAllocationDeleteLead')))
           .data,
-      'The saved amount goes back up by ${_money(10000, locale: 'en')}. '
-      'Your accounts are not changed.',
+      "The amount set aside for “Fonds d'urgence” goes back up by "
+      '${_money(10000, locale: 'en')}. Your accounts are not changed.',
     );
   });
 

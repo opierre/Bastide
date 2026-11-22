@@ -5207,29 +5207,29 @@ abstract class AppLocalizations {
   /// **'Supprimer l’allocation'**
   String get goalAllocationDelete;
 
-  /// Title of the confirmation before deleting an allocation line.
+  /// Title of the confirmation before deleting an allocation line, naming its date (goalAllocationDeleteDate).
   ///
   /// In fr, this message translates to:
-  /// **'Supprimer cette allocation ?'**
-  String get goalAllocationDeleteTitle;
+  /// **'Supprimer l’allocation du {date} ?'**
+  String goalAllocationDeleteTitle(String date);
+
+  /// The allocation's date in the delete title, written out: « 1er mai 2026 », « 12 mai 2026 ». month is the locale's full month name.
+  ///
+  /// In fr, this message translates to:
+  /// **'{day, plural, =1{1er} other{{day}}} {month} {year}'**
+  String goalAllocationDeleteDate(int day, String month, String year);
 
   /// Lead of the confirmation when the deleted line put money aside.
   ///
   /// In fr, this message translates to:
-  /// **'Le montant mis de côté baisse de {amount}. Vos comptes ne sont pas modifiés.'**
-  String goalAllocationDeleteLeadDown(String amount);
+  /// **'Le montant mis de côté pour « {goal} » baisse de {amount}. Vos comptes ne sont pas modifiés.'**
+  String goalAllocationDeleteLeadDown(String goal, String amount);
 
   /// Lead of the confirmation when the deleted line was a withdrawal (negative).
   ///
   /// In fr, this message translates to:
-  /// **'Le montant mis de côté remonte de {amount}. Vos comptes ne sont pas modifiés.'**
-  String goalAllocationDeleteLeadUp(String amount);
-
-  /// Dismisses the delete confirmation.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get goalAllocationDeleteCancel;
+  /// **'Le montant mis de côté pour « {goal} » remonte de {amount}. Vos comptes ne sont pas modifiés.'**
+  String goalAllocationDeleteLeadUp(String goal, String amount);
 
   /// Destructive button of the delete confirmation.
   ///
@@ -5303,17 +5303,11 @@ abstract class AppLocalizations {
   /// **'Image de l’objectif {name}'**
   String goalImageAlt(String name);
 
-  /// Goal form field: the banner image.
+  /// Goal form field: the optional banner image.
   ///
   /// In fr, this message translates to:
-  /// **'Image'**
+  /// **'Image (facultative)'**
   String get goalFormImageLabel;
-
-  /// Helper under the optional image field.
-  ///
-  /// In fr, this message translates to:
-  /// **'Facultative'**
-  String get goalFormImageHelp;
 
   /// Goal form button picking an image.
   ///
@@ -5399,22 +5393,28 @@ abstract class AppLocalizations {
   /// **'Saisissez un montant supérieur à zéro.'**
   String get goalFormTargetInvalid;
 
-  /// Goal form field: the optional deadline.
+  /// Goal form field: the optional deadline, a month.
   ///
   /// In fr, this message translates to:
-  /// **'Échéance'**
+  /// **'Échéance (facultative)'**
   String get goalFormDateLabel;
 
-  /// Helper marking the target date as optional.
+  /// Placeholder of the empty deadline field: the month spelling it reads.
   ///
   /// In fr, this message translates to:
-  /// **'Facultative'**
-  String get goalFormDateHelp;
+  /// **'MM/AAAA'**
+  String get goalFormDateHint;
 
-  /// Validation message when the target date cannot be read in the current locale.
+  /// Tooltip of the calendar button beside the deadline field.
   ///
   /// In fr, this message translates to:
-  /// **'Date invalide.'**
+  /// **'Choisir un mois'**
+  String get goalFormDatePick;
+
+  /// Validation message when the deadline does not read as a month.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un mois au format MM/AAAA.'**
   String get goalFormDateInvalid;
 
   /// Cancel action in the goal modal footer.
@@ -5468,7 +5468,7 @@ abstract class AppLocalizations {
   /// Label of the optional allocation note field.
   ///
   /// In fr, this message translates to:
-  /// **'Note (optionnelle)'**
+  /// **'Note (facultative)'**
   String get allocationNoteLabel;
 
   /// Placeholder example in the allocation note field.
@@ -5476,12 +5476,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ex. Virement mensuel'**
   String get allocationNoteHint;
-
-  /// Cancel action in the allocation modal footer.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get allocationCancel;
 
   /// Confirm action appending the allocation.
   ///

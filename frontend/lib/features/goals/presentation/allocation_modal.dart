@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/date_field.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -26,8 +25,9 @@ Future<GoalAllocation?> showAllocationModal(
   );
 }
 
-/// One signed amount, a date, and an optional note (`docs/design/11-goals.md`
-/// frame ③).
+/// One signed amount, a date, and an optional note, one under the other, with
+/// the goal's name as lead (`docs/design/11-goals.md` §Modals, proposal v6
+/// `m-goals`).
 ///
 /// **One field, no deposit/withdraw modes.** Taking money back out of an
 /// envelope is the same act as putting it in, with the other sign; two verbs
@@ -55,6 +55,7 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
   /// unavailable before the widget is mounted.
   bool _filled = false;
 
+  bool _dirty = false;
   bool _isSubmitting = false;
   String? _errorText;
 
@@ -87,6 +88,7 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final locale = Localizations.localeOf(context).toString();
@@ -127,15 +129,19 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
     final locale = Localizations.localeOf(context).toString();
     final currency = widget.goal.currency;
 
+    const gap = SizedBox(height: AppSpacing.fieldGap);
+
     return AppModal(
+      key: const Key('allocationModal'),
       title: l10n.allocationModalTitle,
-      width: 440,
+      subtitle: Text(widget.goal.name, key: const Key('allocationGoalName')),
+      width: AppModalSizes.w440,
+      dirty: _dirty,
+      busy: _isSubmitting,
+      saveError: _errorText,
+      onSubmit: _submit,
       actions: [
-        OutlinedButton(
-          key: const Key('allocationCancel'),
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.allocationCancel),
-        ),
+        const AppModalCancel(key: Key('allocationCancel')),
         PrimaryButton(
           key: const Key('allocationSubmit'),
           label: l10n.allocationSubmit,
@@ -145,68 +151,46 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
       ],
       child: Form(
         key: _formKey,
+        onChanged: () {
+          if (!_dirty) setState(() => _dirty = true);
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              widget.goal.name,
-              key: const Key('allocationGoalName'),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: context.colors.textSecondary,
+            LabeledField(
+              label: l10n.allocationAmountLabel,
+              helper: l10n.allocationAmountHelp,
+              // Signed: the minus sign is the whole withdrawal mechanism, so
+              // this is the one amount field in the app that has to let one
+              // through.
+              child: MoneyField(
+                key: const Key('allocationAmount'),
+                controller: _amountController,
+                currency: currency,
+                allowNegative: true,
+                autofocus: true,
+                textAlign: TextAlign.end,
+                validator: (value) => _parseAmount(value ?? '', locale) == null
+                    ? l10n.allocationAmountInvalid
+                    : null,
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            if (_errorText != null) ...[
-              InlineBanner(
-                key: const Key('allocationError'),
-                message: _errorText!,
+            gap,
+            LabeledField(
+              label: l10n.allocationDateLabel,
+              child: DateField(
+                key: const Key('allocationDate'),
+                controller: _dateController,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+                calendarTooltip: l10n.allocationDatePick,
+                validator: (value) =>
+                    parseDateInput(value ?? '', locale) == null
+                    ? l10n.allocationDateInvalid
+                    : null,
               ),
-              const SizedBox(height: AppSpacing.md),
-            ],
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: LabeledField(
-                    label: l10n.allocationAmountLabel,
-                    helper: l10n.allocationAmountHelp,
-                    // Signed: the minus sign is the whole withdrawal
-                    // mechanism, so this is the one amount field in the app
-                    // that has to let one through.
-                    child: MoneyField(
-                      key: const Key('allocationAmount'),
-                      controller: _amountController,
-                      currency: currency,
-                      allowNegative: true,
-                      autofocus: true,
-                      validator: (value) =>
-                          _parseAmount(value ?? '', locale) == null
-                          ? l10n.allocationAmountInvalid
-                          : null,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                SizedBox(
-                  width: 170,
-                  child: LabeledField(
-                    label: l10n.allocationDateLabel,
-                    child: DateField(
-                      key: const Key('allocationDate'),
-                      controller: _dateController,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                      calendarTooltip: l10n.allocationDatePick,
-                      validator: (value) =>
-                          parseDateInput(value ?? '', locale) == null
-                          ? l10n.allocationDateInvalid
-                          : null,
-                    ),
-                  ),
-                ),
-              ],
             ),
-            const SizedBox(height: AppSpacing.md),
+            gap,
             LabeledField(
               label: l10n.allocationNoteLabel,
               child: TextFormField(

@@ -3335,20 +3335,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get goalAllocationDelete => 'Supprimer l’allocation';
 
   @override
-  String get goalAllocationDeleteTitle => 'Supprimer cette allocation ?';
-
-  @override
-  String goalAllocationDeleteLeadDown(String amount) {
-    return 'Le montant mis de côté baisse de $amount. Vos comptes ne sont pas modifiés.';
+  String goalAllocationDeleteTitle(String date) {
+    return 'Supprimer l’allocation du $date ?';
   }
 
   @override
-  String goalAllocationDeleteLeadUp(String amount) {
-    return 'Le montant mis de côté remonte de $amount. Vos comptes ne sont pas modifiés.';
+  String goalAllocationDeleteDate(int day, String month, String year) {
+    String _temp0 = intl.Intl.pluralLogic(
+      day,
+      locale: localeName,
+      other: '$day',
+      one: '1er',
+    );
+    return '$_temp0 $month $year';
   }
 
   @override
-  String get goalAllocationDeleteCancel => 'Annuler';
+  String goalAllocationDeleteLeadDown(String goal, String amount) {
+    return 'Le montant mis de côté pour « $goal » baisse de $amount. Vos comptes ne sont pas modifiés.';
+  }
+
+  @override
+  String goalAllocationDeleteLeadUp(String goal, String amount) {
+    return 'Le montant mis de côté pour « $goal » remonte de $amount. Vos comptes ne sont pas modifiés.';
+  }
 
   @override
   String get goalAllocationDeleteSubmit => 'Supprimer';
@@ -3394,10 +3404,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get goalFormImageLabel => 'Image';
-
-  @override
-  String get goalFormImageHelp => 'Facultative';
+  String get goalFormImageLabel => 'Image (facultative)';
 
   @override
   String get goalFormImagePick => 'Choisir une image';
@@ -3446,13 +3453,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get goalFormTargetInvalid => 'Saisissez un montant supérieur à zéro.';
 
   @override
-  String get goalFormDateLabel => 'Échéance';
+  String get goalFormDateLabel => 'Échéance (facultative)';
 
   @override
-  String get goalFormDateHelp => 'Facultative';
+  String get goalFormDateHint => 'MM/AAAA';
 
   @override
-  String get goalFormDateInvalid => 'Date invalide.';
+  String get goalFormDatePick => 'Choisir un mois';
+
+  @override
+  String get goalFormDateInvalid => 'Saisissez un mois au format MM/AAAA.';
 
   @override
   String get goalFormCancel => 'Annuler';
@@ -3480,13 +3490,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get allocationDateInvalid => 'Date invalide.';
 
   @override
-  String get allocationNoteLabel => 'Note (optionnelle)';
+  String get allocationNoteLabel => 'Note (facultative)';
 
   @override
   String get allocationNoteHint => 'Ex. Virement mensuel';
-
-  @override
-  String get allocationCancel => 'Annuler';
 
   @override
   String get allocationSubmit => 'Ajouter';

@@ -4157,31 +4157,53 @@
   "@goalAllocationDelete": {
     "description": "Trailing action of an allocation row in the inspector; opens the confirmation."
   },
-  "goalAllocationDeleteTitle": "Supprimer cette allocation ?",
+  "goalAllocationDeleteTitle": "Supprimer l’allocation du {date} ?",
   "@goalAllocationDeleteTitle": {
-    "description": "Title of the confirmation before deleting an allocation line."
+    "description": "Title of the confirmation before deleting an allocation line, naming its date (goalAllocationDeleteDate).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
-  "goalAllocationDeleteLeadDown": "Le montant mis de côté baisse de {amount}. Vos comptes ne sont pas modifiés.",
+  "goalAllocationDeleteDate": "{day, plural, =1{1er} other{{day}}} {month} {year}",
+  "@goalAllocationDeleteDate": {
+    "description": "The allocation's date in the delete title, written out: « 1er mai 2026 », « 12 mai 2026 ». month is the locale's full month name.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "goalAllocationDeleteLeadDown": "Le montant mis de côté pour « {goal} » baisse de {amount}. Vos comptes ne sont pas modifiés.",
   "@goalAllocationDeleteLeadDown": {
     "description": "Lead of the confirmation when the deleted line put money aside.",
     "placeholders": {
+      "goal": {
+        "type": "String"
+      },
       "amount": {
         "type": "String"
       }
     }
   },
-  "goalAllocationDeleteLeadUp": "Le montant mis de côté remonte de {amount}. Vos comptes ne sont pas modifiés.",
+  "goalAllocationDeleteLeadUp": "Le montant mis de côté pour « {goal} » remonte de {amount}. Vos comptes ne sont pas modifiés.",
   "@goalAllocationDeleteLeadUp": {
     "description": "Lead of the confirmation when the deleted line was a withdrawal (negative).",
     "placeholders": {
+      "goal": {
+        "type": "String"
+      },
       "amount": {
         "type": "String"
       }
     }
-  },
-  "goalAllocationDeleteCancel": "Annuler",
-  "@goalAllocationDeleteCancel": {
-    "description": "Dismisses the delete confirmation."
   },
   "goalAllocationDeleteSubmit": "Supprimer",
   "@goalAllocationDeleteSubmit": {
@@ -4241,13 +4263,9 @@
       }
     }
   },
-  "goalFormImageLabel": "Image",
+  "goalFormImageLabel": "Image (facultative)",
   "@goalFormImageLabel": {
-    "description": "Goal form field: the banner image."
-  },
-  "goalFormImageHelp": "Facultative",
-  "@goalFormImageHelp": {
-    "description": "Helper under the optional image field."
+    "description": "Goal form field: the optional banner image."
   },
   "goalFormImagePick": "Choisir une image",
   "@goalFormImagePick": {
@@ -4310,17 +4328,21 @@
   "@goalFormTargetInvalid": {
     "description": "Validation message when the target is missing, unparseable, or not positive."
   },
-  "goalFormDateLabel": "Échéance",
+  "goalFormDateLabel": "Échéance (facultative)",
   "@goalFormDateLabel": {
-    "description": "Goal form field: the optional deadline."
+    "description": "Goal form field: the optional deadline, a month."
   },
-  "goalFormDateHelp": "Facultative",
-  "@goalFormDateHelp": {
-    "description": "Helper marking the target date as optional."
+  "goalFormDateHint": "MM/AAAA",
+  "@goalFormDateHint": {
+    "description": "Placeholder of the empty deadline field: the month spelling it reads."
   },
-  "goalFormDateInvalid": "Date invalide.",
+  "goalFormDatePick": "Choisir un mois",
+  "@goalFormDatePick": {
+    "description": "Tooltip of the calendar button beside the deadline field."
+  },
+  "goalFormDateInvalid": "Saisissez un mois au format MM/AAAA.",
   "@goalFormDateInvalid": {
-    "description": "Validation message when the target date cannot be read in the current locale."
+    "description": "Validation message when the deadline does not read as a month."
   },
   "goalFormCancel": "Annuler",
   "@goalFormCancel": {
@@ -4354,17 +4376,13 @@
   "@allocationDateInvalid": {
     "description": "Validation message when the allocation date cannot be read in the current locale."
   },
-  "allocationNoteLabel": "Note (optionnelle)",
+  "allocationNoteLabel": "Note (facultative)",
   "@allocationNoteLabel": {
     "description": "Label of the optional allocation note field."
   },
   "allocationNoteHint": "Ex. Virement mensuel",
   "@allocationNoteHint": {
     "description": "Placeholder example in the allocation note field."
-  },
-  "allocationCancel": "Annuler",
-  "@allocationCancel": {
-    "description": "Cancel action in the allocation modal footer."
   },
   "allocationSubmit": "Ajouter",
   "@allocationSubmit": {

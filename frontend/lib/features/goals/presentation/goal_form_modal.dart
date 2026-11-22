@@ -7,9 +7,8 @@ import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import '../../../core/session/current_user_provider.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
-import '../../../core/widgets/date_field.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -19,6 +18,7 @@ import '../data/goals_repository.dart';
 import '../domain/goal.dart';
 import 'goal_image_crop_modal.dart';
 import 'goal_labels.dart';
+import 'goal_month_field.dart';
 
 /// Opens the create/edit goal modal. Resolves to the saved goal, or `null` when
 /// the user cancelled.
@@ -30,7 +30,9 @@ Future<Goal?> showGoalForm(BuildContext context, {Goal? initial}) {
 }
 
 /// The 440 px « Nouvel objectif » modal, reused for editing
-/// (`11-goals.md` §Modals): Nom · Montant cible · Échéance · Image.
+/// (`11-goals.md` §Modals, proposal v6 `m-goals`): Nom, then Montant cible
+/// and Échéance (facultative, a month) side by side, then Image
+/// (facultative).
 ///
 /// Deliberately short: nothing here asks about an account, because a goal
 /// has none. The image is picked and cropped here but uploaded once the goal
@@ -50,11 +52,16 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
     text: widget.initial?.name,
   );
   final _targetController = TextEditingController();
-  final _dateController = TextEditingController();
+  late final _dateController = TextEditingController(
+    text: switch (widget.initial?.targetDate) {
+      final date? => formatGoalMonth(date),
+      null => null,
+    },
+  );
 
-  /// Guards the one-time locale-aware fill of the amount and date fields. Done
-  /// in [didChangeDependencies] because both must round-trip through the same
-  /// formatters that re-parse them on submit, and those need the active locale
+  /// Guards the one-time locale-aware fill of the amount field. Done in
+  /// [didChangeDependencies] because it must round-trip through the same
+  /// formatter that re-parses it on submit, and that needs the active locale
   /// — unavailable before the widget is mounted.
   bool _filled = false;
 
@@ -64,6 +71,10 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
   /// Whether the user dropped the goal's existing banner.
   bool _removeImage = false;
 
+  /// Why the last picked file was refused, under the image field.
+  String? _imageError;
+
+  bool _dirty = false;
   bool _isSubmitting = false;
   String? _errorText;
 
@@ -78,9 +89,6 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
     if (goal == null) return;
     final locale = Localizations.localeOf(context).toString();
     _targetController.text = formatMoneyInput(goal.targetMinor, locale);
-    if (goal.targetDate case final date?) {
-      _dateController.text = appDateFormat(locale).format(date);
-    }
   }
 
   @override
@@ -99,17 +107,22 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
     return (minor != null && minor > 0) ? minor : null;
   }
 
-  /// Whether the optional date field holds something usable: an empty one is a
-  /// valid no-deadline goal, a filled one has to be a date the locale can read.
-  bool _dateIsValid(String text, String locale) =>
-      text.trim().isEmpty || parseDateInput(text, locale) != null;
+  /// Whether the optional deadline holds something usable: an empty one is a
+  /// valid no-deadline goal, a filled one has to read as a month.
+  bool _monthIsValid(String text) =>
+      text.trim().isEmpty || parseGoalMonth(text) != null;
+
+  void _markDirty() {
+    if (!_dirty) setState(() => _dirty = true);
+  }
 
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final locale = Localizations.localeOf(context).toString();
     final target = _parseTarget(_targetController.text, locale);
-    final date = parseDateInput(_dateController.text, locale);
+    final date = parseGoalMonth(_dateController.text);
     if (target == null) return;
 
     setState(() {
@@ -153,9 +166,10 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
       if (png != null) {
         _image = png;
         _removeImage = false;
-        _errorText = null;
+        _imageError = null;
+        _dirty = true;
       } else if (failure != null) {
-        _errorText = goalImageFailureText(
+        _imageError = goalImageFailureText(
           AppLocalizations.of(context)!,
           failure,
         );
@@ -166,6 +180,8 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
   void _dropImage() => setState(() {
     _image = null;
     _removeImage = widget.initial?.hasImage ?? false;
+    _imageError = null;
+    _dirty = true;
   });
 
   @override
@@ -179,16 +195,18 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
         widget.initial?.currency ??
         ref.watch(currentUserProvider)?.currency ??
         '';
+    const gap = SizedBox(height: AppSpacing.fieldGap);
 
     return AppModal(
+      key: const Key('goalFormModal'),
       title: _isEditing ? l10n.goalFormEditTitle : l10n.goalFormCreateTitle,
-      width: AppSizes.inspector,
+      width: AppModalSizes.w440,
+      dirty: _dirty,
+      busy: _isSubmitting,
+      saveError: _errorText,
+      onSubmit: _submit,
       actions: [
-        OutlinedButton(
-          key: const Key('goalFormCancel'),
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.goalFormCancel),
-        ),
+        const AppModalCancel(key: Key('goalFormCancel')),
         PrimaryButton(
           key: const Key('goalFormSubmit'),
           label: l10n.goalFormSave,
@@ -198,16 +216,10 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
       ],
       child: Form(
         key: _formKey,
+        onChanged: _markDirty,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_errorText != null) ...[
-              InlineBanner(
-                key: const Key('goalFormError'),
-                message: _errorText!,
-              ),
-              const SizedBox(height: AppSpacing.md),
-            ],
             LabeledField(
               label: l10n.goalFormNameLabel,
               child: TextFormField(
@@ -219,51 +231,39 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
                     : null,
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: LabeledField(
-                    label: l10n.goalFormTargetLabel,
-                    child: MoneyField(
-                      key: const Key('goalFormTarget'),
-                      controller: _targetController,
-                      currency: currency,
-                      validator: (value) =>
-                          _parseTarget(value ?? '', locale) == null
-                          ? l10n.goalFormTargetInvalid
-                          : null,
-                    ),
-                  ),
+            gap,
+            ModalFieldRow(
+              start: ModalFieldCell(
+                label: l10n.goalFormTargetLabel,
+                input: MoneyField(
+                  key: const Key('goalFormTarget'),
+                  controller: _targetController,
+                  currency: currency,
+                  textAlign: TextAlign.end,
+                  validator: (value) =>
+                      _parseTarget(value ?? '', locale) == null
+                      ? l10n.goalFormTargetInvalid
+                      : null,
                 ),
-                const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-                SizedBox(
-                  width: 170,
-                  child: LabeledField(
-                    label: l10n.goalFormDateLabel,
-                    helper: l10n.goalFormDateHelp,
-                    child: DateField(
-                      key: const Key('goalFormDate'),
-                      controller: _dateController,
-                      // A goal is aimed forward, but an existing one may carry a
-                      // date that has since passed, and editing its name must
-                      // not force the user to move it.
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                      calendarTooltip: l10n.goalFormDateLabel,
-                      validator: (value) => _dateIsValid(value ?? '', locale)
-                          ? null
-                          : l10n.goalFormDateInvalid,
-                    ),
-                  ),
+              ),
+              end: ModalFieldCell(
+                label: l10n.goalFormDateLabel,
+                input: GoalMonthField(
+                  key: const Key('goalFormDate'),
+                  controller: _dateController,
+                  hintText: l10n.goalFormDateHint,
+                  calendarTooltip: l10n.goalFormDatePick,
+                  onPicked: _markDirty,
+                  validator: (value) => _monthIsValid(value ?? '')
+                      ? null
+                      : l10n.goalFormDateInvalid,
                 ),
-              ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.fieldGap),
+            gap,
             LabeledField(
               label: l10n.goalFormImageLabel,
-              helper: l10n.goalFormImageHelp,
+              errorText: _imageError,
               child: _ImageField(
                 image: _image,
                 existing: _removeImage ? null : widget.initial?.imageRef,
@@ -278,8 +278,8 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
   }
 }
 
-/// The optional banner: a thumbnail of the chosen (or current) picture, then
-/// « Choisir une image » and, when there is one, « Retirer ».
+/// The optional banner: a 36 × 24 thumbnail of the chosen (or current)
+/// picture, then « Choisir une image » and, when there is one, « Retirer ».
 class _ImageField extends ConsumerWidget {
   const _ImageField({
     required this.image,
@@ -328,7 +328,7 @@ class _ImageField extends ConsumerWidget {
         AppButton(
           key: const Key('goalFormImagePick'),
           label: l10n.goalFormImagePick,
-          icon: LucideIcons300.imagePlus,
+          icon: LucideIcons300.image,
           onPressed: onPick,
         ),
         if (hasImage) ...[

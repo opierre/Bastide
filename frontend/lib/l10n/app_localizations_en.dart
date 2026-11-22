@@ -3321,20 +3321,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalAllocationDelete => 'Delete allocation';
 
   @override
-  String get goalAllocationDeleteTitle => 'Delete this allocation?';
-
-  @override
-  String goalAllocationDeleteLeadDown(String amount) {
-    return 'The saved amount goes down by $amount. Your accounts are not changed.';
+  String goalAllocationDeleteTitle(String date) {
+    return 'Delete the allocation of $date?';
   }
 
   @override
-  String goalAllocationDeleteLeadUp(String amount) {
-    return 'The saved amount goes back up by $amount. Your accounts are not changed.';
+  String goalAllocationDeleteDate(int day, String month, String year) {
+    return '$month $day, $year';
   }
 
   @override
-  String get goalAllocationDeleteCancel => 'Cancel';
+  String goalAllocationDeleteLeadDown(String goal, String amount) {
+    return 'The amount set aside for “$goal” goes down by $amount. Your accounts are not changed.';
+  }
+
+  @override
+  String goalAllocationDeleteLeadUp(String goal, String amount) {
+    return 'The amount set aside for “$goal” goes back up by $amount. Your accounts are not changed.';
+  }
 
   @override
   String get goalAllocationDeleteSubmit => 'Delete';
@@ -3377,10 +3381,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get goalFormImageLabel => 'Image';
-
-  @override
-  String get goalFormImageHelp => 'Optional';
+  String get goalFormImageLabel => 'Image (optional)';
 
   @override
   String get goalFormImagePick => 'Choose an image';
@@ -3429,13 +3430,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalFormTargetInvalid => 'Enter an amount greater than zero.';
 
   @override
-  String get goalFormDateLabel => 'Deadline';
+  String get goalFormDateLabel => 'Deadline (optional)';
 
   @override
-  String get goalFormDateHelp => 'Optional';
+  String get goalFormDateHint => 'MM/YYYY';
 
   @override
-  String get goalFormDateInvalid => 'Invalid date.';
+  String get goalFormDatePick => 'Pick a month';
+
+  @override
+  String get goalFormDateInvalid => 'Enter a month as MM/YYYY.';
 
   @override
   String get goalFormCancel => 'Cancel';
@@ -3467,9 +3471,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allocationNoteHint => 'e.g. Monthly transfer';
-
-  @override
-  String get allocationCancel => 'Cancel';
 
   @override
   String get allocationSubmit => 'Add';
