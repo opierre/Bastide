@@ -336,6 +336,38 @@ void main() {
       );
     });
 
+    testWidgets('the crop step is the 420 px round crop of proposal v6', (
+      tester,
+    ) async {
+      final image = await tester.runAsync(() => createTestImage(width: 40));
+      when(() => files.pick()).thenAnswer((_) async => _file(10));
+      when(() => imaging.decode(any())).thenAnswer((_) async => image!);
+      await tester.pumpWidget(wrap(_user(const MonogramChoice())));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('settingsAvatarChoosePicture')));
+      await tester.pumpAndSettle();
+
+      expect(tester.getSize(find.byKey(const Key('appModalFrame'))).width, 420);
+      expect(find.text('Recadrer la photo'), findsOneWidget);
+      expect(
+        find.text('Faites glisser l’image pour cadrer votre avatar.'),
+        findsOneWidget,
+      );
+      expect(
+        tester.getSize(find.byKey(const Key('pictureCropViewport'))),
+        const Size(320, 320),
+      );
+      expect(find.byKey(const Key('pictureCropGuide')), findsOneWidget);
+      expect(find.byKey(const Key('pictureCropZoom')), findsOneWidget);
+      expect(find.text('Annuler'), findsOneWidget);
+      expect(find.text('Utiliser cette photo'), findsOneWidget);
+
+      await tester.tap(find.text('Annuler'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('pictureCropViewport')), findsNothing);
+    });
+
     testWidgets('a too-large file says so and opens no crop step', (
       tester,
     ) async {
