@@ -13,6 +13,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/auth_form_controllers.dart';
 import '../domain/display_name.dart';
+import '../domain/email_address.dart';
 import '../domain/password_rule.dart';
 import '../domain/supported_currencies.dart';
 import 'auth_error_localizer.dart';
@@ -44,9 +45,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _passwordLeft = false;
   bool _passwordFocused = false;
 
-  static bool _isEmail(String value) =>
-      RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value);
-
   @override
   void initState() {
     super.initState();
@@ -72,7 +70,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   bool get _isValid =>
       isValidDisplayName(_displayNameController.text) &&
-      _isEmail(_emailController.text.trim()) &&
+      isValidEmail(_emailController.text.trim()) &&
       isLongEnoughPassword(_passwordController.text);
 
   Future<void> _submit(String locale) async {
@@ -106,7 +104,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return l10n.authEmailTaken;
     }
     final email = _emailController.text.trim();
-    if (email.isNotEmpty && !_isEmail(email)) {
+    if (email.isNotEmpty && !isValidEmail(email)) {
       return l10n.authEmailInvalid;
     }
     return null;
