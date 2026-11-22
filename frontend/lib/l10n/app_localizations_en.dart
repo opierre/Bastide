@@ -3440,6 +3440,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalFormSave => 'Save';
 
   @override
+  String get goalFormDelete => 'Delete';
+
+  @override
+  String goalDeleteTitle(String name) {
+    return 'Delete the goal “$name”?';
+  }
+
+  @override
+  String get goalDeleteLead =>
+      'Its allocations and image will be deleted. To keep its history, archive it instead. Your accounts are not changed.';
+
+  @override
+  String get goalDeleteSubmit => 'Delete';
+
+  @override
   String get allocationModalTitle => 'New allocation';
 
   @override

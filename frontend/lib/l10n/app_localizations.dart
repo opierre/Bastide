@@ -5405,6 +5405,30 @@ abstract class AppLocalizations {
   /// **'Enregistrer'**
   String get goalFormSave;
 
+  /// Ghost delete button on the footer of the edit goal modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get goalFormDelete;
+
+  /// Title of the delete goal confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer l’objectif « {name} » ?'**
+  String goalDeleteTitle(String name);
+
+  /// Lead of the delete goal confirmation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ses allocations et son image seront supprimées. Pour garder son historique, archivez-le plutôt. Vos comptes ne sont pas modifiés.'**
+  String get goalDeleteLead;
+
+  /// Delete goal confirmation button.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get goalDeleteSubmit;
+
   /// Title of the allocation modal.
   ///
   /// In fr, this message translates to:

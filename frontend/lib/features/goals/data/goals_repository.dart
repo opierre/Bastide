@@ -99,6 +99,10 @@ class GoalsRepository {
     return _parseGoal(json as Map<String, dynamic>);
   }
 
+  /// Deletes a goal with its allocations and banner image. No account or
+  /// transaction is touched: archiving is how to keep its history.
+  Future<void> delete(String goalId) => _apiClient.delete('/goals/$goalId');
+
   /// Drops the goal's banner image; the inspector shows its tomettes again.
   Future<Goal> removeImage(String goalId) async {
     final json = await _apiClient.delete('/goals/$goalId/image');

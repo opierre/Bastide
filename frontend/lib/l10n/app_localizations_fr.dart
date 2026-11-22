@@ -3464,6 +3464,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get goalFormSave => 'Enregistrer';
 
   @override
+  String get goalFormDelete => 'Supprimer';
+
+  @override
+  String goalDeleteTitle(String name) {
+    return 'Supprimer l’objectif « $name » ?';
+  }
+
+  @override
+  String get goalDeleteLead =>
+      'Ses allocations et son image seront supprimées. Pour garder son historique, archivez-le plutôt. Vos comptes ne sont pas modifiés.';
+
+  @override
+  String get goalDeleteSubmit => 'Supprimer';
+
+  @override
   String get allocationModalTitle => 'Nouvelle allocation';
 
   @override

@@ -274,6 +274,14 @@ class GoalsController extends AsyncNotifier<GoalsState> {
   Future<void> restore(String goalId) =>
       _write(() => _repository.update(goalId, status: GoalStatus.active));
 
+  /// Deletes a goal with its allocations and image. A failure lands in the
+  /// panel's banner; the confirmation closes either way. The inspector falls
+  /// back to the first goal of the table once the reload drops this one.
+  Future<void> delete(String goalId) async {
+    await _write(() => _repository.delete(goalId));
+    ref.invalidate(goalAllocationsProvider(goalId));
+  }
+
   /// Appends one signed ledger line — positive puts money aside, negative takes
   /// it back out. One flow, because there is one mechanism.
   Future<GoalAllocation> allocate(
