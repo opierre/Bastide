@@ -1400,10 +1400,6 @@
   "@transactionsDateRangeOrder": {
     "description": "Validation message when the range's end date is before its start date."
   },
-  "transactionsDateRangeCancel": "Annuler",
-  "@transactionsDateRangeCancel": {
-    "description": "Cancel button of the date range modal."
-  },
   "transactionsDateRangeApply": "Appliquer",
   "@transactionsDateRangeApply": {
     "description": "Confirm button of the date range modal, applying the chosen range."
