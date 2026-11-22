@@ -84,7 +84,8 @@ Modals (all 500 px):
   Bastide. Mettez l’application à jour pour le restaurer. »
 - **Reset confirmation:** title « Réinitialiser la base de données ? », lead naming the
   profile, key/value list of live counts, note « Les catégories fournies, vos préférences et le
-  réglage IA sont conservés. », field « Saisissez SUPPRIMER pour confirmer » (Geist Mono),
+  réglage IA sont conservés. », field « Saisissez « supprimer » pour confirmer » (Geist Mono, any case matches, helper
+  « Majuscules ou minuscules, peu importe. »),
   footer: ghost « Exporter d’abord » on the left, as in the restore · « Annuler » · solid
   `negative` « Tout supprimer », disabled until the field matches.
 - Toasts: « Sauvegarde enregistrée · 1 284 opérations, 4 comptes. » · « Base de données

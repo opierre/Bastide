@@ -504,11 +504,11 @@ MD.form = () => modal(480, 'Modifier la catégorie', '', `
   ${F('Catégorie parente', selF('Aucune (catégorie principale)'))}`,
   `<span class="lead-act">${B('Supprimer', 'ghost')}</span>${CANCEL}${B('Enregistrer', 'pri')}`);
 MD.confirm = () => modal(420, 'Archiver ce compte ?', 'Vous pourrez toujours consulter son historique, mais il n’apparaîtra plus dans votre liste de comptes.', '', CANCEL + B('Archiver', 'pri'), { cls: 'nobody' });
-MD.destructive = () => modal(480, 'Supprimer cette règle ?', 'Les opérations qu’elle a déjà classées gardent leur catégorie.', '', B('Annuler', 'focus') + B('Supprimer', 'dsolid'), { cls: 'nobody' });
+MD.destructive = () => modal(480, 'Supprimer la règle « CARREFOUR » ?', 'Les opérations qu’elle a déjà classées gardent leur catégorie.', '', B('Annuler', 'focus') + B('Supprimer', 'dsolid'), { cls: 'nobody' });
 MD.fieldError = () => modal(420, 'Changer de nom d’utilisateur', 'Le nouveau nom remplace l’ancien pour vous connecter.', `
   ${F('Nom d’utilisateur', inp('camille', 'err focus'), 'Ce nom d’utilisateur est déjà pris.', { err: 1 })}`, CANCEL + B('Enregistrer', 'pri'));
 MD.failed = () => modal(480, 'Règle de prélèvement de la carte', '', `
-  ${bnr('circle-x', 'neg', 'Impossible d’enregistrer la règle. Réessayez.')}
+  ${bnr('circle-x', 'neg', 'La règle n’a pas été enregistrée. Rien n’a été modifié et votre saisie est conservée : réessayez.')}
   ${F('Le libellé du prélèvement contient', inp('PRLV CARTE X4821', 'mono'))}`, B('Plus tard') + B('Enregistrer la règle', 'pri'));
 MD.busy = () => modal(420, 'Changer le mot de passe', 'Votre code de récupération reste valable.', `
   ${F('Mot de passe actuel', pwF('••••••••••••'), '', { cls: 'off' })}
@@ -586,10 +586,10 @@ MD.restore = () => modal(500, 'Restaurer cette sauvegarde ?', '', `
   <span class="mono">bastide-2026-05-11.bastide</span>
   ${kvList([['Exporté le', '11 mai 2026 à 14:32'], ['Version de l’application', '0.2.0'], ...COUNTS])}
   ${bnr('triangle-alert', 'warn', 'Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.')}`, `<span class="lead-act">${B('Exporter d’abord', 'ghost', 'download')}</span>` + CANCEL + B('Remplacer mes données', 'dsolid'));
-MD.reset = (typed = 'SUPPR') => modal(500, 'Réinitialiser la base de données ?', 'Tout le contenu du profil Camille Dubois sera supprimé définitivement :', `
+MD.reset = (typed = 'suppr') => modal(500, 'Réinitialiser la base de données ?', 'Tout le contenu du profil Camille Dubois sera supprimé définitivement :', `
   ${kvList([COUNTS[0], COUNTS[1], ['Catégories personnalisées', '3'], ...COUNTS.slice(3)])}
   ${note('info', 'Les catégories fournies, vos préférences et le réglage IA sont conservés.')}
-  ${F('Saisissez SUPPRIMER pour confirmer', inp(typed, 'mono focus'))}`, `<span class="lead-act">${B('Exporter d’abord', 'ghost', 'download')}</span>` + CANCEL + `<span class="btn dsolid" ${typed === 'SUPPRIMER' ? '' : 'style="opacity:.45"'}>Tout supprimer</span>`);
+  ${F('Saisissez « supprimer » pour confirmer', inp(typed, 'mono focus'), 'Majuscules ou minuscules, peu importe.')}`, `<span class="lead-act">${B('Exporter d’abord', 'ghost', 'download')}</span>` + CANCEL + `<span class="btn dsolid" ${typed.toLowerCase() === 'supprimer' ? '' : 'style="opacity:.45"'}>Tout supprimer</span>`);
 
 /* ── categories ── */
 const ICON_FR = {"house": "Maison", "key-round": "Clé", "zap": "Énergie", "wrench": "Travaux", "sofa": "Ameublement", "soup": "Repas", "shopping-cart": "Courses", "utensils": "Restaurant", "coffee": "Café", "car": "Voiture", "bus": "Bus", "fuel": "Carburant", "plane": "Avion", "star": "Étoile", "ticket": "Billet", "gamepad-2": "Jeux", "book-open": "Livres", "dumbbell": "Sport", "refresh-cw": "Renouvellement", "smartphone": "Téléphone", "wifi": "Internet", "cross": "Soins", "pill": "Pharmacie", "coins": "Pièces", "piggy-bank": "Tirelire", "credit-card": "Carte bancaire", "landmark": "Banque", "trending-up": "Placements", "receipt": "Reçu", "arrow-up": "Hausse", "briefcase": "Travail", "gift": "Cadeau", "shirt": "Vêtements", "shopping-bag": "Achats", "graduation-cap": "Études", "baby": "Enfants", "paw-print": "Animaux", "hand-heart": "Dons"};
@@ -604,7 +604,7 @@ MD.categorySub = () => modal(480, 'Nouvelle catégorie', cat('Logement'), `
   ${F('Nom', inp('Travaux', 'focus'))}
   ${F('Catégorie parente', selF(cat('Logement')))}`, CANCEL + B('Enregistrer', 'pri'));
 MD.categoryEdit = MD.form;
-MD.categoryDelete = () => modal(480, 'Supprimer cette catégorie ?', '« Épargne projet » et ses sous-catégories seront supprimées. Les transactions concernées redeviendront non catégorisées.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
+MD.categoryDelete = () => modal(480, 'Supprimer la catégorie « Épargne projet » ?', 'Ses sous-catégories seront supprimées aussi. Les transactions concernées redeviendront non catégorisées.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
 
 /* ── rules ── */
 MD.ruleEdit = (o = {}) => modal(520, o.isNew ? 'Nouvelle règle' : 'Modifier la règle', '', `
@@ -647,7 +647,7 @@ MD.packProgress = () => modal(560, 'Commerces courants', '', `
   <div class="col" style="gap:8px"><div class="row"><span>Téléchargement des logos… 4 / 6</span></div>${meter(66.7)}</div>
   ${note('info', 'Les règles sont importées : il ne reste que leurs logos. Si vous arrêtez, les logos restants ne sont pas ajoutés.')}`, B('Arrêter les téléchargements'));
 MD.packRefused = () => modal(480, 'Ce fichier n’a pas été accepté', '', `
-  ${bnr('circle-x', 'neg', 'Ce pack contient une règle « regex ». Les expressions régulières ne sont pas acceptées dans un pack partagé : une expression venue d’un fichier tiers peut bloquer votre machine. Utilisez « contient », « égal à » ou « plage ».')}`, B('Fermer', 'pri'));
+  ${bnr('circle-x', 'neg', 'Rien n’a été importé. Ce pack contient une règle « regex », que Bastide n’accepte pas d’un fichier partagé : écrite par quelqu’un d’autre, elle pourrait ralentir fortement l’application. Les conditions « contient », « égal à » et « plage » sont acceptées.')}`, B('Fermer', 'pri'));
 MD.packLogoFailures = () => modal(480, '2 logos n’ont pas pu être ajoutés', '', `
   ${bnr('triangle-alert', 'warn', 'Les règles ont bien été importées : seuls ces logos n’ont pas été ajoutés.')}
   <div class="col" style="gap:6px">${note('circle-x', '« MONOPRIX » : le téléchargement a échoué.')}${note('circle-x', '« PHARMACIE » : le fichier n’est pas une image PNG, JPEG ou WebP.')}</div>`, B('Fermer', 'pri'));
@@ -679,7 +679,6 @@ const PREVIEW = [[1, '12 mai 2026', 'PRLV SEPA BASIC FIT', '', '−29,99 €'], 
 const MARK_LEAD = 'Voici les opérations que Bastide regrouperait. Décochez celles qui n’en font pas partie.';
 const markBody = (low = false) => `<div class="col" style="gap:4px"><div class="row"><span style="font-weight:600">Basic-Fit</span><span class="sp"></span><span class="st ${low ? 'warn' : 't2'}">${I(low ? 'triangle-alert' : 'check')}${low ? 'Confiance faible' : 'Confiance élevée'}</span></div>
   <span class="sm t2">${low ? '2 opérations trouvées · Moins de trois prélèvements · Aucun rythme régulier' : '3 opérations trouvées · Rythme mensuel reconnu · Montant stable'}</span></div>
-  ${low ? bnr('triangle-alert', 'warn', 'Aucun rythme régulier n’a été trouvé. Vous pouvez tout de même enregistrer la série : elle sera irrégulière.') : ''}
   <div class="g2m"><div class="col" style="gap:4px"><span class="sm t2">Rythme proposé</span><span>${low ? 'Irrégulier' : 'Mensuel'}</span></div><div class="col" style="gap:4px"><span class="sm t2">Montant attendu</span><span>29,99 €</span></div></div>
   <div class="col" style="gap:4px">${chargeRows(low ? PREVIEW.slice(0, 2) : PREVIEW)}<span class="xs t3">${low ? '2 opérations cochées · du 12 avr. 2026 au 12 mai 2026' : '3 opérations cochées · du 12 mars 2026 au 12 mai 2026'}</span></div>
   <span class="row ac sm">${I('list-plus', 's14')}Ajouter à une série existante…</span>`;
@@ -695,13 +694,13 @@ MD.seriesPicker = () => modal(520, 'Marquer comme récurrent', 'Choisissez la s�
 /* ── goals ── */
 MD.goalForm = () => modal(440, 'Nouvel objectif', '', `
   ${F('Nom', inp('Voyage Japon', 'focus'))}
-  <div class="g2m">${F('Montant cible', inp('4 000,00 €', 'r'))}${F('Échéance', dateF('06/2026'), 'Facultative')}</div>
-  ${F('Image', `<span class="row"><span style="width:36px;height:24px;border-radius:4px;overflow:hidden;flex:none">${FUJI}</span>${B('Choisir une image', '', 'image')}${B('Retirer', 'ghost')}</span>`, 'Facultative')}`, CANCEL + B('Enregistrer', 'pri'));
+  <div class="g2m">${F('Montant cible', inp('4 000,00 €', 'r'))}${F('Échéance (facultative)', dateF('06/2026'))}</div>
+  ${F('Image (facultative)', `<span class="row"><span style="width:36px;height:24px;border-radius:4px;overflow:hidden;flex:none">${FUJI}</span>${B('Choisir une image', '', 'image')}${B('Retirer', 'ghost')}</span>`)}`, CANCEL + B('Enregistrer', 'pri'));
 MD.allocation = () => modal(440, 'Nouvelle allocation', 'Voyage Japon', `
   ${F('Montant', inp('400,00 €', 'r focus'), 'Un montant négatif retire de l’objectif.')}
   ${F('Date', dateF('01/05/2026'))}
-  ${F('Note (optionnelle)', inp('Ex. Virement mensuel', 'ph'))}`, CANCEL + B('Ajouter', 'pri'));
-MD.allocationDelete = () => modal(440, 'Supprimer cette allocation ?', 'Le montant mis de côté baisse de 400,00 €. Vos comptes ne sont pas modifiés.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
+  ${F('Note (facultative)', inp('Ex. Virement mensuel', 'ph'))}`, CANCEL + B('Ajouter', 'pri'));
+MD.allocationDelete = () => modal(440, 'Supprimer l’allocation du 1er mai 2026 ?', 'Le montant mis de côté pour « Voyage Japon » baisse de 400,00 €. Vos comptes ne sont pas modifiés.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
 MD.goalCrop = () => modal(440, 'Recadrer l’image', 'Faites glisser l’image pour cadrer la bannière.', cropBody(392, 169, FUJI), CANCEL + B('Utiliser cette image', 'pri'));
 
 /* ── loans ── */
@@ -712,16 +711,16 @@ MD.loanForm = (edit = true) => modal(600, edit ? 'Modifier le crédit' : 'Nouvea
   ${F('Remboursement', selF('Échéance constante'))}${F('Capital emprunté', inp('15 000,00 €', 'r'))}
   ${F('Taux nominal', inp('4,90 %', 'r'))}${F('Durée', inp('60<span class="t3" style="margin-left:6px">mois</span>', 'r'))}
   ${F('1re échéance', dateF('05/02/2025'))}${F('Assurance par mois', inp('0,00 €', 'r'))}
-  ${F('Frais de dossier', inp('150,00 €', 'r'))}${F('Bien financé', selF('Appartement Lyon 3e'))}</div>
+  ${F('Frais de dossier', inp('150,00 €', 'r'))}${F('Bien financé (facultatif)', selF('Appartement Lyon 3e'))}</div>
   <div class="row" style="align-items:baseline;gap:10px;padding-top:4px"><span class="h">Mensualité calculée</span><span class="t2">échéance totale 282,38 € · intérêts totaux 1 942,80 €</span></div>`,
   `${edit ? `<span class="lead-act">${B('Supprimer', 'ghost')}</span>` : ''}${CANCEL}${B('Enregistrer', 'pri')}`);
-MD.loanDelete = () => modal(440, 'Supprimer ce crédit ?', 'Il quittera le passif de la Synthèse et, s’il est rattaché à un bien, la base de l’IFI.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
+MD.loanDelete = () => modal(440, 'Supprimer le crédit « Travaux cuisine » ?', 'Il ne sera plus déduit de votre patrimoine dans la Synthèse, et son tableau d’amortissement disparaît. Vos comptes ne sont pas modifiés.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
 
 /* ── net worth ── */
 MD.property = () => modal(620, 'Nouveau bien', '', `
   <div class="g2m">
   ${F('Libellé', inp('Studio Villeurbanne', 'focus'), '', { cls: 'span2' })}
-  ${F('Adresse', inp('12 rue des Tilleuls, 69100 Villeurbanne'), '', { cls: 'span2' })}
+  ${F('Adresse (facultative)', inp('12 rue des Tilleuls, 69100 Villeurbanne'), '', { cls: 'span2' })}
   ${F('Nature', selF('Locatif'))}${F('<span class="row">Quote-part détenue<span class="sp"></span><span class="t3">part : 72 500,00 €</span></span>', inp('50 %', 'r'))}
   ${F('Valeur déclarée', inp('145 000,00 €', 'r'))}${F('Date d’estimation', dateF('15/03/2026'))}
   ${F('Prix d’acquisition', inp('128 000,00 €', 'r'))}${F('Date d’acquisition', dateF('01/09/2019'))}</div>`, CANCEL + B('Enregistrer', 'pri'));
@@ -736,20 +735,20 @@ MD.investmentForm = (edit = false) => modal(440, edit ? 'Modifier le placement' 
   ${F('Nom', inp('PEA', edit ? '' : 'focus'))}
   ${F('Enveloppe', selF('Plan d’épargne en actions (PEA)'))}
   <div class="g2m">${F('Établissement', inp(`${mg('BD')}Boursorama`))}${F('Date d’ouverture', dateF('14/03/2023'))}</div>
-  ${edit ? '' : `<div class="g2m">${F('Valeur actuelle', inp('0,00 €', 'r ph'), 'Facultative')}${F('Versements déjà effectués', inp('0,00 €', 'r ph'), 'Facultatifs. Comptés comme un versement à l’ouverture.')}</div>`}`,
+  ${edit ? '' : `<div class="g2m">${F('Valeur actuelle (facultative)', inp('0,00 €', 'r ph'))}${F('Versements déjà effectués (facultatif)', inp('0,00 €', 'r ph'), 'Comptés comme un versement à l’ouverture.')}</div>`}`,
   `${edit ? `<span class="lead-act">${B('Supprimer', 'ghost')}</span>` : ''}${CANCEL}${B('Enregistrer', 'pri')}`);
 MD.investmentValue = () => modal(440, 'Saisir la valeur', 'PEA', `
   ${F('Valeur', inp('31 840,00 €', 'r focus'), 'Recopiez la valeur totale indiquée sur votre relevé.')}
   ${F('Date', dateF('30/04/2026'))}
-  ${F('Note (optionnelle)', inp('Ex. Relevé trimestriel', 'ph'))}`, CANCEL + B('Enregistrer', 'pri'));
+  ${F('Note (facultative)', inp('Ex. Relevé trimestriel', 'ph'))}`, CANCEL + B('Enregistrer', 'pri'));
 MD.investmentMove = () => modal(440, 'Versement ou retrait', 'PEA', `
   ${F('Montant', inp('500,00 €', 'r focus'), 'Un montant négatif est un retrait.')}
   ${F('Date', dateF('05/04/2026'))}
-  ${F('Note (optionnelle)', inp('Ex. Versement mensuel', 'ph'))}
-  ${F('Transaction liée', selF('<span class="mono">VIR PEA BOURSORAMA</span><span class="t3" style="margin-left:6px">5 avr. 2026 · −500,00 €</span>'), 'Facultative. Les virements récents du même montant.')}`, CANCEL + B('Enregistrer', 'pri'));
+  ${F('Note (facultative)', inp('Ex. Versement mensuel', 'ph'))}
+  ${F('Transaction liée (facultative)', selF('<span class="mono">VIR PEA BOURSORAMA</span><span class="t3" style="margin-left:6px">5 avr. 2026 · −500,00 €</span>'), 'Les virements récents du même montant.')}`, CANCEL + B('Enregistrer', 'pri'));
 MD.investmentClose = () => modal(440, 'Clôturer ce placement ?', 'Il quitte la synthèse à la date de clôture et reste dans la liste, grisé. Son historique est conservé.', `
   <div class="g2m">${F('Date de clôture', dateF('31/05/2026', 'focus'))}${F('Montant final reçu', inp('32 010,00 €', 'r'))}</div>`, CANCEL + B('Clôturer', 'pri'));
-MD.investmentDelete = () => modal(440, 'Supprimer « PEA » ?', 'Ses valeurs saisies et ses versements seront supprimés. Vos comptes ne sont pas modifiés.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
+MD.investmentDelete = () => modal(440, 'Supprimer le placement « PEA » ?', 'Ses valeurs saisies et ses versements seront supprimés. Vos comptes ne sont pas modifiés.', '', CANCEL + B('Supprimer', 'dsolid'), { cls: 'nobody' });
 
 /* ── simulator ── */
 MD.saveScenario = () => modal(420, 'Enregistrer le scénario', '', `${F('Nom', inp('Lyon 3e, 320 k€', 'focus'))}`, CANCEL + B('Enregistrer', 'pri'));
@@ -809,19 +808,19 @@ P['m-profile'] = galleryM('Profil', 'Ticket #268 · spécification 09-settings.m
 ]);
 P['m-data'] = galleryM('Paramètres, données', 'Ticket #269 · spécification 09-settings.md, Données.', () => [
   itemM('Restaurer cette sauvegarde ?', `500 · ${SRC}settings/presentation/restore_confirm_modal.dart`, MD.restore(), '« Exporter d’abord », fantôme à gauche, enregistre une sauvegarde des données actuelles sans fermer la modale. Même action dans la réinitialisation.'),
-  itemM('Réinitialiser la base de données ?', `500 · ${SRC}settings/presentation/reset_confirm_modal.dart`, MD.reset(), '« Tout supprimer » reste désactivé tant que le champ ne vaut pas exactement SUPPRIMER.'),
-  itemM('Réinitialiser la base de données ?, mot saisi', '500', MD.reset('SUPPRIMER')),
+  itemM('Réinitialiser la base de données ?', `500 · ${SRC}settings/presentation/reset_confirm_modal.dart`, MD.reset(), '« Tout supprimer » reste désactivé tant que le champ ne contient pas « supprimer », en majuscules ou en minuscules.'),
+  itemM('Réinitialiser la base de données ?, mot saisi', '500', MD.reset('supprimer')),
 ]);
 P['m-categories'] = galleryM('Catégories', 'Ticket #270 · spécification 08-categories-rules.md.', () => [
   itemM('Nouvelle catégorie', `480 · ${SRC}categories/presentation/category_form_modal.dart`, MD.categoryNew(), 'Icône : le jeu Lucide retenu, cases de 32 px, la case choisie en hover avec un contour accent. Couleur : les sept emplacements en carrés de 20 px.'),
   itemM('Nouvelle sous-catégorie', '480 · parent choisi', MD.categorySub(), 'Avec un parent, Type, Icône et Couleur disparaissent et le chapeau reprend l’étiquette du parent.'),
   itemM('Modifier la catégorie', '480', MD.categoryEdit()),
-  itemM('Supprimer cette catégorie ?', `480 · ${SRC}categories/presentation/category_delete.dart`, MD.categoryDelete()),
+  itemM('Supprimer une catégorie', `480 · ${SRC}categories/presentation/category_delete.dart`, MD.categoryDelete()),
 ]);
 P['m-rules'] = galleryM('Règles', 'Ticket #271 · spécification 08-categories-rules.md.', () => [
   itemM('Modifier la règle', `520 · ${SRC}rules/presentation/rule_editor_modal.dart`, MD.ruleEdit()),
   itemM('Nouvelle règle', '520', MD.ruleEdit({ isNew: 1 })),
-  itemM('Supprimer cette règle ?', '480', MD.ruleDelete()),
+  itemM('Supprimer une règle', '480', MD.ruleDelete()),
   itemM('Recadrer le logo', `420 · ${SRC}rules/presentation/rule_logo_field.dart`, MD.ruleLogoCrop()),
   itemM('Logo depuis une adresse', '420', MD.ruleLogoUrl()),
   itemM('Logo depuis une adresse, refusé', '420', MD.ruleLogoUrl(true)),
@@ -848,13 +847,13 @@ P['m-subscriptions'] = galleryM('Abonnements', 'Ticket #273 · spécifications 1
 P['m-goals'] = galleryM('Objectifs', 'Ticket #274 · spécification 11-goals.md.', () => [
   itemM('Nouvel objectif', `440 · ${SRC}goals/presentation/goal_form_modal.dart`, MD.goalForm()),
   itemM('Nouvelle allocation', `440 · ${SRC}goals/presentation/allocation_modal.dart`, MD.allocation()),
-  itemM('Supprimer cette allocation ?', `440 · ${SRC}goals/presentation/delete_allocation_modal.dart`, MD.allocationDelete()),
+  itemM('Supprimer une allocation', `440 · ${SRC}goals/presentation/delete_allocation_modal.dart`, MD.allocationDelete()),
   itemM('Recadrer l’image', `440 · ${SRC}goals/presentation/goal_image_crop_modal.dart`, MD.goalCrop()),
 ]);
 P['m-loans'] = galleryM('Crédits', 'Ticket #275 · spécification 12-credits.md.', () => [
   itemM('Modifier le crédit', `600 · ${SRC}mortgages/presentation/mortgage_form_modal.dart`, MD.loanForm(), 'Grille à deux colonnes, 16 px de gouttière. « Mensualité calculée » se met à jour à la saisie ; sans capital, taux ou durée : « Renseignez le capital, le taux et la durée. »'),
   itemM('Nouveau crédit', '600', MD.loanForm(false)),
-  itemM('Supprimer ce crédit ?', '440', MD.loanDelete()),
+  itemM('Supprimer un crédit', '440', MD.loanDelete()),
 ]);
 P['m-networth'] = galleryM('Synthèse', 'Ticket #276 · spécification 15-synthese.md.', () => [
   itemM('Nouveau bien', `620 · ${SRC}properties/presentation/property_form_modal.dart`, MD.property(), 'Libellé et adresse sur toute la largeur, puis nature et quote-part, estimation, acquisition : aucune case vide. La quote-part porte « part : {montant} » à droite de son libellé, mis à jour à la saisie.'),
@@ -867,7 +866,7 @@ P['m-investments'] = galleryM('Placements', 'Spécification 17-placements.md : t
   itemM('Saisir la valeur', '440', MD.investmentValue(), 'Le chapeau nomme le placement. La date vaut aujourd’hui par défaut et ne peut pas être dans le futur.'),
   itemM('Versement ou retrait', '440', MD.investmentMove(), 'Transaction liée : les virements récents du même montant, libellé en Geist Mono.'),
   itemM('Clôturer ce placement ?', '440 · principal encre', MD.investmentClose(), 'Sans perte : l’historique reste et le placement reste listé, donc le principal reste encre.'),
-  itemM('Supprimer « PEA » ?', '440 · bouton plein negative', MD.investmentDelete()),
+  itemM('Supprimer le placement « PEA » ?', '440 · bouton plein negative', MD.investmentDelete()),
 ]);
 P['m-simulator'] = galleryM('Simulateur', 'Ticket #277 · spécification 14-simulateur.md. « Déclarer un revenu » ouvre Paramètres › Préférences, pas une modale (09-settings.md).', () => [
   itemM('Enregistrer le scénario', `420 · ${SRC}simulator/presentation/scenario_list.dart`, MD.saveScenario()),

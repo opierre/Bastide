@@ -69,13 +69,13 @@ Flush panel, two panes: **list** (flexible, padding 24 32) · **inspector** (440
 - While it loads or if it fails, the no-image banner shows. Never a broken image.
 
 ### Modals
-- **New / edit goal** (440 px): Nom · Montant cible · Échéance (optional month) · Image
-  (optional, same picker). Footer « Annuler » · « Enregistrer ».
+- **New / edit goal** (440 px): Nom · Montant cible · Échéance (facultative, a month) ·
+  Image (facultative, same picker). Footer « Annuler » · « Enregistrer ».
 - **Allocation** (440 px): title « Nouvelle allocation », lead = the goal's name. Montant
-  (helper « Un montant négatif retire de l’objectif. ») · Date · Note (optional). Footer
+  (helper « Un montant négatif retire de l’objectif. ») · Date · Note (facultative). Footer
   « Annuler » · « Ajouter ». One signed amount field; no deposit/withdraw modes.
-- **Delete allocation** (440 px): title « Supprimer cette allocation ? », lead « Le montant
-  mis de côté baisse de {amount}. Vos comptes ne sont pas modifiés. » (« remonte de » for a
+- **Delete allocation** (440 px): title « Supprimer l’allocation du {date} ? », lead « Le
+  montant mis de côté pour « {goal} » baisse de {amount}. Vos comptes ne sont pas modifiés. » (« remonte de » for a
   negative line). Footer « Annuler » · destructive « Supprimer ». After the delete, the saved
   figure, the repère, the percent and « Atteint en … » are reloaded from the backend.
 

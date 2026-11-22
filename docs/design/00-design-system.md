@@ -271,7 +271,8 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
     repeats the title's verb (« Archiver ») or names its effect when the verb alone would be
     vague (« Remplacer mes données » for a restore). Reversible actions keep the ink primary.
   - Destructive confirmation: the same, with the destructive button (§6) as the confirm
-    action. When the action needs typing a word, the button stays disabled until it matches.
+    action. The title names what goes (« Supprimer la règle « CARREFOUR » ? »), never
+    « cette règle ». When the action needs typing a word, the button stays disabled until it matches.
   - Single way out: something shown once (a recovery code); one primary action, Escape and
     the scrim do nothing. Initial focus goes to the copy action, never to the closing one, so
     Enter cannot dismiss it; a secondary « Enregistrer dans un fichier » writes it to a text
@@ -431,6 +432,11 @@ French first, English at parity (same keys, same structure). The interface is ca
 9. Failures say what failed, that nothing was modified, and what to do next.
 10. Readings that bind no one (HCSF ratio, TAEG, fiscal milestones) say so in body text:
     « Lecture indicative, qui n’engage aucun prêteur. »
+11. An optional field says so in its label, « Note (facultative) », « Bien financé
+    (facultatif) »; a required field carries no mark. No « optionnel », no helper that only
+    says « Facultative ».
+12. A typed confirmation word is lower-case in the label (« Saisissez « supprimer » pour
+    confirmer ») and matches in any case.
 
 **String changes** (apply the same change to `app_en.arb`)
 

@@ -75,7 +75,7 @@ account) · Montant · Cadence (select) · Catégorie (select with the category 
   (date, bank label in Geist Mono over the account, amount), link « Afficher plus ». Primary
   counts the selection: « Ajouter {n} opérations ».
 - **Marquer comme récurrent** (520 px), the dialog `07-transactions.md` opens: the preview
-  (confidence as status text, proposed cadence and amount, checkable charges), link « Ajouter à
+  (confidence as status text with its reasons on one line, said once: no banner repeats them; proposed cadence and amount, checkable charges), link « Ajouter à
   une série existante… »; when the charge matches a series, the lead says so and the body links
   to it; the series picker puts « Retour à l’aperçu » as the left ghost action.
 

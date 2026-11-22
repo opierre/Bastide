@@ -67,7 +67,7 @@ Heading, then Notes:
 
 ## Modals
 - **Property form** (620 px): « Nouveau bien » / « Modifier le bien ». Two columns: Libellé (full
-  width) · Adresse (optional, full width, ≤ 255 characters) · Nature (select) · Quote-part
+  width) · Adresse (facultative, full width, ≤ 255 characters) · Nature (select) · Quote-part
   détenue (the label carries « part : {amount} » live) · Valeur déclarée · Date d’estimation ·
   Prix d’acquisition · Date d’acquisition. Footer « Annuler » · « Enregistrer ».
 - **Nouvelle estimation** (420 px): lead « {label} : {value} estimés le {date}. La nouvelle

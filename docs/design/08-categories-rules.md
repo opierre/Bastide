@@ -71,16 +71,21 @@ standard table, checkbox and note components. The built-in pack button hides onc
 imported.
 
 ### Other modals (`00` §7)
-- **Delete a rule** (480 px), destructive confirmation: lead « Les opérations qu’elle a déjà
-  classées gardent leur catégorie. »
-- **Delete a category** (480 px), destructive confirmation; the lead names the category and
-  says its transactions become uncategorised.
+- **Delete a rule** (480 px), destructive confirmation: « Supprimer la règle « {motif} » ? »,
+  lead « Les opérations qu’elle a déjà classées gardent leur catégorie. »
+- **Delete a category** (480 px), destructive confirmation: « Supprimer la catégorie
+  « {nom} » ? », lead « Ses sous-catégories seront supprimées aussi. Les transactions
+  concernées redeviendront non catégorisées. »
 - **Logo crop** (420 px), square crop 320 × 320; footer « Annuler » · « Utiliser ce logo ».
 - **Logo from an address** (420 px): lead « Collez l’adresse d’une image. Bastide la
   télécharge depuis cet ordinateur, puis vous la recadrez. »; Adresse de l’image (Geist Mono);
   footer « Annuler » · « Télécharger ».
 - **Logo zoom** (240 px), the zoom variant.
 - **Pack refused** and **logos not added** (480 px), acknowledgements with a single « Fermer ».
+  A pack refused for a regex rule says: « Rien n’a été importé. Ce pack contient une règle
+  « regex », que Bastide n’accepte pas d’un fichier partagé : écrite par quelqu’un d’autre,
+  elle pourrait ralentir fortement l’application. Les conditions « contient », « égal à » et
+  « plage » sont acceptées. »
 - **Logos downloading** (the import modal, 560 px): progress « Téléchargement des logos… {n} /
   {total} » with a meter and the note that the rules are already imported. Secondary
   « Arrêter les téléchargements » closes it; the logos not yet downloaded join the « logos not
