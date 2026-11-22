@@ -7,6 +7,7 @@ import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/features/settings/presentation/profile_section.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -136,6 +137,68 @@ void main() {
 
     expect(find.byKey(const Key('displayNameModalField')), findsOneWidget);
     expect(find.text("Ce nom d’utilisateur est déjà pris."), findsOneWidget);
+  });
+
+  testWidgets('opens as the 420 px v2 form, focus on the field', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('settingsDisplayNameButton')));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byKey(const Key('appModalFrame'))).width, 420);
+    expect(find.text('Changer de nom d’utilisateur'), findsOneWidget);
+    expect(
+      find.text('Le nouveau nom remplace l’ancien pour vous connecter.'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('displayNameModalCancel')), findsOneWidget);
+    final focused = FocusManager.instance.primaryFocus!.context!;
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('displayNameModalField')),
+        matching: find.byWidget(focused.widget),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Escape on an edited name asks before dropping it', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await openAndType(tester, 'ada.l');
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('appModalDiscard')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('appModalDiscardConfirm')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('displayNameModal')), findsNothing);
+  });
+
+  testWidgets('a failure other than a taken name is the frame banner', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+    when(
+      () => apiClient.patch('/auth/me', body: any(named: 'body')),
+    ).thenThrow(const ApiFailure(code: 'INTERNAL', message: 'boom'));
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await openAndType(tester, 'bruno');
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('appModalSaveError')), findsOneWidget);
+    expect(find.text('bruno'), findsOneWidget);
   });
 
   testWidgets('a name with spaces is saved with its inner spaces collapsed', (

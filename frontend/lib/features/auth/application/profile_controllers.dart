@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/auth_repository.dart';
@@ -9,7 +11,8 @@ import 'auth_controller.dart';
 /// a taken name errors the modal alone, not the whole session.
 class DisplayNameController extends AsyncNotifier<void> {
   @override
-  Future<void> build() async {}
+  // Synchronous, so the modal opens idle rather than loading for a frame.
+  FutureOr<void> build() {}
 
   Future<void> save({required String displayName}) async {
     state = const AsyncValue.loading();
@@ -34,7 +37,8 @@ final displayNameControllerProvider =
 /// the whole session.
 class PasswordChangeController extends AsyncNotifier<void> {
   @override
-  Future<void> build() async {}
+  // Synchronous, so the modal opens idle rather than loading for a frame.
+  FutureOr<void> build() {}
 
   Future<void> change({
     required String currentPassword,

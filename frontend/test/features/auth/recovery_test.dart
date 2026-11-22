@@ -1,14 +1,19 @@
+import 'dart:io';
+
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/router/app_router.dart';
 import 'package:bastide/core/storage/token_store.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/app_modal.dart';
 import 'package:bastide/features/auth/application/auth_controller.dart';
+import 'package:bastide/features/auth/application/recovery_controllers.dart';
 import 'package:bastide/features/auth/presentation/forgot_password_screen.dart';
 import 'package:bastide/features/auth/presentation/recovery_code_modal.dart';
 import 'package:bastide/features/auth/presentation/recovery_code_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +22,24 @@ import 'package:mocktail/mocktail.dart';
 class _MockApiClient extends Mock implements ApiClient {}
 
 class _MockTokenStore extends Mock implements TokenStore {}
+
+/// Records what « Enregistrer dans un fichier » writes, with no save dialog.
+class _FakeRecoveryCodeFiles implements RecoveryCodeFiles {
+  final saved = <(String, String)>[];
+  bool cancel = false;
+  bool fail = false;
+
+  @override
+  Future<String?> save({
+    required String suggestedName,
+    required String contents,
+  }) async {
+    if (fail) throw const FileSystemException('read-only');
+    if (cancel) return null;
+    saved.add((suggestedName, contents));
+    return '/tmp/$suggestedName';
+  }
+}
 
 const _code = '7K2M-QX9D-4HPA-T0RV-8ZNC';
 const _newCode = 'B3WE-9FJS-K2XQ-M7PD-1RNA';
@@ -38,12 +61,14 @@ void main() {
   late _MockApiClient apiClient;
   late _MockTokenStore tokenStore;
   late ProviderContainer container;
+  late _FakeRecoveryCodeFiles files;
 
   setUpAll(() => registerFallbackValue(<String, dynamic>{}));
 
   setUp(() {
     apiClient = _MockApiClient();
     tokenStore = _MockTokenStore();
+    files = _FakeRecoveryCodeFiles();
     when(() => tokenStore.read()).thenAnswer((_) async => null);
     when(() => tokenStore.write(any())).thenAnswer((_) async {});
     when(() => tokenStore.delete()).thenAnswer((_) async {});
@@ -51,6 +76,7 @@ void main() {
       overrides: [
         apiClientProvider.overrideWithValue(apiClient),
         tokenStoreProvider.overrideWithValue(tokenStore),
+        recoveryCodeFilesProvider.overrideWithValue(files),
       ],
     );
     addTearDown(container.dispose);
@@ -360,25 +386,33 @@ void main() {
   });
 
   group('settings regeneration modal', () {
-    Future<void> openAndSubmit(WidgetTester tester, String password) async {
+    Future<void> open(WidgetTester tester, {Locale? locale}) async {
       await tester.pumpWidget(
         wrap(
           // The modal as the recovery code row opens it.
           Builder(
             builder: (context) => TextButton(
               key: const Key('settingsRecoveryButton'),
-              onPressed: () => showDialog<void>(
+              onPressed: () => showAppModal<void>(
                 context: context,
-                barrierDismissible: false,
                 builder: (_) => const RegenerateRecoveryCodeModal(),
               ),
               child: const Text('open'),
             ),
           ),
+          locale: locale ?? const Locale('fr'),
         ),
       );
       await tester.tap(find.byKey(const Key('settingsRecoveryButton')));
       await tester.pumpAndSettle();
+    }
+
+    Future<void> openAndSubmit(
+      WidgetTester tester,
+      String password, {
+      Locale? locale,
+    }) async {
+      await open(tester, locale: locale);
       await tester.enterText(
         find.byKey(const Key('recoveryModalPasswordField')),
         password,
@@ -388,10 +422,48 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    void answerCode() => when(
+      () => apiClient.post('/auth/recovery-code', body: any(named: 'body')),
+    ).thenAnswer((_) async => {'recovery_code': _newCode});
+
+    bool focusedWithin(Finder finder) {
+      final focused = FocusManager.instance.primaryFocus?.context;
+      if (focused == null) return false;
+      return find
+          .descendant(
+            of: finder,
+            matching: find.byElementPredicate((e) => e == focused),
+          )
+          .evaluate()
+          .isNotEmpty;
+    }
+
+    double frameWidth(WidgetTester tester) =>
+        tester.getSize(find.byKey(const Key('appModalFrame'))).width;
+
+    testWidgets('asks the password in a 480 px form', (tester) async {
+      await open(tester);
+
+      expect(frameWidth(tester), 480);
+      expect(find.text('Nouveau code de récupération'), findsOneWidget);
+      expect(
+        find.text(
+          'Confirmez votre mot de passe pour générer un nouveau code. '
+          'L’ancien cessera de fonctionner.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('recoveryModalCancel')), findsOneWidget);
+      expect(find.text('Générer'), findsOneWidget);
+      // The form's focus lands on its field.
+      expect(
+        focusedWithin(find.byKey(const Key('recoveryModalPasswordField'))),
+        isTrue,
+      );
+    });
+
     testWidgets('the right password shows the new code once', (tester) async {
-      when(
-        () => apiClient.post('/auth/recovery-code', body: any(named: 'body')),
-      ).thenAnswer((_) async => {'recovery_code': _newCode});
+      answerCode();
 
       await openAndSubmit(tester, 'secret');
 
@@ -400,13 +472,94 @@ void main() {
             apiClient.post('/auth/recovery-code', body: {'password': 'secret'}),
       ).called(1);
       expect(find.text(_newCode), findsOneWidget);
+      expect(frameWidth(tester), 480);
+      expect(
+        find.text(
+          'Notez ce code et gardez-le en lieu sûr : il ne sera plus affiché.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Copier'), findsOneWidget);
+      expect(find.text('Enregistrer dans un fichier'), findsOneWidget);
+      // One way out: no cancel, a single « Terminé ».
+      expect(find.byKey(const Key('recoveryModalCancel')), findsNothing);
 
       await tester.tap(find.byKey(const Key('recoveryModalDone')));
       await tester.pumpAndSettle();
       expect(find.text(_newCode), findsNothing);
     });
 
-    testWidgets('a wrong password banners and keeps the form', (tester) async {
+    testWidgets('the shown code focuses « Copier » and ignores Escape', (
+      tester,
+    ) async {
+      answerCode();
+      await openAndSubmit(tester, 'secret');
+
+      expect(
+        focusedWithin(find.byKey(const Key('recoveryCodeCopyButton'))),
+        isTrue,
+      );
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.text(_newCode), findsOneWidget);
+
+      await tester.tapAt(const Offset(4, 4));
+      await tester.pumpAndSettle();
+      expect(find.text(_newCode), findsOneWidget);
+
+      // Enter on « Copier » copies; it never dismisses the code.
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(find.text(_newCode), findsOneWidget);
+    });
+
+    testWidgets('« Enregistrer dans un fichier » writes the code', (
+      tester,
+    ) async {
+      answerCode();
+      await openAndSubmit(tester, 'secret');
+
+      await tester.tap(find.byKey(const Key('recoveryCodeSaveButton')));
+      await tester.pumpAndSettle();
+
+      expect(files.saved, [
+        ('code-de-recuperation-bastide.txt', '$_newCode\n'),
+      ]);
+      expect(find.text('Enregistré'), findsOneWidget);
+      expect(find.text(_newCode), findsOneWidget);
+    });
+
+    testWidgets('a cancelled save dialog changes nothing', (tester) async {
+      answerCode();
+      files.cancel = true;
+      await openAndSubmit(tester, 'secret');
+
+      await tester.tap(find.byKey(const Key('recoveryCodeSaveButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Enregistrer dans un fichier'), findsOneWidget);
+      expect(find.byKey(const Key('appModalSaveError')), findsNothing);
+    });
+
+    testWidgets('a file that cannot be written banners and keeps the code', (
+      tester,
+    ) async {
+      answerCode();
+      files.fail = true;
+      await openAndSubmit(tester, 'secret');
+
+      await tester.tap(find.byKey(const Key('recoveryCodeSaveButton')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Le fichier n’a pas pu être enregistré. Réessayez.'),
+        findsOneWidget,
+      );
+      expect(find.text(_newCode), findsOneWidget);
+    });
+
+    testWidgets('a wrong password is said under its field', (tester) async {
       when(
         () => apiClient.post('/auth/recovery-code', body: any(named: 'body')),
       ).thenThrow(
@@ -415,12 +568,37 @@ void main() {
 
       await openAndSubmit(tester, 'wrong');
 
-      expect(find.byKey(const Key('recoveryModalError')), findsOneWidget);
+      expect(find.byKey(const Key('appModalSaveError')), findsNothing);
       expect(find.text('Mot de passe incorrect.'), findsOneWidget);
       expect(
         find.byKey(const Key('recoveryModalPasswordField')),
         findsOneWidget,
       );
+    });
+
+    testWidgets('any other failure is the frame banner', (tester) async {
+      when(
+        () => apiClient.post('/auth/recovery-code', body: any(named: 'body')),
+      ).thenThrow(const ApiFailure(code: 'INTERNAL', message: 'boom'));
+
+      await openAndSubmit(tester, 'secret');
+
+      expect(find.byKey(const Key('appModalSaveError')), findsOneWidget);
+      expect(
+        find.byKey(const Key('recoveryModalPasswordField')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('renders the shown code in English', (tester) async {
+      answerCode();
+
+      await openAndSubmit(tester, 'secret', locale: const Locale('en'));
+
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Save to a file'), findsOneWidget);
+      expect(find.text('Done'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   });
 }
