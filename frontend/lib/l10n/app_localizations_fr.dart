@@ -1725,12 +1725,13 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get categoryDeleteConfirmTitle => 'Supprimer cette catégorie ?';
+  String categoryDeleteConfirmTitle(String name) {
+    return 'Supprimer la catégorie « $name » ?';
+  }
 
   @override
-  String categoryDeleteConfirmBody(String name) {
-    return '« $name » et ses sous-catégories seront supprimées. Les transactions concernées redeviendront non catégorisées.';
-  }
+  String get categoryDeleteConfirmLead =>
+      'Ses sous-catégories seront supprimées aussi. Les transactions concernées redeviendront non catégorisées.';
 
   @override
   String get categoryFormCreateTitle => 'Nouvelle catégorie';
@@ -1771,7 +1772,18 @@ class AppLocalizationsFr extends AppLocalizations {
       'La couleur suit la catégorie partout : graphiques, légendes et étiquettes.';
 
   @override
-  String get categoryFormCancel => 'Annuler';
+  String categoryColorName(String slot) {
+    String _temp0 = intl.Intl.selectLogic(slot, {
+      'cat1': 'Bleu',
+      'cat2': 'Orange',
+      'cat3': 'Vert',
+      'cat4': 'Ambre',
+      'cat5': 'Rose',
+      'cat6': 'Violet',
+      'other': 'Gris',
+    });
+    return '$_temp0';
+  }
 
   @override
   String get categoryFormSave => 'Enregistrer';

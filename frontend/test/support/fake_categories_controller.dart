@@ -13,10 +13,44 @@ class FakeCategoriesController extends CategoriesController {
   final deleteCalls = <String>[];
   Object? errorOnDelete;
 
+  /// Each `create` as its fields: name, kind, icon, color, parentId.
+  final createCalls = <Map<String, String?>>[];
+  Object? errorOnCreate;
+
   @override
   Future<List<AppCategory>> build() async {
     if (loadError != null) throw loadError!;
     return initialCategories;
+  }
+
+  @override
+  Future<AppCategory> create({
+    required String name,
+    required String kind,
+    required String icon,
+    required String color,
+    String? parentId,
+  }) async {
+    createCalls.add({
+      'name': name,
+      'kind': kind,
+      'icon': icon,
+      'color': color,
+      'parentId': parentId,
+    });
+    if (errorOnCreate != null) throw errorOnCreate!;
+    final created = testCategory(
+      id: 'new-${createCalls.length}',
+      userId: 'u1',
+      parentId: parentId,
+      name: name,
+      kind: kind,
+      icon: icon,
+      color: color,
+      isSystem: false,
+    );
+    state = AsyncValue.data([...?state.value, created]);
+    return created;
   }
 
   @override

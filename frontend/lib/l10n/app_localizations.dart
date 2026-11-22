@@ -2809,17 +2809,17 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{aucune règle} one{1 règle} other{{count} règles}}'**
   String categoryRuleCount(int count);
 
-  /// Title of the delete-category confirmation dialog.
+  /// Title of the delete-category confirmation; also its accessible name.
   ///
   /// In fr, this message translates to:
-  /// **'Supprimer cette catégorie ?'**
-  String get categoryDeleteConfirmTitle;
+  /// **'Supprimer la catégorie « {name} » ?'**
+  String categoryDeleteConfirmTitle(String name);
 
-  /// Body of the delete-category confirmation. Names what else goes with it, since the deletion cascades.
+  /// Lead of the delete-category confirmation. Names what else goes with it, since the deletion cascades.
   ///
   /// In fr, this message translates to:
-  /// **'« {name} » et ses sous-catégories seront supprimées. Les transactions concernées redeviendront non catégorisées.'**
-  String categoryDeleteConfirmBody(String name);
+  /// **'Ses sous-catégories seront supprimées aussi. Les transactions concernées redeviendront non catégorisées.'**
+  String get categoryDeleteConfirmLead;
 
   /// Title of the create-category modal.
   ///
@@ -2893,11 +2893,11 @@ abstract class AppLocalizations {
   /// **'La couleur suit la catégorie partout : graphiques, légendes et étiquettes.'**
   String get categoryFormColorHelper;
 
-  /// Cancel button in the category modal and the delete confirmation.
+  /// Accessible name and tooltip of a colour square in the category form, by slot.
   ///
   /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get categoryFormCancel;
+  /// **'{slot, select, cat1{Bleu} cat2{Orange} cat3{Vert} cat4{Ambre} cat5{Rose} cat6{Violet} other{Gris}}'**
+  String categoryColorName(String slot);
 
   /// Submit button of the category modal.
   ///

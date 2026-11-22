@@ -749,6 +749,9 @@ abstract final class AppCategoriesPanel {
   /// A cell of the category form's icon grid, and a colour square.
   static const iconCell = 32.0;
   static const colorSquare = 20.0;
+
+  /// The `check` on the selected colour square (`08` §Category form).
+  static const colorCheck = 12.0;
 }
 
 /// The Transactions panel of `docs/design/07-transactions.md`.
