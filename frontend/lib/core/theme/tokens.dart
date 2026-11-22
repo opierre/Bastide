@@ -520,6 +520,20 @@ abstract final class AppFonts {
   static const mono = 'Geist Mono';
 }
 
+/// The text size factors of Paramètres › Préférences (`00` §3 « Text size »):
+/// one factor multiplies every size of the type scale, so it grows together.
+abstract final class AppTextScale {
+  /// The type scale as written; the default.
+  static const normal = 1.0;
+
+  /// « Grand »: body 13 reads about 14.
+  static const large = 1.08;
+
+  /// « Très grand »: body 13 reads about 15. The largest the fixed chrome
+  /// (rows 36, nav items 30, buttons 28) holds without clipping.
+  static const xlarge = 1.15;
+}
+
 /// The modal frame of `00` §7 « Modal ».
 abstract final class AppModalSizes {
   /// The widths a modal may take; each panel spec names its own.

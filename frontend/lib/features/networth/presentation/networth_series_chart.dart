@@ -261,7 +261,10 @@ class _NetworthSeriesPlotState extends State<NetworthSeriesPlot> {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
-    final labelStyle = ChartPaints.labelStyle(context);
+    final labelStyle = ChartPaints.painted(
+      context,
+      ChartPaints.labelStyle(context),
+    );
     final months = widget.months;
     final values = widget.values;
 

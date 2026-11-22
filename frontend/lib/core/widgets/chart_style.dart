@@ -17,6 +17,18 @@ abstract final class ChartPaints {
     Theme.of(context).textTheme.labelSmall!,
   ).copyWith(fontWeight: FontWeight.w400, color: context.colors.textTertiary);
 
+  /// [style] for a [CustomPainter]'s [TextPainter], which does not read the
+  /// ambient [TextScaler]: the app's text scale (`00` §3 « Text size ») is
+  /// baked into its size, so painted labels grow with every other text.
+  /// A [Text] takes [style] as it is.
+  static TextStyle painted(BuildContext context, TextStyle style) {
+    final size = style.fontSize;
+    if (size == null) return style;
+    return style.copyWith(
+      fontSize: MediaQuery.textScalerOf(context).scale(size),
+    );
+  }
+
   /// The series line in [color].
   static Paint stroke(Color color) => Paint()
     ..color = color

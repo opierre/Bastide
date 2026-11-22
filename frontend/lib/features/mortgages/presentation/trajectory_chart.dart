@@ -240,7 +240,7 @@ class _TrajectoryPlotState extends State<TrajectoryPlot> {
               values: widget.values,
               annotations: widget.annotations,
               yLabel: widget.yLabel,
-              labelStyle: widget.labelStyle,
+              labelStyle: ChartPaints.painted(context, widget.labelStyle),
               textDirection: Directionality.of(context),
               hovered: _hovered,
             ),

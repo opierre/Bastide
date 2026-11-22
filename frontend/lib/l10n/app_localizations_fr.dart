@@ -276,6 +276,25 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le thème n’a pas pu être enregistré. Rien n’a été modifié. Réessayez.';
 
   @override
+  String get settingsTextSizeTitle => 'Taille du texte';
+
+  @override
+  String get settingsTextSizeNote => 'Agrandit tout le texte de l’application.';
+
+  @override
+  String get settingsTextSizeNormal => 'Normal';
+
+  @override
+  String get settingsTextSizeLarge => 'Grand';
+
+  @override
+  String get settingsTextSizeXLarge => 'Très grand';
+
+  @override
+  String get settingsTextSizeSaveFailed =>
+      'La taille du texte n’a pas pu être enregistrée. Rien n’a été modifié. Réessayez.';
+
+  @override
   String get settingsLanguageTitle => 'Langue';
 
   @override

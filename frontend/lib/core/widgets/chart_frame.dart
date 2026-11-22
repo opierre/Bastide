@@ -164,7 +164,7 @@ class _ChartFrameState extends State<ChartFrame> {
                         colors: context.colors,
                         geometryFor: (size) => _geometry(size, scale, gutter),
                         levels: levels,
-                        labelStyle: labelStyle,
+                        labelStyle: ChartPaints.painted(context, labelStyle),
                         hovered: _hovered,
                         paintSeries: widget.paintSeries,
                       ),

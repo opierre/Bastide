@@ -536,6 +536,42 @@ abstract class AppLocalizations {
   /// **'Le thème n’a pas pu être enregistré. Rien n’a été modifié. Réessayez.'**
   String get settingsThemeSaveFailed;
 
+  /// Title of the text size row in settings preferences.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taille du texte'**
+  String get settingsTextSizeTitle;
+
+  /// Note under the text size segmented control.
+  ///
+  /// In fr, this message translates to:
+  /// **'Agrandit tout le texte de l’application.'**
+  String get settingsTextSizeNote;
+
+  /// Text size option: the reference type scale, the default.
+  ///
+  /// In fr, this message translates to:
+  /// **'Normal'**
+  String get settingsTextSizeNormal;
+
+  /// Text size option: every text a little larger.
+  ///
+  /// In fr, this message translates to:
+  /// **'Grand'**
+  String get settingsTextSizeLarge;
+
+  /// Text size option: the largest text size.
+  ///
+  /// In fr, this message translates to:
+  /// **'Très grand'**
+  String get settingsTextSizeXLarge;
+
+  /// Toast shown when saving the text size fails; the previous size is restored.
+  ///
+  /// In fr, this message translates to:
+  /// **'La taille du texte n’a pas pu être enregistrée. Rien n’a été modifié. Réessayez.'**
+  String get settingsTextSizeSaveFailed;
+
   /// Title of the language card in settings preferences.
   ///
   /// In fr, this message translates to:

@@ -275,6 +275,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'The theme could not be saved. Nothing was changed. Try again.';
 
   @override
+  String get settingsTextSizeTitle => 'Text size';
+
+  @override
+  String get settingsTextSizeNote => 'Makes all the app’s text larger.';
+
+  @override
+  String get settingsTextSizeNormal => 'Normal';
+
+  @override
+  String get settingsTextSizeLarge => 'Large';
+
+  @override
+  String get settingsTextSizeXLarge => 'Extra large';
+
+  @override
+  String get settingsTextSizeSaveFailed =>
+      'The text size could not be saved. Nothing was changed. Try again.';
+
+  @override
   String get settingsLanguageTitle => 'Language';
 
   @override
