@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 import 'chart_frame.dart';
+import 'chart_scale.dart';
 import 'chart_style.dart';
 
 /// Bars by sign (`docs/design/00-design-system.md` §9): one bar per period,
 /// at most 18 px wide, radius 3 on the outer end; `positive` above zero,
 /// `negative` below. A period in [provisional] (the month in progress) is
-/// hatched rather than filled.
+/// hatched rather than filled. The value axis fits the bars' own range
+/// ([ChartScale.signedBars]), so they fill the plot.
 class SignedBarChart extends StatelessWidget {
   const SignedBarChart({
     super.key,
@@ -28,6 +30,9 @@ class SignedBarChart extends StatelessWidget {
   final String Function(num value)? valueLabel;
   final List<InlineSpan>? tooltips;
   final num minStep;
+
+  /// About how many gaps the gridlines leave, as on every chart frame.
+  static const gridlines = 4;
 
   /// The bar of period [index], from zero to its value.
   static Rect barRect(ChartGeometry g, int index, num value) {
@@ -49,11 +54,17 @@ class SignedBarChart extends StatelessWidget {
     ];
 
     return ChartFrame(
-      scaleValues: [...values, 0],
+      scaleValues: values,
+      scale: ChartScale.signedBars(
+        values,
+        intervals: gridlines,
+        minStep: minStep,
+      ),
       labels: labels,
       valueLabel: valueLabel,
       tooltips: tooltips,
       minStep: minStep,
+      gridlines: gridlines,
       slotKeyPrefix: 'signedBarSlot',
       tooltipKey: const Key('signedBarTooltip'),
       marks: bars,

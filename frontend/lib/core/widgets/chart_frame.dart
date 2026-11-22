@@ -53,6 +53,7 @@ class ChartFrame extends StatefulWidget {
   const ChartFrame({
     super.key,
     required this.scaleValues,
+    this.scale,
     required this.labels,
     required this.paintSeries,
     required this.anchors,
@@ -66,8 +67,13 @@ class ChartFrame extends StatefulWidget {
     this.tooltipKey = const Key('chartTooltip'),
   });
 
-  /// Every value the plot must hold (a bar chart adds 0).
+  /// Every value the plot must hold.
   final List<num> scaleValues;
+
+  /// The value range and gridlines, when the chart frames its series its
+  /// own way (bars by sign); otherwise the padded [ChartScale.of] of
+  /// [scaleValues].
+  final ChartScale? scale;
 
   /// The category axis, one label per period.
   final List<String> labels;
@@ -124,11 +130,13 @@ class _ChartFrameState extends State<ChartFrame> {
     final labelStyle = ChartPaints.labelStyle(context);
     final valueLabel = widget.valueLabel;
     final gutter = valueLabel == null ? 0.0 : AppChart.valueGutter;
-    final scale = ChartScale.of(
-      widget.scaleValues,
-      intervals: widget.gridlines,
-      minStep: widget.minStep,
-    );
+    final scale =
+        widget.scale ??
+        ChartScale.of(
+          widget.scaleValues,
+          intervals: widget.gridlines,
+          minStep: widget.minStep,
+        );
     final levels = valueLabel == null
         ? const <String>[]
         : scale.ticks.map(valueLabel).toList();
