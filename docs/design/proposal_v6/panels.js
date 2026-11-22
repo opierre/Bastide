@@ -587,7 +587,7 @@ MD.restore = () => modal(500, 'Restaurer cette sauvegarde ?', '', `
   ${kvList([['Exporté le', '11 mai 2026 à 14:32'], ['Version de l’application', '0.2.0'], ...COUNTS])}
   ${bnr('triangle-alert', 'warn', 'Toutes vos données actuelles seront remplacées. Exportez-les d’abord si besoin.')}`, `<span class="lead-act">${B('Exporter d’abord', 'ghost', 'download')}</span>` + CANCEL + B('Remplacer mes données', 'dsolid'));
 MD.reset = (typed = 'suppr') => modal(500, 'Réinitialiser la base de données ?', 'Tout le contenu du profil Camille Dubois sera supprimé définitivement :', `
-  ${kvList([COUNTS[0], COUNTS[1], ['Catégories personnalisées', '3'], ...COUNTS.slice(3)])}
+  <dl class="kv">${[COUNTS[0], COUNTS[1], ['Catégories personnalisées', '3'], ...COUNTS.slice(3)].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
   ${note('info', 'Les catégories fournies, vos préférences et le réglage IA sont conservés.')}
   ${F('Saisissez « supprimer » pour confirmer', inp(typed, 'mono focus'), 'Majuscules ou minuscules, peu importe.')}`, `<span class="lead-act">${B('Exporter d’abord', 'ghost', 'download')}</span>` + CANCEL + `<span class="btn dsolid" ${typed.toLowerCase() === 'supprimer' ? '' : 'style="opacity:.45"'}>Tout supprimer</span>`);
 
