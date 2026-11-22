@@ -2683,10 +2683,6 @@
   "@ruleLogoCropLead": {
     "description": "Lead text of the logo crop modal."
   },
-  "ruleLogoCropCancel": "Annuler",
-  "@ruleLogoCropCancel": {
-    "description": "Cancel button of the logo crop modal."
-  },
   "ruleLogoCropSave": "Utiliser ce logo",
   "@ruleLogoCropSave": {
     "description": "Confirm button of the logo crop modal, uploading the cropped logo."
@@ -2720,10 +2716,6 @@
   "@ruleLogoUrlHint": {
     "description": "Placeholder of the web address field in the logo-from-address dialog."
   },
-  "ruleLogoUrlCancel": "Annuler",
-  "@ruleLogoUrlCancel": {
-    "description": "Cancel button of the logo-from-address dialog."
-  },
   "ruleLogoUrlFetch": "Télécharger",
   "@ruleLogoUrlFetch": {
     "description": "Confirm button of the logo-from-address dialog: downloads the picture."
@@ -2749,10 +2741,6 @@
   "@ruleLogoUrlNotAPicture": {
     "description": "Error when the downloaded file is not a picture."
   },
-  "ruleFormCancel": "Annuler",
-  "@ruleFormCancel": {
-    "description": "Cancel button of the rule editor."
-  },
   "ruleFormSave": "Enregistrer",
   "@ruleFormSave": {
     "description": "Submit button of the rule editor."
@@ -2761,13 +2749,19 @@
   "@ruleFormDelete": {
     "description": "Delete action in the rule editor's footer, shown only when editing."
   },
-  "ruleDeleteConfirmTitle": "Supprimer cette règle ?",
+  "ruleDeleteConfirmTitle": "Supprimer la règle « {pattern} » ?",
   "@ruleDeleteConfirmTitle": {
-    "description": "Title of the confirmation before a rule is deleted."
+    "description": "Title of the confirmation before a rule is deleted; also its accessible name.",
+    "placeholders": {
+      "pattern": {
+        "type": "String",
+        "example": "CARREFOUR"
+      }
+    }
   },
-  "ruleDeleteConfirmBody": "Les opérations qu’elle a déjà classées gardent leur catégorie.",
-  "@ruleDeleteConfirmBody": {
-    "description": "Body of the confirmation before a rule is deleted."
+  "ruleDeleteConfirmLead": "Les opérations qu’elle a déjà classées gardent leur catégorie.",
+  "@ruleDeleteConfirmLead": {
+    "description": "Lead of the confirmation before a rule is deleted."
   },
   "rulePreviewLoading": "Recherche des transactions correspondantes…",
   "@rulePreviewLoading": {

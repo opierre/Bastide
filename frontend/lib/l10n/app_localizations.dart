@@ -3577,12 +3577,6 @@ abstract class AppLocalizations {
   /// **'Faites glisser l’image pour cadrer le logo.'**
   String get ruleLogoCropLead;
 
-  /// Cancel button of the logo crop modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get ruleLogoCropCancel;
-
   /// Confirm button of the logo crop modal, uploading the cropped logo.
   ///
   /// In fr, this message translates to:
@@ -3625,12 +3619,6 @@ abstract class AppLocalizations {
   /// **'https://…'**
   String get ruleLogoUrlHint;
 
-  /// Cancel button of the logo-from-address dialog.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get ruleLogoUrlCancel;
-
   /// Confirm button of the logo-from-address dialog: downloads the picture.
   ///
   /// In fr, this message translates to:
@@ -3661,12 +3649,6 @@ abstract class AppLocalizations {
   /// **'Cette adresse ne mène pas à une image.'**
   String get ruleLogoUrlNotAPicture;
 
-  /// Cancel button of the rule editor.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get ruleFormCancel;
-
   /// Submit button of the rule editor.
   ///
   /// In fr, this message translates to:
@@ -3679,17 +3661,17 @@ abstract class AppLocalizations {
   /// **'Supprimer'**
   String get ruleFormDelete;
 
-  /// Title of the confirmation before a rule is deleted.
+  /// Title of the confirmation before a rule is deleted; also its accessible name.
   ///
   /// In fr, this message translates to:
-  /// **'Supprimer cette règle ?'**
-  String get ruleDeleteConfirmTitle;
+  /// **'Supprimer la règle « {pattern} » ?'**
+  String ruleDeleteConfirmTitle(String pattern);
 
-  /// Body of the confirmation before a rule is deleted.
+  /// Lead of the confirmation before a rule is deleted.
   ///
   /// In fr, this message translates to:
   /// **'Les opérations qu’elle a déjà classées gardent leur catégorie.'**
-  String get ruleDeleteConfirmBody;
+  String get ruleDeleteConfirmLead;
 
   /// Info banner shown while the match preview is in flight.
   ///

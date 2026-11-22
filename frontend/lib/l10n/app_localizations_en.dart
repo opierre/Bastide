@@ -2140,9 +2140,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ruleLogoCropLead => 'Drag the image to frame the logo.';
 
   @override
-  String get ruleLogoCropCancel => 'Cancel';
-
-  @override
   String get ruleLogoCropSave => 'Use this logo';
 
   @override
@@ -2167,9 +2164,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ruleLogoUrlHint => 'https://…';
 
   @override
-  String get ruleLogoUrlCancel => 'Cancel';
-
-  @override
   String get ruleLogoUrlFetch => 'Download';
 
   @override
@@ -2190,19 +2184,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'This address doesn’t lead to a picture.';
 
   @override
-  String get ruleFormCancel => 'Cancel';
-
-  @override
   String get ruleFormSave => 'Save';
 
   @override
   String get ruleFormDelete => 'Delete';
 
   @override
-  String get ruleDeleteConfirmTitle => 'Delete this rule?';
+  String ruleDeleteConfirmTitle(String pattern) {
+    return 'Delete the rule “$pattern”?';
+  }
 
   @override
-  String get ruleDeleteConfirmBody =>
+  String get ruleDeleteConfirmLead =>
       'The transactions it already classed keep their category.';
 
   @override

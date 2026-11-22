@@ -8,6 +8,7 @@ import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/pictures/picture_download.dart';
 import 'package:bastide/core/pictures/pictures.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/inline_banner.dart';
 import 'package:bastide/features/categories/application/categories_controller.dart';
 import 'package:bastide/features/rules/application/rule_logo_url_controller.dart';
 import 'package:bastide/features/rules/application/rules_controller.dart';
@@ -307,6 +308,14 @@ void main() {
           verify(() => client.send(any())).called(1);
           expect(find.text(error), findsOneWidget);
           expect(find.byKey(const Key('ruleLogoUrlField')), findsOneWidget);
+          // The refusal is the field's error state, not a banner.
+          expect(
+            find.descendant(
+              of: find.byKey(const Key('ruleLogoUrlModal')),
+              matching: find.byType(InlineBanner),
+            ),
+            findsNothing,
+          );
         },
       );
     }
