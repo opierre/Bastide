@@ -225,7 +225,7 @@ Disabled is 45 % opacity and not focusable.
 | **Summary line** | A row, items bottom-aligned, 40 px apart, separated by vertical `line` hairlines. Each item: label 12 `textSecondary`, figure (40, 28 or 20), optional caption 12 `textTertiary` or a trend line. The first item holds the lead figure. |
 | **Table** | Header 12/400 `textTertiary`, no ground, 8 px below; rows 36 px with a top `line` hairline; cell padding-right 12; numeric columns right-aligned. Row hover `hover`. Selected row `accentSoft`. Dimmed row (cancelled, disabled, archived): all cells `textTertiary`. Sortable header: label + `chevron-up`/`chevron-down` 14 px on the sorted column. |
 | **Group row** | 30 px, `rail` ground, 12 `textTertiary`, spans the table (a day, an account type). |
-| **Key/value list** | Two columns, label `textSecondary` left, value right-aligned, 8 px rows. |
+| **Key/value list** | Two columns, label `textSecondary` left, value right-aligned, 8 px rows. A comparison adds one value column per source, 24 px apart, each headed 12 `textTertiary` right-aligned (« Sauvegarde · Actuel »); values stay `text`, a difference is not coloured. |
 | **Monogram** | 22 px (32 px "large"), radius 5 (7), `hover` ground, 1 px `line`, initials 10/600 (12/600) `textSecondary`. Always neutral. Unknown: « ? ». A user-supplied logo replaces it in the same box, cover-cropped. |
 | **Category label** | 8 px square dot (radius 2) in the category hue + name in `textSecondary`; subcategory after « › » in `textTertiary`. Uncategorised: « Non catégorisé » in `textTertiary` with a 1 px dashed `lineStrong` underline. An AI proposal is the same label followed by « confiance 78 % » 12 `textTertiary`; no gauge. |
 | **Status text** | Icon 13 px + text 12 px in one colour: `positive` (`check`), `warning` (`triangle-alert`, `trending-up`, `clock-alert`), `negative` (`circle-x`), neutral `textSecondary`. No pill, no dot badge. Nothing is shown for a healthy item. |
@@ -300,7 +300,12 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
   spinner in the primary button and disables the other actions and the fields, and a second
   click does nothing (a confirmation's action behaves the same); a loading body shows its silhouette
   (as §7 « Loading »); a body that cannot load shows a Banner with a `warning` icon and a
-  secondary « Réessayer ».
+  secondary « Réessayer ». An action that runs without closing the modal (« Exporter
+  d’abord ») gives way, once it succeeds, to status text in `positive` with `check` that
+  names the result (« Sauvegarde enregistrée »), in the button's place, until the modal
+  closes. It is announced to screen readers, stands in for the toast the action shows
+  elsewhere, and focus moves to the modal's initial focus (« Annuler » in a destructive
+  confirmation).
 
 ### States of a panel
 
