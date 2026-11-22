@@ -3383,10 +3383,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get goalFormImageLabel => 'Image';
-
-  @override
-  String get goalFormImageHelp => 'Optional';
+  String get goalFormImageLabel => 'Image (optional)';
 
   @override
   String get goalFormImagePick => 'Choose an image';
@@ -3435,13 +3432,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalFormTargetInvalid => 'Enter an amount greater than zero.';
 
   @override
-  String get goalFormDateLabel => 'Deadline';
+  String get goalFormDateLabel => 'Deadline (optional)';
 
   @override
-  String get goalFormDateHelp => 'Optional';
+  String get goalFormDateHint => 'MM/YYYY';
 
   @override
-  String get goalFormDateInvalid => 'Invalid date.';
+  String get goalFormDatePick => 'Pick a month';
+
+  @override
+  String get goalFormDateInvalid => 'Enter a month as MM/YYYY.';
 
   @override
   String get goalFormCancel => 'Cancel';

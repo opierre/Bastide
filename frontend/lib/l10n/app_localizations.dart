@@ -5315,17 +5315,11 @@ abstract class AppLocalizations {
   /// **'Image de l’objectif {name}'**
   String goalImageAlt(String name);
 
-  /// Goal form field: the banner image.
+  /// Goal form field: the optional banner image.
   ///
   /// In fr, this message translates to:
-  /// **'Image'**
+  /// **'Image (facultative)'**
   String get goalFormImageLabel;
-
-  /// Helper under the optional image field.
-  ///
-  /// In fr, this message translates to:
-  /// **'Facultative'**
-  String get goalFormImageHelp;
 
   /// Goal form button picking an image.
   ///
@@ -5411,22 +5405,28 @@ abstract class AppLocalizations {
   /// **'Saisissez un montant supérieur à zéro.'**
   String get goalFormTargetInvalid;
 
-  /// Goal form field: the optional deadline.
+  /// Goal form field: the optional deadline, a month.
   ///
   /// In fr, this message translates to:
-  /// **'Échéance'**
+  /// **'Échéance (facultative)'**
   String get goalFormDateLabel;
 
-  /// Helper marking the target date as optional.
+  /// Placeholder of the empty deadline field: the month spelling it reads.
   ///
   /// In fr, this message translates to:
-  /// **'Facultative'**
-  String get goalFormDateHelp;
+  /// **'MM/AAAA'**
+  String get goalFormDateHint;
 
-  /// Validation message when the target date cannot be read in the current locale.
+  /// Tooltip of the calendar button beside the deadline field.
   ///
   /// In fr, this message translates to:
-  /// **'Date invalide.'**
+  /// **'Choisir un mois'**
+  String get goalFormDatePick;
+
+  /// Validation message when the deadline does not read as a month.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez un mois au format MM/AAAA.'**
   String get goalFormDateInvalid;
 
   /// Cancel action in the goal modal footer.

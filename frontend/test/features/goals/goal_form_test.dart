@@ -35,6 +35,7 @@ class _RecordingGoalsController extends FakeGoalsController {
 Widget _wrap({
   required _RecordingGoalsController controller,
   Locale locale = const Locale('fr'),
+  Goal? initial,
 }) {
   return ProviderScope(
     overrides: [
@@ -54,7 +55,7 @@ Widget _wrap({
       theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(body: GoalFormModal()),
+      home: Scaffold(body: GoalFormModal(initial: initial)),
     ),
   );
 }
@@ -107,7 +108,7 @@ void main() {
     );
   });
 
-  testWidgets('the target date is picked from a calendar', (tester) async {
+  testWidgets('the deadline month is picked from a calendar', (tester) async {
     final controller = _RecordingGoalsController();
     await tester.pumpWidget(_wrap(controller: controller));
     await tester.pumpAndSettle();
@@ -120,15 +121,24 @@ void main() {
 
     await tester.tap(find.byIcon(LucideIcons300.calendar));
     await tester.pumpAndSettle();
+    // The calendar opens on its years: a deadline is chosen by year first.
+    await tester.tap(find.text('2030'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('22'));
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
 
+    final month = DateTime.now().month;
+    expect(
+      find.text('${month.toString().padLeft(2, '0')}/2030'),
+      findsOneWidget,
+    );
+
     await tester.tap(find.byKey(const Key('goalFormSubmit')));
     await tester.pumpAndSettle();
 
-    // Whatever month the calendar opened on, it is the 22nd that was submitted.
-    expect(controller.createCalls.single.$3?.day, 22);
+    // Only the month is kept: the day picked is not one the panel shows.
+    expect(controller.createCalls.single.$3, DateTime(2030, month));
   });
 
   testWidgets('creating sends the name, the target and the date', (
@@ -146,14 +156,14 @@ void main() {
       'Voyage Japon',
     );
     await tester.enterText(find.byKey(const Key('goalFormTarget')), '4000');
-    await tester.enterText(find.byKey(const Key('goalFormDate')), '30/06/2026');
+    await tester.enterText(find.byKey(const Key('goalFormDate')), '06/2026');
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('goalFormSubmit')));
     await tester.pumpAndSettle();
 
     expect(controller.createCalls, [
-      ('Voyage Japon', 400000, DateTime(2026, 6, 30)),
+      ('Voyage Japon', 400000, DateTime(2026, 6)),
     ]);
   });
 
@@ -199,11 +209,88 @@ void main() {
       find.byKey(const Key('goalFormTarget')),
       '10,000.50',
     );
-    await tester.enterText(find.byKey(const Key('goalFormDate')), '6/30/2026');
+    await tester.enterText(find.byKey(const Key('goalFormDate')), '06/2026');
     await tester.tap(find.byKey(const Key('goalFormSubmit')));
     await tester.pumpAndSettle();
 
     expect(controller.createCalls.single.$2, 1000050);
-    expect(controller.createCalls.single.$3, DateTime(2026, 6, 30));
+    expect(controller.createCalls.single.$3, DateTime(2026, 6));
+  });
+
+  testWidgets('the v6 layout: optional fields say so in their label', (
+    tester,
+  ) async {
+    final controller = _RecordingGoalsController();
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nouvel objectif'), findsOneWidget);
+    expect(find.text('Échéance (facultative)'), findsOneWidget);
+    expect(find.text('Image (facultative)'), findsOneWidget);
+    expect(find.text('Facultative'), findsNothing);
+    expect(find.text('Annuler'), findsOneWidget);
+    expect(find.text('Enregistrer'), findsOneWidget);
+    // No picture yet: nothing to take back.
+    expect(find.byKey(const Key('goalFormImageRemove')), findsNothing);
+    expect(find.byIcon(LucideIcons300.image), findsOneWidget);
+
+    // Montant cible and Échéance side by side, aligned by their input.
+    final target = tester.getRect(find.byKey(const Key('goalFormTarget')));
+    final date = tester.getRect(find.byKey(const Key('goalFormDate')));
+    expect(target.top, date.top);
+    expect(target.right, lessThan(date.left));
+
+    // The target reads right-aligned, like every amount.
+    final field = tester.widget<TextField>(
+      find.descendant(
+        of: find.byKey(const Key('goalFormTarget')),
+        matching: find.byType(TextField),
+      ),
+    );
+    expect(field.textAlign, TextAlign.end);
+  });
+
+  testWidgets('a deadline that is not a month is refused', (tester) async {
+    final controller = _RecordingGoalsController();
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('goalFormName')), 'Vélo');
+    await tester.enterText(find.byKey(const Key('goalFormTarget')), '900');
+    await tester.enterText(find.byKey(const Key('goalFormDate')), '13/2026');
+    await tester.tap(find.byKey(const Key('goalFormSubmit')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Saisissez un mois au format MM/AAAA.'), findsOneWidget);
+    expect(controller.createCalls, isEmpty);
+  });
+
+  testWidgets('editing loads the deadline as a month', (tester) async {
+    final controller = _RecordingGoalsController();
+    await tester.pumpWidget(
+      _wrap(
+        controller: controller,
+        initial: testGoal(targetDate: DateTime(2028, 6, 30)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Modifier l’objectif'), findsOneWidget);
+    expect(find.text('06/2028'), findsOneWidget);
+  });
+
+  testWidgets('cancelling a filled form asks before dropping it', (
+    tester,
+  ) async {
+    final controller = _RecordingGoalsController();
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('goalFormName')), 'Vélo');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('goalFormCancel')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Abandonner les modifications ?'), findsOneWidget);
   });
 }
