@@ -418,23 +418,6 @@ abstract final class AppSpacing {
   /// Fields 14 px apart: in a modal (`00` §7) and down the auth column
   /// (`02-login.md`, `03-register.md`).
   static const fieldGap = 14.0;
-
-  // v1 layout values, kept only so the panels compile until each panel's v2
-  // ticket replaces them. Nothing new reads these.
-
-  /// v1: gap between cards in a grid.
-  static const gridGap = 18.0;
-
-  /// v1: card padding.
-  static const cardPadding = 20.0;
-  static const cardPaddingWide = 24.0;
-
-  /// v1: content region padding, 24 × 28.
-  static const contentX = 28.0;
-  static const contentY = 24.0;
-
-  /// v1: panels that open with a filter bar.
-  static const contentTopFiltered = 20.0;
 }
 
 /// Corner radii (`00` §4).
@@ -464,20 +447,6 @@ abstract final class AppRadii {
   /// Avatars and toggles.
   static const pill = 999.0;
   static const full = pill;
-
-  // v1 radii, kept only until #200 and the panels' v2 tickets replace them.
-
-  /// v1: monogram.
-  static const monogram = 9.0;
-
-  /// v1: toasts and inset plates.
-  static const inset = 14.0;
-
-  /// v1: card.
-  static const lg = 16.0;
-
-  /// v1: modal, glyph plate.
-  static const xl = 20.0;
 }
 
 /// Heights and widths of `00` §4 and §5. The shell (#201) and the shared
@@ -787,12 +756,6 @@ abstract final class AppSubscriptions {
   /// The date column of a charge list in the subscription modals, its 12 px
   /// gap to the label included (`proposal_v6` `m-subscriptions`).
   static const chargeDateColumn = 96.0;
-}
-
-/// v1: the 38 px control pill some panels still put in the title bar, kept
-/// until each panel's v2 ticket moves it to the 28 px controls of [AppSizes].
-abstract final class AppChrome {
-  static const controlPillHeight = 38.0;
 }
 
 /// The one chart frame (`00` §9). Colours come from the theme: gridlines in

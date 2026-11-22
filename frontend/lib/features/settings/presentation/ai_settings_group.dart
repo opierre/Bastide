@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/app_popover.dart';
 import '../../../core/widgets/app_slider.dart';
 import '../../../core/widgets/app_toggle.dart';
@@ -137,7 +138,7 @@ class _RowsState extends ConsumerState<_Rows> {
         // the toggle is on or off.
         SettingRow(
           key: const Key('settingsAiPrivacy'),
-          name: l10n.settingsAiSubtitle,
+          name: l10n.settingsAiToggleLabel,
           description: l10n.settingsAiPrivacy,
           children: [
             AppToggle(
@@ -421,7 +422,7 @@ class _LearnMoreLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return SettingsLink(
+    return AppLink(
       key: const Key('settingsAiLearnMore'),
       label: l10n.settingsAiLearnMore,
       onTap: () =>

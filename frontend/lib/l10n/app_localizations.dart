@@ -4135,13 +4135,7 @@ abstract class AppLocalizations {
   /// **'IA locale'**
   String get settingsAiTitle;
 
-  /// Label of the AI card's opt-in toggle, shown beside it.
-  ///
-  /// In fr, this message translates to:
-  /// **'Catégorisation par IA'**
-  String get settingsAiSubtitle;
-
-  /// Accessible label of the card's opt-in toggle.
+  /// Name of the AI card's opt-in row, shown beside its toggle, and the toggle's accessible label.
   ///
   /// In fr, this message translates to:
   /// **'Catégorisation par IA'**

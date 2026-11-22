@@ -1,6 +1,7 @@
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/app_button.dart';
+import 'package:bastide/core/widgets/app_link.dart';
 import 'package:bastide/core/widgets/app_checkbox.dart';
 import 'package:bastide/core/widgets/app_segmented.dart';
 import 'package:bastide/core/widgets/app_select.dart';
@@ -488,5 +489,47 @@ void main() {
       decorationOf(tester, find.byKey(const Key('appToggleTrack'))).color,
       AppColors.light.accent,
     );
+  });
+
+  group('AppLink', () {
+    testWidgets('accent 12 px, underlined on hover, activated by Enter', (
+      tester,
+    ) async {
+      // A desktop app runs in the traditional highlight mode; tests start in
+      // touch mode, where no hover highlight shows.
+      FocusManager.instance.highlightStrategy =
+          FocusHighlightStrategy.alwaysTraditional;
+      addTearDown(
+        () => FocusManager.instance.highlightStrategy =
+            FocusHighlightStrategy.automatic,
+      );
+      var taps = 0;
+      await pumpHost(tester, AppLink(label: 'Voir tout', onTap: () => taps++));
+      Text text() => tester.widget<Text>(find.text('Voir tout'));
+      expect(text().style?.color, dark.accent);
+      expect(text().style?.fontSize, 12);
+      expect(text().style?.decoration, isNot(TextDecoration.underline));
+
+      await hover(tester, find.text('Voir tout'));
+      await tester.pump();
+      expect(text().style?.decoration, TextDecoration.underline);
+
+      await tester.tap(find.text('Voir tout'));
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(taps, 2);
+    });
+
+    testWidgets('13 px when not small, Geist Mono for a file name', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        AppLink(label: 'releve.ofx', onTap: () {}, small: false, mono: true),
+      );
+      final style = tester.widget<Text>(find.text('releve.ofx')).style;
+      expect(style?.fontSize, 13);
+      expect(style?.fontFamily, AppFonts.mono);
+    });
   });
 }

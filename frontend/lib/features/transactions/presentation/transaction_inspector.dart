@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/focus_ring.dart';
 import '../../../core/widgets/inspector_pane.dart';
@@ -31,7 +32,6 @@ import '../domain/transaction.dart';
 import 'always_categorize_modal.dart';
 import 'category_picker.dart';
 import 'transaction_labels.dart';
-import 'transactions_link.dart';
 
 /// The inspector pane of the « Toutes » tab (`07-transactions.md` §Inspector
 /// pane) for the selected operation: its header, amount and key/value list,
@@ -192,7 +192,7 @@ class _Summary extends ConsumerWidget {
               l10n.transactionInspectorImport,
               fileName == null
                   ? Text('—', style: TextStyle(color: colors.textSecondary))
-                  : TransactionsLink(
+                  : AppLink(
                       key: const Key('transactionInspectorImport'),
                       label: fileName,
                       small: false,
@@ -325,7 +325,7 @@ class _RecurringRow extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        TransactionsLink(
+        AppLink(
           key: const Key('transactionInspectorViewSeries'),
           label: l10n.transactionRecurringView,
           onTap: () => openRecurringSeries(context, ref, seriesId: series.id),

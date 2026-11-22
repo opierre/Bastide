@@ -10,6 +10,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/app_table.dart';
 import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/inline_banner.dart';
@@ -26,7 +27,6 @@ import 'always_categorize_modal.dart';
 import 'category_picker.dart';
 import 'transaction_error_localizer.dart';
 import 'transaction_labels.dart';
-import 'transactions_link.dart';
 
 /// The « À vérifier » tab (`07-transactions.md` §Tab « À vérifier »): the
 /// progress row (or the run's banner), then the queue as a table whose rows
@@ -271,7 +271,7 @@ class _AiInvitation extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        TransactionsLink(
+        AppLink(
           key: const Key('reviewAiInvitationLink'),
           label: l10n.reviewAiInvitationLink,
           onTap: () => context.go(SettingsScreen.path),

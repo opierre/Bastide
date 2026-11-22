@@ -7,7 +7,7 @@ import 'package:intl/intl.dart' show NumberFormat;
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/area_line.dart';
+import '../../../core/widgets/chart_frame.dart';
 import '../../../core/widgets/chart_scale.dart';
 import '../../../core/widgets/chart_style.dart';
 import '../../../core/widgets/chart_tooltip.dart';
@@ -272,7 +272,11 @@ Rect _barRect(Size size, List<int> capital, List<int> interest, int index) {
     _StackedBarsPainter._maxBarWidth,
     plot.width / capital.length * 0.62,
   );
-  final center = plot.left + AreaLine.pointX(index, capital.length, plot.width);
+  final center = ChartGeometry(
+    plot: plot,
+    scale: scale,
+    count: capital.length,
+  ).x(index);
   final top = scale.y(capital[index] + interest[index], plot);
   return Rect.fromLTRB(
     center - width / 2,
@@ -339,9 +343,14 @@ class _StackedBarsPainter extends CustomPainter {
     const baseRadius = Radius.circular(AppChart.stackRadius);
     final last = years.length - 1;
 
+    final geometry = ChartGeometry(
+      plot: plot,
+      scale: scale,
+      count: years.length,
+    );
+
     for (var index = 0; index < years.length; index++) {
-      final center =
-          plot.left + AreaLine.pointX(index, years.length, plot.width);
+      final center = geometry.x(index);
       final left = center - width / 2;
       final capitalHeight = heightOf(capital[index]);
       final interestHeight = heightOf(interest[index]);

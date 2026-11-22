@@ -23,7 +23,7 @@ import 'price_history_chart.dart';
 import 'recurring_error_localizer.dart';
 import 'recurring_labels.dart';
 import 'series_form_modal.dart';
-import 'summary_item.dart';
+import '../../../core/widgets/summary_line.dart';
 
 /// One series in full (`docs/design/10` § Series detail): the summary line,
 /// the price-rise banner with its yearly cost, the charge history drawn as a

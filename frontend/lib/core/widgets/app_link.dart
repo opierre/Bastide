@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/focus_ring.dart';
+import '../theme/app_theme.dart';
+import '../theme/tokens.dart';
+import 'focus_ring.dart';
 
-/// A link (`00` §6): `accent`, 13 or 12 px, underlined on hover, focusable.
-/// No arrow glyph. « Voir la série », « Effacer les filtres », « Paramètres »,
-/// the import's file name.
-class TransactionsLink extends StatefulWidget {
-  const TransactionsLink({
+/// A link (`docs/design/00-design-system.md` §6, Link): `accent`, 12 or
+/// 13 px, underlined on hover, focusable and activated with `Enter` or
+/// `Space`. No arrow glyph in the label. The right side of a section
+/// heading, « Voir tout », « Effacer les filtres », a file name.
+class AppLink extends StatefulWidget {
+  const AppLink({
     super.key,
     required this.label,
     required this.onTap,
@@ -25,18 +27,18 @@ class TransactionsLink extends StatefulWidget {
   final bool mono;
 
   @override
-  State<TransactionsLink> createState() => _TransactionsLinkState();
+  State<AppLink> createState() => _AppLinkState();
 }
 
-class _TransactionsLinkState extends State<TransactionsLink> {
+class _AppLinkState extends State<AppLink> {
   bool _hovered = false;
   bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
+    final accent = context.colors.accent;
     final textTheme = Theme.of(context).textTheme;
-    final base = widget.small ? textTheme.bodySmall : textTheme.bodyMedium;
+    final base = widget.small ? textTheme.bodySmall! : textTheme.bodyMedium!;
 
     return FocusableActionDetector(
       mouseCursor: SystemMouseCursors.click,
@@ -51,6 +53,7 @@ class _TransactionsLinkState extends State<TransactionsLink> {
         ),
       },
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: widget.onTap,
         child: FocusRing(
           focused: _focused,
@@ -61,11 +64,11 @@ class _TransactionsLinkState extends State<TransactionsLink> {
               widget.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: base?.copyWith(
-                color: colors.accent,
+              style: tabularNumberStyle(base).copyWith(
+                color: accent,
                 fontFamily: widget.mono ? AppFonts.mono : null,
                 decoration: _hovered ? TextDecoration.underline : null,
-                decorationColor: colors.accent,
+                decorationColor: accent,
               ),
             ),
           ),

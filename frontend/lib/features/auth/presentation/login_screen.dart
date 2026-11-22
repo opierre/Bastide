@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/widgets/app_link.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/auth_controller.dart';
 import 'auth_error_localizer.dart';
-import 'auth_link.dart';
 import 'auth_scaffold.dart';
 import 'forgot_password_screen.dart';
 import 'password_field.dart';
@@ -122,17 +122,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Flexible(
-              child: AuthLink(
+              child: AppLink(
                 key: const Key('goToRegisterButton'),
                 label: l10n.authGoToRegister,
-                onPressed: () => context.go(RegisterScreen.path),
+                onTap: () => context.go(RegisterScreen.path),
               ),
             ),
             Flexible(
-              child: AuthLink(
+              child: AppLink(
                 key: const Key('goToForgotPasswordButton'),
                 label: l10n.authForgotPasswordLink,
-                onPressed: () => context.go(ForgotPasswordScreen.path),
+                onTap: () => context.go(ForgotPasswordScreen.path),
               ),
             ),
           ],
