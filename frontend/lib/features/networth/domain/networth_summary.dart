@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 /// Which side of the asset strip a composition slice belongs to.
 enum CompositionGroup {
   account('account'),
-  property('property');
+  property('property'),
+  investment('investment');
 
   const CompositionGroup(this.wireValue);
 
@@ -19,8 +20,8 @@ enum CompositionGroup {
   }
 }
 
-/// One slice of the assets: an account type or a property kind, with its
-/// server-computed share of total assets in bps.
+/// One slice of the assets: an account type, a property kind, or every
+/// placement together, with its server-computed share of total assets in bps.
 @immutable
 class CompositionEntry {
   const CompositionEntry({
@@ -32,10 +33,14 @@ class CompositionEntry {
 
   final CompositionGroup group;
 
-  /// The account `type` or the property `kind` wire value, labelled from ARB.
+  /// The account `type` or the property `kind` wire value, labelled from ARB;
+  /// [investmentsKey] for the placements' one slice.
   final String key;
   final int amountMinor;
   final int shareBps;
+
+  /// The key of the one « Placements » slice.
+  static const investmentsKey = 'investments';
 }
 
 /// Net worth at the end of one closed month.
@@ -86,6 +91,7 @@ class NetWorthSummary {
   const NetWorthSummary({
     required this.accountsMinor,
     required this.propertiesMinor,
+    required this.investmentsMinor,
     required this.mortgagesMinor,
     required this.netWorthMinor,
     required this.composition,
@@ -99,12 +105,16 @@ class NetWorthSummary {
 
   final int accountsMinor;
 
-  /// The Actif figure: the two asset parts the API returns, added. The API
+  /// The Actif figure: the three asset parts the API returns, added. The API
   /// states net worth but not this total; nothing else is derived here.
-  int get assetsMinor => accountsMinor + propertiesMinor;
+  int get assetsMinor => accountsMinor + propertiesMinor + investmentsMinor;
 
   /// The held shares of the non-archived properties.
   final int propertiesMinor;
+
+  /// The open placements at their last declared value (net payments before
+  /// the first declaration).
+  final int investmentsMinor;
 
   /// Outstanding principal of the active loans.
   final int mortgagesMinor;

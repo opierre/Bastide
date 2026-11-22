@@ -12,7 +12,11 @@ import '../../support/networth_fixtures.dart';
 class MockApiClient extends Mock implements ApiClient {}
 
 Map<String, dynamic> _summaryJson(List<Map<String, dynamic>> series) => {
-  'assets': {'accounts_minor': 0, 'properties_minor': 0},
+  'assets': {
+    'accounts_minor': 0,
+    'properties_minor': 0,
+    'investments_minor': 0,
+  },
   'liabilities': {'mortgages_minor': 0},
   'net_worth_minor': 0,
   'composition': <Map<String, dynamic>>[],

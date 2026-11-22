@@ -356,18 +356,6 @@ class CategoryColors extends ThemeExtension<CategoryColors> {
   Color forRank(int index) =>
       index < 6 ? forSlot(CategorySlot.values[index + 1]) : cat0;
 
-  /// The plate of a preset user avatar, keyed by the backend preset key.
-  Color forAvatarPreset(String preset, AppColors colors) => switch (preset) {
-    'cyan' => cat1,
-    'blue' => cat6,
-    'teal' => cat3,
-    'pink' => cat5,
-    'amber' => cat4,
-    'lime' => cat2,
-    'green' => income,
-    _ => colors.accent,
-  };
-
   @override
   CategoryColors copyWith({
     Color? cat0,
@@ -643,6 +631,25 @@ abstract final class AppNetworth {
   static const propertyShareColumn = 96.0;
   static const propertyValueColumn = 140.0;
   static const menuColumn = AppSizes.button + AppSpacing.smPlus;
+}
+
+/// The Placements panel of `docs/design/17-placements.md`.
+abstract final class AppPlacements {
+  /// The list pane's blocks sit 20 px apart (§List pane).
+  static const listGap = 20.0;
+
+  /// The inspector chart's height, axis included (§Inspector pane 5).
+  static const chartHeight = 170.0;
+
+  /// Column widths of the investments table; « Placement » takes the rest.
+  static const netPaymentsColumn = 112.0;
+  static const valueColumn = 112.0;
+  static const gainColumn = 160.0;
+  static const valuedOnColumn = 108.0;
+
+  /// Column widths of the movements table; the label takes the rest.
+  static const historyDateColumn = 96.0;
+  static const historyAmountColumn = 116.0;
 }
 
 /// The Catégories et règles panel of `docs/design/08-categories-rules.md`.

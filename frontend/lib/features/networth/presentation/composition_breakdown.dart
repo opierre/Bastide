@@ -46,6 +46,9 @@ class CompositionSection extends StatelessWidget {
   ];
 
   String _label(AppLocalizations l10n, CompositionEntry entry) {
+    if (entry.group == CompositionGroup.investment) {
+      return l10n.networthCompositionInvestments;
+    }
     if (entry.group == CompositionGroup.account) {
       return switch (entry.key) {
         'checking' => l10n.networthCompositionChecking,

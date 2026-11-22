@@ -35,6 +35,8 @@ class NetworthEquation extends StatelessWidget {
     final assetsCaption = [
       if (summary.accountsMinor != 0)
         l10n.networthAssetsPartAccounts(money(summary.accountsMinor)),
+      if (summary.investmentsMinor != 0)
+        l10n.networthAssetsPartInvestments(money(summary.investmentsMinor)),
       if (summary.propertiesMinor != 0)
         l10n.networthAssetsPartProperties(money(summary.propertiesMinor)),
     ].join(' · ');

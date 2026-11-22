@@ -15,7 +15,11 @@ Map<String, dynamic> _summaryJson({
   int netWorthMinor = 28267079,
   bool heldFlat = true,
 }) => {
-  'assets': {'accounts_minor': 2430000, 'properties_minor': propertiesMinor},
+  'assets': {
+    'accounts_minor': 2430000,
+    'properties_minor': propertiesMinor,
+    'investments_minor': 0,
+  },
   'liabilities': {'mortgages_minor': 23412921},
   'net_worth_minor': netWorthMinor,
   'composition': [
@@ -106,8 +110,8 @@ void main() {
   test('a composition group this build does not know is skipped', () async {
     final json = _summaryJson();
     (json['composition'] as List).add({
-      'group': 'investment',
-      'key': 'pea',
+      'group': 'vehicle',
+      'key': 'car',
       'amount_minor': 500000,
       'share_bps': 100,
     });
@@ -123,13 +127,55 @@ void main() {
     ]);
   });
 
+  test('the placements fold into one slice and count in the assets', () async {
+    final json = _summaryJson();
+    (json['assets'] as Map<String, dynamic>)['investments_minor'] = 700000;
+    (json['composition'] as List)
+      ..insert(1, {
+        'group': 'investment',
+        'key': 'pea',
+        'amount_minor': 500000,
+        'share_bps': 100,
+      })
+      ..add({
+        'group': 'investment',
+        'key': 'life_insurance',
+        'amount_minor': 200000,
+        'share_bps': 40,
+      });
+    when(
+      () => apiClient.get('/networth/summary'),
+    ).thenAnswer((_) async => json);
+
+    final summary = await container.read(networthControllerProvider.future);
+
+    expect(summary.investmentsMinor, 700000);
+    expect(
+      summary.assetsMinor,
+      summary.accountsMinor + summary.propertiesMinor + 700000,
+    );
+    expect(summary.composition.map((entry) => entry.key), [
+      'checking',
+      CompositionEntry.investmentsKey,
+      'rental',
+    ]);
+    final placements = summary.composition[1];
+    expect(placements.group, CompositionGroup.investment);
+    expect(placements.amountMinor, 700000);
+    expect(placements.shareBps, 140);
+  });
+
   test('a user with nothing maps to an empty summary, not an error', () async {
     when(
       () => apiClient.get('/mortgages/summary'),
     ).thenAnswer((_) async => {'active_count': 0});
     when(() => apiClient.get('/networth/summary')).thenAnswer(
       (_) async => {
-        'assets': {'accounts_minor': 0, 'properties_minor': 0},
+        'assets': {
+          'accounts_minor': 0,
+          'properties_minor': 0,
+          'investments_minor': 0,
+        },
         'liabilities': {'mortgages_minor': 0},
         'net_worth_minor': 0,
         'composition': <Map<String, dynamic>>[],
@@ -218,6 +264,7 @@ void main() {
     final summary = NetWorthSummary(
       accountsMinor: 0,
       propertiesMinor: 0,
+      investmentsMinor: 0,
       mortgagesMinor: 0,
       netWorthMinor: 0,
       composition: [

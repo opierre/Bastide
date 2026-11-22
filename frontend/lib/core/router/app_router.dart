@@ -60,6 +60,7 @@ TopBarActionsBuilder? _topBarActions(String path) => switch (path) {
   '/goals' => (context) => const [GoalsTopBarActions()],
   '/mortgages' => (context) => const [MortgagesTopBarActions()],
   '/simulations' => (context) => const [SimulatorTopBarActions()],
+  '/investments' => (context) => const [PlacementsTopBarActions()],
   '/networth' => (context) => const [NetworthTopBarActions()],
   _ => switch (AccountDetailScreen.idFromPath(path)) {
     final id? => (context) => [AccountDetailTopBarActions(accountId: id)],

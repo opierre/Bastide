@@ -237,9 +237,10 @@ class ProfileUpdate(BaseModel):
     display_name: DisplayName
 
 
-#: The preset avatars: the user's initials on a plate of this hue. The keys are the contract;
-#: the app owns the actual colours.
-AVATAR_PRESETS = frozenset({"cyan", "blue", "teal", "pink", "amber", "lime", "green", "iris"})
+#: The preset avatars: the user's initials on a plate of this category slot
+#: (`docs/design/09-settings.md` §Profil). The keys are the contract; the app's theme owns the
+#: colours, so a preset follows the dark and light palettes as a category does.
+AVATAR_PRESETS = frozenset({"cat1", "cat2", "cat3", "cat4", "cat5", "cat6"})
 
 
 def _validate_avatar_default(value: str) -> str:

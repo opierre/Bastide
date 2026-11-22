@@ -483,6 +483,23 @@ def test_restore_maps_a_v1_category_colour_to_its_slot(client: TestClient, tmp_p
         assert category.color == "cat5"
 
 
+def test_restore_keeps_the_profile_s_avatar(client: TestClient) -> None:
+    """The avatar is profile, not data: an archive, old or new, never carries a preset key, so
+    no hue preset from before the category slots can come back through a restore."""
+    headers = _register(client, "amelie@example.com")
+    choice_url = "/api/v1/auth/me/avatar-choice"
+    client.put(choice_url, headers=headers, json={"avatar": "preset:cat3"})
+    content = _export(client, headers)
+    with zipfile.ZipFile(io.BytesIO(content)) as archive:
+        assert not any(b"preset:" in archive.read(member) for member in archive.namelist())
+    client.put(choice_url, headers=headers, json={"avatar": "preset:cat5"})
+
+    assert _upload(client, "restore", headers, content).status_code == 200
+
+    me = client.get("/api/v1/auth/me", headers=headers).json()["user"]
+    assert me["avatar"] == "preset:cat5"
+
+
 def test_restore_leaves_other_users_untouched(client: TestClient, tmp_path: Path) -> None:
     headers = _register(client, "amelie@example.com")
     _register(client, "bruno@example.com")
