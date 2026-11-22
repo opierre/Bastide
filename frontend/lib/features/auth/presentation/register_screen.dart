@@ -12,7 +12,9 @@ import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/auth_form_controllers.dart';
+import '../domain/availability.dart';
 import '../domain/display_name.dart';
+import '../domain/email_address.dart';
 import '../domain/password_rule.dart';
 import '../domain/supported_currencies.dart';
 import 'auth_error_localizer.dart';
@@ -44,9 +46,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _passwordLeft = false;
   bool _passwordFocused = false;
 
-  static bool _isEmail(String value) =>
-      RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value);
-
   @override
   void initState() {
     super.initState();
@@ -70,10 +69,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
+  /// Every field well formed, and neither the name nor the e-mail taken or
+  /// still being checked: one submit is then enough.
   bool get _isValid =>
       isValidDisplayName(_displayNameController.text) &&
-      _isEmail(_emailController.text.trim()) &&
-      isLongEnoughPassword(_passwordController.text);
+      isPlausibleEmail(_emailController.text.trim()) &&
+      isLongEnoughPassword(_passwordController.text) &&
+      !ref.read(registerAvailabilityProvider).blocksSubmit;
 
   Future<void> _submit(String locale) async {
     if (!_isValid || ref.read(registerControllerProvider).isLoading) return;
@@ -88,9 +90,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         );
   }
 
-  /// A taken or malformed name is that field's helper.
-  String? _displayNameError(AppLocalizations l10n, Object? error) {
-    if (error case ApiFailure(code: 'DISPLAY_NAME_TAKEN')) {
+  /// A taken or malformed name is that field's helper. Taken shows as soon
+  /// as the check run while typing answers, not only after a submit.
+  String? _displayNameError(
+    AppLocalizations l10n,
+    Object? error,
+    Availability availability,
+  ) {
+    if (availability == Availability.taken ||
+        error is ApiFailure && error.code == 'DISPLAY_NAME_TAKEN') {
       return l10n.authDisplayNameTaken;
     }
     final name = _displayNameController.text;
@@ -101,12 +109,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   /// A taken or malformed e-mail is that field's helper, never a banner.
-  String? _emailError(AppLocalizations l10n, Object? error) {
-    if (error case ApiFailure(code: 'EMAIL_TAKEN')) {
+  String? _emailError(
+    AppLocalizations l10n,
+    Object? error,
+    Availability availability,
+  ) {
+    if (availability == Availability.taken ||
+        error is ApiFailure && error.code == 'EMAIL_TAKEN') {
       return l10n.authEmailTaken;
     }
     final email = _emailController.text.trim();
-    if (email.isNotEmpty && !_isEmail(email)) {
+    if (email.isNotEmpty && !isPlausibleEmail(email)) {
       return l10n.authEmailInvalid;
     }
     return null;
@@ -118,8 +131,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final submission = ref.watch(registerControllerProvider);
     final isSubmitting = submission.isLoading;
     final error = submission.hasError ? submission.error : null;
-    final displayNameError = _displayNameError(l10n, error);
-    final emailError = _emailError(l10n, error);
+    final availability = ref.watch(registerAvailabilityProvider);
+    final displayNameError = _displayNameError(
+      l10n,
+      error,
+      availability.displayName,
+    );
+    final emailError = _emailError(l10n, error, availability.email);
     final password = _passwordController.text;
     final passwordShort = NewPasswordHelper.isError(
       password,
@@ -135,9 +153,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ? localizeAuthError(l10n, error)
         : null;
 
-    // Editing a field clears the error it answers, then re-validates.
-    ValueChanged<String> edited(RegisterField field) => (_) {
+    // Editing a field clears the error it answers, then re-validates; the
+    // name and the e-mail are also checked against existing accounts.
+    ValueChanged<String> edited(RegisterField field) => (value) {
       ref.read(registerControllerProvider.notifier).fieldEdited(field);
+      final checks = ref.read(registerAvailabilityProvider.notifier);
+      switch (field) {
+        case RegisterField.email:
+          checks.emailChanged(value);
+        case RegisterField.displayName:
+          checks.displayNameChanged(value);
+        case RegisterField.password:
+          break;
+      }
       setState(() {});
     };
 
