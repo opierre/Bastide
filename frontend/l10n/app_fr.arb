@@ -7454,19 +7454,15 @@
   "@placementFormOpenedOn": {
     "description": "Investment form field label."
   },
-  "placementFormCurrentValue": "Valeur actuelle",
+  "placementFormCurrentValue": "Valeur actuelle (facultative)",
   "@placementFormCurrentValue": {
     "description": "Investment form field label (optional)."
   },
-  "placementFormCurrentValueHelp": "Facultatif. Saisie à la date du jour.",
-  "@placementFormCurrentValueHelp": {
-    "description": "Helper of the current value field."
-  },
-  "placementFormInitialPayments": "Versements déjà effectués",
+  "placementFormInitialPayments": "Versements déjà effectués (facultatif)",
   "@placementFormInitialPayments": {
     "description": "Investment form field label (optional)."
   },
-  "placementFormInitialPaymentsHelp": "Facultatif. Un versement à la date d’ouverture.",
+  "placementFormInitialPaymentsHelp": "Comptés comme un versement à l’ouverture.",
   "@placementFormInitialPaymentsHelp": {
     "description": "Helper of the initial payments field."
   },
@@ -7481,10 +7477,6 @@
   "placementFormDatePick": "Choisir une date",
   "@placementFormDatePick": {
     "description": "Tooltip of a date field's calendar button."
-  },
-  "placementFormCancel": "Annuler",
-  "@placementFormCancel": {
-    "description": "Modal cancel button."
   },
   "placementFormSave": "Enregistrer",
   "@placementFormSave": {
@@ -7514,9 +7506,17 @@
   "@placementFieldDate": {
     "description": "Date field label of the value and movement modals."
   },
-  "placementFieldNote": "Note",
+  "placementFieldNote": "Note (facultative)",
   "@placementFieldNote": {
     "description": "Note field label of the value and movement modals."
+  },
+  "placementValuationNoteHint": "Ex. Relevé trimestriel",
+  "@placementValuationNoteHint": {
+    "description": "Placeholder of the note field of the value modal."
+  },
+  "placementMovementNoteHint": "Ex. Versement mensuel",
+  "@placementMovementNoteHint": {
+    "description": "Placeholder of the note field of the movement modal."
   },
   "placementMovementEditTitle": "Modifier le mouvement",
   "@placementMovementEditTitle": {
@@ -7534,38 +7534,37 @@
   "@placementMovementAmountInvalid": {
     "description": "Movement modal error: zero or unreadable amount."
   },
-  "placementMovementLink": "Transaction liée",
+  "placementMovementLink": "Transaction liée (facultative)",
   "@placementMovementLink": {
     "description": "Movement modal field label (optional)."
+  },
+  "placementMovementLinkHelp": "Les virements récents du même montant.",
+  "@placementMovementLinkHelp": {
+    "description": "Helper under the linked transaction select."
   },
   "placementMovementLinkNone": "Aucune",
   "@placementMovementLinkNone": {
     "description": "Linked transaction select: no link."
   },
-  "placementMovementLinkItem": "{date} · {description}",
-  "@placementMovementLinkItem": {
-    "description": "Linked transaction select item: the transaction's date and label.",
+  "placementMovementLinkDetail": "{date} · {amount}",
+  "@placementMovementLinkDetail": {
+    "description": "Detail after a linked transaction's bank label: its date and amount.",
     "placeholders": {
       "date": {
         "type": "String"
       },
-      "description": {
+      "amount": {
         "type": "String"
       }
     }
   },
-  "placementCloseTitle": "Clôturer le placement",
+  "placementCloseTitle": "Clôturer ce placement ?",
   "@placementCloseTitle": {
     "description": "Title of the close modal."
   },
-  "placementCloseLead": "{name} quitte la synthèse à cette date et reste listé.",
+  "placementCloseLead": "Il quitte la synthèse à la date de clôture et reste dans la liste, grisé. Son historique est conservé.",
   "@placementCloseLead": {
-    "description": "Lead of the close modal.",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
+    "description": "Lead of the close modal."
   },
   "placementCloseDate": "Date de clôture",
   "@placementCloseDate": {
@@ -7583,18 +7582,18 @@
   "@placementCloseSubmit": {
     "description": "Close modal confirm button."
   },
-  "placementDeleteTitle": "Supprimer le placement",
+  "placementDeleteTitle": "Supprimer le placement « {name} » ?",
   "@placementDeleteTitle": {
-    "description": "Title of the delete confirmation."
-  },
-  "placementDeleteLead": "{name} et tout son historique seront supprimés. Pour le garder, clôturez-le.",
-  "@placementDeleteLead": {
-    "description": "Lead of the delete confirmation.",
+    "description": "Title of the delete confirmation.",
     "placeholders": {
       "name": {
         "type": "String"
       }
     }
+  },
+  "placementDeleteLead": "Ses valeurs saisies et ses versements seront supprimés. Vos comptes ne sont pas modifiés.",
+  "@placementDeleteLead": {
+    "description": "Lead of the delete confirmation."
   },
   "placementDeleteSubmit": "Supprimer",
   "@placementDeleteSubmit": {

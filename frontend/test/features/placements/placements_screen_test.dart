@@ -39,6 +39,25 @@ Widget _wrap(
   ),
 );
 
+/// [_wrap] with the top bar's actions, where « Nouveau placement » lives.
+Widget _wrapWithActions(FakePlacementsController controller) => ProviderScope(
+  overrides: placementsOverrides(controller),
+  child: MaterialApp(
+    locale: const Locale('fr'),
+    theme: AppTheme.dark,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: const Scaffold(
+      body: Column(
+        children: [
+          PlacementsTopBarActions(),
+          Expanded(child: PlacementsScreen()),
+        ],
+      ),
+    ),
+  ),
+);
+
 /// The 1440 × 900 frame less the sidebar: 224 px expanded, 56 collapsed.
 void _useSurface(WidgetTester tester, {double width = 1216}) {
   tester.view.physicalSize = Size(width, 852);
@@ -396,25 +415,7 @@ void main() {
   ) async {
     _useSurface(tester);
     final controller = FakePlacementsController(investments: specInvestments());
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: placementsOverrides(controller),
-        child: MaterialApp(
-          locale: const Locale('fr'),
-          theme: AppTheme.dark,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: const Scaffold(
-            body: Column(
-              children: [
-                PlacementsTopBarActions(),
-                Expanded(child: PlacementsScreen()),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(_wrapWithActions(controller));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('addPlacementButton')));
@@ -459,9 +460,18 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('placementMenu-close')));
     await tester.pumpAndSettle();
+    expect(find.text('Clôturer ce placement ?'), findsOneWidget);
     expect(
-      find.text('PEA quitte la synthèse à cette date et reste listé.'),
+      find.text(
+        'Il quitte la synthèse à la date de clôture et reste dans la liste, '
+        'grisé. Son historique est conservé.',
+      ),
       findsOneWidget,
+    );
+    // The date and the amount side by side, aligned by their input.
+    expect(
+      tester.getTopLeft(find.byKey(const Key('closePlacementDate'))).dy,
+      tester.getTopLeft(find.byKey(const Key('closePlacementAmount'))).dy,
     );
     await tester.enterText(
       find.byKey(const Key('closePlacementAmount')),
@@ -483,10 +493,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('placementMenu-delete')));
     await tester.pumpAndSettle();
+    expect(find.text('Supprimer le placement « PEA » ?'), findsOneWidget);
     expect(
       find.text(
-        'PEA et tout son historique seront supprimés. Pour le garder, '
-        'clôturez-le.',
+        'Ses valeurs saisies et ses versements seront supprimés. Vos comptes '
+        'ne sont pas modifiés.',
       ),
       findsOneWidget,
     );
@@ -495,6 +506,99 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.deleteCalls, ['i1']);
+  });
+
+  testWidgets('the creation form pairs its fields, inputs in line', (
+    tester,
+  ) async {
+    _useSurface(tester);
+    final controller = FakePlacementsController(investments: specInvestments());
+    await tester.pumpWidget(_wrapWithActions(controller));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('addPlacementButton')));
+    await tester.pumpAndSettle();
+
+    double top(String key) => tester.getTopLeft(find.byKey(Key(key))).dy;
+    expect(top('placementFormInstitution'), top('placementFormOpenedOn'));
+    expect(top('placementFormValue'), top('placementFormPayments'));
+    expect(find.text('Valeur actuelle (facultative)'), findsOneWidget);
+    expect(find.text('Versements déjà effectués (facultatif)'), findsOneWidget);
+    expect(
+      find.text('Comptés comme un versement à l’ouverture.'),
+      findsOneWidget,
+    );
+    // Creation has no « Supprimer ».
+    expect(find.byKey(const Key('placementFormDelete')), findsNothing);
+  });
+
+  testWidgets('a label on two lines moves both inputs down together', (
+    tester,
+  ) async {
+    _useSurface(tester);
+    final controller = FakePlacementsController(investments: specInvestments());
+    await tester.pumpWidget(_wrapWithActions(controller));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('addPlacementButton')));
+    await tester.pumpAndSettle();
+
+    final label = find.text('Versements déjà effectués (facultatif)');
+    final lineHeight = tester.getSize(find.text('Nom')).height;
+    expect(tester.getSize(label).height, greaterThan(lineHeight * 1.5));
+    final value = tester.getRect(find.byKey(const Key('placementFormValue')));
+    final payments = tester.getRect(
+      find.byKey(const Key('placementFormPayments')),
+    );
+    expect(value.top, payments.top);
+    expect(payments.top, greaterThan(tester.getRect(label).bottom));
+  });
+
+  testWidgets('the edit form deletes through its destructive confirmation', (
+    tester,
+  ) async {
+    _useSurface(tester);
+    final controller = FakePlacementsController(investments: specInvestments());
+    await tester.pumpWidget(_wrap(controller));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('placementMenu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('placementMenu-edit')));
+    await tester.pumpAndSettle();
+    expect(find.text('Modifier le placement'), findsOneWidget);
+    // The optional amounts exist only on creation.
+    expect(find.byKey(const Key('placementFormValue')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('placementFormDelete')));
+    await tester.pumpAndSettle();
+    expect(find.text('Supprimer le placement « PEA » ?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('deletePlacementSubmit')));
+    await tester.pumpAndSettle();
+
+    expect(controller.deleteCalls, ['i1']);
+    expect(find.byKey(const Key('placementFormModal')), findsNothing);
+    expect(find.byKey(const Key('deletePlacementModal')), findsNothing);
+  });
+
+  testWidgets('the note fields carry their example', (tester) async {
+    _useSurface(tester);
+    final controller = FakePlacementsController(investments: specInvestments());
+    await tester.pumpWidget(_wrap(controller));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('placementEnterValue')));
+    await tester.pumpAndSettle();
+    expect(find.text('Note (facultative)'), findsOneWidget);
+    expect(find.text('Ex. Relevé trimestriel'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('valuationCancel')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('placementAddMovement')));
+    await tester.pumpAndSettle();
+    expect(find.text('Ex. Versement mensuel'), findsOneWidget);
+    expect(find.text('Transaction liée (facultative)'), findsOneWidget);
+    expect(find.text('Les virements récents du même montant.'), findsOneWidget);
   });
 
   testWidgets('no placement: the empty state with its button', (tester) async {

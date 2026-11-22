@@ -9003,25 +9003,19 @@ abstract class AppLocalizations {
   /// Investment form field label (optional).
   ///
   /// In fr, this message translates to:
-  /// **'Valeur actuelle'**
+  /// **'Valeur actuelle (facultative)'**
   String get placementFormCurrentValue;
-
-  /// Helper of the current value field.
-  ///
-  /// In fr, this message translates to:
-  /// **'Facultatif. Saisie à la date du jour.'**
-  String get placementFormCurrentValueHelp;
 
   /// Investment form field label (optional).
   ///
   /// In fr, this message translates to:
-  /// **'Versements déjà effectués'**
+  /// **'Versements déjà effectués (facultatif)'**
   String get placementFormInitialPayments;
 
   /// Helper of the initial payments field.
   ///
   /// In fr, this message translates to:
-  /// **'Facultatif. Un versement à la date d’ouverture.'**
+  /// **'Comptés comme un versement à l’ouverture.'**
   String get placementFormInitialPaymentsHelp;
 
   /// Form error: unreadable or future date.
@@ -9041,12 +9035,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Choisir une date'**
   String get placementFormDatePick;
-
-  /// Modal cancel button.
-  ///
-  /// In fr, this message translates to:
-  /// **'Annuler'**
-  String get placementFormCancel;
 
   /// Modal save button.
   ///
@@ -9093,8 +9081,20 @@ abstract class AppLocalizations {
   /// Note field label of the value and movement modals.
   ///
   /// In fr, this message translates to:
-  /// **'Note'**
+  /// **'Note (facultative)'**
   String get placementFieldNote;
+
+  /// Placeholder of the note field of the value modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Relevé trimestriel'**
+  String get placementValuationNoteHint;
+
+  /// Placeholder of the note field of the movement modal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. Versement mensuel'**
+  String get placementMovementNoteHint;
 
   /// Title of the movement modal when editing.
   ///
@@ -9123,8 +9123,14 @@ abstract class AppLocalizations {
   /// Movement modal field label (optional).
   ///
   /// In fr, this message translates to:
-  /// **'Transaction liée'**
+  /// **'Transaction liée (facultative)'**
   String get placementMovementLink;
+
+  /// Helper under the linked transaction select.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les virements récents du même montant.'**
+  String get placementMovementLinkHelp;
 
   /// Linked transaction select: no link.
   ///
@@ -9132,23 +9138,23 @@ abstract class AppLocalizations {
   /// **'Aucune'**
   String get placementMovementLinkNone;
 
-  /// Linked transaction select item: the transaction's date and label.
+  /// Detail after a linked transaction's bank label: its date and amount.
   ///
   /// In fr, this message translates to:
-  /// **'{date} · {description}'**
-  String placementMovementLinkItem(String date, String description);
+  /// **'{date} · {amount}'**
+  String placementMovementLinkDetail(String date, String amount);
 
   /// Title of the close modal.
   ///
   /// In fr, this message translates to:
-  /// **'Clôturer le placement'**
+  /// **'Clôturer ce placement ?'**
   String get placementCloseTitle;
 
   /// Lead of the close modal.
   ///
   /// In fr, this message translates to:
-  /// **'{name} quitte la synthèse à cette date et reste listé.'**
-  String placementCloseLead(String name);
+  /// **'Il quitte la synthèse à la date de clôture et reste dans la liste, grisé. Son historique est conservé.'**
+  String get placementCloseLead;
 
   /// Close modal field label.
   ///
@@ -9177,14 +9183,14 @@ abstract class AppLocalizations {
   /// Title of the delete confirmation.
   ///
   /// In fr, this message translates to:
-  /// **'Supprimer le placement'**
-  String get placementDeleteTitle;
+  /// **'Supprimer le placement « {name} » ?'**
+  String placementDeleteTitle(String name);
 
   /// Lead of the delete confirmation.
   ///
   /// In fr, this message translates to:
-  /// **'{name} et tout son historique seront supprimés. Pour le garder, clôturez-le.'**
-  String placementDeleteLead(String name);
+  /// **'Ses valeurs saisies et ses versements seront supprimés. Vos comptes ne sont pas modifiés.'**
+  String get placementDeleteLead;
 
   /// Delete confirmation button.
   ///

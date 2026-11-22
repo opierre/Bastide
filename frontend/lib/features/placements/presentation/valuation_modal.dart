@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/date_field.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -45,6 +44,7 @@ class _ValuationModalState extends ConsumerState<ValuationModal> {
   final _date = TextEditingController();
   late final _note = TextEditingController(text: widget.initial?.note);
   bool _filled = false;
+  bool _dirty = false;
   bool _isSubmitting = false;
   String? _errorText;
 
@@ -92,6 +92,7 @@ class _ValuationModalState extends ConsumerState<ValuationModal> {
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final locale = Localizations.localeOf(context).toString();
     final value = parseMoneyMinor(_value.text, locale);
@@ -132,6 +133,10 @@ class _ValuationModalState extends ConsumerState<ValuationModal> {
           : l10n.placementValuationEditTitle,
       subtitle: Text(widget.investment.name),
       width: AppSizes.inspector,
+      dirty: _dirty,
+      busy: _isSubmitting,
+      saveError: _errorText,
+      onSubmit: _submit,
       leadingAction: initial == null
           ? null
           : AppButton(
@@ -148,11 +153,7 @@ class _ValuationModalState extends ConsumerState<ValuationModal> {
                     ),
             ),
       actions: [
-        OutlinedButton(
-          key: const Key('valuationCancel'),
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.placementFormCancel),
-        ),
+        const AppModalCancel(key: Key('valuationCancel')),
         PrimaryButton(
           key: const Key('valuationSubmit'),
           label: l10n.placementFormSave,
@@ -162,16 +163,12 @@ class _ValuationModalState extends ConsumerState<ValuationModal> {
       ],
       child: Form(
         key: _formKey,
+        onChanged: () {
+          if (!_dirty) setState(() => _dirty = true);
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_errorText != null) ...[
-              InlineBanner(
-                key: const Key('valuationError'),
-                message: _errorText!,
-              ),
-              gap,
-            ],
             LabeledField(
               label: l10n.placementValuationValue,
               helper: l10n.placementValuationHelp,
@@ -207,6 +204,9 @@ class _ValuationModalState extends ConsumerState<ValuationModal> {
               child: TextFormField(
                 key: const Key('valuationNote'),
                 controller: _note,
+                decoration: InputDecoration(
+                  hintText: l10n.placementValuationNoteHint,
+                ),
               ),
             ),
           ],

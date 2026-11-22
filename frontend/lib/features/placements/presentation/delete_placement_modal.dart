@@ -8,19 +8,21 @@ import '../../../l10n/app_localizations.dart';
 import '../application/placements_controller.dart';
 import '../domain/investment.dart';
 
-Future<void> showDeletePlacementModal(
+/// Resolves to `true` once the placement has been deleted.
+Future<bool?> showDeletePlacementModal(
   BuildContext context, {
   required Investment investment,
 }) {
-  return showAppModal<void>(
+  return showAppModal<bool>(
     context: context,
     builder: (_) => DeletePlacementModal(investment: investment),
   );
 }
 
-/// The confirmation before a placement goes with its whole history
-/// (`17-placements.md` §Behaviour). It says so, and points at closing as the
-/// way to keep it; one of the places the solid destructive red may appear.
+/// « Supprimer le placement « … » ? » (`17-placements.md` §Modals, proposal
+/// v6 `m-investments`): a confirmation without a body whose lead says the
+/// values and payments go and the accounts stay; one of the places the solid
+/// destructive red may appear. Focus lands on « Annuler ».
 class DeletePlacementModal extends ConsumerStatefulWidget {
   const DeletePlacementModal({super.key, required this.investment});
 
@@ -40,7 +42,7 @@ class _DeletePlacementModalState extends ConsumerState<DeletePlacementModal> {
     await ref
         .read(placementsControllerProvider.notifier)
         .delete(widget.investment.id);
-    if (mounted) Navigator.of(context).pop();
+    if (mounted) Navigator.of(context).pop(true);
   }
 
   @override
@@ -49,15 +51,13 @@ class _DeletePlacementModalState extends ConsumerState<DeletePlacementModal> {
 
     return AppModal(
       key: const Key('deletePlacementModal'),
-      title: l10n.placementDeleteTitle,
+      title: l10n.placementDeleteTitle(widget.investment.name),
       width: AppSizes.inspector,
-      subtitle: Text(l10n.placementDeleteLead(widget.investment.name)),
+      kind: AppModalKind.destructive,
+      busy: _isDeleting,
+      subtitle: Text(l10n.placementDeleteLead),
       actions: [
-        AppButton(
-          key: const Key('deletePlacementCancel'),
-          label: l10n.placementFormCancel,
-          onPressed: _isDeleting ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(key: Key('deletePlacementCancel')),
         AppButton(
           key: const Key('deletePlacementSubmit'),
           label: l10n.placementDeleteSubmit,
@@ -66,7 +66,6 @@ class _DeletePlacementModalState extends ConsumerState<DeletePlacementModal> {
           onPressed: _isDeleting ? null : _confirm,
         ),
       ],
-      child: const SizedBox.shrink(),
     );
   }
 }

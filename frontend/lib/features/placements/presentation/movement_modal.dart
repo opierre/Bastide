@@ -5,7 +5,6 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/date_field.dart';
-import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -48,6 +47,7 @@ class _MovementModalState extends ConsumerState<MovementModal> {
   late final _note = TextEditingController(text: widget.initial?.note);
   late String? _transactionId = widget.initial?.transactionId;
   bool _filled = false;
+  bool _dirty = false;
   bool _isSubmitting = false;
   String? _errorText;
 
@@ -114,6 +114,7 @@ class _MovementModalState extends ConsumerState<MovementModal> {
   }
 
   Future<void> _submit(List<LinkCandidate>? candidates) async {
+    if (_isSubmitting) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final locale = Localizations.localeOf(context).toString();
     final amount = _parseAmount(_amount.text, locale);
@@ -167,6 +168,10 @@ class _MovementModalState extends ConsumerState<MovementModal> {
           : l10n.placementMovementEditTitle,
       subtitle: Text(widget.investment.name),
       width: AppSizes.inspector,
+      dirty: _dirty,
+      busy: _isSubmitting,
+      saveError: _errorText,
+      onSubmit: () => _submit(candidates),
       leadingAction: initial == null
           ? null
           : AppButton(
@@ -183,11 +188,7 @@ class _MovementModalState extends ConsumerState<MovementModal> {
                     ),
             ),
       actions: [
-        OutlinedButton(
-          key: const Key('movementCancel'),
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.placementFormCancel),
-        ),
+        const AppModalCancel(key: Key('movementCancel')),
         PrimaryButton(
           key: const Key('movementSubmit'),
           label: l10n.placementFormSave,
@@ -197,16 +198,12 @@ class _MovementModalState extends ConsumerState<MovementModal> {
       ],
       child: Form(
         key: _formKey,
+        onChanged: () {
+          if (!_dirty) setState(() => _dirty = true);
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_errorText != null) ...[
-              InlineBanner(
-                key: const Key('movementError'),
-                message: _errorText!,
-              ),
-              gap,
-            ],
             LabeledField(
               label: l10n.placementMovementAmount,
               helper: l10n.placementMovementAmountHelp,
@@ -244,11 +241,15 @@ class _MovementModalState extends ConsumerState<MovementModal> {
               child: TextFormField(
                 key: const Key('movementNote'),
                 controller: _note,
+                decoration: InputDecoration(
+                  hintText: l10n.placementMovementNoteHint,
+                ),
               ),
             ),
             gap,
             LabeledField(
               label: l10n.placementMovementLink,
+              helper: l10n.placementMovementLinkHelp,
               child: AppSelect<String?>(
                 key: const Key('movementLink'),
                 value:
@@ -262,18 +263,28 @@ class _MovementModalState extends ConsumerState<MovementModal> {
                     label: l10n.placementMovementLinkNone,
                   ),
                   for (final candidate in candidates ?? const <LinkCandidate>[])
+                    // The bank label in Geist Mono, then its date and amount.
                     AppSelectItem(
                       value: candidate.transactionId,
-                      label: l10n.placementMovementLinkItem(
+                      label: candidate.description,
+                      mono: true,
+                      detail: l10n.placementMovementLinkDetail(
                         placementDateLabel(locale, candidate.bookedDate),
-                        candidate.description,
+                        placementMoney(
+                          candidate.amountMinor,
+                          candidate.currency,
+                          locale,
+                        ),
                       ),
                       subtitle: candidate.accountName,
                     ),
                 ],
                 onChanged: _isSubmitting || candidates == null
                     ? null
-                    : (id) => setState(() => _transactionId = id),
+                    : (id) => setState(() {
+                        _transactionId = id;
+                        _dirty = true;
+                      }),
               ),
             ),
           ],

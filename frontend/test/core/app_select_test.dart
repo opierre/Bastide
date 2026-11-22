@@ -68,4 +68,50 @@ void main() {
       expect(option.style?.fontWeight, closed.style?.fontWeight);
     },
   );
+
+  testWidgets('a raw bank label in Geist Mono, its detail in textTertiary', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark,
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 392,
+              child: AppSelect<int>(
+                key: const Key('select'),
+                value: 1,
+                items: const [
+                  AppSelectItem(
+                    value: 1,
+                    label: 'VIR CAFE DU PORT',
+                    mono: true,
+                    detail: '5 avr. · 12,00',
+                  ),
+                ],
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final text = tester.widget<Text>(
+      find
+          .descendant(
+            of: find.byKey(const Key('select')),
+            matching: find.byType(Text),
+          )
+          .first,
+    );
+    final spans = (text.textSpan! as TextSpan).children!;
+    final label = spans.first as TextSpan;
+    final detail = spans.last as TextSpan;
+    expect(label.style?.fontFamily, AppFonts.mono);
+    expect(detail.text, '5 avr. · 12,00');
+    expect(detail.style?.color, AppColors.dark.textTertiary);
+  });
 }
