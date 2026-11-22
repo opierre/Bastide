@@ -13,19 +13,19 @@ void main() {
 
   group('fr', () {
     test('long date', () {
-      expect(DayMonthFormat.yMMMMd('fr').format(date), '12 mai 2026');
+      expect(DayMonthFormat.yMMMMd('fr').format(date), '12\u00A0mai 2026');
     });
 
     test('abbreviated date', () {
       expect(
         DayMonthFormat.yMMMd('fr').format(DateTime(2026, 4, 30)),
-        '30 avr. 2026',
+        '30\u00A0avr. 2026',
       );
     });
 
     test('day and month', () {
-      expect(DayMonthFormat.MMMMd('fr').format(date), '12 mai');
-      expect(DayMonthFormat.MMMd('fr').format(date), '12 mai');
+      expect(DayMonthFormat.MMMMd('fr').format(date), '12\u00A0mai');
+      expect(DayMonthFormat.MMMd('fr').format(date), '12\u00A0mai');
     });
 
     test('day alone', () {
@@ -35,19 +35,19 @@ void main() {
 
   group('en', () {
     test('long date', () {
-      expect(DayMonthFormat.yMMMMd('en').format(date), 'May 12, 2026');
+      expect(DayMonthFormat.yMMMMd('en').format(date), 'May\u00A012, 2026');
     });
 
     test('abbreviated date', () {
       expect(
         DayMonthFormat.yMMMd('en').format(DateTime(2026, 9, 3)),
-        'Sep 3, 2026',
+        'Sep\u00A03, 2026',
       );
     });
 
     test('day and month', () {
-      expect(DayMonthFormat.MMMMd('en').format(date), 'May 12');
-      expect(DayMonthFormat.MMMd('en').format(date), 'May 12');
+      expect(DayMonthFormat.MMMMd('en').format(date), 'May\u00A012');
+      expect(DayMonthFormat.MMMd('en').format(date), 'May\u00A012');
     });
   });
 
@@ -77,7 +77,7 @@ void main() {
   });
 
   test('withUnit joins a figure and its unit with U+00A0', () {
-    expect(withUnit('320', 'k€'), '320 k€');
-    expect(withUnit('2,2', '×'), '2,2 ×');
+    expect(withUnit('320', 'k€'), '320\u00A0k€');
+    expect(withUnit('2,2', '×'), '2,2\u00A0×');
   });
 }

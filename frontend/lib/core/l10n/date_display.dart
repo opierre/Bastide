@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 
 /// U+00A0, the no-break space of `docs/design/00-design-system.md` §3: between
 /// a figure and its unit, and between a day and its month.
-const String noBreakSpace = ' ';
+const String noBreakSpace = '\u00A0';
 
 /// Joins [figure] and [unit] with a no-break space (« 320 k€ », « 2,2 × »),
 /// so a line never breaks between them. Money and percentages keep what
