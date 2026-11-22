@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/l10n/date_display.dart';
 import '../../../core/pictures/pictures.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/goals_controller.dart';
@@ -73,6 +74,7 @@ String goalDeadlineLabel(AppLocalizations l10n, String locale, Goal goal) {
 /// and a goal at 99,6 % that claimed 100 % would be contradicted by them.
 /// Reported unclamped, so an over-funded goal says 118 % while its repère
 /// stops at full (`11-goals.md` §Behaviour).
-String goalPercentLabel(double progressPct, String locale) =>
-    '${NumberFormat('0', locale).format((progressPct * 100).truncate())} %'
-        .replaceAll('-', '−');
+String goalPercentLabel(double progressPct, String locale) => withUnit(
+  NumberFormat('0', locale).format((progressPct * 100).truncate()),
+  '%',
+).replaceAll('-', '−');

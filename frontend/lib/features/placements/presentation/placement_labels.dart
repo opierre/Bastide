@@ -65,7 +65,7 @@ String gainPercentLabel(int bps, String locale) {
       : bps < 0
       ? '−'
       : '';
-  return '$sign$formatted %';
+  return withUnit('$sign$formatted', '%');
 }
 
 /// « 30 avr. 2026 »: a date as the panel prints it.
