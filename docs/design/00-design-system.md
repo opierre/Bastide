@@ -184,7 +184,8 @@ Mockup: any panel.
 - **Drag area:** the empty stretch of the title bar and the sidebar's brand row. Double-click
   maximizes or restores. Controls, crumb and title do not drag.
 - **macOS:** the system's three window buttons, drawn by macOS, 16 px from the left edge in
-  the sidebar's brand row; the brand row starts 14 px after them; no controls on the right.
+  the sidebar's brand row, centred in its 48 px band (they span 52 px: three 12 px buttons,
+  8 apart); the brand row starts 14 px after them; no controls on the right.
   The buttons do not drag; the rest of the brand row does. With the sidebar collapsed, the
   buttons keep their place and overhang the title bar by 12 px; its 24 px padding leaves 12 px
   before the crumb or title, and the rail hides the mark. On auth screens the buttons sit

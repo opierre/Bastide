@@ -484,6 +484,17 @@ abstract final class AppRadii {
 /// widgets (#200) build on these.
 abstract final class AppSizes {
   static const titleBar = 48.0;
+
+  /// A window control (Réduire, Agrandir, Fermer): 46 wide, as tall as the
+  /// title bar (`00` §5).
+  static const windowControl = 46.0;
+
+  /// macOS: the system's three window buttons, 16 px from the window's left
+  /// edge, span 52 px; the brand row starts 14 px after them (`00` §5).
+  static const macWindowButtonsInset = 16.0;
+  static const macWindowButtons = 52.0;
+  static const macBrandAfterButtons = 14.0;
+
   static const navItem = 30.0;
   static const button = 28.0;
   static const buttonLarge = 36.0;

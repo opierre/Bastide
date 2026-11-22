@@ -8,6 +8,7 @@ import '../theme/tokens.dart';
 import '../widgets/brand_mark.dart';
 import '../widgets/state_views.dart';
 import '../widgets/tomettes.dart';
+import '../widgets/window_controls.dart';
 
 /// What the user sees until the backend is ready, and if it fails
 /// (`docs/design/18-brand.md` §4).
@@ -31,56 +32,63 @@ class StartupScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: context.colors.bg,
-      body: Stack(
-        children: [
-          const Positioned.fill(child: Tomettes()),
-          CenteredStatePane(
-            maxWidth: 440,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const BrandMark(size: markSize),
-                const SizedBox(height: AppSpacing.md),
-                const BrandName(size: nameSize),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  l10n.startupPrivacy,
-                  key: const Key('startupPrivacy'),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: AppFonts.geist,
-                    fontSize: 13,
-                    color: context.colors.textSecondary,
+      // Like the auth screens, no title bar: the window's controls float in
+      // its top corner and the top band moves it (`00` §5).
+      body: ChromelessWindowFrame(
+        child: Stack(
+          children: [
+            const Positioned.fill(child: Tomettes()),
+            CenteredStatePane(
+              maxWidth: 440,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const BrandMark(size: markSize),
+                  const SizedBox(height: AppSpacing.md),
+                  const BrandName(size: nameSize),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    l10n.startupPrivacy,
+                    key: const Key('startupPrivacy'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: AppFonts.geist,
+                      fontSize: 13,
+                      color: context.colors.textSecondary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                if (failure != null)
-                  _Failed(
-                    failure: failure is BackendFailure
-                        ? failure
-                        : const BackendFailure(BackendFailureKind.crashed),
-                    onRetry: () =>
-                        ref.read(backendControllerProvider.notifier).retry(),
-                    onOpenLogs: () => ref.read(openLogsFolderProvider)(),
-                  )
-                else if (mismatch?.mismatchedAppVersion case final appVersion?)
-                  _VersionWarning(
-                    appVersion: appVersion,
-                    backendVersion: mismatch!.version,
-                    onRetry: () =>
-                        ref.read(backendControllerProvider.notifier).retry(),
-                    onContinue: () =>
-                        ref
-                                .read(versionWarningDismissedProvider.notifier)
-                                .state =
-                            true,
-                  )
-                else
-                  const _Starting(),
-              ],
+                  const SizedBox(height: AppSpacing.lg),
+                  if (failure != null)
+                    _Failed(
+                      failure: failure is BackendFailure
+                          ? failure
+                          : const BackendFailure(BackendFailureKind.crashed),
+                      onRetry: () =>
+                          ref.read(backendControllerProvider.notifier).retry(),
+                      onOpenLogs: () => ref.read(openLogsFolderProvider)(),
+                    )
+                  else if (mismatch?.mismatchedAppVersion
+                      case final appVersion?)
+                    _VersionWarning(
+                      appVersion: appVersion,
+                      backendVersion: mismatch!.version,
+                      onRetry: () =>
+                          ref.read(backendControllerProvider.notifier).retry(),
+                      onContinue: () =>
+                          ref
+                                  .read(
+                                    versionWarningDismissedProvider.notifier,
+                                  )
+                                  .state =
+                              true,
+                    )
+                  else
+                    const _Starting(),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

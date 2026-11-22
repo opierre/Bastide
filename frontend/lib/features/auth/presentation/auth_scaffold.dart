@@ -5,6 +5,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/brand_mark.dart';
 import '../../../core/widgets/note_line.dart';
 import '../../../core/widgets/tomettes.dart';
+import '../../../core/widgets/window_controls.dart';
 import '../../../l10n/app_localizations.dart';
 
 /// The signed-out column (`docs/design/02-login.md`, `03-register.md`):
@@ -27,46 +28,52 @@ class AuthScaffold extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: context.colors.bg,
-      body: Stack(
-        children: [
-          const Positioned.fill(child: Tomettes()),
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.lg,
-              ),
-              child: SizedBox(
-                width: AppSizes.authColumn,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: BrandLockup.login(),
+      // No title bar here: the window's controls float in its top corner and
+      // the top band moves it (`00` §5).
+      body: ChromelessWindowFrame(
+        child: Stack(
+          children: [
+            const Positioned.fill(child: Tomettes()),
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.lg,
+                ),
+                child: SizedBox(
+                  width: AppSizes.authColumn,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: BrandLockup.login(),
+                        ),
                       ),
-                    ),
-                    for (final child in children) ...[
+                      for (final child in children) ...[
+                        const SizedBox(height: AppSpacing.fieldGap),
+                        child,
+                      ],
+                      const SizedBox(
+                        height: AppSpacing.fieldGap + AppSpacing.sm,
+                      ),
+                      const _Hairline(),
                       const SizedBox(height: AppSpacing.fieldGap),
-                      child,
+                      NoteLine(
+                        key: const Key('authPrivacyLine'),
+                        icon: LucideIcons300.lock,
+                        text: l10n.authPrivacyLine,
+                      ),
                     ],
-                    const SizedBox(height: AppSpacing.fieldGap + AppSpacing.sm),
-                    const _Hairline(),
-                    const SizedBox(height: AppSpacing.fieldGap),
-                    NoteLine(
-                      key: const Key('authPrivacyLine'),
-                      icon: LucideIcons300.lock,
-                      text: l10n.authPrivacyLine,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

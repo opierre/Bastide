@@ -36,6 +36,26 @@
   "@navSectionManage": {
     "description": "Sidebar group label, sentence case, over the imports, categories, recurring and goals destinations."
   },
+  "windowControls": "Fenêtre",
+  "@windowControls": {
+    "description": "Accessible name of the group of window controls (minimize, maximize, close) drawn by the app on Windows and Linux."
+  },
+  "windowMinimize": "Réduire",
+  "@windowMinimize": {
+    "description": "Tooltip and accessible label of the window control that minimizes the window."
+  },
+  "windowMaximize": "Agrandir",
+  "@windowMaximize": {
+    "description": "Tooltip and accessible label of the window control that maximizes the window."
+  },
+  "windowRestore": "Restaurer",
+  "@windowRestore": {
+    "description": "Tooltip and accessible label of the window control that restores a maximized window to its previous size."
+  },
+  "windowClose": "Fermer",
+  "@windowClose": {
+    "description": "Tooltip and accessible label of the window control that closes the window, and the app with it."
+  },
   "sidebarPrivacyBadge": "Données locales",
   "@sidebarPrivacyBadge": {
     "description": "Privacy line at the foot of the sidebar, beside a lock glyph. On the collapsed sidebar it becomes the lock's tooltip."

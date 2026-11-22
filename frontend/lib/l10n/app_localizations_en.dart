@@ -36,6 +36,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSectionManage => 'Manage';
 
   @override
+  String get windowControls => 'Window';
+
+  @override
+  String get windowMinimize => 'Minimize';
+
+  @override
+  String get windowMaximize => 'Maximize';
+
+  @override
+  String get windowRestore => 'Restore';
+
+  @override
+  String get windowClose => 'Close';
+
+  @override
   String get sidebarPrivacyBadge => 'Local data';
 
   @override
