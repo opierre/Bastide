@@ -296,7 +296,7 @@ void main() {
           .widgetList<AppTableGroupRow>(find.byType(AppTableGroupRow))
           .map((row) => row.label)
           .toList();
-      expect(groups, ['14 mai 2026', '9 mai 2026']);
+      expect(groups, ['14\u00A0mai 2026', '9\u00A0mai 2026']);
       expect(
         tester.getTopLeft(find.byKey(const Key('transactionRow-t2'))).dy,
         lessThan(
@@ -433,7 +433,7 @@ void main() {
           .setDateRange(DateTime(2026, 5, 1), DateTime(2026, 5, 31));
       await tester.pumpAndSettle();
 
-      expect(find.text('1 – 31 mai 2026'), findsOneWidget);
+      expect(find.text('1 – 31\u00A0mai 2026'), findsOneWidget);
     });
 
     testWidgets('no row for the filters offers to clear them', (tester) async {
@@ -580,7 +580,7 @@ void main() {
       );
       expect(amount.amountMinor, -18_744);
       expect(amount.style?.fontSize, 28);
-      expect(inside(find.text('11 mai 2026')), findsOneWidget);
+      expect(inside(find.text('11\u00A0mai 2026')), findsOneWidget);
       expect(inside(find.text('Compte courant')), findsOneWidget);
       // The full category label: the subcategory after « › ».
       expect(
@@ -627,7 +627,10 @@ void main() {
       await _select(tester, 't1');
 
       expect(find.text('Paiement récurrent'), findsOneWidget);
-      expect(find.text('Annuel · prochain le 21 nov. 2026'), findsOneWidget);
+      expect(
+        find.text('Annuel · prochain le 21\u00A0nov. 2026'),
+        findsOneWidget,
+      );
       expect(
         find.byKey(const Key('transactionInspectorViewSeries')),
         findsOneWidget,
@@ -695,7 +698,7 @@ void main() {
         const Key('transactionInspectorSameMerchant-t-old'),
       );
       expect(
-        find.descendant(of: row, matching: find.text('21 nov. 2025')),
+        find.descendant(of: row, matching: find.text('21\u00A0nov. 2025')),
         findsOneWidget,
       );
       expect(

@@ -130,7 +130,7 @@ void main() {
       expect(_text(tester, 'mortgagesMonthlyCharge'), _money(150625));
       expect(
         _text(tester, 'mortgagesChargeCaption'),
-        '2 échéances le 1 juin 2026, assurance comprise',
+        '2 échéances le 1\u00A0juin 2026, assurance comprise',
       );
       expect(_text(tester, 'mortgagesTotalOutstanding'), _money(23412921));
       expect(
@@ -191,7 +191,7 @@ void main() {
       expect(_text(tester, 'loanEnd-m1'), 'Aug 2048');
       expect(
         _text(tester, 'mortgagesChargeCaption'),
-        '2 instalments on June 1, 2026, insurance included',
+        '2 instalments on June\u00A01, 2026, insurance included',
       );
     });
 
@@ -239,14 +239,14 @@ void main() {
         _text(tester, 'mortgageDetailInstalmentCaption'),
         '${_money(119507)} + ${_money(2880)} d’assurance',
       );
-      expect(_text(tester, 'mortgageDetailNext'), '1 juin 2026');
+      expect(_text(tester, 'mortgageDetailNext'), '1\u00A0juin 2026');
       expect(
         _text(tester, 'mortgageDetailFacts'),
         'Crédit immobilier · BNP · ${_money(24000000)} sur 300 mois',
       );
       expect(
         _text(tester, 'mortgageDetailFirstPayment'),
-        '1re échéance le 1 sept. 2023 · frais de dossier ${_money(145000)}',
+        '1re échéance le 1\u00A0sept. 2023 · frais de dossier ${_money(145000)}',
       );
       expect(find.text('TAEG indicatif'), findsOneWidget);
       expect(find.text('taux, assurance et frais'), findsOneWidget);

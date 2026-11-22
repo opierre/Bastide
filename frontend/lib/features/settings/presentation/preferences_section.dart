@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/l10n/date_display.dart';
 import '../../../core/l10n/locale_provider.dart';
 import '../../../core/navigation/sidebar_controller.dart';
 import '../../../core/session/current_user_provider.dart';
@@ -129,7 +130,7 @@ class PreferencesSection extends ConsumerWidget {
             _FormatsList(
               dateLabel: l10n.settingsFormatsDates,
               date: l10n.settingsFormatsDatePair(
-                DateFormat.yMMMMd(locale).format(_sampleDate),
+                DayMonthFormat.yMMMMd(locale).format(_sampleDate),
                 DateFormat.yMd(locale).format(_sampleDate),
               ),
               amountLabel: l10n.settingsFormatsAmounts,

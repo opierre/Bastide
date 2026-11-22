@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/l10n/category_display.dart';
+import '../../../core/l10n/date_display.dart';
 import '../../../core/widgets/category_label.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../l10n/app_localizations.dart';
@@ -31,12 +31,12 @@ String periodLabel(
   DateTime? to,
 ) {
   if (from == null || to == null) return l10n.transactionsFilterAllDates;
-  final full = DateFormat.yMMMd(locale);
+  final full = DayMonthFormat.yMMMd(locale);
   final String start;
   if (from.year == to.year && from.month == to.month) {
-    start = DateFormat.d(locale).format(from);
+    start = DayMonthFormat.d(locale).format(from);
   } else if (from.year == to.year) {
-    start = DateFormat.MMMd(locale).format(from);
+    start = DayMonthFormat.MMMd(locale).format(from);
   } else {
     start = full.format(from);
   }
@@ -45,7 +45,7 @@ String periodLabel(
 
 /// The group row's day: « 14 mai 2026 ».
 String dayLabel(String locale, DateTime date) =>
-    DateFormat.yMMMMd(locale).format(date);
+    DayMonthFormat.yMMMMd(locale).format(date);
 
 /// « Classée par »: the rule's pattern, the local AI and its confidence,
 /// « vous », or « non classée ».

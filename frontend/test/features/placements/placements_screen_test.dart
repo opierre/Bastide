@@ -74,7 +74,7 @@ void main() {
     expect(_text(tester, 'placementsSummaryValue'), _money(5423500));
     expect(
       _text(tester, 'placementsSummaryCaption'),
-      '3 placements · dernière valeur saisie le 30 avr. 2026',
+      '3 placements · dernière valeur saisie le 30\u00A0avr. 2026',
     );
     expect(_text(tester, 'placementsSummaryNetPayments'), _money(4670000));
     expect(
@@ -109,10 +109,10 @@ void main() {
     expect(first.twoLines, isTrue);
     expect(_inInspector(find.text('PEA')), findsOneWidget);
     expect(
-      _inInspector(find.text('Courtier Nord · ouvert le 14 mars 2023')),
+      _inInspector(find.text('Courtier Nord · ouvert le 14\u00A0mars 2023')),
       findsOneWidget,
     );
-    expect(_inInspector(find.text('au 30 avr. 2026')), findsOneWidget);
+    expect(_inInspector(find.text('au 30\u00A0avr. 2026')), findsOneWidget);
     expect(find.text('Saisir la valeur'), findsOneWidget);
     expect(find.text('Versement ou retrait'), findsOneWidget);
 

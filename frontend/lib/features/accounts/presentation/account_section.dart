@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
+import '../../../core/l10n/date_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
@@ -308,7 +309,7 @@ class _AccountRow extends StatelessWidget {
         Text(
           lastImport == null
               ? l10n.accountsNoImport
-              : DateFormat.yMMMd(locale).format(lastImport.toLocal()),
+              : DayMonthFormat.yMMMd(locale).format(lastImport.toLocal()),
           key: Key('accountLastImport-${account.id}'),
           style: secondary,
         ),

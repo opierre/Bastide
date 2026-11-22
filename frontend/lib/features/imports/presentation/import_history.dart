@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
+import '../../../core/l10n/date_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_table.dart';
@@ -189,7 +190,7 @@ class _HistoryRow extends ConsumerWidget {
             ],
           ),
         Text(
-          DateFormat.yMMMd(locale).format(batch.importedAt.toLocal()),
+          DayMonthFormat.yMMMd(locale).format(batch.importedAt.toLocal()),
           style: secondary,
         ),
         Text(
@@ -197,7 +198,7 @@ class _HistoryRow extends ConsumerWidget {
               ? l10n.importHistoryNoValue
               : l10n.importPeriodRange(
                   formatPeriodStart(batch.periodStart, batch.periodEnd, locale),
-                  DateFormat.yMMMd(locale).format(batch.periodEnd),
+                  DayMonthFormat.yMMMd(locale).format(batch.periodEnd),
                 ),
           key: Key('importBatchPeriod-${batch.id}'),
           style: secondary,
@@ -304,9 +305,11 @@ class _Result extends StatelessWidget {
 /// The start of a period, shortened by what it shares with the end: « 1 » in
 /// « 1 – 30 avr. 2026 », « 1 janv. » in « 1 janv. – 31 mars 2026 ».
 String formatPeriodStart(DateTime start, DateTime end, String locale) {
-  if (start.year != end.year) return DateFormat.yMMMd(locale).format(start);
-  if (start.month != end.month) return DateFormat.MMMd(locale).format(start);
-  return DateFormat.d(locale).format(start);
+  if (start.year != end.year) return DayMonthFormat.yMMMd(locale).format(start);
+  if (start.month != end.month) {
+    return DayMonthFormat.MMMd(locale).format(start);
+  }
+  return DayMonthFormat.d(locale).format(start);
 }
 
 /// The table's silhouette while the history loads (`00` §7): the header, then

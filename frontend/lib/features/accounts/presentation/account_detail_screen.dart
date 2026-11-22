@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/l10n/card_display.dart';
 import '../../../core/l10n/category_display.dart';
+import '../../../core/l10n/date_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
@@ -183,7 +184,7 @@ class _SummaryLine extends StatelessWidget {
       key: const Key('accountDetailHeadline'),
       label: settlement == null
           ? l10n.accountDetailBalanceOn(
-              DateFormat.yMMMMd(
+              DayMonthFormat.yMMMMd(
                 locale,
               ).format(overview.balanceDate ?? DateTime.now()),
             )
@@ -236,7 +237,7 @@ class _SummaryLine extends StatelessWidget {
           figure: Text(
             debit == null
                 ? l10n.accountDetailNoStats
-                : DateFormat.MMMd(locale).format(debit),
+                : DayMonthFormat.MMMd(locale).format(debit),
             style: minor,
           ),
         ),
@@ -296,7 +297,7 @@ class _AccountFacts extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final style = context.textStyles.statLabel;
-    final date = DateFormat.yMMMd(_locale(context));
+    final date = DayMonthFormat.yMMMd(_locale(context));
     final account = overview.account;
     final first = overview.firstTransactionDate;
     final imported = overview.lastImportAt;
@@ -330,7 +331,9 @@ class _AccountFacts extends StatelessWidget {
               _Link(
                 key: const Key('accountDetailLastImport'),
                 label: l10n.accountDetailLastImport(
-                  DateFormat.MMMd(_locale(context)).format(imported.toLocal()),
+                  DayMonthFormat.MMMd(
+                    _locale(context),
+                  ).format(imported.toLocal()),
                 ),
                 small: true,
                 onTap: () => context.go(ImportsScreen.path),
@@ -539,7 +542,7 @@ class _CycleChart extends ConsumerWidget {
         .watch(balanceRangeControllerProvider(accountId))
         .slice(settlement.cycles);
     final month = DateFormat.MMM(locale);
-    final day = DateFormat.yMMMd(locale);
+    final day = DayMonthFormat.yMMMd(locale);
     // The open cycle is labelled by the month it will be debited in, else
     // the month after the last settlement.
     String label(SettlementCycle cycle) => month.format(
@@ -756,7 +759,7 @@ class _LinkedCardRow extends ConsumerWidget {
               debit == null
                   ? l10n.accountDetailNoDebitScheduled
                   : l10n.accountDetailDebitOn(
-                      DateFormat.MMMd(_locale(context)).format(debit),
+                      DayMonthFormat.MMMd(_locale(context)).format(debit),
                     ),
               maxLines: 1,
               style: context.textStyles.helper,
@@ -810,7 +813,7 @@ class _SettlementBlock extends ConsumerWidget {
     } else if (rule.appliesFrom case final from?) {
       ruleText = l10n.accountDetailRuleSummary(
         rule.pattern,
-        DateFormat.yMMMd(_locale(context)).format(from),
+        DayMonthFormat.yMMMd(_locale(context)).format(from),
       );
     } else {
       ruleText = l10n.accountDetailRuleSummaryUndated(rule.pattern);
@@ -1055,7 +1058,7 @@ class _OperationRow extends StatelessWidget {
             slug: categorySlugFor(name: category.name, kind: category.kind),
           ),
         Text(
-          DateFormat.MMMd(_locale(context)).format(transaction.bookedDate),
+          DayMonthFormat.MMMd(_locale(context)).format(transaction.bookedDate),
           style: tabularNumberStyle(
             textTheme.bodyMedium!,
           ).copyWith(color: colors.textSecondary),
