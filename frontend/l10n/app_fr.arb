@@ -1360,6 +1360,19 @@
   "@transactionsFilterImportRemove": {
     "description": "Tooltip and accessible label of the button that lifts the import filter."
   },
+  "transactionsFilterOperation": "Opération : {name}",
+  "@transactionsFilterOperation": {
+    "description": "Chip in the transactions filter row naming the one operation the list is narrowed to (opened from a dashboard or account detail row).",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsFilterOperationRemove": "Retirer le filtre d’opération",
+  "@transactionsFilterOperationRemove": {
+    "description": "Tooltip and accessible label of the button that lifts the one-operation filter."
+  },
   "transactionsDateRangeTitle": "Période",
   "@transactionsDateRangeTitle": {
     "description": "Title of the transactions date range filter modal."

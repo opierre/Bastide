@@ -1777,6 +1777,18 @@ abstract class AppLocalizations {
   /// **'Retirer le filtre d’import'**
   String get transactionsFilterImportRemove;
 
+  /// Chip in the transactions filter row naming the one operation the list is narrowed to (opened from a dashboard or account detail row).
+  ///
+  /// In fr, this message translates to:
+  /// **'Opération : {name}'**
+  String transactionsFilterOperation(String name);
+
+  /// Tooltip and accessible label of the button that lifts the one-operation filter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer le filtre d’opération'**
+  String get transactionsFilterOperationRemove;
+
   /// Title of the transactions date range filter modal.
   ///
   /// In fr, this message translates to:

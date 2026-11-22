@@ -51,7 +51,8 @@ class TransactionsListPane extends StatelessWidget {
 }
 
 /// Padding 12 32, 8 px apart: accounts, period, categories, the import an
-/// import history row narrowed the list to, then the count and the net.
+/// import history row narrowed the list to or the operation a deep link opened
+/// on, then the count and the net.
 class _FilterRow extends ConsumerWidget {
   const _FilterRow({required this.page});
 
@@ -125,9 +126,31 @@ class _FilterRow extends ConsumerWidget {
           if (filters.importBatch case final batch?) ...[
             const SizedBox(width: AppSpacing.sm),
             _FilterSlot(
-              child: _ImportFilterChip(
-                fileName: batch.fileName,
+              child: _FilterChip(
+                key: const Key('transactionsImportFilter'),
+                removeKey: const Key('transactionsImportFilterRemove'),
+                icon: LucideIcons300.download,
+                label: l10n.transactionsFilterImport(batch.fileName),
+                removeTooltip: l10n.transactionsFilterImportRemove,
                 onRemove: notifier.clearImport,
+              ),
+            ),
+          ],
+          if ((filters.operationId, page.items.firstOrNull) case (
+            _?,
+            final transaction?,
+          )) ...[
+            const SizedBox(width: AppSpacing.sm),
+            _FilterSlot(
+              child: _FilterChip(
+                key: const Key('transactionsOperationFilter'),
+                removeKey: const Key('transactionsOperationFilterRemove'),
+                icon: LucideIcons300.arrowLeftRight,
+                label: l10n.transactionsFilterOperation(
+                  transactionName(transaction),
+                ),
+                removeTooltip: l10n.transactionsFilterOperationRemove,
+                onRemove: notifier.clearOperation,
               ),
             ),
           ],
@@ -283,22 +306,30 @@ class _PeriodSelectState extends State<_PeriodSelect> {
   }
 }
 
-/// The import an import history row narrowed the list to, with the means to
-/// lift that filter: toolbar select geometry with the Imports icon and a
-/// ghost `x` in place of the chevron.
-class _ImportFilterChip extends StatelessWidget {
-  const _ImportFilterChip({required this.fileName, required this.onRemove});
+/// A filter set from elsewhere (an import history row, a deep link to one
+/// operation), with the means to lift it: toolbar select geometry with the
+/// source's icon and a ghost `x` in place of the chevron.
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required super.key,
+    required this.removeKey,
+    required this.icon,
+    required this.label,
+    required this.removeTooltip,
+    required this.onRemove,
+  });
 
-  final String fileName;
+  final Key removeKey;
+  final IconData icon;
+  final String label;
+  final String removeTooltip;
   final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final colors = context.colors;
 
     return Container(
-      key: const Key('transactionsImportFilter'),
       height: AppSizes.toolbarSelect,
       padding: const EdgeInsetsDirectional.only(
         start: AppSpacing.sm + AppSpacing.xxs,
@@ -312,15 +343,11 @@ class _ImportFilterChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            LucideIcons300.download,
-            size: AppSizes.iconSmall,
-            color: colors.textTertiary,
-          ),
+          Icon(icon, size: AppSizes.iconSmall, color: colors.textTertiary),
           const SizedBox(width: AppSpacing.xsPlus),
           Flexible(
             child: Text(
-              l10n.transactionsFilterImport(fileName),
+              label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodyMedium,
@@ -328,9 +355,9 @@ class _ImportFilterChip extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.xxs),
           IconButton(
-            key: const Key('transactionsImportFilterRemove'),
+            key: removeKey,
             onPressed: onRemove,
-            tooltip: l10n.transactionsFilterImportRemove,
+            tooltip: removeTooltip,
             iconSize: AppSizes.iconSmall,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints.tightFor(

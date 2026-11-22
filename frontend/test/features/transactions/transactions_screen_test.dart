@@ -775,7 +775,7 @@ void main() {
       expect(find.byKey(const Key('transactionInspector')), findsOneWidget);
     });
 
-    testWidgets('narrows the list to its account and day', (tester) async {
+    testWidgets('narrows the list to that operation alone', (tester) async {
       await _pump(
         tester,
         items: [_transaction(id: 't2')],
@@ -790,12 +790,40 @@ void main() {
 
       expect(
         _container(tester).read(transactionFiltersProvider),
-        TransactionFilters(
-          accountId: 'a1',
-          dateFrom: DateTime(2026, 5, 11),
-          dateTo: DateTime(2026, 5, 11),
-        ),
+        const TransactionFilters(operationId: 't2'),
       );
+    });
+
+    testWidgets('the operation filter names it and lifts on « x »', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        items: [_transaction(id: 't2', merchant: 'Cafe du Port')],
+        operationId: 't2',
+      );
+
+      expect(find.text('Opération : Cafe du Port'), findsOneWidget);
+      await tester.tap(
+        find.byKey(const Key('transactionsOperationFilterRemove')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        _container(tester).read(transactionFiltersProvider),
+        const TransactionFilters(),
+      );
+    });
+
+    testWidgets('the operation filter reads in English', (tester) async {
+      await _pump(
+        tester,
+        items: [_transaction(id: 't2', merchant: 'Cafe du Port')],
+        operationId: 't2',
+        locale: const Locale('en'),
+      );
+
+      expect(find.text('Operation: Cafe du Port'), findsOneWidget);
     });
 
     testWidgets('ignores an unknown id and keeps the filters', (tester) async {
