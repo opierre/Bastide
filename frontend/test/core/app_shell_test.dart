@@ -4,6 +4,7 @@ import 'package:bastide/core/storage/ui_preferences.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/app_shell.dart';
+import 'package:bastide/core/window/window_providers.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/features/transactions/application/review_count_provider.dart';
 import 'package:bastide/l10n/app_localizations.dart';
@@ -32,6 +33,7 @@ Widget _shell({
   TopBarTitleBuilder? titleBuilder,
   TopBarActionsBuilder? actionsBuilder,
   ValueChanged<String>? onNavigate,
+  bool systemWindowButtons = false,
 }) {
   return ProviderScope(
     overrides: [
@@ -40,6 +42,7 @@ Widget _shell({
         sidebarCollapsedProvider.overrideWith(FakeCollapsedSidebar.new),
       currentUserProvider.overrideWithValue(_user),
       reviewCountProvider.overrideWith((ref) async => reviewCount),
+      systemWindowButtonsProvider.overrideWithValue(systemWindowButtons),
     ],
     child: MaterialApp(
       locale: locale,
@@ -248,7 +251,29 @@ void main() {
     final a = tester.getRect(find.byKey(const Key('a')));
     final b = tester.getRect(find.byKey(const Key('b')));
     expect(b.left - a.right, AppSpacing.sm);
-    expect(bar.right - b.right, AppSpacing.lg);
+    // Then 8 px to the window controls, which meet the right edge.
+    expect(bar.right - b.right, AppSpacing.sm + 3 * AppSizes.windowControl);
+  });
+
+  testWidgets('macOS: no window controls, the bar keeps its 24 px padding', (
+    tester,
+  ) async {
+    _useFrame(tester);
+    await tester.pumpWidget(
+      _shell(
+        path: '/dashboard',
+        systemWindowButtons: true,
+        actionsBuilder: (_) => const [
+          SizedBox(key: Key('a'), width: 60, height: AppSizes.button),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final bar = tester.getRect(find.byKey(const Key('appTopBar')));
+    final a = tester.getRect(find.byKey(const Key('a')));
+    expect(bar.right - a.right, AppSpacing.lg);
+    expect(find.byKey(const Key('windowControls')), findsNothing);
   });
 
   testWidgets('Ctrl+B collapses to the 56 px icon rail and back', (

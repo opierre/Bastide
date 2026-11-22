@@ -36,6 +36,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navSectionManage => 'Gestion';
 
   @override
+  String get windowControls => 'Fenêtre';
+
+  @override
+  String get windowMinimize => 'Réduire';
+
+  @override
+  String get windowMaximize => 'Agrandir';
+
+  @override
+  String get windowRestore => 'Restaurer';
+
+  @override
+  String get windowClose => 'Fermer';
+
+  @override
   String get sidebarPrivacyBadge => 'Données locales';
 
   @override

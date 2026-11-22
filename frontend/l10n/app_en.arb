@@ -9,6 +9,11 @@
   "navSettings": "Settings",
   "navSectionOverview": "Overview",
   "navSectionManage": "Manage",
+  "windowControls": "Window",
+  "windowMinimize": "Minimize",
+  "windowMaximize": "Maximize",
+  "windowRestore": "Restore",
+  "windowClose": "Close",
   "sidebarPrivacyBadge": "Local data",
   "@sidebarPrivacyBadge": {
     "description": "Reassurance badge pinned at the foot of the sidebar, beside a lock glyph."

@@ -10,11 +10,13 @@ import '../../l10n/app_localizations.dart';
 import '../navigation/sidebar_controller.dart';
 import '../session/current_user_provider.dart';
 import '../theme/tokens.dart';
+import '../window/window_providers.dart';
 import 'app_popover.dart';
 import 'brand_mark.dart';
 import 'focus_ring.dart';
 import 'tomettes.dart';
 import 'user_avatar.dart';
+import 'window_controls.dart';
 
 class NavDestinationSpec {
   const NavDestinationSpec({
@@ -243,6 +245,7 @@ class _Sidebar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final collapsed = ref.watch(sidebarCollapsedProvider);
+    final systemButtons = ref.watch(systemWindowButtonsProvider);
     final colors = context.colors;
 
     Widget item(NavDestinationSpec destination) => _NavItem(
@@ -255,9 +258,11 @@ class _Sidebar extends ConsumerWidget {
 
     return Container(
       width: collapsed ? AppSizes.sidebarCollapsed : AppSizes.sidebar,
-      padding: const EdgeInsets.fromLTRB(
+      // On macOS the brand row is the window's top 48 px band, beside the
+      // system's buttons, so it starts at the very top.
+      padding: EdgeInsets.fromLTRB(
         AppSpacing.sm,
-        AppSpacing.smPlus,
+        systemButtons ? 0 : AppSpacing.smPlus,
         AppSpacing.sm,
         AppSpacing.sm,
       ),
@@ -268,7 +273,7 @@ class _Sidebar extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _BrandRow(collapsed: collapsed),
+          _BrandRow(collapsed: collapsed, systemButtons: systemButtons),
           Expanded(
             // The groups scroll only when the window is shorter than the
             // stack; otherwise the empty stretch takes what is left.
@@ -303,26 +308,59 @@ class _Sidebar extends ConsumerWidget {
   }
 }
 
+/// The brand row, which also moves the window (`00` §5).
+///
+/// On macOS it shares the window's top 48 px band with the system's three
+/// buttons: the lockup starts 14 px after them, and the collapsed rail, which
+/// the buttons overhang, hides the mark.
 class _BrandRow extends StatelessWidget {
-  const _BrandRow({required this.collapsed});
+  const _BrandRow({required this.collapsed, required this.systemButtons});
 
   final bool collapsed;
+  final bool systemButtons;
+
+  /// Where the lockup starts on macOS, inside the sidebar's 8 px padding.
+  static const _macLockupStart =
+      AppSizes.macWindowButtonsInset +
+      AppSizes.macWindowButtons +
+      AppSizes.macBrandAfterButtons -
+      AppSpacing.sm;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        collapsed ? 0 : AppSpacing.sm,
-        AppSpacing.xs,
-        collapsed ? 0 : AppSpacing.sm,
-        AppSpacing.sidebarBrandBottom,
+    if (systemButtons) {
+      return WindowDragArea(
+        key: const Key('brandRowDragArea'),
+        child: SizedBox(
+          height: AppSizes.titleBar,
+          child: collapsed
+              ? null
+              : const Padding(
+                  padding: EdgeInsetsDirectional.only(start: _macLockupStart),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: BrandLockup(),
+                  ),
+                ),
+        ),
+      );
+    }
+    return WindowDragArea(
+      key: const Key('brandRowDragArea'),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          collapsed ? 0 : AppSpacing.sm,
+          AppSpacing.xs,
+          collapsed ? 0 : AppSpacing.sm,
+          AppSpacing.sidebarBrandBottom,
+        ),
+        child: collapsed
+            ? const Center(child: BrandMark())
+            : const Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: BrandLockup(),
+              ),
       ),
-      child: collapsed
-          ? const Center(child: BrandMark())
-          : const Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: BrandLockup(),
-            ),
     );
   }
 }
@@ -678,16 +716,18 @@ class TitleBarCrumb {
 }
 
 /// The title bar's title: an optional parent [crumb], then the title at
-/// 14/600 (`00` §5). No subtitle and no descriptor, ever.
-class TitleBarTitle extends StatelessWidget {
+/// 14/600 (`00` §5). No subtitle and no descriptor, ever. The title takes
+/// `textTertiary` while the window is inactive.
+class TitleBarTitle extends ConsumerWidget {
   const TitleBarTitle({super.key, required this.title, this.crumb});
 
   final String title;
   final TitleBarCrumb? crumb;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final focused = ref.watch(windowStatusProvider.select((s) => s.focused));
     return Row(
       children: [
         if (crumb case final crumb?) ...[
@@ -700,7 +740,11 @@ class TitleBarTitle extends StatelessWidget {
             key: const Key('titleBarTitle'),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: textTheme.titleMedium,
+            style: focused
+                ? textTheme.titleMedium
+                : textTheme.titleMedium?.copyWith(
+                    color: context.colors.textTertiary,
+                  ),
           ),
         ),
       ],
@@ -769,30 +813,61 @@ class _CrumbLinkState extends State<_CrumbLink> {
   }
 }
 
-class _TitleBar extends StatelessWidget {
+/// The 48 px title bar (`00` §5): title, contextual controls and, on
+/// Windows and Linux, the window controls against the right edge, with no
+/// right padding so Fermer meets the window corner. Its empty stretch moves
+/// the window; the title, the crumb and the controls sit above that area and
+/// take the pointer themselves.
+class _TitleBar extends ConsumerWidget {
   const _TitleBar({super.key, required this.title, required this.actions});
 
   final Widget title;
   final List<Widget> actions;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final systemButtons = ref.watch(systemWindowButtonsProvider);
     return Container(
       height: AppSizes.titleBar,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: context.colors.bg,
-        border: Border(bottom: BorderSide(color: context.colors.line)),
-      ),
-      child: Row(
+      color: context.colors.bg,
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          // The controls keep their designed size and the title takes what is
-          // left, ellipsizing first.
-          Expanded(child: title),
-          for (final (index, action) in actions.indexed) ...[
-            SizedBox(width: index == 0 ? AppSpacing.smPlus : AppSpacing.sm),
-            action,
-          ],
+          // The hairline is drawn first so the window controls, 48 px tall,
+          // cover it as they meet the corner.
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 1,
+            child: ColoredBox(color: context.colors.line),
+          ),
+          const Positioned.fill(
+            child: WindowDragArea(key: Key('titleBarDragArea')),
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.only(
+              start: AppSpacing.lg,
+              end: systemButtons ? AppSpacing.lg : 0,
+            ),
+            child: Row(
+              children: [
+                // The controls keep their designed size and the title takes
+                // what is left, ellipsizing first.
+                Expanded(child: title),
+                for (final (index, action) in actions.indexed) ...[
+                  SizedBox(
+                    width: index == 0 ? AppSpacing.smPlus : AppSpacing.sm,
+                  ),
+                  action,
+                ],
+                if (!systemButtons) ...[
+                  if (actions.isNotEmpty) const SizedBox(width: AppSpacing.sm),
+                  const WindowControls(key: Key('windowControls')),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );

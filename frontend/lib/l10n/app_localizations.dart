@@ -152,6 +152,36 @@ abstract class AppLocalizations {
   /// **'Gestion'**
   String get navSectionManage;
 
+  /// Accessible name of the group of window controls (minimize, maximize, close) drawn by the app on Windows and Linux.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fenêtre'**
+  String get windowControls;
+
+  /// Tooltip and accessible label of the window control that minimizes the window.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réduire'**
+  String get windowMinimize;
+
+  /// Tooltip and accessible label of the window control that maximizes the window.
+  ///
+  /// In fr, this message translates to:
+  /// **'Agrandir'**
+  String get windowMaximize;
+
+  /// Tooltip and accessible label of the window control that restores a maximized window to its previous size.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restaurer'**
+  String get windowRestore;
+
+  /// Tooltip and accessible label of the window control that closes the window, and the app with it.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get windowClose;
+
   /// Privacy line at the foot of the sidebar, beside a lock glyph. On the collapsed sidebar it becomes the lock's tooltip.
   ///
   /// In fr, this message translates to:
