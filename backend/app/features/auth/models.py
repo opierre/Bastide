@@ -13,6 +13,8 @@ AVATAR_IMAGE = "image"
 AVATAR_PRESET_PREFIX = "preset:"
 #: The theme a new user gets: dark is the reference theme (docs/design/00-design-system.md).
 THEME_DEFAULT = "dark"
+#: The text size a new user gets: the type scale of docs/design/00-design-system.md, unscaled.
+TEXT_SIZE_DEFAULT = "normal"
 
 
 class User(Base):
@@ -34,6 +36,8 @@ class User(Base):
     avatar: Mapped[str] = mapped_column(String(40), default=AVATAR_MONOGRAM)
     # `system`, `dark` or `light` (see `schemas.ThemePreference`); `system` follows the OS.
     theme: Mapped[str] = mapped_column(String(6), default=THEME_DEFAULT)
+    # `normal`, `large` or `xlarge` (see `schemas.TextSizePreference`): scales the whole type scale.
+    text_size: Mapped[str] = mapped_column(String(6), default=TEXT_SIZE_DEFAULT)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime(), default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
         UtcDateTime(),

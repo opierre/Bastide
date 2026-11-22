@@ -332,6 +332,7 @@ erDiagram
         text recovery_code_hash "nullable"
         text avatar
         text theme
+        text text_size
     }
     accounts ||--o{ account_balance_snapshots : "account_id"
     accounts |o--o{ accounts : "settlement_account_id"

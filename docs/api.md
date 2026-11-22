@@ -36,6 +36,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `DELETE` | `/auth/me/avatar` |  |  | 200 `MeResponse` |
 | `PUT` | `/auth/me/avatar-choice` |  | `AvatarChoiceUpdate` | 200 `MeResponse` |
 | `PUT` | `/auth/me/theme` |  | `ThemeUpdate` | 200 `MeResponse` |
+| `PUT` | `/auth/me/text-size` |  | `TextSizeUpdate` | 200 `MeResponse` |
 
 ## accounts
 
