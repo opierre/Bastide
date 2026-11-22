@@ -245,7 +245,8 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
   height minus 24 px above and below.
 - **Header:** padding 24 24 14; title 16/600; optional lead 13 `textSecondary` 4 px under it.
   No icon or glyph plate before the title, no close button. A long title wraps, its lines
-  balanced; it never truncates and never widens the modal.
+  balanced; it never truncates and never widens the modal. The lead
+  never leaves one word alone on its last line.
 - **Body:** padding 0 24, fields 14 px apart, two-column grids with a 16 px gutter. Fields in
   a row align by their input: a helper under one does not push its neighbour down. A grid
   leaves no empty cell before its last row. Only the body scrolls; while it does, a `line`
