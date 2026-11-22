@@ -8,6 +8,7 @@ import 'package:bastide/features/auth/presentation/password_change_modal.dart';
 import 'package:bastide/features/settings/presentation/profile_section.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -170,6 +171,81 @@ void main() {
 
     expect(find.byType(PasswordChangeModal), findsOneWidget);
     expect(find.text('Mot de passe incorrect.'), findsOneWidget);
+  });
+
+  testWidgets('a wrong current password is not a banner', (tester) async {
+    when(
+      () => apiClient.put('/auth/me/password', body: any(named: 'body')),
+    ).thenThrow(const ApiFailure(code: 'INVALID_CREDENTIALS', message: 'nope'));
+    await open(tester);
+
+    await fill(tester);
+    await tester.tap(find.byKey(const Key('passwordModalSave')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('appModalSaveError')), findsNothing);
+  });
+
+  testWidgets('any other failure is the frame banner, input kept', (
+    tester,
+  ) async {
+    when(
+      () => apiClient.put('/auth/me/password', body: any(named: 'body')),
+    ).thenThrow(const ApiFailure(code: 'INTERNAL', message: 'boom'));
+    await open(tester);
+
+    await fill(tester);
+    await tester.tap(find.byKey(const Key('passwordModalSave')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('appModalSaveError')), findsOneWidget);
+    expect(find.text('Mot de passe incorrect.'), findsNothing);
+    expect(saveButton(tester).onPressed, isNotNull);
+  });
+
+  testWidgets('opens as the 420 px v2 form, focus on the current password', (
+    tester,
+  ) async {
+    await open(tester);
+
+    expect(tester.getSize(find.byKey(const Key('appModalFrame'))).width, 420);
+    expect(find.byKey(const Key('passwordModalCancel')), findsOneWidget);
+    final focused = FocusManager.instance.primaryFocus!.context!;
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('passwordModalCurrentField')),
+        matching: find.byWidget(focused.widget),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Enter from the confirmation submits', (tester) async {
+    when(
+      () => apiClient.put('/auth/me/password', body: any(named: 'body')),
+    ).thenAnswer((_) async => null);
+    await open(tester);
+
+    await fill(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PasswordChangeModal), findsNothing);
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('a typed form asks before Escape drops it', (tester) async {
+    await open(tester);
+
+    await fill(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('appModalDiscard')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('appModalDiscardContinue')));
+    await tester.pumpAndSettle();
+    expect(find.byType(PasswordChangeModal), findsOneWidget);
   });
 
   testWidgets('renders in English', (tester) async {

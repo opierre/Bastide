@@ -14,11 +14,13 @@ import 'auth_error_localizer.dart';
 import 'new_password_helper.dart';
 import 'password_field.dart';
 
-/// « Changer le mot de passe », opened from the password row of
-/// Settings › Profil (`09-settings.md`, Password modal): the current
+/// « Changer le mot de passe », the 420 px modal opened from the password row
+/// of Settings › Profil (`09-settings.md`, Password modal): the current
 /// password, then the new one with its confirmation.
 ///
-/// Success closes the modal and toasts; this session stays open.
+/// A wrong current password is refused under its field; any other failure
+/// is the frame's save banner. Success closes the modal and toasts; this
+/// session stays open.
 class PasswordChangeModal extends ConsumerStatefulWidget {
   const PasswordChangeModal({super.key});
 
@@ -59,6 +61,11 @@ class _PasswordChangeModalState extends ConsumerState<PasswordChangeModal> {
     _newFocus.dispose();
     super.dispose();
   }
+
+  bool get _dirty =>
+      _currentController.text.isNotEmpty ||
+      _newController.text.isNotEmpty ||
+      _confirmController.text.isNotEmpty;
 
   bool get _confirmMismatch =>
       _confirmController.text.isNotEmpty &&
@@ -104,13 +111,18 @@ class _PasswordChangeModalState extends ConsumerState<PasswordChangeModal> {
     void refresh(String _) => setState(() {});
 
     return AppModal(
+      key: const Key('passwordChangeModal'),
       title: l10n.settingsPasswordModalTitle,
-      width: 420,
+      subtitle: Text(l10n.settingsPasswordModalLead),
+      width: AppModalSizes.w420,
+      dirty: _dirty,
+      busy: isSaving,
+      saveError: error == null || wrongCurrent
+          ? null
+          : localizeAuthError(l10n, error),
+      onSubmit: _submit,
       actions: [
-        AppButton(
-          label: l10n.settingsPasswordModalCancel,
-          onPressed: isSaving ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(key: Key('passwordModalCancel')),
         PrimaryButton(
           key: const Key('passwordModalSave'),
           label: l10n.settingsPasswordModalSave,
@@ -118,21 +130,15 @@ class _PasswordChangeModalState extends ConsumerState<PasswordChangeModal> {
           onPressed: _isValid ? _submit : null,
         ),
       ],
-      subtitle: Text(l10n.settingsPasswordModalLead),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           LabeledField(
             label: l10n.settingsPasswordCurrentLabel,
-            errorText: error == null
-                ? null
-                : wrongCurrent
-                ? l10n.settingsPasswordWrongPassword
-                : localizeAuthError(l10n, error),
+            errorText: wrongCurrent ? l10n.settingsPasswordWrongPassword : null,
             child: PasswordField(
               fieldKey: const Key('passwordModalCurrentField'),
               controller: _currentController,
-              enabled: !isSaving,
               hasError: wrongCurrent,
               onChanged: refresh,
             ),
@@ -148,7 +154,6 @@ class _PasswordChangeModalState extends ConsumerState<PasswordChangeModal> {
                   controller: _newController,
                   focusNode: _newFocus,
                   autofillHint: AutofillHints.newPassword,
-                  enabled: !isSaving,
                   hasError: NewPasswordHelper.isError(
                     newPassword,
                     flagShort: _newLeft,
@@ -167,10 +172,8 @@ class _PasswordChangeModalState extends ConsumerState<PasswordChangeModal> {
               fieldKey: const Key('passwordModalConfirmField'),
               controller: _confirmController,
               autofillHint: AutofillHints.newPassword,
-              enabled: !isSaving,
               hasError: _confirmMismatch,
               onChanged: refresh,
-              onSubmitted: (_) => _submit(),
             ),
           ),
         ],

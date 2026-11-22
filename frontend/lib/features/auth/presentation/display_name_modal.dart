@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -9,9 +10,13 @@ import '../../../l10n/app_localizations.dart';
 import '../application/profile_controllers.dart';
 import '../domain/display_name.dart';
 
-/// « Changer de nom d'utilisateur », opened from the username row of
-/// Settings › Profil. The display name is also a login name, so the lead says
-/// the new one replaces the old for signing in.
+/// « Changer de nom d’utilisateur », the 420 px modal opened from the
+/// username row of Settings › Profil (`09-settings.md`, Username modal). The
+/// display name is also a login name, so the lead says the new one replaces
+/// the old for signing in.
+///
+/// A malformed or taken name is refused under the field; any other failure
+/// is the frame's save banner, the input kept.
 class DisplayNameModal extends ConsumerStatefulWidget {
   const DisplayNameModal({super.key, required this.initialName});
 
@@ -27,7 +32,7 @@ class _DisplayNameModalState extends ConsumerState<DisplayNameModal> {
   @override
   void initState() {
     super.initState();
-    // The save button's enabled state and the format error follow the field.
+    // The save button, the format error and the dirty state follow the field.
     _nameController.addListener(() => setState(() {}));
   }
 
@@ -42,6 +47,9 @@ class _DisplayNameModalState extends ConsumerState<DisplayNameModal> {
       normalizeDisplayName(_nameController.text) != widget.initialName;
 
   Future<void> _save() async {
+    if (!_canSave || ref.read(displayNameControllerProvider).isLoading) {
+      return;
+    }
     await ref
         .read(displayNameControllerProvider.notifier)
         .save(displayName: normalizeDisplayName(_nameController.text));
@@ -51,16 +59,17 @@ class _DisplayNameModalState extends ConsumerState<DisplayNameModal> {
     }
   }
 
-  String? _errorText(AppLocalizations l10n, AsyncValue<void> state) {
+  static bool _isTaken(Object? error) =>
+      error is ApiFailure && error.code == 'DISPLAY_NAME_TAKEN';
+
+  String? _fieldError(AppLocalizations l10n, AsyncValue<void> state) {
     final text = _nameController.text;
     if (text.isNotEmpty && !isValidDisplayName(text)) {
       return l10n.authDisplayNameInvalid;
     }
-    if (!state.hasError) return null;
-    return state.error is ApiFailure &&
-            (state.error! as ApiFailure).code == 'DISPLAY_NAME_TAKEN'
+    return state.hasError && _isTaken(state.error)
         ? l10n.authDisplayNameTaken
-        : l10n.authErrorGeneric;
+        : null;
   }
 
   @override
@@ -68,16 +77,21 @@ class _DisplayNameModalState extends ConsumerState<DisplayNameModal> {
     final l10n = AppLocalizations.of(context)!;
     final state = ref.watch(displayNameControllerProvider);
     final isSaving = state.isLoading;
-    final errorText = _errorText(l10n, state);
+    final fieldError = _fieldError(l10n, state);
 
     return AppModal(
+      key: const Key('displayNameModal'),
       title: l10n.settingsProfileNameModalTitle,
-      width: 420,
+      subtitle: Text(l10n.settingsProfileNameModalLead),
+      width: AppModalSizes.w420,
+      dirty: _nameController.text != widget.initialName,
+      busy: isSaving,
+      saveError: state.hasError && !_isTaken(state.error)
+          ? l10n.authErrorGeneric
+          : null,
+      onSubmit: _save,
       actions: [
-        AppButton(
-          label: l10n.settingsProfileNameModalCancel,
-          onPressed: isSaving ? null : () => Navigator.of(context).pop(),
-        ),
+        const AppModalCancel(key: Key('displayNameModalCancel')),
         PrimaryButton(
           key: const Key('displayNameModalSave'),
           label: l10n.settingsProfileNameModalSave,
@@ -85,26 +99,16 @@ class _DisplayNameModalState extends ConsumerState<DisplayNameModal> {
           onPressed: _canSave ? _save : null,
         ),
       ],
-      subtitle: Text(l10n.settingsProfileNameModalLead),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          LabeledField(
-            label: l10n.authDisplayNameLabel,
-            helper: l10n.authDisplayNameHelper,
-            errorText: errorText,
-            child: TextFormField(
-              key: const Key('displayNameModalField'),
-              controller: _nameController,
-              autofocus: true,
-              autofillHints: const [AutofillHints.newUsername],
-              decoration: errorText != null
-                  ? errorFieldDecoration(context)
-                  : null,
-              onFieldSubmitted: (_) => isSaving || !_canSave ? null : _save(),
-            ),
-          ),
-        ],
+      child: LabeledField(
+        label: l10n.authDisplayNameLabel,
+        helper: l10n.authDisplayNameHelper,
+        errorText: fieldError,
+        child: TextFormField(
+          key: const Key('displayNameModalField'),
+          controller: _nameController,
+          autofillHints: const [AutofillHints.newUsername],
+          decoration: fieldError != null ? errorFieldDecoration(context) : null,
+        ),
       ),
     );
   }
