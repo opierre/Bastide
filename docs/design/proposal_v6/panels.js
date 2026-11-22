@@ -670,7 +670,7 @@ MD.seriesEdit = () => modal(480, 'Modifier le paiement récurrent', '', `
   <div class="g2m">${F('Montant', inp('15,49 €', 'r'))}${F('Cadence', selF('Mensuel'))}</div>
   ${F('Catégorie', selF(cat('Loisirs')))}`, CANCEL + B('Enregistrer', 'pri'));
 const CHARGES = [[1, '12 mai 2026', 'PRLV SEPA STREAMCO', 'BNP Compte courant', '−15,49 €'], [1, '28 avr. 2026', 'CB STREAMCO PARIS', 'Revolut', '−15,49 €'], [0, '25 avr. 2026', 'CB LE PETIT BOUCHON LYON', 'Revolut', '−42,50 €'], [0, '19 avr. 2026', 'CB SNCF CONNECT', 'Revolut', '−86,40 €'], [0, '14 avr. 2026', 'CB CARREFOUR LYON 3', 'BNP Compte courant', '−63,18 €']];
-const chargeRows = rows => `<table class="mtable">${rows.map(r => `<tr><td style="width:24px"><span class="chk ${r[0] ? 'on' : ''}">${r[0] ? I('check') : ''}</span></td><td class="t2" style="width:96px">${r[1]}</td><td><div class="col" style="padding:4px 0"><span class="mono">${r[2]}</span>${r[3] ? `<span class="xs t3">${r[3]}</span>` : ''}</div></td><td class="n">${amt(r[4])}</td></tr>`).join('')}</table>`;
+const chargeRows = rows => `<table class="mtable pick">${rows.map(r => `<tr class="${r[3] ? 'two' : ''}"><td style="width:34px"><span class="chk ${r[0] ? 'on' : ''}">${r[0] ? I('check') : ''}</span></td><td class="t2" style="width:96px">${r[1]}</td><td><div class="col"><span class="mono">${r[2]}</span>${r[3] ? `<span class="xs t3">${r[3]}</span>` : ''}</div></td><td class="n">${amt(r[4])}</td></tr>`).join('')}</table>`;
 MD.addCharges = () => modal(560, 'Ajouter à « Netflix »', 'Les opérations qui ne font partie d’aucune série, les plus proches en premier.', `
   <span class="inp ph">${I('search', 's14')}Rechercher un libellé</span>
   ${chargeRows(CHARGES)}

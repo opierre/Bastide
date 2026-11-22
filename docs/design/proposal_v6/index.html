@@ -254,6 +254,13 @@ label.f small.err{color:var(--neg)}
 .sk{background:var(--hover);border-radius:4px;height:12px}
 .mtable td{height:36px}
 .mtable tr:first-child td{border-top:0}
+/* selectable list rows (§7 Modal, body): 36 or 48 px, radius 4, no hairline, as the series picker */
+.mtable.pick{border-collapse:separate;border-spacing:0 2px;margin:-2px 0}
+.mtable.pick td{border-top:0}
+.mtable.pick tr.two td{height:48px}
+.mtable.pick td:first-child{border-radius:4px 0 0 4px;padding-left:8px}
+.mtable.pick td:last-child{border-radius:0 4px 4px 0;padding-right:8px}
+.mtable.pick tr:hover td{background:var(--hover)}
 /* gallery: each modal on its scrim, dark beside light */
 .mg-page{width:1440px;padding:40px 48px;display:block;height:auto}
 .mg-page h2{font:600 20px var(--f);margin:40px 0 4px;letter-spacing:-.01em}
