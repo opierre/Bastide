@@ -441,6 +441,139 @@ void main() {
     expect(find.text('1 objectif archivé'), findsOneWidget);
   });
 
+  testWidgets('the goal actions are icon-only tool buttons with tooltips', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _wrap(controller: FakeGoalsController(initialGoals: specGoals())),
+    );
+    await tester.pumpAndSettle();
+
+    for (final (key, label) in [
+      ('goalEdit', 'Modifier'),
+      ('goalArchive', 'Archiver'),
+      ('goalDelete', 'Supprimer'),
+    ]) {
+      final button = find.byKey(Key(key));
+      expect(_inInspector(button), findsOneWidget);
+      // No visible label: the icon alone, the label as tooltip and name.
+      expect(
+        find.descendant(of: button, matching: find.byType(Text)),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: button,
+          matching: find.byWidgetPredicate(
+            (widget) => widget is Tooltip && widget.message == label,
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: button, matching: find.bySemanticsLabel(label)),
+        findsOneWidget,
+      );
+    }
+    semantics.dispose();
+  });
+
+  testWidgets('the tool buttons read in English', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeGoalsController(initialGoals: specGoals()),
+        locale: const Locale('en'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    for (final label in ['Edit', 'Archive', 'Delete']) {
+      expect(
+        find.byWidgetPredicate(
+          (widget) => widget is Tooltip && widget.message == label,
+        ),
+        findsOneWidget,
+      );
+    }
+  });
+
+  testWidgets('an archived goal has no edit but can still be deleted', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeGoalsController(
+          initialGoals: [testGoal(status: GoalStatus.archived)],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('goalEdit')), findsNothing);
+    expect(find.byKey(const Key('goalUnarchive')), findsOneWidget);
+    expect(find.byKey(const Key('goalDelete')), findsOneWidget);
+  });
+
+  testWidgets('deleting a goal asks for a confirmation first', (tester) async {
+    _useDesktopSurface(tester);
+    final controller = FakeGoalsController(initialGoals: specGoals());
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('goalDelete')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Supprimer l’objectif « Fonds d\'urgence » ?'), findsOne);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('goalDeleteLead'))).data,
+      'Ses allocations et son image seront supprimées. Pour garder son '
+      'historique, archivez-le plutôt. Vos comptes ne sont pas modifiés.',
+    );
+    // A destructive confirmation: focus on « Annuler », so Enter deletes
+    // nothing by mistake.
+    final focused = FocusManager.instance.primaryFocus!.context!;
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('goalDeleteCancel')),
+        matching: find.byWidget(focused.widget),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('goalDeleteCancel')));
+    await tester.pumpAndSettle();
+    expect(controller.deleteCalls, isEmpty);
+    expect(find.byKey(const Key('goalDeleteModal')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('goalDelete')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('goalDeleteSubmit')));
+    await tester.pumpAndSettle();
+
+    expect(controller.deleteCalls, ['g1']);
+    expect(find.byKey(const Key('goalDeleteModal')), findsNothing);
+  });
+
+  testWidgets('the delete confirmation reads in English', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeGoalsController(initialGoals: specGoals()),
+        locale: const Locale('en'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('goalDelete')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Delete the goal “Fonds d\'urgence”?'), findsOne);
+  });
+
   testWidgets('over-allocation is neutral, states the delta, and closes', (
     tester,
   ) async {

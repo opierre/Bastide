@@ -3350,6 +3350,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get goalEdit => 'Modifier';
 
   @override
+  String get goalDelete => 'Supprimer';
+
+  @override
   String get goalAllocationsTitle => 'Allocations';
 
   @override
@@ -3500,9 +3503,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get goalFormSave => 'Enregistrer';
-
-  @override
-  String get goalFormDelete => 'Supprimer';
 
   @override
   String goalDeleteTitle(String name) {

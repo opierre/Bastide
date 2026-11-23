@@ -108,6 +108,7 @@ class FakeGoalsController extends GoalsController {
   final allocateCalls = <(String, int, DateTime, String?)>[];
   final archiveCalls = <String>[];
   final restoreCalls = <String>[];
+  final deleteCalls = <String>[];
   final deleteAllocationCalls = <(String, String)>[];
   final removeImageCalls = <String>[];
   Object? errorOnAllocate;
@@ -172,6 +173,11 @@ class FakeGoalsController extends GoalsController {
   @override
   Future<void> restore(String goalId) async {
     restoreCalls.add(goalId);
+  }
+
+  @override
+  Future<void> delete(String goalId) async {
+    deleteCalls.add(goalId);
   }
 
   @override
