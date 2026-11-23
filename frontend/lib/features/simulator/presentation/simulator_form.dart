@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
-import '../../../core/theme/app_theme.dart';
+import '../../../core/l10n/loan_display.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/app_slider.dart';
 import '../../../core/widgets/app_toggle.dart';
-import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/loan_terms_fields.dart';
 import '../../../core/widgets/money_field.dart';
+import '../../../core/widgets/term_slider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/simulator_controller.dart';
 import '../domain/simulation.dart';
@@ -66,11 +64,7 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
     fill(_principal, inputs.principalMinor);
     fill(_insurance, inputs.insuranceMonthlyMinor);
     if (inputs.annualRateBps case final bps?) {
-      final separator = NumberFormat.decimalPattern(
-        _locale,
-      ).symbols.DECIMAL_SEP;
-      _rate.text =
-          '${bps ~/ 100}$separator${(bps % 100).toString().padLeft(2, '0')}';
+      _rate.text = formatRateInput(bps, _locale);
     }
   }
 
@@ -97,15 +91,6 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
     _controller.setRate(bps);
   }
 
-  Widget _pair(Widget first, Widget second) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Expanded(child: first),
-      const SizedBox(width: AppSpacing.smPlus),
-      Expanded(child: second),
-    ],
-  );
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -113,11 +98,6 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
     final state = widget.state;
     final inputs = state.inputs;
     final currency = state.household.currency;
-    final hint = NumberFormat.decimalPatternDigits(
-      locale: _locale,
-      decimalDigits: 2,
-    ).format(0);
-
     // The derived amount follows price, fees and down payment into its field.
     ref.listen<AsyncValue<SimulatorState>>(simulatorControllerProvider, (
       _,
@@ -132,7 +112,6 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
 
     final errorField = simulatorErrorField(state.computeError);
     final errorMessage = localizeSimulatorError(l10n, state.computeError);
-    const rowGap = SizedBox(height: AppSpacing.smPlus);
     const blockGap = SizedBox(height: AppSimulator.inputsGap);
 
     return KeyedSubtree(
@@ -143,175 +122,75 @@ class _SimulatorFormState extends ConsumerState<SimulatorForm> {
         children: [
           Text(l10n.simulatorFormTitle, style: textTheme.titleSmall),
           blockGap,
-          _pair(
-            LabeledField(
-              label: l10n.simulatorPrice,
-              child: MoneyField(
+          LoanTermsFields(
+            currency: currency,
+            leading: (
+              LoanTermsInput(
                 key: const Key('simulatorPrice'),
                 controller: _price,
-                currency: currency,
+                label: l10n.simulatorPrice,
                 autofocus: true,
-                hintText: hint,
-                textAlign: TextAlign.end,
                 onChanged: (text) => _controller.setPropertyPrice(_money(text)),
               ),
-            ),
-            LabeledField(
-              label: l10n.simulatorDownPayment,
-              child: MoneyField(
+              LoanTermsInput(
                 key: const Key('simulatorDownPayment'),
                 controller: _downPayment,
-                currency: currency,
-                hintText: hint,
-                textAlign: TextAlign.end,
+                label: l10n.simulatorDownPayment,
                 onChanged: (text) => _controller.setDownPayment(_money(text)),
               ),
             ),
-          ),
-          rowGap,
-          _pair(
-            LabeledField(
+            fees: LoanTermsInput(
+              key: const Key('simulatorFees'),
+              controller: _fees,
               label: l10n.simulatorFees,
               errorText: errorField == SimulatorErrorField.fees
                   ? errorMessage
                   : null,
-              child: MoneyField(
-                key: const Key('simulatorFees'),
-                controller: _fees,
-                currency: currency,
-                hintText: hint,
-                textAlign: TextAlign.end,
-                onChanged: (text) => _controller.setFees(_money(text)),
-              ),
+              onChanged: (text) => _controller.setFees(_money(text)),
             ),
-            LabeledField(
+            principal: LoanTermsInput(
+              key: const Key('simulatorPrincipal'),
+              controller: _principal,
               label: l10n.simulatorPrincipal,
               // A convenience, not a constraint: the helper says the figure
               // was filled in, and editing it takes it over.
               helper: state.principalDerived && inputs.principalMinor != null
                   ? l10n.simulatorPrincipalDerivedHelper
                   : null,
-              child: MoneyField(
-                key: const Key('simulatorPrincipal'),
-                controller: _principal,
-                currency: currency,
-                hintText: hint,
-                textAlign: TextAlign.end,
-                onChanged: (text) => _controller.setPrincipal(_money(text)),
-              ),
+              onChanged: (text) => _controller.setPrincipal(_money(text)),
             ),
-          ),
-          rowGap,
-          _pair(
-            LabeledField(
+            rate: LoanTermsInput(
+              key: const Key('simulatorRate'),
+              controller: _rate,
               label: l10n.simulatorRate,
               errorText: _rateUnreadable
                   ? l10n.simulatorRateInvalid
                   : errorField == SimulatorErrorField.rate
                   ? errorMessage
                   : null,
-              child: TextFormField(
-                key: const Key('simulatorRate'),
-                controller: _rate,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                ],
-                textAlign: TextAlign.right,
-                style: tabularNumberStyle(textTheme.bodyLarge!),
-                decoration: InputDecoration(
-                  hintText: '—',
-                  suffixText: '%',
-                  suffixStyle: fieldSuffixStyle(context),
-                ),
-                onChanged: _onRateChanged,
-              ),
+              onChanged: _onRateChanged,
             ),
-            LabeledField(
+            insurance: LoanTermsInput(
+              key: const Key('simulatorInsurance'),
+              controller: _insurance,
               label: l10n.simulatorInsurance,
-              child: MoneyField(
-                key: const Key('simulatorInsurance'),
-                controller: _insurance,
-                currency: currency,
-                hintText: hint,
-                textAlign: TextAlign.end,
-                onChanged: (text) => _controller.setInsurance(_money(text)),
-              ),
+              onChanged: (text) => _controller.setInsurance(_money(text)),
+            ),
+            // A year at a time over 5–30 years (§Inputs pane, 3).
+            term: TermSlider(
+              termMonths: inputs.termMonths,
+              minMonths: SimulatorInputs.minTermMonths,
+              maxMonths: SimulatorInputs.maxTermMonths,
+              stepMonths: SimulatorInputs.termStepMonths,
+              sliderKey: const Key('simulatorTermSlider'),
+              valueKey: const Key('simulatorTermValue'),
+              onChanged: _controller.setTerm,
             ),
           ),
-          blockGap,
-          _TermSlider(termMonths: inputs.termMonths),
           blockGap,
           _ExistingLoansSwitch(state: state),
         ],
       ),
-    );
-  }
-}
-
-/// « Durée » with its value on the same line, the slider over 5–30 years a
-/// year at a time, and the end labels 11 `textTertiary`.
-class _TermSlider extends ConsumerWidget {
-  const _TermSlider({required this.termMonths});
-
-  final int termMonths;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final textTheme = Theme.of(context).textTheme;
-    final bounds = textTheme.labelSmall!.copyWith(
-      color: context.colors.textTertiary,
-    );
-    String value(int months) => l10n.simulatorTermValue(months, months ~/ 12);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                l10n.simulatorTerm,
-                style: textTheme.bodySmall?.copyWith(
-                  color: context.colors.textSecondary,
-                ),
-              ),
-            ),
-            Text(
-              value(termMonths),
-              key: const Key('simulatorTermValue'),
-              style: tabularNumberStyle(
-                textTheme.bodySmall!,
-              ).copyWith(color: context.colors.text),
-            ),
-          ],
-        ),
-        AppSlider(
-          key: const Key('simulatorTermSlider'),
-          value: termMonths.toDouble(),
-          min: SimulatorInputs.minTermMonths.toDouble(),
-          max: SimulatorInputs.maxTermMonths.toDouble(),
-          divisions:
-              (SimulatorInputs.maxTermMonths - SimulatorInputs.minTermMonths) ~/
-              SimulatorInputs.termStepMonths,
-          width: double.infinity,
-          semanticFormatter: (months) => value(months.round()),
-          onChanged: (months) => ref
-              .read(simulatorControllerProvider.notifier)
-              .setTerm(months.round()),
-        ),
-        Row(
-          children: [
-            Text(termLabel(l10n, SimulatorInputs.minTermMonths), style: bounds),
-            const Spacer(),
-            Text(termLabel(l10n, SimulatorInputs.maxTermMonths), style: bounds),
-          ],
-        ),
-      ],
     );
   }
 }

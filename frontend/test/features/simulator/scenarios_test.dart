@@ -1,3 +1,4 @@
+import 'package:bastide/core/l10n/loan_display.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
@@ -10,7 +11,6 @@ import 'package:bastide/features/simulator/application/simulator_controller.dart
 import 'package:bastide/features/simulator/data/simulations_repository.dart';
 import 'package:bastide/features/simulator/domain/simulation.dart';
 import 'package:bastide/features/simulator/domain/simulation_result.dart';
-import 'package:bastide/features/simulator/presentation/simulator_labels.dart';
 import 'package:bastide/features/simulator/presentation/simulator_screen.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';

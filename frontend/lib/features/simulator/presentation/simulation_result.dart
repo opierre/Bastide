@@ -1,25 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/loan_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/loan_summary_line.dart';
 import '../../../core/widgets/repere_meter.dart';
 import '../../../core/widgets/status_text.dart';
-import '../../../core/widgets/summary_line.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../application/simulator_controller.dart';
 import '../domain/simulation.dart';
-import 'simulator_labels.dart';
 
-/// The summary line (`14-simulateur.md` §Reading pane, 1): « Échéance
-/// mensuelle » leads at 40 px, then « Coût total » and « TAEG indicatif » at
-/// 20 px, bottom-aligned and split by vertical hairlines.
-///
-/// Every figure is the API's, neutral, and none depends on the existing-loans
-/// toggle. Before anything computes the figures are « — » `textTertiary`.
+/// The summary line (`14-simulateur.md` §Reading pane, 1): the shared
+/// [LoanSummaryLine] over the live simulation. None of its figures depends on
+/// the existing-loans toggle.
 class SimulationSummaryLine extends StatelessWidget {
   const SimulationSummaryLine({super.key, required this.state});
 
@@ -27,122 +24,26 @@ class SimulationSummaryLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context).toString();
-    final textTheme = Theme.of(context).textTheme;
     final result = state.result;
     final terms = state.inputs.terms;
 
-    String money(int minor) => formatAmount(
-      amountMinor: minor,
-      currency: result?.currency ?? state.household.currency,
-      locale: locale,
-    );
-
-    return IntrinsicHeight(
+    return LoanSummaryLine(
       key: const Key('simulatorSummaryLine'),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Flexible(
-            flex: 5,
-            child: _SummaryItem(
-              id: 'Instalment',
-              label: l10n.simulatorInstalmentLabel,
-              labelGap: AppSpacing.xs,
-              value: result == null ? null : money(result.totalInstalmentMinor),
-              valueStyle: textTheme.displayLarge!,
-              caption: result == null || terms == null
-                  ? l10n.simulatorInstalmentEmpty
-                  : l10n.simulatorInstalmentCaption(
-                      money(result.monthlyPaymentMinor),
-                      money(terms.insuranceMonthlyMinor),
-                      terms.termMonths,
-                    ),
+      currency: result?.currency ?? state.household.currency,
+      emptyCaption: AppLocalizations.of(context)!.simulatorInstalmentEmpty,
+      figures: result == null || terms == null
+          ? null
+          : (
+              totalInstalmentMinor: result.totalInstalmentMinor,
+              monthlyPaymentMinor: result.monthlyPaymentMinor,
+              insuranceMonthlyMinor: terms.insuranceMonthlyMinor,
+              termMonths: terms.termMonths,
+              totalCostMinor: result.totalCostMinor,
+              totalInterestMinor: result.totalInterestMinor,
+              totalInsuranceMinor: result.totalInsuranceMinor,
+              upfrontFeesMinor: terms.upfrontFeesMinor,
+              taegBps: result.taegBps,
             ),
-          ),
-          const SummaryHairline(),
-          Flexible(
-            flex: 4,
-            child: _SummaryItem(
-              id: 'Cost',
-              label: l10n.simulatorCostLabel,
-              value: result == null ? null : money(result.totalCostMinor),
-              valueStyle: textTheme.displaySmall!,
-              caption: result == null || terms == null
-                  ? null
-                  : l10n.simulatorCostCaption(
-                      money(result.totalInterestMinor),
-                      money(result.totalInsuranceMinor),
-                      money(terms.upfrontFeesMinor),
-                    ),
-            ),
-          ),
-          const SummaryHairline(),
-          Flexible(
-            flex: 3,
-            child: _SummaryItem(
-              id: 'Taeg',
-              // « indicatif » is part of the TAEG label itself.
-              label: l10n.simulatorTaegLabel,
-              value: result == null ? null : formatRate(result.taegBps, locale),
-              valueStyle: textTheme.displaySmall!,
-              caption: l10n.simulatorTaegCaption,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A [SummaryItem] whose figure is the API's string, or the dash before
-/// anything computes.
-class _SummaryItem extends StatelessWidget {
-  const _SummaryItem({
-    required this.id,
-    required this.label,
-    required this.value,
-    required this.valueStyle,
-    required this.caption,
-    this.labelGap = AppSpacing.xsPlus,
-  });
-
-  /// Suffix of the item's keys: `result<id>`, `result<id>Caption`.
-  final String id;
-  final String label;
-
-  /// `null` draws the dash.
-  final String? value;
-  final TextStyle valueStyle;
-  final String? caption;
-  final double labelGap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = context.colors;
-
-    return SummaryItem(
-      key: Key('result${id}Item'),
-      label: label,
-      labelKey: Key('result${id}Label'),
-      labelGap: labelGap,
-      caption: caption,
-      captionKey: Key('result${id}Caption'),
-      captionMaxLines: 2,
-      figure: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: AlignmentDirectional.centerStart,
-        child: Text(
-          value ?? l10n.simulatorNoValue,
-          key: Key('result$id'),
-          maxLines: 1,
-          style: tabularNumberStyle(
-            valueStyle,
-          ).copyWith(color: value == null ? colors.textTertiary : colors.text),
-        ),
-      ),
     );
   }
 }

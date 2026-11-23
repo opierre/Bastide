@@ -34,17 +34,6 @@ DateFormat mortgageMonthFormat(String locale) => DateFormat.yMMM(locale);
 /// « mai 2026 » — today's annotation on the trajectory chart.
 DateFormat mortgageLongMonthFormat(String locale) => DateFormat.yMMMM(locale);
 
-/// A basis-point figure printed as the locale's percent — « 32,7 % », « 3.45% ».
-///
-/// Display formatting only: the value is the API's, and the division is the
-/// unit change a percent sign implies, not a computation about the loan.
-String formatBps(int bps, String locale, {int digits = 1}) {
-  final format = NumberFormat.percentPattern(locale)
-    ..minimumFractionDigits = digits
-    ..maximumFractionDigits = digits;
-  return format.format(bps / 10000);
-}
-
 /// The form field a refused write belongs to, so its message lands under the
 /// number the user has to change rather than in a toast.
 enum MortgageErrorField { rate, fees, property, none }

@@ -6,6 +6,7 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../../core/widgets/yearly_projection_chart.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/simulator_controller.dart';
 import 'scenario_compare.dart';
@@ -13,7 +14,6 @@ import 'scenario_list.dart';
 import 'simulation_result.dart';
 import 'simulator_form.dart';
 import 'simulator_labels.dart';
-import 'yearly_projection_chart.dart';
 
 /// The Simulateur panel (`docs/design/14-simulateur.md`), flush: the inputs
 /// pane on the left (380 px, right hairline) and the reading pane on the
@@ -138,6 +138,22 @@ class _ReadingPane extends StatelessWidget {
       child: Divider(height: 1, thickness: 1, color: context.colors.line),
     );
 
+    final result = state.result;
+    final projection = YearlyProjection(
+      currency: result?.currency ?? state.household.currency,
+      emptyText: l10n.simulatorChartEmpty,
+      years: result == null
+          ? null
+          : [
+              for (final row in result.yearly)
+                (
+                  year: row.year,
+                  capitalMinor: row.principalMinor,
+                  interestMinor: row.interestMinor,
+                ),
+            ],
+    );
+
     List<Widget> blocks(Widget chart) => [
       if (bannerError) ...[
         InlineBanner(
@@ -165,9 +181,7 @@ class _ReadingPane extends StatelessWidget {
             padding: padding,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: blocks(
-                Expanded(child: YearlyProjection(result: state.result)),
-              ),
+              children: blocks(Expanded(child: projection)),
             ),
           );
         }
@@ -178,7 +192,7 @@ class _ReadingPane extends StatelessWidget {
             children: blocks(
               SizedBox(
                 height: AppSimulator.fixedChartHeight,
-                child: YearlyProjection(result: state.result),
+                child: projection,
               ),
             ),
           ),

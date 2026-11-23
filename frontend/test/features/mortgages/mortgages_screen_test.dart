@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bastide/core/l10n/loan_display.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
@@ -8,7 +9,6 @@ import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/mortgages/application/mortgages_controller.dart';
 import 'package:bastide/features/mortgages/domain/mortgage.dart';
-import 'package:bastide/features/mortgages/presentation/mortgage_labels.dart';
 import 'package:bastide/features/mortgages/presentation/mortgages_screen.dart';
 import 'package:bastide/features/mortgages/presentation/trajectory_chart.dart';
 import 'package:bastide/features/settings/presentation/settings_screen.dart';
