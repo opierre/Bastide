@@ -140,6 +140,63 @@ void main() {
       // No tinted hero, no card: the figures are set in type.
       expect(find.byKey(const Key('debtRatioCard')), findsNothing);
     });
+
+    // The debt ratio carries a repère, a caption and sometimes an action
+    // under its figure; whatever it carries, the three figures stay on one
+    // baseline and what sits under them starts on one line.
+    final ratioStates = <String, MortgageSummary>{
+      'declared': testMortgageSummary(),
+      'ledger, above the reference': testMortgageSummary(
+        incomeSource: IncomeSource.ledger,
+        debtRatioBps: 5285,
+        monthlyIncomeMinor: 285000,
+        overLimit: true,
+      ),
+      'unknown': testMortgageSummary(
+        incomeSource: IncomeSource.unknown,
+        debtRatioBps: null,
+        monthlyIncomeMinor: null,
+      ),
+    };
+    for (final MapEntry(key: name, value: summary) in ratioStates.entries) {
+      for (final scale in [AppTextScale.normal, AppTextScale.xlarge]) {
+        testWidgets('the three figures share one baseline ($name, × $scale)', (
+          tester,
+        ) async {
+          _useDesktopSurface(tester);
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+          await tester.pumpWidget(
+            _wrap(controller: _twoLoans(summary: summary)),
+          );
+          await tester.pumpAndSettle();
+
+          double baseline(String key) {
+            final box = tester.renderObject<RenderBox>(find.byKey(Key(key)));
+            // Read outside a layout pass: the flag lifts the parent-only
+            // calling convention of `getDistanceToBaseline`.
+            RenderObject.debugCheckingIntrinsics = true;
+            try {
+              return box.localToGlobal(Offset.zero).dy +
+                  box.getDistanceToBaseline(TextBaseline.alphabetic)!;
+            } finally {
+              RenderObject.debugCheckingIntrinsics = false;
+            }
+          }
+
+          final lead = baseline('mortgagesMonthlyCharge');
+          expect(baseline('mortgagesTotalOutstanding'), closeTo(lead, 0.5));
+          expect(baseline('ratioValue'), closeTo(lead, 0.5));
+
+          double top(String key) => tester.getTopLeft(find.byKey(Key(key))).dy;
+          final under = top('mortgagesChargeCaption');
+          expect(top('mortgagesOutstandingCaption'), closeTo(under, 0.5));
+          if (summary.incomeSource != IncomeSource.unknown) {
+            expect(top('ratioGauge'), closeTo(under, 0.5));
+          }
+        });
+      }
+    }
   });
 
   group('loans table', () {

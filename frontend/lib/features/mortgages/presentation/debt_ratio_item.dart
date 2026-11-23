@@ -11,6 +11,7 @@ import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../domain/mortgage.dart';
+import 'loan_summary_item.dart';
 import 'mortgage_labels.dart';
 
 /// « Taux d’endettement », the third item of the Crédits summary line
@@ -69,10 +70,17 @@ class DebtRatioItem extends StatelessWidget {
     return SizedBox(
       key: const Key('debtRatioItem'),
       width: AppLoans.ratioWidth,
+      // Laid out from the top: the line sets this item's ratio on the
+      // baseline of « Charge mensuelle », and the repère then starts where
+      // its neighbours' captions do. An empty label line stands above the
+      // ratio's own line, as the other items' labels stand above their
+      // figures.
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text('', style: context.textStyles.statLabel),
+          const SizedBox(height: AppSpacing.xs),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
@@ -109,10 +117,11 @@ class DebtRatioItem extends StatelessWidget {
                   textTheme.displaySmall!,
                 ).copyWith(color: known ? colors.text : colors.textTertiary),
               ),
+              const LeadFigureStrut(),
             ],
           ),
           if (known) ...[
-            const SizedBox(height: AppSpacing.xsPlus),
+            const SizedBox(height: AppSpacing.xs),
             // The tone follows the API's `over_limit` rather than a
             // comparison made here. The meter clamps its fill past 60 %; the
             // figure above stays exact.

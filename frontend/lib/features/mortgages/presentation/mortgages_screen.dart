@@ -239,6 +239,12 @@ class _LoadedPanel extends ConsumerWidget {
 /// at 40 px, then « Capital restant dû » at 20 px and the debt ratio, with a
 /// vertical hairline between the three. Read straight from
 /// `/mortgages/summary`.
+///
+/// The debt ratio carries a repère, a two-line caption and sometimes an
+/// action under its figure, so bottom-aligning the items (`00` §7) would lift
+/// its figure above the others. The items are laid out from the top instead,
+/// with every figure on the lead's baseline: the three figures share one
+/// baseline, and the captions and the repère start on one line under them.
 class LoansSummaryLine extends StatelessWidget {
   const LoansSummaryLine({super.key, required this.summary});
 
@@ -262,31 +268,36 @@ class LoansSummaryLine extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Flexible(
-            child: LoanSummaryItem(
-              lead: true,
-              label: l10n.mortgagesChargeLabel,
-              figure: money(summary.monthlyChargeMinor),
-              figureKey: const Key('mortgagesMonthlyCharge'),
-              caption: next == null
-                  ? l10n.mortgagesChargeCaptionNoNext
-                  : l10n.mortgagesChargeCaption(
-                      summary.nextPaymentCount,
-                      mortgageLongDateFormat(locale).format(next),
-                    ),
-              captionKey: const Key('mortgagesChargeCaption'),
+            child: _TopAligned(
+              child: LoanSummaryItem(
+                lead: true,
+                label: l10n.mortgagesChargeLabel,
+                figure: money(summary.monthlyChargeMinor),
+                figureKey: const Key('mortgagesMonthlyCharge'),
+                caption: next == null
+                    ? l10n.mortgagesChargeCaptionNoNext
+                    : l10n.mortgagesChargeCaption(
+                        summary.nextPaymentCount,
+                        mortgageLongDateFormat(locale).format(next),
+                      ),
+                captionKey: const Key('mortgagesChargeCaption'),
+              ),
             ),
           ),
           const SummaryHairline(),
           Flexible(
-            child: LoanSummaryItem(
-              label: l10n.mortgagesOutstandingLabel,
-              figure: money(summary.totalOutstandingMinor),
-              figureKey: const Key('mortgagesTotalOutstanding'),
-              caption: l10n.mortgagesOutstandingCaption(
-                money(summary.totalPrincipalMinor),
-                formatBps(summary.repaidBps, locale),
+            child: _TopAligned(
+              child: LoanSummaryItem(
+                onLeadBaseline: true,
+                label: l10n.mortgagesOutstandingLabel,
+                figure: money(summary.totalOutstandingMinor),
+                figureKey: const Key('mortgagesTotalOutstanding'),
+                caption: l10n.mortgagesOutstandingCaption(
+                  money(summary.totalPrincipalMinor),
+                  formatBps(summary.repaidBps, locale),
+                ),
+                captionKey: const Key('mortgagesOutstandingCaption'),
               ),
-              captionKey: const Key('mortgagesOutstandingCaption'),
             ),
           ),
           const SummaryHairline(),
@@ -295,4 +306,17 @@ class LoansSummaryLine extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Holds a summary item at the top of the stretched line, at its own size:
+/// the column hands it an unbounded height, so the item no longer fills the
+/// line and falls to its bottom.
+class _TopAligned extends StatelessWidget {
+  const _TopAligned({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [child]);
 }
