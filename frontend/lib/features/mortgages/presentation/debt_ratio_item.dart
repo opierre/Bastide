@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/loan_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
@@ -11,7 +12,6 @@ import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../domain/mortgage.dart';
-import 'mortgage_labels.dart';
 
 /// « Taux d’endettement », the third item of the Crédits summary line
 /// (`12-credits.md` §1): the label with the ratio on the same line, the

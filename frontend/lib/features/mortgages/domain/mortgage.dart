@@ -243,6 +243,16 @@ class MortgageSummary {
   final String currency;
 }
 
+/// The loan form's term slider (`12-credits.md` Loan form): a month at a
+/// time, since a contracted term need not be whole years, from one year to
+/// thirty, opening on the Simulateur's 25 years.
+abstract final class LoanTermScale {
+  static const minMonths = 12;
+  static const maxMonths = 360;
+  static const stepMonths = 1;
+  static const defaultMonths = 300;
+}
+
 /// The declared inputs of a loan, as the form collects them. Rates are already
 /// in bps: the percent the user typed is converted at the form edge.
 @immutable
@@ -276,7 +286,24 @@ class LoanDraft {
   final String? propertyId;
 }
 
-/// What `POST /simulations/compute` returns that the form's plate prints.
+/// One year of a computed schedule, as the engine splits it: what the form's
+/// yearly projection stacks.
+@immutable
+class ComputedYear {
+  const ComputedYear({
+    required this.year,
+    required this.principalMinor,
+    required this.interestMinor,
+  });
+
+  final int year;
+  final int principalMinor;
+  final int interestMinor;
+}
+
+/// What `POST /simulations/compute` returns that the form's reading pane
+/// prints, with the terms it was computed for: the captions name them, and
+/// they must be the ones behind the figures, not what is being typed.
 @immutable
 class ComputedInstalment {
   const ComputedInstalment({
@@ -284,12 +311,33 @@ class ComputedInstalment {
     required this.totalInstalmentMinor,
     required this.totalInterestMinor,
     required this.currency,
+    this.totalInsuranceMinor = 0,
+    this.totalCostMinor = 0,
+    this.taegBps = 0,
+    this.insuranceMonthlyMinor = 0,
+    this.termMonths = 0,
+    this.upfrontFeesMinor = 0,
+    this.yearly = const [],
   });
 
+  /// The échéance, insurance excluded.
   final int monthlyPaymentMinor;
+
+  /// Payment plus insurance.
   final int totalInstalmentMinor;
   final int totalInterestMinor;
   final String currency;
+  final int totalInsuranceMinor;
+
+  /// Interest, insurance and upfront fees.
+  final int totalCostMinor;
+
+  /// Indicative only.
+  final int taegBps;
+  final int insuranceMonthlyMinor;
+  final int termMonths;
+  final int upfrontFeesMinor;
+  final List<ComputedYear> yearly;
 }
 
 /// A property a loan can be linked to — this panel's narrow view of one.

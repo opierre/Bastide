@@ -1,4 +1,5 @@
 import 'package:bastide/core/api/api_client.dart';
+import 'package:bastide/core/l10n/loan_display.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/app_button.dart';
@@ -48,7 +49,15 @@ ComputedInstalment _computed(int monthly) => ComputedInstalment(
   monthlyPaymentMinor: monthly,
   totalInstalmentMinor: monthly,
   totalInterestMinor: 194280,
+  totalInsuranceMinor: 0,
+  totalCostMinor: 194280,
+  taegBps: 501,
+  termMonths: 60,
   currency: 'EUR',
+  yearly: const [
+    ComputedYear(year: 2025, principalMinor: 250000, interestMinor: 60000),
+    ComputedYear(year: 2026, principalMinor: 270000, interestMinor: 50000),
+  ],
 );
 
 void _stubCompute(MockMortgagesRepository repository, int monthly) {
@@ -79,7 +88,7 @@ Future<void> _fillWorksLoan(WidgetTester tester, {String rate = '4,90'}) async {
     '15000',
   );
   await tester.enterText(find.byKey(const Key('mortgageFormRate')), rate);
-  await tester.enterText(find.byKey(const Key('mortgageFormTerm')), '60');
+  await _setTerm(tester, 60);
   await tester.enterText(
     find.descendant(
       of: find.byKey(const Key('mortgageFormFirstPayment')),
@@ -92,8 +101,21 @@ Future<void> _fillWorksLoan(WidgetTester tester, {String rate = '4,90'}) async {
 String _eur(int minor) =>
     formatAmount(amountMinor: minor, currency: 'EUR', locale: 'fr');
 
-String _plateDetail(WidgetTester tester) =>
-    tester.widget<Text>(find.byKey(const Key('mortgageFormPlateDetail'))).data!;
+/// Moves the term slider as a drag ending on [months] would.
+Future<void> _setTerm(WidgetTester tester, int months) async {
+  tester
+      .widget<Slider>(
+        find.descendant(
+          of: find.byKey(const Key('mortgageFormTerm')),
+          matching: find.byType(Slider),
+        ),
+      )
+      .onChanged!(months.toDouble());
+  await tester.pump();
+}
+
+String _text(WidgetTester tester, String key) =>
+    tester.widget<Text>(find.byKey(Key(key))).data!;
 
 /// Picks « In fine » in the Remboursement select.
 Future<void> _pickInterestOnly(WidgetTester tester) async {
@@ -163,7 +185,7 @@ void main() {
   );
 
   testWidgets(
-    'the mensualité plate follows the compute endpoint as fields change',
+    'the reading pane follows the compute endpoint as fields change',
     (tester) async {
       _useDesktopSurface(tester);
       await tester.pumpWidget(
@@ -171,12 +193,23 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('mortgageFormPlatePending')), findsOneWidget);
+      // Before a principal and a rate, the Simulateur's dashes and a caption
+      // naming what is missing.
+      expect(_text(tester, 'resultInstalment'), '—');
+      expect(
+        _text(tester, 'resultInstalmentCaption'),
+        'Renseignez le capital et le taux pour voir l’échéance.',
+      );
+      expect(find.byKey(const Key('projectionEmpty')), findsOneWidget);
 
       await _fillWorksLoan(tester);
       await _settlePreview(tester);
 
-      expect(_plateDetail(tester), contains(_eur(28238)));
+      expect(_text(tester, 'resultInstalment'), _eur(28238));
+      expect(_text(tester, 'resultCost'), _eur(194280));
+      expect(_text(tester, 'resultTaeg'), contains('5,01'));
+      expect(_text(tester, 'resultInstalmentCaption'), contains('échéances'));
+      expect(find.byKey(const Key('projectionPlot')), findsOneWidget);
       verify(
         () => repository.compute(
           principalMinor: 1500000,
@@ -191,7 +224,7 @@ void main() {
       await tester.enterText(find.byKey(const Key('mortgageFormRate')), '5');
       await _settlePreview(tester);
 
-      expect(_plateDetail(tester), contains(_eur(28307)));
+      expect(_text(tester, 'resultInstalment'), _eur(28307));
     },
   );
 
@@ -253,11 +286,12 @@ void main() {
     await _fillWorksLoan(tester);
     await _settlePreview(tester);
 
+    expect(_text(tester, 'resultInstalment'), '—');
     expect(
-      find.byKey(const Key('mortgageFormPlateInterestOnly')),
-      findsOneWidget,
+      _text(tester, 'resultInstalmentCaption'),
+      'La mensualité d’un prêt in fine s’affiche une fois le crédit enregistré.',
     );
-    expect(find.byKey(const Key('mortgageFormPlateDetail')), findsNothing);
+    expect(find.byKey(const Key('projectionPlot')), findsNothing);
     verifyNever(
       () => repository.compute(
         principalMinor: any(named: 'principalMinor'),
@@ -381,7 +415,7 @@ void main() {
     },
   );
 
-  testWidgets('lays the fields out on the two-column grid of proposal v6', (
+  testWidgets('lays the form out as the Simulateur: inputs, then the reading', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -397,13 +431,12 @@ void main() {
     double top(String key) => tester.getTopLeft(find.byKey(Key(key))).dy;
     double left(String key) => tester.getTopLeft(find.byKey(Key(key))).dx;
 
-    // Libellé spans both columns; then pairs, left then right.
+    // Libellé spans both columns; then pairs, left then right, the terms in
+    // the Simulateur's order.
     for (final (first, second) in [
-      ('mortgageFormLender', 'mortgageFormKind'),
-      ('mortgageFormRepayment', 'mortgageFormPrincipal'),
-      ('mortgageFormRate', 'mortgageFormTerm'),
-      ('mortgageFormFirstPayment', 'mortgageFormInsurance'),
-      ('mortgageFormFees', 'mortgageFormProperty'),
+      ('mortgageFormLender', 'mortgageFormFirstPayment'),
+      ('mortgageFormFees', 'mortgageFormPrincipal'),
+      ('mortgageFormRate', 'mortgageFormInsurance'),
     ]) {
       expect(top(first), top(second), reason: '$first beside $second');
       expect(left(first), lessThan(left(second)));
@@ -415,6 +448,29 @@ void main() {
         tester.getSize(find.byKey(const Key('mortgageFormLender'))).width * 2,
       ),
     );
+    // Type then Remboursement, each across the pane so no French value is cut.
+    expect(top('mortgageFormKind'), greaterThan(top('mortgageFormLender')));
+    expect(top('mortgageFormRepayment'), greaterThan(top('mortgageFormKind')));
+    expect(
+      tester.getSize(find.byKey(const Key('mortgageFormKind'))).width,
+      tester.getSize(find.byKey(const Key('mortgageFormLabel'))).width,
+    );
+    // The term slider under the grid, then the property, full width.
+    expect(top('mortgageFormTerm'), greaterThan(top('mortgageFormRate')));
+    expect(top('mortgageFormProperty'), greaterThan(top('mortgageFormTerm')));
+    expect(
+      _text(tester, 'mortgageFormTermValue'),
+      '25\u00A0ans · 300\u00A0mois',
+    );
+    // The reading pane sits right of the inputs pane, the summary line over
+    // the yearly projection.
+    expect(
+      left('mortgageFormSummary'),
+      greaterThan(
+        tester.getTopRight(find.byKey(const Key('mortgageFormInsurance'))).dx,
+      ),
+    );
+    expect(top('projection'), greaterThan(top('mortgageFormSummary')));
     expect(find.text('Bien financé (facultatif)'), findsOneWidget);
     // The new form has no « Supprimer ».
     expect(find.byKey(const Key('mortgageFormDelete')), findsNothing);
@@ -439,5 +495,46 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Abandonner les modifications ?'), findsOneWidget);
+  });
+
+  testWidgets('the term slider steps a month at a time and reads in full', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(controller: FakeMortgagesController(), repository: repository),
+    );
+    await tester.pumpAndSettle();
+
+    await _setTerm(tester, 90);
+    expect(_text(tester, 'mortgageFormTermValue'), '90\u00A0mois');
+    await _setTerm(tester, 84);
+    expect(_text(tester, 'mortgageFormTermValue'), '7\u00A0ans · 84\u00A0mois');
+  });
+
+  testWidgets('editing opens the slider on the saved term', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeMortgagesController(initialMortgages: [testMortgage()]),
+        repository: repository,
+        initial: testMortgage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _settlePreview(tester);
+
+    final months = testMortgage().termMonths;
+    expect(
+      tester
+          .widget<Slider>(
+            find.descendant(
+              of: find.byKey(const Key('mortgageFormTerm')),
+              matching: find.byType(Slider),
+            ),
+          )
+          .value,
+      months.toDouble(),
+    );
   });
 }

@@ -4876,18 +4876,6 @@
   "@mortgageFormRateInvalid": {
     "description": "Loan form: unreadable rate."
   },
-  "mortgageFormTerm": "Durée",
-  "@mortgageFormTerm": {
-    "description": "Loan form: term field."
-  },
-  "mortgageFormTermUnit": "mois",
-  "@mortgageFormTermUnit": {
-    "description": "Unit suffix inside the term field."
-  },
-  "mortgageFormTermInvalid": "Saisissez une durée en mois.",
-  "@mortgageFormTermInvalid": {
-    "description": "Loan form: missing or zero term."
-  },
   "mortgageFormFirstPayment": "1re échéance",
   "@mortgageFormFirstPayment": {
     "description": "Loan form: first instalment date field."
@@ -4920,29 +4908,21 @@
   "@mortgageFormPropertyNone": {
     "description": "Loan form: no property linked."
   },
-  "mortgageFormPlateLabel": "Mensualité calculée",
-  "@mortgageFormPlateLabel": {
-    "description": "Read-only computed instalment plate label."
+  "mortgageFormInstalmentEmpty": "Renseignez le capital et le taux pour voir l’échéance.",
+  "@mortgageFormInstalmentEmpty": {
+    "description": "Loan form reading pane: caption under the dashed instalment before the inputs are complete."
   },
-  "mortgageFormPlateDetail": "échéance totale {instalment} · intérêts totaux {interest}",
-  "@mortgageFormPlateDetail": {
-    "description": "Computed instalment plate: total instalment and total interest.",
-    "placeholders": {
-      "instalment": {
-        "type": "String"
-      },
-      "interest": {
-        "type": "String"
-      }
-    }
+  "mortgageFormInterestOnly": "La mensualité d’un prêt in fine s’affiche une fois le crédit enregistré.",
+  "@mortgageFormInterestOnly": {
+    "description": "Loan form reading pane: caption under the instalment for an interest-only loan, which the simulator does not compute."
   },
-  "mortgageFormPlatePending": "Renseignez le capital, le taux et la durée.",
-  "@mortgageFormPlatePending": {
-    "description": "Computed instalment plate before the inputs are complete."
+  "mortgageFormChartEmpty": "Renseignez le capital et le taux : la répartition par année s’affiche ici.",
+  "@mortgageFormChartEmpty": {
+    "description": "Loan form reading pane: note in the yearly projection before the inputs are complete."
   },
-  "mortgageFormPlateInterestOnly": "La mensualité d’un prêt in fine s’affiche une fois le crédit enregistré.",
-  "@mortgageFormPlateInterestOnly": {
-    "description": "Computed instalment plate for an interest-only loan, which the simulator does not compute."
+  "mortgageFormChartInterestOnly": "La répartition par année d’un prêt in fine se lit dans son tableau d’amortissement, une fois le crédit enregistré.",
+  "@mortgageFormChartInterestOnly": {
+    "description": "Loan form reading pane: note in the yearly projection for an interest-only loan."
   },
   "mortgageFormCancel": "Annuler",
   "@mortgageFormCancel": {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
+import '../../../core/l10n/loan_display.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
@@ -12,7 +13,6 @@ import '../../../l10n/app_localizations.dart';
 import '../application/simulator_controller.dart';
 import '../domain/simulation.dart';
 import 'scenario_list.dart';
-import 'simulator_labels.dart';
 
 /// One row of the comparison: a label and how each column fills it. `null`
 /// is a figure that does not apply to that scenario: printed as a dash,

@@ -222,7 +222,7 @@ final scheduleWindowProvider =
           .scheduleYear(window.mortgageId, window.year);
     });
 
-/// The loan form's live « Mensualité calculée » plate.
+/// The loan form's live reading pane (summary line and yearly projection).
 ///
 /// Fed by a debounced `POST /simulations/compute` — stateless and free to call —
 /// never by a payment formula written in Dart (one engine). `null` means

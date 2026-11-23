@@ -261,7 +261,9 @@ class ModalFieldCell {
 /// « Modal », Body): a label on two lines moves both inputs down together,
 /// and a helper under one does not push its neighbour. A [middle] cell makes
 /// it three, as the rule editor's Champ · Condition · Priorité; [endWidth]
-/// fixes the last column instead of sharing the width.
+/// fixes the last column instead of sharing the width. [gutter] narrows the
+/// 16 px gap where a spec names another, as the Simulateur's 12 px field
+/// grid that the loan form shares (`14-simulateur.md` §Inputs pane).
 ///
 /// A [Table] rather than columns: its rows are as tall as their tallest
 /// cell, which is the CSS subgrid of the mockup.
@@ -272,12 +274,14 @@ class ModalFieldRow extends StatelessWidget {
     required this.end,
     this.middle,
     this.endWidth,
+    this.gutter = AppModalSizes.columnGutter,
   });
 
   final ModalFieldCell start;
   final ModalFieldCell? middle;
   final ModalFieldCell end;
   final double? endWidth;
+  final double gutter;
 
   static const _labelGap = 5.0;
 
@@ -310,20 +314,16 @@ class ModalFieldRow extends StatelessWidget {
       _ => const SizedBox.shrink(),
     };
 
-    const gutter = SizedBox(width: AppModalSizes.columnGutter);
+    final gap = SizedBox(width: gutter);
     final cells = [start, ?middle, end];
     final endWidth = this.endWidth;
     List<Widget> row(Widget Function(ModalFieldCell) build) => [
-      for (final (i, cell) in cells.indexed) ...[
-        if (i > 0) gutter,
-        build(cell),
-      ],
+      for (final (i, cell) in cells.indexed) ...[if (i > 0) gap, build(cell)],
     ];
     return Table(
       columnWidths: {
         for (var i = 0; i < cells.length; i++) ...{
-          if (i > 0)
-            2 * i - 1: const FixedColumnWidth(AppModalSizes.columnGutter),
+          if (i > 0) 2 * i - 1: FixedColumnWidth(gutter),
           2 * i: i == cells.length - 1 && endWidth != null
               ? FixedColumnWidth(endWidth)
               : const FlexColumnWidth(),

@@ -4,36 +4,51 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show NumberFormat;
 
-import '../../../core/theme/app_theme.dart';
-import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/amount_text.dart';
-import '../../../core/widgets/chart_frame.dart';
-import '../../../core/widgets/chart_scale.dart';
-import '../../../core/widgets/chart_style.dart';
-import '../../../core/widgets/chart_tooltip.dart';
-import '../../../core/widgets/note_line.dart';
-import '../../../core/widgets/section_heading.dart';
-import '../../../l10n/app_localizations.dart';
-import '../domain/simulation_result.dart';
+import '../../l10n/app_localizations.dart';
+import '../theme/app_theme.dart';
+import '../theme/tokens.dart';
+import 'amount_text.dart';
+import 'chart_frame.dart';
+import 'chart_scale.dart';
+import 'chart_style.dart';
+import 'chart_tooltip.dart';
+import 'note_line.dart';
+import 'section_heading.dart';
 
-/// « Projection annuelle » (`14-simulateur.md` §Reading pane, 5): one stacked
-/// bar per year, capital in `accent` at the base and interest in
-/// `textTertiary` above it, with the legend on the heading line.
+/// One calendar year of a loan's schedule as the engine splits it: what the
+/// projection stacks. Each feature maps its own API rows onto it.
+typedef ProjectionYear = ({int year, int capitalMinor, int interestMinor});
+
+/// « Projection annuelle » (`14-simulateur.md` §Reading pane, 5; the loan
+/// form's reading pane in `12-credits.md`): one stacked bar per year, capital
+/// in `accent` at the base and interest in `textTertiary` above it, with the
+/// legend on the heading line.
 ///
 /// Yearly, never monthly: 300 bars at this width is noise. The split is the
 /// API's yearly rows; nothing is summed out of a schedule here. Before
-/// anything can be computed the block keeps its place and carries a note.
+/// anything can be computed ([years] `null` or empty) the block keeps its
+/// place and carries [emptyText] as a note.
 class YearlyProjection extends StatelessWidget {
-  const YearlyProjection({super.key, required this.result});
+  const YearlyProjection({
+    super.key,
+    required this.years,
+    required this.currency,
+    required this.emptyText,
+  });
 
-  final SimulationResult? result;
+  final List<ProjectionYear>? years;
+  final String currency;
+  final String emptyText;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
-    final result = this.result;
+    final years = this.years;
+
+    String money(int minor) =>
+        formatAmount(amountMinor: minor, currency: currency, locale: locale);
 
     return Column(
       key: const Key('projection'),
@@ -58,33 +73,29 @@ class YearlyProjection extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xs),
         Expanded(
-          child: result == null || result.yearly.isEmpty
+          child: years == null || years.isEmpty
               ? Align(
                   alignment: AlignmentDirectional.topStart,
                   child: NoteLine(
                     key: const Key('projectionEmpty'),
-                    text: l10n.simulatorChartEmpty,
+                    text: emptyText,
                   ),
                 )
               : YearlyProjectionPlot(
                   key: const Key('projectionPlot'),
-                  years: [for (final row in result.yearly) row.year],
-                  capital: [
-                    for (final row in result.yearly) row.principalMinor,
-                  ],
-                  interest: [
-                    for (final row in result.yearly) row.interestMinor,
-                  ],
+                  years: [for (final row in years) row.year],
+                  capital: [for (final row in years) row.capitalMinor],
+                  interest: [for (final row in years) row.interestMinor],
                   yLabel: (minor) => NumberFormat.compactSimpleCurrency(
                     locale: locale,
-                    name: result.currency,
+                    name: currency,
                     decimalDigits: 0,
                   ).format(minor / 100),
                   labelStyle: ChartPaints.labelStyle(context),
                   // The year, then its two API figures: neutral, like every
-                  // amount on this panel.
+                  // loan amount.
                   tooltips: [
-                    for (final row in result.yearly)
+                    for (final row in years)
                       TextSpan(
                         children: [
                           TextSpan(
@@ -93,8 +104,8 @@ class YearlyProjection extends StatelessWidget {
                           ),
                           TextSpan(
                             text:
-                                '${l10n.simulatorChartTooltipCapital(formatAmount(amountMinor: row.principalMinor, currency: result.currency, locale: locale))}\n'
-                                '${l10n.simulatorChartTooltipInterest(formatAmount(amountMinor: row.interestMinor, currency: result.currency, locale: locale))}',
+                                '${l10n.simulatorChartTooltipCapital(money(row.capitalMinor))}\n'
+                                '${l10n.simulatorChartTooltipInterest(money(row.interestMinor))}',
                             style: tabularNumberStyle(textTheme.bodySmall!),
                           ),
                         ],

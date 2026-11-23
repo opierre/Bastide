@@ -545,7 +545,11 @@ abstract final class AppModalSizes {
   static const w560 = 560.0;
   static const w600 = 600.0;
   static const w620 = 620.0;
-  static const widths = [w420, w440, w480, w500, w520, w560, w600, w620];
+
+  /// The loan form, on the Simulateur's two panes: the 380 px inputs pane
+  /// and a reading pane (`12-credits.md` Loan form).
+  static const w960 = 960.0;
+  static const widths = [w420, w440, w480, w500, w520, w560, w600, w620, w960];
 
   /// Between the frame and the window edge, above, below and on the sides.
   static const windowInset = AppSpacing.lg;
@@ -652,11 +656,18 @@ abstract final class AppLoans {
   /// flex against the other columns' 78 shares.
   static const repaidFlex = 22;
 
-  /// The loan form's « Mensualité calculée » line (`proposal_v6` m-loans):
-  /// 4 px more than the field gap above it, 10 px between its label and
-  /// the figures, on one baseline.
-  static const instalmentLineTop = AppSpacing.xs;
-  static const instalmentLabelGap = 10.0;
+  /// The loan form's inputs pane inside the modal body's 24 px padding:
+  /// the Simulateur's 380 px pane less its own padding, so the hairline
+  /// falls 380 px from the modal's edge and the reading pane starts 32 px
+  /// after it, as in the panel.
+  static const formInputsWidth =
+      AppSimulator.inputsWidth - 2 * AppModalSizes.padding;
+  static const formInputsGap = AppModalSizes.padding;
+  static const formReadingGap = AppSpacing.xl;
+
+  /// The loan form's yearly projection, its heading included: tall enough
+  /// that the reading pane ends about level with the inputs pane.
+  static const formChartHeight = 400.0;
 }
 
 /// The Synthèse panel of `docs/design/15-synthese.md` §Layout.
