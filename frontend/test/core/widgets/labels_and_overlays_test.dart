@@ -312,6 +312,21 @@ void main() {
     );
   });
 
+  testWidgets('a wrapped note ends where its longest line does', (
+    tester,
+  ) async {
+    // The test font sets every glyph 12 px wide: the third word wraps, and
+    // the first line (21 glyphs, 252 px) is well short of the 300 px offered.
+    await pumpHost(
+      tester,
+      ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 300),
+        child: const NoteLine(text: 'aaaaaaaaaa bbbbbbbbbb cccccccccc'),
+      ),
+    );
+    expect(tester.getSize(find.byType(NoteLine)).width, lessThan(300));
+  });
+
   group('AppPopover', () {
     testWidgets('surface, lineStrong, radius 8, shadow, padding 4', (
       tester,
