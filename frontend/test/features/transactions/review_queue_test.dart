@@ -399,6 +399,13 @@ void main() {
       find.byKey(const Key('reviewQueueRunButton')),
     );
     expect(button.right, moreOrLessEquals(row.right));
+    // The cut Note keeps its distance from the progress block.
+    expect(
+      tester.getRect(find.byKey(const Key('reviewAiNote'))).left,
+      moreOrLessEquals(
+        row.left + AppTransactions.progressWidth + AppSpacing.md,
+      ),
+    );
     expect(tester.takeException(), isNull);
   });
 
