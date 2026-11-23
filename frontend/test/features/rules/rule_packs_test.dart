@@ -445,7 +445,7 @@ void main() {
       },
     );
 
-    testWidgets('are 28 px secondary toolbar buttons, like other panels', (
+    testWidgets('are 36 × 28 secondary toolbar buttons, like other panels', (
       tester,
     ) async {
       await tester.pumpWidget(_wrap(apiClient, files: FakeRulePackFiles()));
@@ -458,7 +458,9 @@ void main() {
         'rulePackExportButton',
       ]) {
         final button = find.byKey(Key(key));
-        expect(tester.getSize(button), const Size.square(AppSizes.button));
+        // 28 px high, with a labelled toolbar button's 0 10 padding around
+        // the 14 px icon, not squared to 28.
+        expect(tester.getSize(button), const Size(36, AppSizes.button));
         // The secondary recipe: a `surface` ground and a `lineStrong` border,
         // so the whole 28 px square reads, not only the 14 px icon.
         final box = tester.widget<Container>(

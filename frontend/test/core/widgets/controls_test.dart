@@ -111,6 +111,26 @@ void main() {
       expect(find.bySemanticsLabel('Plus d’actions'), findsOneWidget);
     });
 
+    testWidgets('a padded icon-only button keeps the 0 10 padding: 36 × 28', (
+      tester,
+    ) async {
+      await pumpHost(
+        tester,
+        AppButton(
+          key: key,
+          label: 'Exporter',
+          icon: Icons.more_horiz,
+          iconOnly: true,
+          padded: true,
+          onPressed: () {},
+        ),
+      );
+      // The 14 px icon, the 10 px padding each side and the 1 px border.
+      expect(tester.getSize(find.byKey(key)), const Size(36, AppSizes.button));
+      expect(find.text('Exporter'), findsNothing);
+      expect(find.bySemanticsLabel('Exporter'), findsOneWidget);
+    });
+
     testWidgets('hover takes the hover ground at once', (tester) async {
       await pumpHost(tester, button(onPressed: () {}));
       await hover(tester, find.byKey(key));

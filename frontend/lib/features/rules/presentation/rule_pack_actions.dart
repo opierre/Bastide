@@ -10,14 +10,16 @@ import '../domain/rule_pack.dart';
 import 'rule_pack_export_sheet.dart';
 import 'rule_pack_import_sheet.dart';
 
-/// The pack actions at the right of the rules pane's header, one 28 px
-/// secondary icon button each, 8 px apart: the toolbar button of every other
-/// panel (`00` §6).
+/// The pack actions at the right of the rules pane's header, one secondary
+/// icon button each, 8 px apart: 28 px high with the §6 0 10 padding around
+/// its 14 px icon (36 × 28), the geometry of every labelled toolbar button
+/// (`00` §6).
 ///
 /// Buttons rather than a menu: behind a single icon, users did not find them.
 /// Icon-only so the header stays quiet; each button names its action in a
-/// tooltip. Secondary rather than ghost: a ghost button shows only its 14 px
-/// icon, which read as a control too small for a toolbar. The built-in pack button hides once that pack is imported.
+/// tooltip. Secondary rather than ghost, and padded rather than square: a
+/// ghost icon, then a 28 px square, both read as controls too small for a
+/// toolbar. The built-in pack button hides once that pack is imported.
 class RulePackActions extends ConsumerWidget {
   const RulePackActions({super.key});
 
@@ -78,6 +80,7 @@ class _PackActionButton extends StatelessWidget {
         label: tooltip,
         icon: icon,
         iconOnly: true,
+        padded: true,
         onPressed: onPressed,
       ),
     );
