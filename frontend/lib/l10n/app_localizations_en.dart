@@ -3815,15 +3815,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgageFormRateInvalid => 'Enter a rate, for example 3.45.';
 
   @override
-  String get mortgageFormTerm => 'Term';
-
-  @override
-  String get mortgageFormTermUnit => 'months';
-
-  @override
-  String get mortgageFormTermInvalid => 'Enter a term in months.';
-
-  @override
   String get mortgageFormFirstPayment => 'First instalment';
 
   @override
@@ -3849,20 +3840,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mortgageFormPropertyNone => 'None';
 
   @override
-  String get mortgageFormPlateLabel => 'Computed instalment';
+  String get mortgageFormInstalmentEmpty =>
+      'Enter the amount borrowed and the rate to see the instalment.';
 
   @override
-  String mortgageFormPlateDetail(String instalment, String interest) {
-    return 'total instalment $instalment · total interest $interest';
-  }
-
-  @override
-  String get mortgageFormPlatePending =>
-      'Fill in the principal, the rate and the term.';
-
-  @override
-  String get mortgageFormPlateInterestOnly =>
+  String get mortgageFormInterestOnly =>
       'An interest-only loan’s instalment shows once the loan is saved.';
+
+  @override
+  String get mortgageFormChartEmpty =>
+      'Enter the amount borrowed and the rate: the split by year shows here.';
+
+  @override
+  String get mortgageFormChartInterestOnly =>
+      'An interest-only loan’s split by year reads in its amortisation table, once the loan is saved.';
 
   @override
   String get mortgageFormCancel => 'Cancel';

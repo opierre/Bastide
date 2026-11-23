@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
-import '../../../core/theme/app_theme.dart';
+import '../../../core/l10n/loan_display.dart';
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/date_field.dart';
+import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/loan_summary_line.dart';
+import '../../../core/widgets/loan_terms_fields.dart';
 import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/term_slider.dart';
+import '../../../core/widgets/yearly_projection_chart.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/mortgages_controller.dart';
 import '../domain/mortgage.dart';
@@ -30,27 +32,12 @@ Future<MortgageDetail?> showMortgageForm(
   );
 }
 
-/// Reads a typed percent as basis points — « 3,45 » → 345.
-///
-/// The one place a rate changes unit (rates are bps).
-/// Done on the digits rather than through a double, so 3,45 can never come out
-/// as 344. Accepts a comma or a point, at most two decimals.
-int? parseRateBps(String raw) {
-  final match = RegExp(r'^\s*(\d{1,3})(?:[.,](\d{0,2}))?\s*$').firstMatch(raw);
-  if (match == null) return null;
-  final fraction = (match.group(2) ?? '').padRight(2, '0');
-  return int.parse(match.group(1)!) * 100 + int.parse(fraction);
-}
-
-/// The inverse, for prefilling the rate field in the locale's own spelling.
-String formatRateInput(int bps, String locale) {
-  final separator = NumberFormat.decimalPattern(locale).symbols.DECIMAL_SEP;
-  return '${bps ~/ 100}$separator${(bps % 100).toString().padLeft(2, '0')}';
-}
-
-/// The 600 px « Nouveau crédit » modal (`12-credits.md` « Loan form »,
-/// `proposal_v6` m-loans), reused prefilled for « Modifier le crédit », where
-/// the ghost « Supprimer » opens its destructive confirmation.
+/// The « Nouveau crédit » modal (`12-credits.md` « Loan form »), laid out as
+/// the Simulateur: the inputs pane on the left, its terms typed with the
+/// Simulateur's own fields and term slider, and a reading pane on the right
+/// (the summary line and the yearly projection) that follows every
+/// keystroke. Reused prefilled for « Modifier le crédit », where the ghost
+/// « Supprimer » opens its destructive confirmation.
 class MortgageFormModal extends ConsumerStatefulWidget {
   const MortgageFormModal({super.key, this.initial});
 
@@ -68,9 +55,6 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
   late final _lenderController = TextEditingController(
     text: widget.initial?.lender,
   );
-  late final _termController = TextEditingController(
-    text: widget.initial?.termMonths.toString(),
-  );
   final _principalController = TextEditingController();
   final _rateController = TextEditingController();
   final _dateController = TextEditingController();
@@ -81,6 +65,8 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
   late RepaymentType _repayment =
       widget.initial?.repaymentType ?? RepaymentType.constantPayment;
   late String? _propertyId = widget.initial?.propertyId;
+  late int _termMonths =
+      widget.initial?.termMonths ?? LoanTermScale.defaultMonths;
 
   /// Guards the one-time locale-aware fill of the amount, rate and date fields,
   /// which needs the active locale and so cannot run in `initState`.
@@ -108,7 +94,6 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
   List<TextEditingController> get _computeInputs => [
     _principalController,
     _rateController,
-    _termController,
     _insuranceController,
     _feesController,
   ];
@@ -182,7 +167,8 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
         _kind != (initial?.kind ?? MortgageKind.mortgage) ||
         _repayment !=
             (initial?.repaymentType ?? RepaymentType.constantPayment) ||
-        _propertyId != initial?.propertyId;
+        _propertyId != initial?.propertyId ||
+        _termMonths != (initial?.termMonths ?? LoanTermScale.defaultMonths);
     if (dirty != _dirty) setState(() => _dirty = dirty);
   }
 
@@ -192,16 +178,16 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
   int? _optionalMoney(String text) =>
       text.trim().isEmpty ? 0 : parseMoneyMinor(text, _locale);
 
-  /// Asks for a fresh plate once the inputs describe a loan the simulator can
-  /// run. An in-fine loan is not one of those — `/simulations/compute` only
-  /// knows constant payments — so its plate says so rather than showing a
-  /// figure that would be wrong.
+  /// Asks for a fresh reading once the inputs describe a loan the simulator
+  /// can run. An in-fine loan is not one of those — `/simulations/compute`
+  /// only knows constant payments — so the reading pane says so rather than
+  /// showing a figure that would be wrong.
   void _requestPreview() {
     if (!mounted) return;
     final preview = ref.read(loanInstalmentPreviewProvider.notifier);
     final principal = parseMoneyMinor(_principalController.text, _locale);
     final rate = parseRateBps(_rateController.text);
-    final term = int.tryParse(_termController.text.trim());
+    final term = _termMonths;
     final insurance = _optionalMoney(_insuranceController.text);
     final fees = _optionalMoney(_feesController.text);
 
@@ -209,7 +195,6 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
         principal == null ||
         principal <= 0 ||
         rate == null ||
-        term == null ||
         term <= 0 ||
         insurance == null ||
         fees == null) {
@@ -238,7 +223,7 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
       principalMinor: parseMoneyMinor(_principalController.text, _locale)!,
       annualRateBps: parseRateBps(_rateController.text)!,
       insuranceMonthlyMinor: _optionalMoney(_insuranceController.text)!,
-      termMonths: int.parse(_termController.text.trim()),
+      termMonths: _termMonths,
       firstPaymentDate: firstPayment!,
       upfrontFeesMinor: _optionalMoney(_feesController.text)!,
       propertyId: _propertyId,
@@ -327,9 +312,6 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final numberStyle = tabularNumberStyle(
-      Theme.of(context).textTheme.bodyLarge!,
-    );
     final currency =
         ref.watch(mortgagesControllerProvider).value?.summary.currency ??
         widget.initial?.currency ??
@@ -337,27 +319,175 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
     final properties =
         ref.watch(loanPropertiesProvider).value ?? const <LoanProperty>[];
     final preview = ref.watch(loanInstalmentPreviewProvider);
+    final interestOnly = _repayment == RepaymentType.interestOnly;
     const rowGap = SizedBox(height: AppSpacing.fieldGap);
 
-    final feesCell = ModalFieldCell(
-      label: l10n.mortgageFormFees,
-      errorText: _feesError,
-      input: MoneyField(
-        key: const Key('mortgageFormFees'),
-        controller: _feesController,
-        currency: currency,
-        validator: (value) => _optionalMoney(value ?? '') == null
-            ? l10n.mortgageFormAmountOptionalInvalid
-            : null,
-      ),
-    );
-    // Without a property to link, Frais de dossier stays alone on the last
-    // row: the one row allowed an empty cell.
-    final propertyCell = (properties.isNotEmpty || _propertyId != null)
-        ? ModalFieldCell(
+    // A refused preview is explained where the save's refusal would be: under
+    // the rate or the fees when one of them is the cause, otherwise above the
+    // reading (the Simulateur's arrangement).
+    final previewError = interestOnly ? null : preview?.error;
+    final previewField = mortgageErrorField(previewError);
+    final previewMessage = previewError == null
+        ? null
+        : localizeMortgageError(l10n, previewError);
+
+    final inputs = Column(
+      key: const Key('mortgageFormInputs'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        LabeledField(
+          label: l10n.mortgageFormLabel,
+          child: TextFormField(
+            key: const Key('mortgageFormLabel'),
+            controller: _labelController,
+            validator: (value) => (value == null || value.trim().isEmpty)
+                ? l10n.mortgageFormLabelRequired
+                : null,
+          ),
+        ),
+        rowGap,
+        ModalFieldRow(
+          start: ModalFieldCell(
+            label: l10n.mortgageFormLender,
+            input: TextFormField(
+              key: const Key('mortgageFormLender'),
+              controller: _lenderController,
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? l10n.mortgageFormLenderRequired
+                  : null,
+            ),
+          ),
+          end: ModalFieldCell(
+            label: l10n.mortgageFormFirstPayment,
+            input: DateField(
+              key: const Key('mortgageFormFirstPayment'),
+              controller: _dateController,
+              firstDate: DateTime(1970),
+              lastDate: DateTime(2100),
+              calendarTooltip: l10n.mortgageFormCalendar,
+              validator: (value) => parseDateInput(value ?? '', _locale) == null
+                  ? l10n.mortgageFormDateInvalid
+                  : null,
+            ),
+          ),
+        ),
+        rowGap,
+        // The two selects take the full width: their French values (« Crédit
+        // à la consommation », « Échéance constante ») would not fit a column
+        // of the Simulateur's pane.
+        LabeledField(
+          label: l10n.mortgageFormKind,
+          child: AppSelect<MortgageKind>(
+            key: const Key('mortgageFormKind'),
+            value: _kind,
+            // The product label only — it never touches the repayment type.
+            onChanged: (value) {
+              setState(() => _kind = value);
+              _updateDirty();
+            },
+            items: [
+              for (final kind in MortgageKind.values)
+                AppSelectItem(
+                  value: kind,
+                  label: mortgageKindLabel(l10n, kind),
+                ),
+            ],
+          ),
+        ),
+        rowGap,
+        LabeledField(
+          label: l10n.mortgageFormRepayment,
+          child: AppSelect<RepaymentType>(
+            key: const Key('mortgageFormRepayment'),
+            value: _repayment,
+            onChanged: (value) {
+              setState(() => _repayment = value);
+              _updateDirty();
+              _requestPreview();
+            },
+            items: [
+              for (final type in RepaymentType.values)
+                AppSelectItem(
+                  value: type,
+                  label: repaymentTypeLabel(l10n, type),
+                ),
+            ],
+          ),
+        ),
+        rowGap,
+        // The terms, typed exactly as in the Simulateur.
+        LoanTermsFields(
+          currency: currency,
+          gutter: AppModalSizes.columnGutter,
+          rowGap: AppSpacing.fieldGap,
+          fees: LoanTermsInput(
+            key: const Key('mortgageFormFees'),
+            controller: _feesController,
+            label: l10n.mortgageFormFees,
+            errorText:
+                _feesError ??
+                (previewField == MortgageErrorField.fees
+                    ? previewMessage
+                    : null),
+            validator: (value) => _optionalMoney(value ?? '') == null
+                ? l10n.mortgageFormAmountOptionalInvalid
+                : null,
+          ),
+          principal: LoanTermsInput(
+            key: const Key('mortgageFormPrincipal'),
+            controller: _principalController,
+            label: l10n.mortgageFormPrincipal,
+            validator: (value) {
+              final amount = parseMoneyMinor(value ?? '', _locale);
+              return amount == null || amount <= 0
+                  ? l10n.mortgageFormAmountInvalid
+                  : null;
+            },
+          ),
+          rate: LoanTermsInput(
+            key: const Key('mortgageFormRate'),
+            controller: _rateController,
+            label: l10n.mortgageFormRate,
+            errorText:
+                _rateError ??
+                (previewField == MortgageErrorField.rate
+                    ? previewMessage
+                    : null),
+            validator: (value) => parseRateBps(value ?? '') == null
+                ? l10n.mortgageFormRateInvalid
+                : null,
+          ),
+          insurance: LoanTermsInput(
+            key: const Key('mortgageFormInsurance'),
+            controller: _insuranceController,
+            label: l10n.mortgageFormInsurance,
+            validator: (value) => _optionalMoney(value ?? '') == null
+                ? l10n.mortgageFormAmountOptionalInvalid
+                : null,
+          ),
+          term: TermSlider(
+            termMonths: _termMonths,
+            minMonths: LoanTermScale.minMonths,
+            maxMonths: LoanTermScale.maxMonths,
+            stepMonths: LoanTermScale.stepMonths,
+            sliderKey: const Key('mortgageFormTerm'),
+            valueKey: const Key('mortgageFormTermValue'),
+            onChanged: (months) {
+              setState(() => _termMonths = months);
+              _updateDirty();
+              _requestPreview();
+            },
+          ),
+        ),
+        // Without a property to link there is nothing to pick: the field
+        // stays away rather than offering « Aucun » alone.
+        if (properties.isNotEmpty || _propertyId != null) ...[
+          rowGap,
+          LabeledField(
             label: l10n.mortgageFormProperty,
             errorText: _propertyError,
-            input: AppSelect<String?>(
+            child: AppSelect<String?>(
               key: const Key('mortgageFormProperty'),
               value: _propertyId,
               onChanged: (value) {
@@ -381,14 +511,76 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
                   ),
               ],
             ),
-          )
-        : null;
+          ),
+        ],
+      ],
+    );
+
+    final computed = interestOnly ? null : preview?.value;
+    final reading = Column(
+      key: const Key('mortgageFormReading'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (previewMessage != null &&
+            previewField == MortgageErrorField.none) ...[
+          InlineBanner(
+            key: const Key('mortgageFormPreviewError'),
+            message: previewMessage,
+          ),
+          const SizedBox(height: AppSimulator.readingGap),
+        ],
+        LoanSummaryLine(
+          key: const Key('mortgageFormSummary'),
+          captionMaxLines: 3,
+          currency: computed?.currency ?? currency,
+          emptyCaption: interestOnly
+              ? l10n.mortgageFormInterestOnly
+              : l10n.mortgageFormInstalmentEmpty,
+          figures: computed == null
+              ? null
+              : (
+                  totalInstalmentMinor: computed.totalInstalmentMinor,
+                  monthlyPaymentMinor: computed.monthlyPaymentMinor,
+                  insuranceMonthlyMinor: computed.insuranceMonthlyMinor,
+                  termMonths: computed.termMonths,
+                  totalCostMinor: computed.totalCostMinor,
+                  totalInterestMinor: computed.totalInterestMinor,
+                  totalInsuranceMinor: computed.totalInsuranceMinor,
+                  upfrontFeesMinor: computed.upfrontFeesMinor,
+                  taegBps: computed.taegBps,
+                ),
+        ),
+        const SizedBox(height: AppSimulator.readingGap / 2),
+        Divider(height: 1, thickness: 1, color: context.colors.line),
+        const SizedBox(height: AppSimulator.readingGap / 2),
+        SizedBox(
+          height: AppLoans.formChartHeight,
+          child: YearlyProjection(
+            currency: computed?.currency ?? currency,
+            emptyText: interestOnly
+                ? l10n.mortgageFormChartInterestOnly
+                : l10n.mortgageFormChartEmpty,
+            years: computed == null
+                ? null
+                : [
+                    for (final row in computed.yearly)
+                      (
+                        year: row.year,
+                        capitalMinor: row.principalMinor,
+                        interestMinor: row.interestMinor,
+                      ),
+                  ],
+          ),
+        ),
+      ],
+    );
 
     return AppModal(
       title: _isEditing
           ? l10n.mortgageFormEditTitle
           : l10n.mortgageFormCreateTitle,
-      width: AppModalSizes.w600,
+      width: AppModalSizes.w960,
       dirty: _dirty,
       busy: _isSubmitting,
       saveError: _bannerError,
@@ -412,261 +604,32 @@ class _MortgageFormModalState extends ConsumerState<MortgageFormModal> {
       ],
       child: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        // The Simulateur's two panes inside the modal body: the hairline runs
+        // the full height of the taller one.
+        child: Stack(
           children: [
-            LabeledField(
-              label: l10n.mortgageFormLabel,
-              child: TextFormField(
-                key: const Key('mortgageFormLabel'),
-                controller: _labelController,
-                validator: (value) => (value == null || value.trim().isEmpty)
-                    ? l10n.mortgageFormLabelRequired
-                    : null,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(width: AppLoans.formInputsWidth, child: inputs),
+                const SizedBox(
+                  width: AppLoans.formInputsGap + 1 + AppLoans.formReadingGap,
+                ),
+                Expanded(child: reading),
+              ],
             ),
-            rowGap,
-            ModalFieldRow(
-              start: ModalFieldCell(
-                label: l10n.mortgageFormLender,
-                input: TextFormField(
-                  key: const Key('mortgageFormLender'),
-                  controller: _lenderController,
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? l10n.mortgageFormLenderRequired
-                      : null,
-                ),
+            PositionedDirectional(
+              top: 0,
+              bottom: 0,
+              start: AppLoans.formInputsWidth + AppLoans.formInputsGap,
+              child: SizedBox(
+                width: 1,
+                child: ColoredBox(color: context.colors.line),
               ),
-              end: ModalFieldCell(
-                label: l10n.mortgageFormKind,
-                input: AppSelect<MortgageKind>(
-                  key: const Key('mortgageFormKind'),
-                  value: _kind,
-                  // The product label only — it never touches the repayment type.
-                  onChanged: (value) {
-                    setState(() => _kind = value);
-                    _updateDirty();
-                  },
-                  items: [
-                    for (final kind in MortgageKind.values)
-                      AppSelectItem(
-                        value: kind,
-                        label: mortgageKindLabel(l10n, kind),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            rowGap,
-            ModalFieldRow(
-              start: ModalFieldCell(
-                label: l10n.mortgageFormRepayment,
-                input: AppSelect<RepaymentType>(
-                  key: const Key('mortgageFormRepayment'),
-                  value: _repayment,
-                  onChanged: (value) {
-                    setState(() => _repayment = value);
-                    _updateDirty();
-                    _requestPreview();
-                  },
-                  items: [
-                    for (final type in RepaymentType.values)
-                      AppSelectItem(
-                        value: type,
-                        label: repaymentTypeLabel(l10n, type),
-                      ),
-                  ],
-                ),
-              ),
-              end: ModalFieldCell(
-                label: l10n.mortgageFormPrincipal,
-                input: MoneyField(
-                  key: const Key('mortgageFormPrincipal'),
-                  controller: _principalController,
-                  currency: currency,
-                  validator: (value) {
-                    final amount = parseMoneyMinor(value ?? '', _locale);
-                    return amount == null || amount <= 0
-                        ? l10n.mortgageFormAmountInvalid
-                        : null;
-                  },
-                ),
-              ),
-            ),
-            rowGap,
-            ModalFieldRow(
-              start: ModalFieldCell(
-                label: l10n.mortgageFormRate,
-                errorText: _rateError,
-                input: TextFormField(
-                  key: const Key('mortgageFormRate'),
-                  controller: _rateController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                  ],
-                  textAlign: TextAlign.right,
-                  style: numberStyle,
-                  decoration: InputDecoration(
-                    suffixText: '%',
-                    suffixStyle: fieldSuffixStyle(context),
-                  ),
-                  validator: (value) => parseRateBps(value ?? '') == null
-                      ? l10n.mortgageFormRateInvalid
-                      : null,
-                ),
-              ),
-              end: ModalFieldCell(
-                label: l10n.mortgageFormTerm,
-                input: TextFormField(
-                  key: const Key('mortgageFormTerm'),
-                  controller: _termController,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  textAlign: TextAlign.right,
-                  style: numberStyle,
-                  decoration: InputDecoration(
-                    suffixText: l10n.mortgageFormTermUnit,
-                    suffixStyle: fieldSuffixStyle(context),
-                  ),
-                  validator: (value) {
-                    final term = int.tryParse(value?.trim() ?? '');
-                    return term == null || term <= 0
-                        ? l10n.mortgageFormTermInvalid
-                        : null;
-                  },
-                ),
-              ),
-            ),
-            rowGap,
-            ModalFieldRow(
-              start: ModalFieldCell(
-                label: l10n.mortgageFormFirstPayment,
-                input: DateField(
-                  key: const Key('mortgageFormFirstPayment'),
-                  controller: _dateController,
-                  firstDate: DateTime(1970),
-                  lastDate: DateTime(2100),
-                  calendarTooltip: l10n.mortgageFormCalendar,
-                  validator: (value) =>
-                      parseDateInput(value ?? '', _locale) == null
-                      ? l10n.mortgageFormDateInvalid
-                      : null,
-                ),
-              ),
-              end: ModalFieldCell(
-                label: l10n.mortgageFormInsurance,
-                input: MoneyField(
-                  key: const Key('mortgageFormInsurance'),
-                  controller: _insuranceController,
-                  currency: currency,
-                  validator: (value) => _optionalMoney(value ?? '') == null
-                      ? l10n.mortgageFormAmountOptionalInvalid
-                      : null,
-                ),
-              ),
-            ),
-            rowGap,
-            if (propertyCell != null)
-              ModalFieldRow(start: feesCell, end: propertyCell)
-            else
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: LabeledField(
-                      label: feesCell.label,
-                      errorText: feesCell.errorText,
-                      child: feesCell.input,
-                    ),
-                  ),
-                  const SizedBox(width: AppModalSizes.columnGutter),
-                  const Spacer(),
-                ],
-              ),
-            const SizedBox(
-              height: AppSpacing.fieldGap + AppLoans.instalmentLineTop,
-            ),
-            _InstalmentLine(
-              interestOnly: _repayment == RepaymentType.interestOnly,
-              preview: preview,
             ),
           ],
         ),
       ),
     );
-  }
-}
-
-/// The read-only « Mensualité calculée » line under the grid, following the
-/// fields live: the label at 13/600, then on its baseline « échéance totale
-/// {x} · intérêts totaux {y} » in `textSecondary` (`proposal_v6` m-loans).
-/// Until the simulator can run, the same place says what it is waiting for.
-/// No box, no plate.
-class _InstalmentLine extends StatelessWidget {
-  const _InstalmentLine({required this.interestOnly, required this.preview});
-
-  final bool interestOnly;
-  final AsyncValue<ComputedInstalment>? preview;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final locale = Localizations.localeOf(context).toString();
-    final colors = context.colors;
-    final textTheme = Theme.of(context).textTheme;
-    final strong = tabularNumberStyle(
-      textTheme.titleSmall!,
-    ).copyWith(color: colors.text);
-    final secondary = tabularNumberStyle(
-      textTheme.bodyMedium!,
-    ).copyWith(color: colors.textSecondary);
-
-    String money(int minor, String currency) =>
-        formatAmount(amountMinor: minor, currency: currency, locale: locale);
-
-    final Widget detail;
-    if (interestOnly) {
-      detail = Text(
-        l10n.mortgageFormPlateInterestOnly,
-        key: const Key('mortgageFormPlateInterestOnly'),
-        style: secondary,
-      );
-    } else {
-      detail = switch (preview) {
-        AsyncData(:final value) => Text(
-          l10n.mortgageFormPlateDetail(
-            money(value.totalInstalmentMinor, value.currency),
-            money(value.totalInterestMinor, value.currency),
-          ),
-          key: const Key('mortgageFormPlateDetail'),
-          style: secondary,
-        ),
-        AsyncError(:final error) => Text(
-          localizeMortgageError(l10n, error),
-          key: const Key('mortgageFormPlateError'),
-          style: secondary.copyWith(color: colors.negative),
-        ),
-        _ => Text(
-          l10n.mortgageFormPlatePending,
-          key: const Key('mortgageFormPlatePending'),
-          style: secondary,
-        ),
-      };
-    }
-
-    final content = Row(
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: [
-        Text(l10n.mortgageFormPlateLabel, style: strong),
-        const SizedBox(width: AppLoans.instalmentLabelGap),
-        Expanded(child: detail),
-      ],
-    );
-
-    return KeyedSubtree(key: const Key('mortgageFormPlate'), child: content);
   }
 }

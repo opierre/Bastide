@@ -77,15 +77,36 @@ Title bar: crumb « Crédits / », title = loan name, right: secondary « Modifi
 
 No amortisation curve in the detail: the table carries the numbers, the list's chart the shape.
 
-## Loan form (modal, 600 px)
-Title « Nouveau crédit » / « Modifier le crédit ». Two-column grid: Libellé (full width) ·
-Prêteur · Type (Crédit immobilier, Prêt travaux, Crédit à la consommation, Crédit auto) ·
-Remboursement (Échéance constante, In fine) · Capital emprunté · Taux nominal · Durée (unit « mois ») · 1re échéance · Assurance par mois ·
-Frais de dossier · Bien financé (facultatif, select; an option shows the property's address on
-a second line). Under the grid, a read-only line that updates live: « Mensualité calculée »
-13/600 + « échéance totale {x} · intérêts totaux {y} » `textSecondary`. Footer: ghost
-« Supprimer » on the left (edit only; its confirmation says the loan leaves the net worth) ·
-« Annuler » · « Enregistrer ».
+## Loan form (modal, 960 px)
+Title « Nouveau crédit » / « Modifier le crédit ». The body is laid out as the Simulateur
+(`14-simulateur.md` §Layout) and shares its widgets: an **inputs pane** (the Simulateur's 380 px,
+measured from the modal's edge, right hairline running the body's height) and a **reading pane**
+32 px after the hairline. Modal metrics apply inside it (fields 14 px apart, 16 px gutter).
+
+Inputs pane, top to bottom: Libellé (full width) · Prêteur · 1re échéance · Type (full width:
+Crédit immobilier, Prêt travaux, Crédit à la consommation, Crédit auto) · Remboursement (full
+width: Échéance constante, In fine) · then the Simulateur's terms block: Frais de dossier ·
+Capital emprunté · Taux nominal · Assurance par mois (amounts right-aligned, placeholder
+« 0,00 », rate placeholder « — ») and « Durée » with its value on the same line, a slider from
+« 1 an » to « 30 ans » **a month at a time** (a contracted term need not be whole years; the value
+reads « 7 ans · 84 mois » on whole years, « 90 mois » otherwise; a new loan opens on 25 years) ·
+Bien financé (facultatif, full width, select; an option shows the property's address on a second
+line; absent while there is no property to link).
+
+Reading pane, recomputed on every keystroke, 22 px apart with a hairline between: the
+Simulateur's summary line (« Échéance mensuelle » 40 px · « Coût total » · « TAEG indicatif »,
+captions up to three lines) and its « Projection annuelle » (400 px, heading included). Before a
+principal and a rate the figures are « — » with « Renseignez le capital et le taux pour voir
+l’échéance. » and the chart note « Renseignez le capital et le taux : la répartition par année
+s’affiche ici. » An in-fine loan, which the simulator does not compute, keeps the dashes with
+« La mensualité d’un prêt in fine s’affiche une fois le crédit enregistré. » and the note « La
+répartition par année d’un prêt in fine se lit dans son tableau d’amortissement, une fois le
+crédit enregistré. » A refused computation is explained under the rate or the fees when one of
+them is the cause, otherwise as a Banner above the summary line. No HCSF block and no
+existing-loans toggle: the debt ratio is read on the Crédits list.
+
+Footer: ghost « Supprimer » on the left (edit only; its confirmation says the loan leaves the
+net worth) · « Annuler » · « Enregistrer ».
 
 **Delete confirmation** (440 px), destructive: « Supprimer le crédit « {libellé} » ? », lead
 « Il ne sera plus déduit de votre patrimoine dans la Synthèse, et son tableau d’amortissement

@@ -15,6 +15,8 @@ Title « Simulateur ». Right: secondary « Enregistrer le scénario » (`bookma
 ## Layout
 Flush panel, two panes: **inputs** (380 px, right hairline, padding 24) · **reading**
 (flexible, padding 24 32). The comparison replaces the reading pane.
+The loan form of Crédits (`12-credits.md`) is built on the same two panes and shares the terms
+block (items 2 and 3 below), the summary line and the yearly projection.
 
 ## Inputs pane, top to bottom, 14 px apart
 1. « Nouveau crédit » 13/600.

@@ -296,6 +296,7 @@ Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
   or « Plus tard » when Bastide proposed the task itself (the settlement rule). A modal
   without a body (a confirmation) keeps the footer 24 px under the lead.
 - **Widths:** 420, 440, 480, 500, 520, 560, 600, 620; each panel spec names its modal's width.
+  One two-pane form takes 960: the loan form, laid out on the Simulateur's panes (`12-credits.md`).
   A modal never widens for a label.
 - **Closing:** Escape and a click on the scrim act as the secondary action on a confirmation
   and on a form nobody has changed. Once a form holds unsaved input, the scrim does nothing,
@@ -609,7 +610,9 @@ in both themes (like the crop circle, §7).
 | 28 px | `scheduleRow` | The amortisation table's dense rows |
 | 96 px | `yearSelectWidth` | The schedule's year select |
 | 22 % | `repaidFlex` | The « Remboursé » column's share of the loans table |
-| 4 / 10 px | `instalmentLineTop`, `instalmentLabelGap` | The loan form's « Mensualité calculée » line: 4 px more than the field gap above it, 10 px between label and figures |
+| 960 px | `AppModalSizes.w960` | The loan form, on the Simulateur's two panes |
+| 332 / 24 / 32 px | `formInputsWidth`, `formInputsGap`, `formReadingGap` | The loan form's inputs pane inside the body padding (the Simulateur's 380 px pane less its padding), then the gaps before and after its hairline |
+| 400 px | `formChartHeight` | The loan form's yearly projection, heading included |
 
 ### Synthèse: `AppNetworth` (`15-synthese.md` §Layout)
 

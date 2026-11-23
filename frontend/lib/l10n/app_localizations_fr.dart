@@ -3841,15 +3841,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mortgageFormRateInvalid => 'Saisissez un taux, par exemple 3,45.';
 
   @override
-  String get mortgageFormTerm => 'Durée';
-
-  @override
-  String get mortgageFormTermUnit => 'mois';
-
-  @override
-  String get mortgageFormTermInvalid => 'Saisissez une durée en mois.';
-
-  @override
   String get mortgageFormFirstPayment => '1re échéance';
 
   @override
@@ -3875,20 +3866,20 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mortgageFormPropertyNone => 'Aucun';
 
   @override
-  String get mortgageFormPlateLabel => 'Mensualité calculée';
+  String get mortgageFormInstalmentEmpty =>
+      'Renseignez le capital et le taux pour voir l’échéance.';
 
   @override
-  String mortgageFormPlateDetail(String instalment, String interest) {
-    return 'échéance totale $instalment · intérêts totaux $interest';
-  }
-
-  @override
-  String get mortgageFormPlatePending =>
-      'Renseignez le capital, le taux et la durée.';
-
-  @override
-  String get mortgageFormPlateInterestOnly =>
+  String get mortgageFormInterestOnly =>
       'La mensualité d’un prêt in fine s’affiche une fois le crédit enregistré.';
+
+  @override
+  String get mortgageFormChartEmpty =>
+      'Renseignez le capital et le taux : la répartition par année s’affiche ici.';
+
+  @override
+  String get mortgageFormChartInterestOnly =>
+      'La répartition par année d’un prêt in fine se lit dans son tableau d’amortissement, une fois le crédit enregistré.';
 
   @override
   String get mortgageFormCancel => 'Annuler';

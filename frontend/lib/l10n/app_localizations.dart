@@ -6041,24 +6041,6 @@ abstract class AppLocalizations {
   /// **'Saisissez un taux, par exemple 3,45.'**
   String get mortgageFormRateInvalid;
 
-  /// Loan form: term field.
-  ///
-  /// In fr, this message translates to:
-  /// **'Durée'**
-  String get mortgageFormTerm;
-
-  /// Unit suffix inside the term field.
-  ///
-  /// In fr, this message translates to:
-  /// **'mois'**
-  String get mortgageFormTermUnit;
-
-  /// Loan form: missing or zero term.
-  ///
-  /// In fr, this message translates to:
-  /// **'Saisissez une durée en mois.'**
-  String get mortgageFormTermInvalid;
-
   /// Loan form: first instalment date field.
   ///
   /// In fr, this message translates to:
@@ -6107,29 +6089,29 @@ abstract class AppLocalizations {
   /// **'Aucun'**
   String get mortgageFormPropertyNone;
 
-  /// Read-only computed instalment plate label.
+  /// Loan form reading pane: caption under the dashed instalment before the inputs are complete.
   ///
   /// In fr, this message translates to:
-  /// **'Mensualité calculée'**
-  String get mortgageFormPlateLabel;
+  /// **'Renseignez le capital et le taux pour voir l’échéance.'**
+  String get mortgageFormInstalmentEmpty;
 
-  /// Computed instalment plate: total instalment and total interest.
-  ///
-  /// In fr, this message translates to:
-  /// **'échéance totale {instalment} · intérêts totaux {interest}'**
-  String mortgageFormPlateDetail(String instalment, String interest);
-
-  /// Computed instalment plate before the inputs are complete.
-  ///
-  /// In fr, this message translates to:
-  /// **'Renseignez le capital, le taux et la durée.'**
-  String get mortgageFormPlatePending;
-
-  /// Computed instalment plate for an interest-only loan, which the simulator does not compute.
+  /// Loan form reading pane: caption under the instalment for an interest-only loan, which the simulator does not compute.
   ///
   /// In fr, this message translates to:
   /// **'La mensualité d’un prêt in fine s’affiche une fois le crédit enregistré.'**
-  String get mortgageFormPlateInterestOnly;
+  String get mortgageFormInterestOnly;
+
+  /// Loan form reading pane: note in the yearly projection before the inputs are complete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseignez le capital et le taux : la répartition par année s’affiche ici.'**
+  String get mortgageFormChartEmpty;
+
+  /// Loan form reading pane: note in the yearly projection for an interest-only loan.
+  ///
+  /// In fr, this message translates to:
+  /// **'La répartition par année d’un prêt in fine se lit dans son tableau d’amortissement, une fois le crédit enregistré.'**
+  String get mortgageFormChartInterestOnly;
 
   /// Loan form: cancel.
   ///

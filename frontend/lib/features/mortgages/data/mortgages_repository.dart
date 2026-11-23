@@ -9,7 +9,7 @@ import '../domain/schedule_row.dart';
 /// The only place in this feature that knows the response shapes.
 ///
 /// It also reaches three foreign resources for this panel's own affordances —
-/// `/simulations/compute` for the form's live « Mensualité calculée » plate,
+/// `/simulations/compute` for the form's live reading pane,
 /// `/properties` for the loan's property link, and `PATCH /settings` for the
 /// ratio card's « Déclarer un revenu » — the same arrangement the recurring
 /// repository uses for accounts and categories.
@@ -143,8 +143,8 @@ class MortgagesRepository {
     return (json['totals'] as Map<String, dynamic>)['interest_minor'] as int;
   }
 
-  /// The stateless simulator run behind the form's live plate (one engine
-  /// for a simulated loan and a declared one).
+  /// The stateless simulator run behind the form's live reading pane (one
+  /// engine for a simulated loan and a declared one).
   Future<ComputedInstalment> compute({
     required int principalMinor,
     required int annualRateBps,
@@ -168,7 +168,22 @@ class MortgagesRepository {
       monthlyPaymentMinor: json['monthly_payment_minor'] as int,
       totalInstalmentMinor: json['total_instalment_minor'] as int,
       totalInterestMinor: json['total_interest_minor'] as int,
+      totalInsuranceMinor: json['total_insurance_minor'] as int,
+      totalCostMinor: json['total_cost_minor'] as int,
+      taegBps: json['taeg_bps'] as int,
       currency: json['currency'] as String,
+      insuranceMonthlyMinor: insuranceMonthlyMinor,
+      termMonths: termMonths,
+      upfrontFeesMinor: upfrontFeesMinor,
+      yearly: [
+        for (final row
+            in (json['yearly'] as List<dynamic>).cast<Map<String, dynamic>>())
+          ComputedYear(
+            year: row['year'] as int,
+            principalMinor: row['principal_minor'] as int,
+            interestMinor: row['interest_minor'] as int,
+          ),
+      ],
     );
   }
 
