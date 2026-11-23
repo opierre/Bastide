@@ -50,6 +50,7 @@ class AppButton extends StatefulWidget {
     this.loadingLabel,
     this.expand = false,
     this.iconOnly = false,
+    this.padded = false,
   });
 
   final String label;
@@ -78,6 +79,12 @@ class AppButton extends StatefulWidget {
   /// [label] stays its accessible name.
   final bool iconOnly;
 
+  /// With [iconOnly]: keeps the §6 horizontal padding around the icon instead
+  /// of squaring the button, so it is the toolbar icon button of the mockup,
+  /// 36 × 28: the geometry of a labelled toolbar button around a 14 px icon.
+  /// The square stays the default, as the row menus' columns are cut to it.
+  final bool padded;
+
   @override
   State<AppButton> createState() => _AppButtonState();
 }
@@ -102,9 +109,15 @@ class _AppButtonState extends State<AppButton> {
         ? (widget.loadingLabel ?? widget.label)
         : widget.label;
 
-    final square = widget.iconOnly && widget.icon != null;
+    final iconOnly = widget.iconOnly && widget.icon != null;
+    final square = iconOnly && !widget.padded;
+    final icon = Icon(widget.icon, size: AppSizes.iconSmall, color: foreground);
     final content = square
-        ? Icon(widget.icon, size: AppSizes.iconSmall, color: foreground)
+        ? icon
+        // A row, as for a label: it centres the icon in the 28 px height
+        // without stretching the button across the width it is given.
+        : iconOnly
+        ? Row(mainAxisSize: MainAxisSize.min, children: [icon])
         : Row(
             mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
