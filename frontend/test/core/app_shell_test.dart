@@ -374,23 +374,18 @@ void main() {
     expect(_inSidebar(find.text('Vue d’ensemble')), findsNothing);
   });
 
-  testWidgets('the user row opens Paramètres and Se déconnecter', (
+  testWidgets('the user row opens Se déconnecter only, no Paramètres', (
     tester,
   ) async {
     _useFrame(tester);
-    final visited = <String>[];
-    await tester.pumpWidget(
-      _shell(path: '/dashboard', onNavigate: visited.add),
-    );
+    await tester.pumpWidget(_shell(path: '/dashboard'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('userMenuButton')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('userMenuLogoutItem')), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('userMenuSettingsItem')));
-    await tester.pumpAndSettle();
-    expect(visited, ['/settings']);
+    expect(find.byKey(const Key('userMenuSettingsItem')), findsNothing);
+    expect(find.text('Se déconnecter'), findsOneWidget);
   });
 
   testWidgets('en labels', (tester) async {

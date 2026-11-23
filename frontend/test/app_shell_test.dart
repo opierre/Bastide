@@ -400,12 +400,14 @@ void main() {
       expect(find.byKey(const Key('appTopBar')), findsNothing);
     });
 
-    testWidgets('Paramètres opens the settings panel', (tester) async {
+    testWidgets('the menu has no Paramètres entry', (tester) async {
       await pumpApp(tester);
 
-      await choose(tester, 'userMenuSettingsItem');
+      await tester.tap(find.byKey(const Key('userMenuButton')));
+      await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('screen-settings')), findsOneWidget);
+      expect(find.byKey(const Key('userMenuLogoutItem')), findsOneWidget);
+      expect(find.byKey(const Key('userMenuSettingsItem')), findsNothing);
     });
   });
 }
