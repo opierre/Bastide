@@ -6100,6 +6100,10 @@
   "@networthDeclaredMonthHint": {
     "description": "Placeholder of the month field."
   },
+  "networthDeclaredMonthPick": "Choisir un mois",
+  "@networthDeclaredMonthPick": {
+    "description": "Tooltip of the calendar button beside the declared month field."
+  },
   "networthDeclaredMonthInvalid": "Saisissez un mois au format MM/AAAA.",
   "@networthDeclaredMonthInvalid": {
     "description": "Month field error: the input doesn't read as a month."

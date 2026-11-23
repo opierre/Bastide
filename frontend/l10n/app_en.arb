@@ -1244,6 +1244,7 @@
   "networthDeclaredSubtitle": "The total of all your accounts at a month end, for the time before your imports. A month your imports cover keeps the imported figure.",
   "networthDeclaredMonth": "Month",
   "networthDeclaredMonthHint": "MM/YYYY",
+  "networthDeclaredMonthPick": "Pick a month",
   "networthDeclaredMonthInvalid": "Enter a month as MM/YYYY.",
   "networthDeclaredMonthNotClosed": "Only a month that has ended can be declared.",
   "networthDeclaredAmount": "Accounts total",

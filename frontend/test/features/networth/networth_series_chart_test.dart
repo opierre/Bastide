@@ -3,9 +3,9 @@ import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/app_button.dart';
 import 'package:bastide/core/widgets/chart_scale.dart';
+import 'package:bastide/core/widgets/date_field.dart';
 import 'package:bastide/features/networth/application/networth_controller.dart';
 import 'package:bastide/features/networth/domain/networth_summary.dart';
-import 'package:bastide/features/networth/presentation/declared_balances_modal.dart';
 import 'package:bastide/features/networth/presentation/networth_screen.dart';
 import 'package:bastide/features/networth/presentation/networth_series_chart.dart';
 import 'package:bastide/features/properties/application/properties_controller.dart';
@@ -460,6 +460,43 @@ void main() {
 
       expect(declared.declaredWrites, [(DateTime(2025, 3), -123456)]);
       expect(find.byKey(const Key('declaredRow-03/2025')), findsOneWidget);
+    });
+
+    testWidgets('the month is typed with its slash put in for the user', (
+      tester,
+    ) async {
+      await open(tester);
+
+      await tester.enterText(find.byKey(const Key('declaredMonth')), '032025');
+      expect(find.text('03/2025'), findsOneWidget);
+    });
+
+    testWidgets('the month field opens a calendar on its year view', (
+      tester,
+    ) async {
+      await open(tester);
+
+      await tester.tap(find.byTooltip('Choisir un mois'));
+      await tester.pumpAndSettle();
+      expect(find.byType(DatePickerDialog), findsOneWidget);
+      final picker = tester.widget<DatePickerDialog>(
+        find.byType(DatePickerDialog),
+      );
+      expect(picker.initialCalendarMode, DatePickerMode.year);
+      // Only an ended month can be declared: the calendar stops before this
+      // one, and opens there when the field is empty.
+      final now = DateTime.now();
+      final lastClosed = DateTime(now.year, now.month, 0);
+      expect(picker.lastDate, lastClosed);
+
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          formatMonthInput(DateTime(lastClosed.year, lastClosed.month)),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a malformed or running month never reaches the API', (

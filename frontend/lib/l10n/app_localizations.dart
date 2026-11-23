@@ -7394,6 +7394,12 @@ abstract class AppLocalizations {
   /// **'MM/AAAA'**
   String get networthDeclaredMonthHint;
 
+  /// Tooltip of the calendar button beside the declared month field.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un mois'**
+  String get networthDeclaredMonthPick;
+
   /// Month field error: the input doesn't read as a month.
   ///
   /// In fr, this message translates to:
