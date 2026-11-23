@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import '../../../core/session/current_user_provider.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
+import '../../../core/widgets/date_field.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/money_field.dart';
@@ -18,7 +19,6 @@ import '../data/goals_repository.dart';
 import '../domain/goal.dart';
 import 'goal_image_crop_modal.dart';
 import 'goal_labels.dart';
-import 'goal_month_field.dart';
 
 /// Opens the create/edit goal modal. Resolves to the saved goal, or `null` when
 /// the user cancelled.
@@ -57,7 +57,7 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
   final _targetController = TextEditingController();
   late final _dateController = TextEditingController(
     text: switch (widget.initial?.targetDate) {
-      final date? => formatGoalMonth(date),
+      final date? => formatMonthInput(date),
       null => null,
     },
   );
@@ -113,7 +113,7 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
   /// Whether the optional deadline holds something usable: an empty one is a
   /// valid no-deadline goal, a filled one has to read as a month.
   bool _monthIsValid(String text) =>
-      text.trim().isEmpty || parseGoalMonth(text) != null;
+      text.trim().isEmpty || parseMonthInput(text) != null;
 
   void _markDirty() {
     if (!_dirty) setState(() => _dirty = true);
@@ -125,7 +125,7 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
 
     final locale = Localizations.localeOf(context).toString();
     final target = _parseTarget(_targetController.text, locale);
-    final date = parseGoalMonth(_dateController.text);
+    final date = parseMonthInput(_dateController.text);
     if (target == null) return;
 
     setState(() {
@@ -251,12 +251,14 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
               ),
               end: ModalFieldCell(
                 label: l10n.goalFormDateLabel,
-                input: GoalMonthField(
+                input: MonthField(
                   key: const Key('goalFormDate'),
                   controller: _dateController,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100, 12, 31),
                   hintText: l10n.goalFormDateHint,
                   calendarTooltip: l10n.goalFormDatePick,
-                  onPicked: _markDirty,
+                  onChanged: (_) => _markDirty(),
                   validator: (value) => _monthIsValid(value ?? '')
                       ? null
                       : l10n.goalFormDateInvalid,

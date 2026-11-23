@@ -4723,6 +4723,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get networthDeclaredMonthHint => 'MM/AAAA';
 
   @override
+  String get networthDeclaredMonthPick => 'Choisir un mois';
+
+  @override
   String get networthDeclaredMonthInvalid =>
       'Saisissez un mois au format MM/AAAA.';
 
