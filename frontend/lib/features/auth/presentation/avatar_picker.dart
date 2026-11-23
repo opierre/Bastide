@@ -66,9 +66,12 @@ class AvatarPicker extends ConsumerWidget {
 
     return Column(
       key: const Key('settingsAvatarPicker'),
-      crossAxisAlignment: CrossAxisAlignment.start,
+      // The avatars and the buttons sit against the row's right edge, like
+      // every control of Profil; the banners keep the full width.
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Wrap(
+          alignment: WrapAlignment.end,
           spacing: AppSpacing.smPlus,
           runSpacing: AppSpacing.sm,
           crossAxisAlignment: WrapCrossAlignment.center,
@@ -95,6 +98,7 @@ class AvatarPicker extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
+          alignment: WrapAlignment.end,
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: [

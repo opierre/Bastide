@@ -35,6 +35,10 @@ Avatar picking opens the crop modal (420 px): the square crop with the avatar's 
 
 Neither row shows a date: nothing records when the password or the code last changed.
 
+In Profil every control sits against the row's right edge: the avatars and their buttons,
+the name and the address with their « Modifier », and each button below; banners keep the full
+width.
+
 **Username modal** (420 px): title « Changer de nom d’utilisateur », lead « Le nouveau nom
 remplace l’ancien pour vous connecter. »; one field « Nom d’utilisateur » with the helper
 « Sert aussi à vous connecter. 3 à 32 caractères : lettres, chiffres, espaces, « . », « _ » ou

@@ -381,6 +381,38 @@ void main() {
     },
   );
 
+  testWidgets('Profil: every button sits against the right edge of its row', (
+    tester,
+  ) async {
+    useDesktopSurface(tester);
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+    await _open(tester, SettingsSection.profile);
+
+    Rect rect(String key) => tester.getRect(find.byKey(Key(key)));
+    const buttons = {
+      'settingsAvatarChoosePicture': 'settingsAvatarRow',
+      'settingsDisplayNameButton': 'settingsDisplayNameRow',
+      'settingsEmailButton': 'settingsEmailRow',
+      'settingsPasswordButton': 'settingsPasswordRow',
+      'settingsRecoveryButton': 'settingsRecoveryRow',
+      'settingsLogoutButton': 'settingsLogoutRow',
+    };
+    for (final MapEntry(key: button, value: row) in buttons.entries) {
+      expect(rect(button).right, rect(row).right, reason: button);
+      expect(rect(button).width, lessThan(rect(row).width / 2), reason: button);
+    }
+    // The value a « Modifier » edits stays beside it, not across the row.
+    expect(
+      tester.getRect(find.text('Camille Dubois')).right,
+      lessThan(rect('settingsDisplayNameButton').left),
+    );
+    expect(
+      tester.getRect(find.text('Camille Dubois')).left,
+      greaterThan(rect('settingsDisplayNameRow').center.dx),
+    );
+  });
+
   testWidgets('À propos: header, privacy, data location, licence, credits', (
     tester,
   ) async {

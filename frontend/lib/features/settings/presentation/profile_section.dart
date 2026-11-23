@@ -17,7 +17,8 @@ import '../../auth/presentation/recovery_code_modal.dart';
 import 'setting_row.dart';
 
 /// Profil: the avatar, the username and the email, then the password and the
-/// recovery code, then signing out.
+/// recovery code, then signing out. Every control sits against its row's
+/// right edge, the value it edits included (`09-settings.md` §Profil).
 ///
 /// Neither security row shows a date: nothing records when the password or
 /// the code last changed (`09-settings.md`).
@@ -47,25 +48,29 @@ class ProfileSection extends ConsumerWidget {
           name: l10n.settingsProfileNameTitle,
           description: l10n.settingsProfileNameNote,
           children: [
-            Wrap(
-              spacing: AppSpacing.smPlus,
-              runSpacing: AppSpacing.sm,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  name,
-                  key: const Key('settingsDisplayName'),
-                  style: textTheme.bodyMedium,
-                ),
-                AppButton(
-                  key: const Key('settingsDisplayNameButton'),
-                  label: l10n.settingsProfileNameButton,
-                  onPressed: () => showAppModal<void>(
-                    context: context,
-                    builder: (_) => DisplayNameModal(initialName: name),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                spacing: AppSpacing.smPlus,
+                runSpacing: AppSpacing.sm,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    name,
+                    key: const Key('settingsDisplayName'),
+                    style: textTheme.bodyMedium,
                   ),
-                ),
-              ],
+                  AppButton(
+                    key: const Key('settingsDisplayNameButton'),
+                    label: l10n.settingsProfileNameButton,
+                    onPressed: () => showAppModal<void>(
+                      context: context,
+                      builder: (_) => DisplayNameModal(initialName: name),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -74,27 +79,31 @@ class ProfileSection extends ConsumerWidget {
           name: l10n.settingsEmailTitle,
           description: l10n.settingsEmailNote,
           children: [
-            Wrap(
-              spacing: AppSpacing.smPlus,
-              runSpacing: AppSpacing.sm,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  email,
-                  key: const Key('settingsEmail'),
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: context.colors.textSecondary,
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                spacing: AppSpacing.smPlus,
+                runSpacing: AppSpacing.sm,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    email,
+                    key: const Key('settingsEmail'),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: context.colors.textSecondary,
+                    ),
                   ),
-                ),
-                AppButton(
-                  key: const Key('settingsEmailButton'),
-                  label: l10n.settingsEmailButton,
-                  onPressed: () => showAppModal<void>(
-                    context: context,
-                    builder: (_) => EmailChangeModal(initialEmail: email),
+                  AppButton(
+                    key: const Key('settingsEmailButton'),
+                    label: l10n.settingsEmailButton,
+                    onPressed: () => showAppModal<void>(
+                      context: context,
+                      builder: (_) => EmailChangeModal(initialEmail: email),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -104,12 +113,15 @@ class ProfileSection extends ConsumerWidget {
           name: l10n.settingsPasswordTitle,
           description: l10n.settingsPasswordSubtitle(minPasswordLength),
           children: [
-            AppButton(
-              key: const Key('settingsPasswordButton'),
-              label: l10n.settingsPasswordButton,
-              onPressed: () => showAppModal<void>(
-                context: context,
-                builder: (_) => const PasswordChangeModal(),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: AppButton(
+                key: const Key('settingsPasswordButton'),
+                label: l10n.settingsPasswordButton,
+                onPressed: () => showAppModal<void>(
+                  context: context,
+                  builder: (_) => const PasswordChangeModal(),
+                ),
               ),
             ),
           ],
@@ -119,14 +131,17 @@ class ProfileSection extends ConsumerWidget {
           name: l10n.settingsRecoveryTitle,
           description: l10n.settingsRecoverySubtitle,
           children: [
-            AppButton(
-              key: const Key('settingsRecoveryButton'),
-              label: l10n.settingsRecoveryButton,
-              onPressed: () => showAppModal<void>(
-                context: context,
-                // The code is shown once; a stray click outside must not
-                // close the modal before it has been noted.
-                builder: (_) => const RegenerateRecoveryCodeModal(),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: AppButton(
+                key: const Key('settingsRecoveryButton'),
+                label: l10n.settingsRecoveryButton,
+                onPressed: () => showAppModal<void>(
+                  context: context,
+                  // The code is shown once; a stray click outside must not
+                  // close the modal before it has been noted.
+                  builder: (_) => const RegenerateRecoveryCodeModal(),
+                ),
               ),
             ),
           ],
@@ -137,12 +152,15 @@ class ProfileSection extends ConsumerWidget {
           name: l10n.settingsLogoutTitle,
           description: l10n.settingsLogoutNote,
           children: [
-            AppButton(
-              key: const Key('settingsLogoutButton'),
-              label: l10n.userMenuLogout,
-              icon: LucideIcons300.logOut,
-              onPressed: () =>
-                  ref.read(authControllerProvider.notifier).logout(),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: AppButton(
+                key: const Key('settingsLogoutButton'),
+                label: l10n.userMenuLogout,
+                icon: LucideIcons300.logOut,
+                onPressed: () =>
+                    ref.read(authControllerProvider.notifier).logout(),
+              ),
             ),
           ],
         ),
