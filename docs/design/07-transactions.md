@@ -63,9 +63,11 @@ lifts the filter. Footer « Annuler » · « Appliquer ».
 Single pane.
 
 - **Progress row,** padding 16 32: left, 260 px: « {done} sur {total} » 13/600 + « classées »
-  `textSecondary`, over a repère without mark. Right, a Note (`cpu` icon):
-  « L’IA locale propose une catégorie pour {n} opérations. Rien n’est classé sans votre
-  accord. »
+  `textSecondary`, over a repère without mark. Right, when local AI is on, right-aligned
+  to the row's end: a Note (`cpu` icon, at most 420 px) « L’IA locale propose une catégorie
+  pour {n} opérations. Rien n’est classé sans votre accord. », then 12 px further secondary
+  « Catégoriser avec l’IA » (`cpu`). The free width sits before the Note, never after the
+  button, so the Note always ends right beside it.
 - **Table,** edge to edge:
 
 | Column | Content |
