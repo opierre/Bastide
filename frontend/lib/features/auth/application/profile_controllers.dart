@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/auth_repository.dart';
 import '../domain/avatar_choice.dart';
+import '../domain/text_size_preference.dart';
 import '../domain/theme_preference.dart';
 import 'auth_controller.dart';
 
@@ -144,4 +145,37 @@ class ThemePreferenceController extends AsyncNotifier<void> {
 final themePreferenceControllerProvider =
     AsyncNotifierProvider.autoDispose<ThemePreferenceController, void>(
       ThemePreferenceController.new,
+    );
+
+/// Sets the text size from Settings › Préférences, like the theme: the
+/// session's user takes it before the request goes out, so every text in the
+/// app resizes at once; a refusal puts the previous size back and leaves the
+/// error in [state].
+class TextSizePreferenceController extends AsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<void> choose(TextSizePreference textSize) async {
+    final auth = ref.read(authControllerProvider.notifier);
+    final previous = ref.read(authControllerProvider).value;
+    if (previous == null || previous.textSize == textSize) return;
+
+    auth.replaceUser(previous.withTextSize(textSize));
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      try {
+        auth.replaceUser(
+          await ref.read(authRepositoryProvider).setTextSize(textSize),
+        );
+      } catch (_) {
+        auth.replaceUser(previous);
+        rethrow;
+      }
+    });
+  }
+}
+
+final textSizePreferenceControllerProvider =
+    AsyncNotifierProvider.autoDispose<TextSizePreferenceController, void>(
+      TextSizePreferenceController.new,
     );

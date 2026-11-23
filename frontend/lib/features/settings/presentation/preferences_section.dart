@@ -19,6 +19,7 @@ import '../../../core/widgets/note_line.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/profile_controllers.dart';
+import '../../auth/domain/text_size_preference.dart';
 import '../../auth/domain/theme_preference.dart';
 import '../application/settings_controller.dart';
 import '../domain/user_settings.dart';
@@ -33,7 +34,7 @@ const _sampleAmountMinor = -123456;
 /// Width of the declared income field (`09-settings.md` §Préférences).
 const _incomeFieldWidth = 140.0;
 
-/// Préférences: Affichage (theme, language, formats, sidebar), then Argent
+/// Préférences: Affichage (theme, text size, language, formats, sidebar), then Argent
 /// (currency, savings-rate goal, declared income).
 class PreferencesSection extends ConsumerWidget {
   const PreferencesSection({super.key, this.focusIncome = false});
@@ -56,6 +57,15 @@ class PreferencesSection extends ConsumerWidget {
         showAppToast(
           context,
           title: l10n.settingsThemeSaveFailed,
+          tone: BannerTone.error,
+        );
+      }
+    });
+    ref.listen(textSizePreferenceControllerProvider, (_, next) {
+      if (next.hasError) {
+        showAppToast(
+          context,
+          title: l10n.settingsTextSizeSaveFailed,
           tone: BannerTone.error,
         );
       }
@@ -91,6 +101,37 @@ class PreferencesSection extends ConsumerWidget {
                   key: const Key('settingsThemeLightOption'),
                   value: ThemePreference.light,
                   label: l10n.settingsThemeLight,
+                ),
+              ],
+            ),
+          ],
+        ),
+        SettingRow(
+          key: const Key('settingsTextSizeRow'),
+          name: l10n.settingsTextSizeTitle,
+          description: l10n.settingsTextSizeNote,
+          children: [
+            AppSegmented<TextSizePreference>(
+              value: user?.textSize ?? TextSizePreference.normal,
+              // Applies at once, like the theme above.
+              onChanged: (value) => ref
+                  .read(textSizePreferenceControllerProvider.notifier)
+                  .choose(value),
+              segments: [
+                AppSegment(
+                  key: const Key('settingsTextSizeNormalOption'),
+                  value: TextSizePreference.normal,
+                  label: l10n.settingsTextSizeNormal,
+                ),
+                AppSegment(
+                  key: const Key('settingsTextSizeLargeOption'),
+                  value: TextSizePreference.large,
+                  label: l10n.settingsTextSizeLarge,
+                ),
+                AppSegment(
+                  key: const Key('settingsTextSizeXLargeOption'),
+                  value: TextSizePreference.xlarge,
+                  label: l10n.settingsTextSizeXLarge,
                 ),
               ],
             ),

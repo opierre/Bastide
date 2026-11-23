@@ -7,6 +7,7 @@ import '../../../core/api/api_client_provider.dart';
 import '../domain/auth_user.dart';
 import '../domain/avatar_choice.dart';
 import '../domain/avatar_picture.dart';
+import '../domain/text_size_preference.dart';
 import '../domain/theme_preference.dart';
 
 /// The session a successful register/login/reset call returns: a bearer token
@@ -172,6 +173,17 @@ class AuthRepository {
     return _parseUser(json['user'] as Map<String, dynamic>);
   }
 
+  /// Makes [textSize] the signed-in user's text size.
+  Future<AuthUser> setTextSize(TextSizePreference textSize) async {
+    final json =
+        await _apiClient.put(
+              '/auth/me/text-size',
+              body: {'text_size': textSize.wire},
+            )
+            as Map<String, dynamic>;
+    return _parseUser(json['user'] as Map<String, dynamic>);
+  }
+
   /// Makes [bytes] the signed-in user's avatar picture. The backend re-encodes
   /// it and refuses a file too large or of the wrong type.
   Future<AuthUser> uploadAvatar(Uint8List bytes) async {
@@ -227,6 +239,7 @@ class AuthRepository {
     currency: json['currency'] as String,
     avatar: AvatarChoice.fromWire(json['avatar'] as String?),
     theme: ThemePreference.fromWire(json['theme'] as String?),
+    textSize: TextSizePreference.fromWire(json['text_size'] as String?),
   );
 }
 

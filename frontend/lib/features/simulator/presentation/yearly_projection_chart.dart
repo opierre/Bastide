@@ -190,7 +190,7 @@ class _YearlyProjectionPlotState extends State<YearlyProjectionPlot> {
               capital: widget.capital,
               interest: widget.interest,
               yLabel: widget.yLabel,
-              labelStyle: widget.labelStyle,
+              labelStyle: ChartPaints.painted(context, widget.labelStyle),
               textDirection: Directionality.of(context),
             ),
           ),

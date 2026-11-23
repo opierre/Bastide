@@ -319,6 +319,16 @@ class ThemeUpdate(BaseModel):
     theme: ThemePreference
 
 
+#: The app's text size: every size of the type scale grows or shrinks together.
+TextSizePreference = Literal["normal", "large", "xlarge"]
+
+
+class TextSizeUpdate(BaseModel):
+    """Choose the app's text size."""
+
+    text_size: TextSizePreference
+
+
 class UserRead(BaseModel):
     """A user's public profile, as returned by the API."""
 
@@ -333,6 +343,8 @@ class UserRead(BaseModel):
     avatar: str
     #: `system`, `dark` or `light`.
     theme: str
+    #: `normal`, `large` or `xlarge`.
+    text_size: str
     created_at: datetime
 
 

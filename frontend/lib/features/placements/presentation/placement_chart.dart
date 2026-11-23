@@ -51,7 +51,10 @@ class _PlacementChartState extends State<PlacementChart> {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
-    final labelStyle = ChartPaints.labelStyle(context);
+    final labelStyle = ChartPaints.painted(
+      context,
+      ChartPaints.labelStyle(context),
+    );
     final points = widget.points;
     final scale = ChartScale.of(
       [

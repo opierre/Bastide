@@ -344,6 +344,30 @@
   "@settingsThemeSaveFailed": {
     "description": "Toast shown when saving the theme preference fails; the previous theme is restored."
   },
+  "settingsTextSizeTitle": "Taille du texte",
+  "@settingsTextSizeTitle": {
+    "description": "Title of the text size row in settings preferences."
+  },
+  "settingsTextSizeNote": "Agrandit tout le texte de l’application.",
+  "@settingsTextSizeNote": {
+    "description": "Note under the text size segmented control."
+  },
+  "settingsTextSizeNormal": "Normal",
+  "@settingsTextSizeNormal": {
+    "description": "Text size option: the reference type scale, the default."
+  },
+  "settingsTextSizeLarge": "Grand",
+  "@settingsTextSizeLarge": {
+    "description": "Text size option: every text a little larger."
+  },
+  "settingsTextSizeXLarge": "Très grand",
+  "@settingsTextSizeXLarge": {
+    "description": "Text size option: the largest text size."
+  },
+  "settingsTextSizeSaveFailed": "La taille du texte n’a pas pu être enregistrée. Rien n’a été modifié. Réessayez.",
+  "@settingsTextSizeSaveFailed": {
+    "description": "Toast shown when saving the text size fails; the previous size is restored."
+  },
   "settingsLanguageTitle": "Langue",
   "@settingsLanguageTitle": {
     "description": "Title of the language card in settings preferences."

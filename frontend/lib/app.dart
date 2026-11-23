@@ -6,6 +6,7 @@ import 'core/l10n/locale_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/startup/startup_screen.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/text_scale_provider.dart';
 import 'core/theme/theme_mode_provider.dart';
 import 'l10n/app_localizations.dart';
 
@@ -17,6 +18,7 @@ class BastideApp extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
     final backend = ref.watch(backendControllerProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final textScale = ref.watch(textScaleProvider);
 
     // Everything behind the router calls the API, so none of it is built
     // until the backend answers — and all of it goes away if the backend dies.
@@ -49,6 +51,12 @@ class BastideApp extends ConsumerWidget {
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       routerConfig: ref.watch(appRouterProvider),
+      // The user's text size scales every text below the router, chrome
+      // included; the startup screen above keeps the reference scale.
+      builder: (context, child) => AppTextScaleScope(
+        factor: textScale,
+        child: child ?? const SizedBox.shrink(),
+      ),
     );
   }
 }

@@ -24,6 +24,7 @@ from app.features.auth.schemas import (
     RecoveryCodeRegenerate,
     RecoveryCodeResponse,
     RegisterResponse,
+    TextSizeUpdate,
     ThemeUpdate,
     TokenResponse,
     UserLogin,
@@ -198,3 +199,13 @@ async def set_theme(
 ) -> MeResponse:
     """Make the system, dark or light theme the caller's theme."""
     return MeResponse(user=UserRead.model_validate(service.set_theme(user, payload.theme)))
+
+
+@router.put("/me/text-size", response_model=MeResponse)
+async def set_text_size(
+    payload: TextSizeUpdate,
+    service: Annotated[AuthService, Depends(_service)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> MeResponse:
+    """Make the normal, large or extra-large text size the caller's text size."""
+    return MeResponse(user=UserRead.model_validate(service.set_text_size(user, payload.text_size)))

@@ -333,6 +333,11 @@ class AuthService:
         user.theme = theme
         return self._repository.save_user(user)
 
+    def set_text_size(self, user: User, text_size: str) -> User:
+        """Make ``text_size`` (``normal``, ``large`` or ``xlarge``) the user's text size."""
+        user.text_size = text_size
+        return self._repository.save_user(user)
+
     def logout(self, token: str) -> None:
         """Invalidate a session token and close what it opened. A no-op if it is already gone."""
         record = self._repository.get_token(token)
