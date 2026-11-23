@@ -4,7 +4,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../../core/widgets/app_toggle.dart';
+import '../../../core/widgets/inline_banner.dart';
 import '../../../core/widgets/status_text.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/update_check_controller.dart';
@@ -75,11 +77,53 @@ class UpdateCheckRow extends ConsumerWidget {
             // instead, in full colour.
             onPressed: state.isBusy && !state.isChecking
                 ? null
-                : controller.checkNow,
+                : () => _checkNow(context, ref),
           ),
         ],
       ],
     );
+  }
+}
+
+/// Runs « Vérifier maintenant » and reports its end in a toast: the status
+/// line alone changes too quietly to show that the check is over.
+Future<void> _checkNow(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context)!;
+  // Looked up before the await: the card may be gone when the check ends.
+  final overlay = Overlay.maybeOf(context);
+  final outcome = await ref
+      .read(updateCheckControllerProvider.notifier)
+      .checkNow();
+  if (outcome == null || overlay == null || !overlay.mounted) return;
+  switch (outcome) {
+    case UpdateCheckOutcome.upToDate:
+      showAppToastOn(overlay, title: l10n.settingsUpdatesToastLatest);
+    case UpdateCheckOutcome.updateAvailable:
+      // The controller reports this outcome only with a version to name.
+      final latest = ref
+          .read(updateCheckControllerProvider)
+          .requireValue
+          .status
+          .latestVersion!;
+      showAppToastOn(
+        overlay,
+        title: l10n.settingsUpdatesToastAvailable(latest),
+        tone: BannerTone.info,
+      );
+    case UpdateCheckOutcome.unreachable:
+      showAppToastOn(
+        overlay,
+        title: l10n.settingsUpdatesToastFailed,
+        message: l10n.settingsUpdatesToastOffline,
+        tone: BannerTone.error,
+      );
+    case UpdateCheckOutcome.failed:
+      showAppToastOn(
+        overlay,
+        title: l10n.settingsUpdatesToastFailed,
+        message: l10n.settingsUpdatesToastError,
+        tone: BannerTone.error,
+      );
   }
 }
 
