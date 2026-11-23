@@ -225,19 +225,16 @@ class _ProgressRow extends ConsumerWidget {
         if (aiIsActive) ...[
           // The free width goes before the Note, never after the button: the
           // pair hugs the row's end edge with the Note right beside the
-          // button, however short the Note's text or wide the window.
+          // button. The Note keeps one line, centred on the button, and ends
+          // in an ellipsis when the window is too narrow for it.
           Expanded(
             child: Align(
               alignment: AlignmentDirectional.centerEnd,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: AppTransactions.noteMaxWidth,
-                ),
-                child: NoteLine(
-                  key: const Key('reviewAiNote'),
-                  icon: LucideIcons300.cpu,
-                  text: l10n.reviewAiNote(proposedCount),
-                ),
+              child: NoteLine(
+                key: const Key('reviewAiNote'),
+                icon: LucideIcons300.cpu,
+                text: l10n.reviewAiNote(proposedCount),
+                singleLine: true,
               ),
             ),
           ),

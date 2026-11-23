@@ -13,6 +13,7 @@ import 'package:bastide/features/transactions/presentation/review_queue.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -349,8 +350,57 @@ void main() {
       final note = tester.getRect(find.byKey(const Key('reviewAiNote')));
       expect(button.right, moreOrLessEquals(row.right));
       expect(note.right, moreOrLessEquals(button.left - AppSpacing.md));
+      // One line, centred on the button.
+      expect(note.center.dy, moreOrLessEquals(button.center.dy));
+      // A single 12 px line: never the two-line height of a wrapped Note.
+      final text = find.descendant(
+        of: find.byKey(const Key('reviewAiNote')),
+        matching: find.byType(Text),
+      );
+      expect(tester.getSize(text).height, lessThan(2 * 12));
     });
   }
+
+  testWidgets('a narrow row cuts the Note with an ellipsis, never wraps', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1100, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      _wrap(
+        controller: _controller([_proposed()]),
+        availability: _aiOn,
+        total: 1,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final text = tester.widget<Text>(
+      find.descendant(
+        of: find.byKey(const Key('reviewAiNote')),
+        matching: find.byType(Text),
+      ),
+    );
+    expect(text.maxLines, 1);
+    expect(text.overflow, TextOverflow.ellipsis);
+    final paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(
+        of: find.descendant(
+          of: find.byKey(const Key('reviewAiNote')),
+          matching: find.byType(Text),
+        ),
+        matching: find.byType(RichText),
+      ),
+    );
+    expect(paragraph.didExceedMaxLines, isTrue);
+    final row = tester.getRect(find.byKey(const Key('reviewProgressRow')));
+    final button = tester.getRect(
+      find.byKey(const Key('reviewQueueRunButton')),
+    );
+    expect(button.right, moreOrLessEquals(row.right));
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('the progress counts against the session baseline', (
     tester,
