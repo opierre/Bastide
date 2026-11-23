@@ -182,6 +182,24 @@ abstract class AppLocalizations {
   /// **'Fermer'**
   String get windowClose;
 
+  /// Label of the button just above « Paramètres » that collapses the sidebar to its icon rail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Replier'**
+  String get sidebarCollapse;
+
+  /// Tooltip and accessible label of the sidebar's collapse button, naming its keyboard shortcut.
+  ///
+  /// In fr, this message translates to:
+  /// **'Replier la barre latérale (Ctrl+B)'**
+  String get sidebarCollapseTooltip;
+
+  /// Tooltip and accessible label of the collapsed sidebar's expand button, naming its keyboard shortcut.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déplier la barre latérale (Ctrl+B)'**
+  String get sidebarExpandTooltip;
+
   /// Privacy line at the foot of the sidebar, beside a lock glyph. On the collapsed sidebar it becomes the lock's tooltip.
   ///
   /// In fr, this message translates to:
@@ -230,7 +248,7 @@ abstract class AppLocalizations {
   /// **'À propos'**
   String get settingsSectionAbout;
 
-  /// Settings › Préférences: title of the group holding theme, language, formats and sidebar.
+  /// Settings › Préférences: title of the group holding theme, text size, language and formats.
   ///
   /// In fr, this message translates to:
   /// **'Affichage'**
@@ -583,30 +601,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'S’applique immédiatement à toute l’interface.'**
   String get settingsLanguageNote;
-
-  /// Title of the sidebar row in settings preferences.
-  ///
-  /// In fr, this message translates to:
-  /// **'Barre latérale'**
-  String get settingsSidebarTitle;
-
-  /// Note under the sidebar segmented control.
-  ///
-  /// In fr, this message translates to:
-  /// **'Réduite, elle ne garde que les icônes.'**
-  String get settingsSidebarNote;
-
-  /// Segment: the sidebar shows icons and labels.
-  ///
-  /// In fr, this message translates to:
-  /// **'Étendue'**
-  String get settingsSidebarExpanded;
-
-  /// Segment: the sidebar keeps only the icons.
-  ///
-  /// In fr, this message translates to:
-  /// **'Réduite'**
-  String get settingsSidebarCollapsed;
 
   /// Title of the currency card in settings preferences.
   ///

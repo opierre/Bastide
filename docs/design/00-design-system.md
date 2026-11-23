@@ -185,13 +185,16 @@ Mockup: any panel.
      Hover: `hover` ground. Active: `hover` ground, `text`, 13/500. No rail, no tint, no filled
      icon. Transactions carries the review count on the right, 11 `textTertiary`, hidden at 0.
   4. Flexible empty stretch: tomettes, faded top and bottom (§12).
-  5. « Paramètres » item.
-  6. Foot, above a `line` hairline: user row (22 px avatar, display name, `chevrons-up-down`
+  5. Collapse button: an item, `panel-left-close` + « Replier », tooltip « Replier la barre
+     latérale (Ctrl+B) ». On the collapsed sidebar, `panel-left-open`, tooltip « Déplier la
+     barre latérale (Ctrl+B) ».
+  6. « Paramètres » item.
+  7. Foot, above a `line` hairline: user row (22 px avatar, display name, `chevrons-up-down`
      14 px) that opens the user menu (Paramètres, Se déconnecter); then the privacy line, `lock`
      14 px + « Données locales » 12 `textTertiary`.
 - **Collapsed sidebar**, 56 px: icons only, centred, tooltips with the label; brand row shows
   the mark; foot shows the avatar and the lock. Group labels become an 8 px gap. Toggled from
-  Paramètres → Préférences and with `Ctrl+B`.
+  the collapse button and with `Ctrl+B`; the choice is kept on this device.
 - **Title bar**, 48 px, `bg`, bottom hairline, padding 0 24: optional parent crumb
   (13 `textTertiary`, « Comptes / », a link), title 14/600, spacer, contextual controls (28 px,
   8 px apart). **No subtitle, no descriptor.**

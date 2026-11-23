@@ -51,6 +51,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get windowClose => 'Fermer';
 
   @override
+  String get sidebarCollapse => 'Replier';
+
+  @override
+  String get sidebarCollapseTooltip => 'Replier la barre latérale (Ctrl+B)';
+
+  @override
+  String get sidebarExpandTooltip => 'Déplier la barre latérale (Ctrl+B)';
+
+  @override
   String get sidebarPrivacyBadge => 'Données locales';
 
   @override
@@ -300,18 +309,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get settingsLanguageNote =>
       'S’applique immédiatement à toute l’interface.';
-
-  @override
-  String get settingsSidebarTitle => 'Barre latérale';
-
-  @override
-  String get settingsSidebarNote => 'Réduite, elle ne garde que les icônes.';
-
-  @override
-  String get settingsSidebarExpanded => 'Étendue';
-
-  @override
-  String get settingsSidebarCollapsed => 'Réduite';
 
   @override
   String get settingsCurrencyTitle => 'Devise';

@@ -66,7 +66,6 @@ session stays open and every other session of the user is signed out.
 | | Taille du texte · « Agrandit tout le texte de l’application. » | Segmented « Normal · Grand · Très grand ». Default « Normal ». Applies at once to every text of the app (`00` §3 « Text size »). |
 | | Langue · « S’applique immédiatement à toute l’interface. » | Segmented « Français · English ». |
 | | Formats · « Dates et montants suivent la langue choisie. » | Key/value list: Date « 14 mai 2026 · 14/05/2026 »; Montant « −1 234,56 € ». |
-| | Barre latérale · « Réduite, elle ne garde que les icônes. » | Segmented « Étendue · Réduite ». |
 | Argent | Devise · « Choisie à l’inscription et appliquée à tous vos comptes. Elle ne peut pas être modifiée dans cette version. » | Read-only value: `lock` + « EUR, euro (€) ». |
 | | Objectif de taux d’épargne · « Le repère affiché sur le tableau de bord. » | Slider 1–50 %, step 1, value printed (« 20 % »). |
 | | Revenu déclaré · « Sert au taux d’endettement des panneaux Crédits et Simulateur. Sans lui, Bastide prend le revenu médian constaté. » | Amount field 140 px + « par mois »; empty means "not declared". |
@@ -151,7 +150,7 @@ done (« Sauvegarde enregistrée »).
 ## Copy
 Delete `navSettingsSubtitle`. `settingsAiSubtitle`, `settingsAiModelUnavailable`,
 `settingsBackupPrivacy`, `settingsBackupNone` per `00` §14. Remove « IRRÉVERSIBLE » and « Zone
-de danger ». New: theme, text size, sidebar, session, licence and data-location strings above.
+de danger ». New: theme, text size, session, licence and data-location strings above.
 A refused text-size save toasts « La taille du texte n’a pas pu être enregistrée. Rien n’a été
 modifié. Réessayez. » and puts the previous size back, as the theme does.
 

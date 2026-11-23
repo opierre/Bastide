@@ -231,38 +231,34 @@ void main() {
     );
   });
 
-  testWidgets('Paramètres › Barre latérale switches the sidebar', (
+  testWidgets('the sidebar button collapses and expands it, and is saved', (
     tester,
   ) async {
     _useDesignViewport(tester);
+    final store = FakeUiPreferencesStore();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           ..._authenticatedOverrides,
-          uiPreferencesStoreProvider.overrideWithValue(
-            FakeUiPreferencesStore(),
-          ),
+          uiPreferencesStoreProvider.overrideWithValue(store),
         ],
         child: const BastideApp(),
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Paramètres'));
-    await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('settingsSidebarCollapsedOption')));
-    await tester.pumpAndSettle();
-    expect(
-      tester.getSize(find.byKey(const Key('appNavRail'))).width,
-      AppSizes.sidebarCollapsed,
-    );
+    double railWidth() =>
+        tester.getSize(find.byKey(const Key('appNavRail'))).width;
+    final toggle = find.byKey(const Key('sidebarCollapseToggle'));
 
-    await tester.tap(find.byKey(const Key('settingsSidebarExpandedOption')));
+    await tester.tap(toggle);
     await tester.pumpAndSettle();
-    expect(
-      tester.getSize(find.byKey(const Key('appNavRail'))).width,
-      AppSizes.sidebar,
-    );
+    expect(railWidth(), AppSizes.sidebarCollapsed);
+
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(railWidth(), AppSizes.sidebar);
+    expect(store.writes, [true, false]);
   });
 
   testWidgets('tapping a nav item swaps the content region, not the chrome', (

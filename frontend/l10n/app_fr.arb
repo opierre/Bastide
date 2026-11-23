@@ -56,6 +56,18 @@
   "@windowClose": {
     "description": "Tooltip and accessible label of the window control that closes the window, and the app with it."
   },
+  "sidebarCollapse": "Replier",
+  "@sidebarCollapse": {
+    "description": "Label of the button just above « Paramètres » that collapses the sidebar to its icon rail."
+  },
+  "sidebarCollapseTooltip": "Replier la barre latérale (Ctrl+B)",
+  "@sidebarCollapseTooltip": {
+    "description": "Tooltip and accessible label of the sidebar's collapse button, naming its keyboard shortcut."
+  },
+  "sidebarExpandTooltip": "Déplier la barre latérale (Ctrl+B)",
+  "@sidebarExpandTooltip": {
+    "description": "Tooltip and accessible label of the collapsed sidebar's expand button, naming its keyboard shortcut."
+  },
   "sidebarPrivacyBadge": "Données locales",
   "@sidebarPrivacyBadge": {
     "description": "Privacy line at the foot of the sidebar, beside a lock glyph. On the collapsed sidebar it becomes the lock's tooltip."
@@ -95,7 +107,7 @@
   },
   "settingsGroupDisplay": "Affichage",
   "@settingsGroupDisplay": {
-    "description": "Settings › Préférences: title of the group holding theme, language, formats and sidebar."
+    "description": "Settings › Préférences: title of the group holding theme, text size, language and formats."
   },
   "settingsGroupMoney": "Argent",
   "@settingsGroupMoney": {
@@ -375,22 +387,6 @@
   "settingsLanguageNote": "S’applique immédiatement à toute l’interface.",
   "@settingsLanguageNote": {
     "description": "Note under the language segmented control."
-  },
-  "settingsSidebarTitle": "Barre latérale",
-  "@settingsSidebarTitle": {
-    "description": "Title of the sidebar row in settings preferences."
-  },
-  "settingsSidebarNote": "Réduite, elle ne garde que les icônes.",
-  "@settingsSidebarNote": {
-    "description": "Note under the sidebar segmented control."
-  },
-  "settingsSidebarExpanded": "Étendue",
-  "@settingsSidebarExpanded": {
-    "description": "Segment: the sidebar shows icons and labels."
-  },
-  "settingsSidebarCollapsed": "Réduite",
-  "@settingsSidebarCollapsed": {
-    "description": "Segment: the sidebar keeps only the icons."
   },
   "settingsCurrencyTitle": "Devise",
   "@settingsCurrencyTitle": {

@@ -51,6 +51,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get windowClose => 'Close';
 
   @override
+  String get sidebarCollapse => 'Collapse';
+
+  @override
+  String get sidebarCollapseTooltip => 'Collapse the sidebar (Ctrl+B)';
+
+  @override
+  String get sidebarExpandTooltip => 'Expand the sidebar (Ctrl+B)';
+
+  @override
   String get sidebarPrivacyBadge => 'Local data';
 
   @override
@@ -299,18 +308,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsLanguageNote =>
       'Applies immediately across the whole interface.';
-
-  @override
-  String get settingsSidebarTitle => 'Sidebar';
-
-  @override
-  String get settingsSidebarNote => 'Collapsed, it keeps only the icons.';
-
-  @override
-  String get settingsSidebarExpanded => 'Expanded';
-
-  @override
-  String get settingsSidebarCollapsed => 'Collapsed';
 
   @override
   String get settingsCurrencyTitle => 'Currency';

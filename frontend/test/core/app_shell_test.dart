@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../support/fake_dashboard_controller.dart';
 import '../support/fake_ui_preferences.dart';
@@ -306,6 +307,58 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pumpAndSettle();
     expect(_sidebarWidth(tester), AppSizes.sidebar);
+  });
+
+  testWidgets('the collapse button sits just above Paramètres', (tester) async {
+    _useFrame(tester);
+    await tester.pumpWidget(_shell(path: '/dashboard'));
+    await tester.pumpAndSettle();
+
+    final toggle = find.byKey(const Key('sidebarCollapseToggle'));
+    final settings = find.byKey(const Key('nav/settings'));
+    expect(
+      tester.getRect(toggle).bottom,
+      moreOrLessEquals(tester.getRect(settings).top, epsilon: 0.5),
+    );
+    expect(_inSidebar(find.text('Replier')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: toggle,
+        matching: find.byIcon(LucideIcons300.panelLeftClose),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byTooltip('Replier la barre latérale (Ctrl+B)'),
+      findsOneWidget,
+    );
+
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(_sidebarWidth(tester), AppSizes.sidebarCollapsed);
+    expect(_inSidebar(find.text('Replier')), findsNothing);
+    expect(
+      find.descendant(
+        of: toggle,
+        matching: find.byIcon(LucideIcons300.panelLeftOpen),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byTooltip('Déplier la barre latérale (Ctrl+B)'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the collapse button speaks English', (tester) async {
+    _useFrame(tester);
+    await tester.pumpWidget(
+      _shell(path: '/dashboard', locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(_inSidebar(find.text('Collapse')), findsOneWidget);
+    expect(find.byTooltip('Collapse the sidebar (Ctrl+B)'), findsOneWidget);
   });
 
   testWidgets('the collapsed foot keeps the avatar and the lock', (

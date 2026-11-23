@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 
 import '../../../core/l10n/date_display.dart';
 import '../../../core/l10n/locale_provider.dart';
-import '../../../core/navigation/sidebar_controller.dart';
 import '../../../core/session/current_user_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
@@ -34,7 +33,7 @@ const _sampleAmountMinor = -123456;
 /// Width of the declared income field (`09-settings.md` §Préférences).
 const _incomeFieldWidth = 140.0;
 
-/// Préférences: Affichage (theme, text size, language, formats, sidebar), then Argent
+/// Préférences: Affichage (theme, text size, language, formats), then Argent
 /// (currency, savings-rate goal, declared income).
 class PreferencesSection extends ConsumerWidget {
   const PreferencesSection({super.key, this.focusIncome = false});
@@ -183,31 +182,6 @@ class PreferencesSection extends ConsumerWidget {
                 colorize: false,
                 style: Theme.of(context).textTheme.bodyMedium!,
               ),
-            ),
-          ],
-        ),
-        SettingRow(
-          key: const Key('settingsSidebarRow'),
-          name: l10n.settingsSidebarTitle,
-          description: l10n.settingsSidebarNote,
-          children: [
-            AppSegmented<bool>(
-              value: ref.watch(sidebarCollapsedProvider),
-              // The same switch as Ctrl+B, so the two never disagree.
-              onChanged: (collapsed) =>
-                  ref.read(sidebarCollapsedProvider.notifier).set(collapsed),
-              segments: [
-                AppSegment(
-                  key: const Key('settingsSidebarExpandedOption'),
-                  value: false,
-                  label: l10n.settingsSidebarExpanded,
-                ),
-                AppSegment(
-                  key: const Key('settingsSidebarCollapsedOption'),
-                  value: true,
-                  label: l10n.settingsSidebarCollapsed,
-                ),
-              ],
             ),
           ],
         ),

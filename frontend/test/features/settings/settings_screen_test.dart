@@ -127,13 +127,14 @@ void main() {
       'settingsThemeRow',
       'settingsLanguageRow',
       'settingsFormatsRow',
-      'settingsSidebarRow',
       'settingsCurrencyRow',
       'settingsSavingsGoalRow',
       'settingsIncomeRow',
     ]) {
       expect(find.byKey(Key(row)), findsOneWidget);
     }
+    // The sidebar collapses from its own button now, not from here.
+    expect(find.byKey(const Key('settingsSidebarRow')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
