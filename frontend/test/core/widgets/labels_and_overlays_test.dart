@@ -312,6 +312,32 @@ void main() {
     );
   });
 
+  testWidgets('a note wraps by default; a single-line note keeps one line '
+      'with an ellipsis and its icon centred', (tester) async {
+    const long = 'aaaaaaaaaa bbbbbbbbbb cccccccccc dddddddddd';
+    Widget boxed(Widget note) => ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 200),
+      child: note,
+    );
+
+    await pumpHost(tester, boxed(const NoteLine(text: long)));
+    var text = tester.widget<Text>(find.text(long));
+    expect(text.maxLines, isNull);
+    expect(text.overflow, isNull);
+    final wrappedHeight = tester.getSize(find.text(long)).height;
+
+    await pumpHost(tester, boxed(const NoteLine(text: long, singleLine: true)));
+    text = tester.widget<Text>(find.text(long));
+    expect(text.maxLines, 1);
+    expect(text.overflow, TextOverflow.ellipsis);
+    expect(tester.getSize(find.text(long)).height, lessThan(wrappedHeight));
+    expect(
+      tester.getCenter(find.byType(Icon)).dy,
+      moreOrLessEquals(tester.getCenter(find.text(long)).dy),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   group('AppPopover', () {
     testWidgets('surface, lineStrong, radius 8, shadow, padding 4', (
       tester,

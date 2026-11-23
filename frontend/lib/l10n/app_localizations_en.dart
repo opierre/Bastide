@@ -1319,12 +1319,9 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          'Local AI proposes a category for $count operations. Nothing is filed without your consent.',
-      one:
-          'Local AI proposes a category for 1 operation. Nothing is filed without your consent.',
-      zero:
-          'Local AI proposed no category. Nothing is filed without your consent.',
+      other: 'Local AI proposes a category for $count operations.',
+      one: 'Local AI proposes a category for 1 operation.',
+      zero: 'Local AI proposed no category.',
     );
     return '$_temp0';
   }
@@ -4683,6 +4680,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get networthDeclaredMonthHint => 'MM/YYYY';
+
+  @override
+  String get networthDeclaredMonthPick => 'Pick a month';
 
   @override
   String get networthDeclaredMonthInvalid => 'Enter a month as MM/YYYY.';

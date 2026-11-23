@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/api/api_client.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_modal.dart';
+import '../../../core/widgets/date_field.dart';
 import '../../../core/widgets/labeled_field.dart';
 import '../../../core/widgets/modal_parts.dart';
 import '../../../core/widgets/money_field.dart';
@@ -30,24 +29,16 @@ Future<void> showDeclaredBalances(
   );
 }
 
-/// Reads « 03/2025 » (or « 3/2025 ») as the first day of that month, or `null`
-/// when it doesn't read as one. The same spelling in both locales: a month
-/// has no day to put first or last.
-DateTime? parseMonthInput(String raw) {
-  final match = RegExp(r'^\s*(\d{1,2})\s*/\s*(\d{4})\s*$').firstMatch(raw);
-  if (match == null) return null;
-  final month = int.parse(match.group(1)!);
-  if (month < 1 || month > 12) return null;
-  return DateTime(int.parse(match.group(2)!), month);
-}
-
-/// The inverse, for loading a month back into the field.
-String formatMonthInput(DateTime month) =>
-    '${month.month.toString().padLeft(2, '0')}/${month.year}';
-
 /// Whether [month] has ended as of [today] — the only months the API accepts.
 bool isClosedMonth(DateTime month, DateTime today) =>
     month.year * 12 + month.month < today.year * 12 + today.month;
+
+/// The last day of the month before today's: the latest day the month
+/// calendar offers.
+DateTime _lastClosedMonth() {
+  final today = DateTime.now();
+  return DateTime(today.year, today.month, 0);
+}
 
 /// Whether a refused write belongs under the month field.
 bool isDeclaredMonthError(Object? error) =>
@@ -187,20 +178,16 @@ class _DeclaredBalancesModalState extends ConsumerState<DeclaredBalancesModal> {
             child: _EntryRow(
               monthLabel: l10n.networthDeclaredMonth,
               monthError: _monthError,
-              month: TextFormField(
+              month: MonthField(
                 key: const Key('declaredMonth'),
                 controller: _monthController,
                 focusNode: _monthFocus,
-                keyboardType: TextInputType.datetime,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9/]')),
-                ],
-                style: tabularNumberStyle(
-                  Theme.of(context).textTheme.bodyLarge!,
-                ),
-                decoration: InputDecoration(
-                  hintText: l10n.networthDeclaredMonthHint,
-                ),
+                // Only an ended month can be declared, so the calendar stops
+                // at the last one.
+                firstDate: DateTime(1970),
+                lastDate: _lastClosedMonth(),
+                hintText: l10n.networthDeclaredMonthHint,
+                calendarTooltip: l10n.networthDeclaredMonthPick,
                 validator: (value) {
                   final month = parseMonthInput(value ?? '');
                   if (month == null) {

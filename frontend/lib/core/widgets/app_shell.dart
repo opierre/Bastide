@@ -302,7 +302,7 @@ class _Sidebar extends ConsumerWidget {
           ),
           _CollapseToggle(collapsed: collapsed),
           item(settings),
-          _SidebarFoot(collapsed: collapsed, onNavigate: onNavigate),
+          _SidebarFoot(collapsed: collapsed),
         ],
       ),
     );
@@ -601,10 +601,9 @@ class _NavItem extends ConsumerWidget {
 /// The sidebar foot, above a hairline: the user row that opens the user menu,
 /// then the privacy line (`00` §5).
 class _SidebarFoot extends StatelessWidget {
-  const _SidebarFoot({required this.collapsed, required this.onNavigate});
+  const _SidebarFoot({required this.collapsed});
 
   final bool collapsed;
-  final ValueChanged<String> onNavigate;
 
   @override
   Widget build(BuildContext context) {
@@ -617,7 +616,7 @@ class _SidebarFoot extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _UserRow(collapsed: collapsed, onNavigate: onNavigate),
+          _UserRow(collapsed: collapsed),
           _PrivacyLine(collapsed: collapsed),
         ],
       ),
@@ -625,13 +624,12 @@ class _SidebarFoot extends StatelessWidget {
   }
 }
 
-enum _UserMenuAction { settings, logout }
-
+/// The user row and its menu. Paramètres is not in it: the sidebar already
+/// has its own item.
 class _UserRow extends ConsumerStatefulWidget {
-  const _UserRow({required this.collapsed, required this.onNavigate});
+  const _UserRow({required this.collapsed});
 
   final bool collapsed;
-  final ValueChanged<String> onNavigate;
 
   @override
   ConsumerState<_UserRow> createState() => _UserRowState();
@@ -640,16 +638,9 @@ class _UserRow extends ConsumerStatefulWidget {
 class _UserRowState extends ConsumerState<_UserRow> {
   final _menu = MenuController();
 
-  void _choose(_UserMenuAction action) {
-    switch (action) {
-      case _UserMenuAction.settings:
-        widget.onNavigate('/settings');
-      case _UserMenuAction.logout:
-        // Signing out flips the session to null; the router's auth redirect
-        // then takes the user back to the login screen.
-        ref.read(authControllerProvider.notifier).logout();
-    }
-  }
+  // Signing out flips the session to null; the router's auth redirect then
+  // takes the user back to the login screen.
+  void _logout() => ref.read(authControllerProvider.notifier).logout();
 
   @override
   Widget build(BuildContext context) {
@@ -670,16 +661,10 @@ class _UserRowState extends ConsumerState<_UserRow> {
       style: AppPopover.menuStyle(context),
       menuChildren: [
         AppMenuItem(
-          key: const Key('userMenuSettingsItem'),
-          label: l10n.navSettings,
-          leading: const Icon(LucideIcons300.settings),
-          onPressed: () => _choose(_UserMenuAction.settings),
-        ),
-        AppMenuItem(
           key: const Key('userMenuLogoutItem'),
           label: l10n.userMenuLogout,
           leading: const Icon(LucideIcons300.logOut),
-          onPressed: () => _choose(_UserMenuAction.logout),
+          onPressed: _logout,
         ),
       ],
       child: _SidebarRow(
