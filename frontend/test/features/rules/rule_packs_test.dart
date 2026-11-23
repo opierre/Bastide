@@ -5,6 +5,7 @@ import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/runs/run_progress_client.dart';
 import 'package:bastide/core/runs/run_progress_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/theme/tokens.dart';
 import 'package:bastide/core/widgets/app_modal.dart';
 import 'package:bastide/core/widgets/inline_banner.dart';
 import 'package:bastide/features/categories/application/categories_controller.dart';
@@ -443,6 +444,34 @@ void main() {
         expect(find.byTooltip('Exporter mes règles'), findsOneWidget);
       },
     );
+
+    testWidgets('are 28 px secondary toolbar buttons, like other panels', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_wrap(apiClient, files: FakeRulePackFiles()));
+      await tester.pumpAndSettle();
+      await _openRules(tester);
+
+      for (final key in const [
+        'rulePackImportButton',
+        'rulePackImportBuiltinButton',
+        'rulePackExportButton',
+      ]) {
+        final button = find.byKey(Key(key));
+        expect(tester.getSize(button), const Size.square(AppSizes.button));
+        // The secondary recipe: a `surface` ground and a `lineStrong` border,
+        // so the whole 28 px square reads, not only the 14 px icon.
+        final box = tester.widget<Container>(
+          find.descendant(of: button, matching: find.byType(Container)).first,
+        );
+        final decoration = box.decoration! as BoxDecoration;
+        expect(decoration.color, AppColors.dark.surface);
+        expect(
+          (decoration.border! as Border).top.color,
+          AppColors.dark.lineStrong,
+        );
+      }
+    });
 
     testWidgets('the import button opens the file picker', (tester) async {
       final files = FakeRulePackFiles(pickedSource: _packSource(type: 'regex'));
