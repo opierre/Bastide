@@ -326,6 +326,32 @@ void main() {
     expect(find.byKey(const Key('reviewAiInvitation')), findsNothing);
   });
 
+  for (final width in [1440.0, 2560.0]) {
+    testWidgets('the run button and its Note hug the row end at $width px', (
+      tester,
+    ) async {
+      tester.view.physicalSize = Size(width, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        _wrap(
+          controller: _controller([_proposed()]),
+          availability: _aiOn,
+          total: 1,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final row = tester.getRect(find.byKey(const Key('reviewProgressRow')));
+      final button = tester.getRect(
+        find.byKey(const Key('reviewQueueRunButton')),
+      );
+      final note = tester.getRect(find.byKey(const Key('reviewAiNote')));
+      expect(button.right, moreOrLessEquals(row.right));
+      expect(note.right, moreOrLessEquals(button.left - AppSpacing.md));
+    });
+  }
+
   testWidgets('the progress counts against the session baseline', (
     tester,
   ) async {

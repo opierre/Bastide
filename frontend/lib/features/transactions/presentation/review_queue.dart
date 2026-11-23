@@ -222,17 +222,22 @@ class _ProgressRow extends ConsumerWidget {
             ],
           ),
         ),
-        const Spacer(),
         if (aiIsActive) ...[
-          Flexible(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: AppTransactions.noteMaxWidth,
-              ),
-              child: NoteLine(
-                key: const Key('reviewAiNote'),
-                icon: LucideIcons300.cpu,
-                text: l10n.reviewAiNote(proposedCount),
+          // The free width goes before the Note, never after the button: the
+          // pair hugs the row's end edge with the Note right beside the
+          // button, however short the Note's text or wide the window.
+          Expanded(
+            child: Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: AppTransactions.noteMaxWidth,
+                ),
+                child: NoteLine(
+                  key: const Key('reviewAiNote'),
+                  icon: LucideIcons300.cpu,
+                  text: l10n.reviewAiNote(proposedCount),
+                ),
               ),
             ),
           ),
