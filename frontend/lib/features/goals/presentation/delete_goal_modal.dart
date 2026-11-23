@@ -16,8 +16,8 @@ Future<bool?> showDeleteGoalModal(BuildContext context, {required Goal goal}) {
   );
 }
 
-/// « Supprimer l’objectif « … » ? », opened from the edit modal's ghost
-/// « Supprimer », as a placement is deleted (`17-placements.md` §Modals): a
+/// « Supprimer l’objectif « … » ? », opened from the inspector's « Supprimer »
+/// tool button (`11-goals.md` §Modals): a
 /// destructive confirmation without a body whose lead says the allocations
 /// and the image go, that archiving keeps them, and that the accounts stay;
 /// one of the places the solid destructive red may appear. Focus lands on

@@ -16,7 +16,6 @@ import '../application/goal_image_controller.dart';
 import '../application/goals_controller.dart';
 import '../data/goals_repository.dart';
 import '../domain/goal.dart';
-import 'delete_goal_modal.dart';
 import 'goal_image_crop_modal.dart';
 import 'goal_labels.dart';
 import 'goal_month_field.dart';
@@ -38,6 +37,9 @@ Future<Goal?> showGoalForm(BuildContext context, {Goal? initial}) {
 /// Deliberately short: nothing here asks about an account, because a goal
 /// has none. The image is picked and cropped here but uploaded once the goal
 /// is saved.
+///
+/// The footer has no « Supprimer »: deleting a goal is the inspector's
+/// trash tool button, next to edit and archive.
 class GoalFormModal extends ConsumerStatefulWidget {
   const GoalFormModal({super.key, this.initial});
 
@@ -115,13 +117,6 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
 
   void _markDirty() {
     if (!_dirty) setState(() => _dirty = true);
-  }
-
-  /// The destructive confirmation, over the form; the form closes once the
-  /// goal is gone.
-  Future<void> _delete() async {
-    final deleted = await showDeleteGoalModal(context, goal: widget.initial!);
-    if (deleted == true && mounted) Navigator.of(context).pop();
   }
 
   Future<void> _submit() async {
@@ -213,14 +208,6 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
       busy: _isSubmitting,
       saveError: _errorText,
       onSubmit: _submit,
-      leadingAction: _isEditing
-          ? AppButton(
-              key: const Key('goalFormDelete'),
-              label: l10n.goalFormDelete,
-              variant: AppButtonVariant.ghost,
-              onPressed: _isSubmitting ? null : _delete,
-            )
-          : null,
       actions: [
         const AppModalCancel(key: Key('goalFormCancel')),
         PrimaryButton(

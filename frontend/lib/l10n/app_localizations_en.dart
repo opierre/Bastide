@@ -3332,6 +3332,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalEdit => 'Edit';
 
   @override
+  String get goalDelete => 'Delete';
+
+  @override
   String get goalAllocationsTitle => 'Allocations';
 
   @override
@@ -3473,9 +3476,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalFormSave => 'Save';
-
-  @override
-  String get goalFormDelete => 'Delete';
 
   @override
   String goalDeleteTitle(String name) {

@@ -5195,23 +5195,29 @@ abstract class AppLocalizations {
   /// **'{deadline} · reste {remaining}'**
   String goalDeadlineRemaining(String deadline, String remaining);
 
-  /// Inspector action archiving the goal.
+  /// Inspector icon action archiving the goal; its tooltip and accessible name.
   ///
   /// In fr, this message translates to:
   /// **'Archiver'**
   String get goalArchive;
 
-  /// Inspector action restoring an archived goal.
+  /// Inspector icon action restoring an archived goal; its tooltip and accessible name.
   ///
   /// In fr, this message translates to:
   /// **'Désarchiver'**
   String get goalUnarchive;
 
-  /// Inspector action opening the goal form.
+  /// Inspector icon action opening the goal form; its tooltip and accessible name.
   ///
   /// In fr, this message translates to:
   /// **'Modifier'**
   String get goalEdit;
+
+  /// Inspector icon action opening the delete goal confirmation; its tooltip and accessible name.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get goalDelete;
 
   /// Inspector section heading.
   ///
@@ -5464,12 +5470,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Enregistrer'**
   String get goalFormSave;
-
-  /// Ghost delete button on the footer of the edit goal modal.
-  ///
-  /// In fr, this message translates to:
-  /// **'Supprimer'**
-  String get goalFormDelete;
 
   /// Title of the delete goal confirmation.
   ///

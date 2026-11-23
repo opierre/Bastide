@@ -17,6 +17,7 @@ import '../domain/goal.dart';
 import '../domain/goal_allocation.dart';
 import 'allocation_modal.dart';
 import 'delete_allocation_modal.dart';
+import 'delete_goal_modal.dart';
 import 'goal_banner.dart';
 import 'goal_form_modal.dart';
 import 'goal_labels.dart';
@@ -29,11 +30,11 @@ RepereTone goalRepereTone(Goal goal) => goal.isArchived
     : RepereTone.normal;
 
 /// The inspector pane of the Objectifs panel (`11-goals.md` §Inspector pane):
-/// the banner edge to edge, then the figures with « Archiver », the repère,
-/// and the allocations with « Allouer ».
+/// the banner edge to edge, then the figures with the goal's tool buttons, the
+/// repère, and the allocations with « Allouer ».
 ///
-/// An archived goal shows « Désarchiver » in place of « Archiver », no
-/// « Allouer », and no delete action on its allocation rows.
+/// An archived goal shows « Désarchiver » in place of « Archiver », no edit,
+/// no « Allouer », and no delete action on its allocation rows.
 class GoalInspector extends ConsumerWidget {
   const GoalInspector({super.key, required this.goal});
 
@@ -59,18 +60,17 @@ class GoalInspector extends ConsumerWidget {
   }
 }
 
-class _Figures extends ConsumerWidget {
+class _Figures extends StatelessWidget {
   const _Figures({required this.goal});
 
   final Goal goal;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final textTheme = Theme.of(context).textTheme;
     final colors = context.colors;
-    final controller = ref.read(goalsControllerProvider.notifier);
     String money(int minor) => formatAmount(
       amountMinor: minor,
       currency: goal.currency,
@@ -115,29 +115,7 @@ class _Figures extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            if (!goal.isArchived) ...[
-              AppButton(
-                key: const Key('goalEdit'),
-                label: l10n.goalEdit,
-                icon: LucideIcons300.pencil,
-                iconOnly: true,
-                onPressed: () => showGoalForm(context, initial: goal),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-            ],
-            goal.isArchived
-                ? AppButton(
-                    key: const Key('goalUnarchive'),
-                    label: l10n.goalUnarchive,
-                    icon: LucideIcons300.archiveRestore,
-                    onPressed: () => controller.restore(goal.id),
-                  )
-                : AppButton(
-                    key: const Key('goalArchive'),
-                    label: l10n.goalArchive,
-                    icon: LucideIcons300.archive,
-                    onPressed: () => controller.archive(goal.id),
-                  ),
+            _GoalTools(goal: goal),
           ],
         ),
         const SizedBox(height: AppSpacing.md),
@@ -161,6 +139,85 @@ class _Figures extends ConsumerWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// The goal's actions as icon-only tool buttons: edit (`pencil`), archive
+/// (`archive`, or `archive-restore` to undo it) and delete (`trash-2`). Each
+/// one's label is its tooltip and its accessible name (`00` §6). An archived
+/// goal is read-only, so it has no edit; it can still be deleted.
+class _GoalTools extends ConsumerWidget {
+  const _GoalTools({required this.goal});
+
+  final Goal goal;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = ref.read(goalsControllerProvider.notifier);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: AppSpacing.xsPlus,
+      children: [
+        if (!goal.isArchived)
+          _ToolButton(
+            key: const Key('goalEdit'),
+            label: l10n.goalEdit,
+            icon: LucideIcons300.pencil,
+            onPressed: () => showGoalForm(context, initial: goal),
+          ),
+        goal.isArchived
+            ? _ToolButton(
+                key: const Key('goalUnarchive'),
+                label: l10n.goalUnarchive,
+                icon: LucideIcons300.archiveRestore,
+                onPressed: () => controller.restore(goal.id),
+              )
+            : _ToolButton(
+                key: const Key('goalArchive'),
+                label: l10n.goalArchive,
+                icon: LucideIcons300.archive,
+                onPressed: () => controller.archive(goal.id),
+              ),
+        _ToolButton(
+          key: const Key('goalDelete'),
+          label: l10n.goalDelete,
+          icon: LucideIcons300.trash2,
+          onPressed: () => showDeleteGoalModal(context, goal: goal),
+        ),
+      ],
+    );
+  }
+}
+
+/// A square secondary button showing only its icon, with its label as a
+/// tooltip. The button already carries the label as its accessible name, so
+/// the tooltip stays out of the semantics tree.
+class _ToolButton extends StatelessWidget {
+  const _ToolButton({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: label,
+      excludeFromSemantics: true,
+      child: AppButton(
+        label: label,
+        icon: icon,
+        iconOnly: true,
+        onPressed: onPressed,
+      ),
     );
   }
 }

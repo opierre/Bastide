@@ -4168,15 +4168,19 @@
   },
   "goalArchive": "Archiver",
   "@goalArchive": {
-    "description": "Inspector action archiving the goal."
+    "description": "Inspector icon action archiving the goal; its tooltip and accessible name."
   },
   "goalUnarchive": "Désarchiver",
   "@goalUnarchive": {
-    "description": "Inspector action restoring an archived goal."
+    "description": "Inspector icon action restoring an archived goal; its tooltip and accessible name."
   },
   "goalEdit": "Modifier",
   "@goalEdit": {
-    "description": "Inspector action opening the goal form."
+    "description": "Inspector icon action opening the goal form; its tooltip and accessible name."
+  },
+  "goalDelete": "Supprimer",
+  "@goalDelete": {
+    "description": "Inspector icon action opening the delete goal confirmation; its tooltip and accessible name."
   },
   "goalAllocationsTitle": "Allocations",
   "@goalAllocationsTitle": {
@@ -4392,10 +4396,6 @@
   "goalFormSave": "Enregistrer",
   "@goalFormSave": {
     "description": "Confirm action when editing a goal."
-  },
-  "goalFormDelete": "Supprimer",
-  "@goalFormDelete": {
-    "description": "Ghost delete button on the footer of the edit goal modal."
   },
   "goalDeleteTitle": "Supprimer l’objectif « {name} » ?",
   "@goalDeleteTitle": {
