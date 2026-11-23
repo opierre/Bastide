@@ -38,16 +38,7 @@ class NoteLine extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.xsPlus),
-        // Sized to its longest line, not the width it was offered, so a
-        // wrapped Note ends where its text does and whatever follows it sits
-        // right beside it.
-        Flexible(
-          child: Text(
-            text,
-            style: style,
-            textWidthBasis: TextWidthBasis.longestLine,
-          ),
-        ),
+        Flexible(child: Text(text, style: style)),
       ],
     );
   }
