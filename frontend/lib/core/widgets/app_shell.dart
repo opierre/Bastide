@@ -300,6 +300,7 @@ class _Sidebar extends ConsumerWidget {
               ],
             ),
           ),
+          _CollapseToggle(collapsed: collapsed),
           item(settings),
           _SidebarFoot(collapsed: collapsed, onNavigate: onNavigate),
         ],
@@ -403,6 +404,7 @@ class _SidebarRow extends StatefulWidget {
     required this.builder,
     super.key,
     this.height = AppSizes.navItem,
+    this.tooltipWhenExpanded = false,
   });
 
   final VoidCallback onTap;
@@ -411,6 +413,10 @@ class _SidebarRow extends StatefulWidget {
 
   /// Shown on the collapsed sidebar, where the label is gone.
   final String tooltip;
+
+  /// Also shows [tooltip] on the expanded sidebar, for a row whose label does
+  /// not say everything (the collapse toggle names its shortcut there).
+  final bool tooltipWhenExpanded;
   final double height;
   final Widget Function(BuildContext context, bool hovered) builder;
 
@@ -464,9 +470,62 @@ class _SidebarRowState extends State<_SidebarRow> {
     );
 
     row = Semantics(button: true, selected: widget.selected, child: row);
-    return widget.collapsed
+    return widget.collapsed || widget.tooltipWhenExpanded
         ? Tooltip(message: widget.tooltip, child: row)
         : row;
+  }
+}
+
+/// Collapses and expands the sidebar, just above « Paramètres »: the same
+/// switch as `Ctrl+B`, so the two never disagree, and the choice is kept on
+/// this device by [SidebarCollapsed].
+class _CollapseToggle extends ConsumerWidget {
+  const _CollapseToggle({required this.collapsed});
+
+  final bool collapsed;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
+
+    return _SidebarRow(
+      key: const Key('sidebarCollapseToggle'),
+      onTap: () => ref.read(sidebarCollapsedProvider.notifier).toggle(),
+      selected: false,
+      collapsed: collapsed,
+      tooltip: collapsed
+          ? l10n.sidebarExpandTooltip
+          : l10n.sidebarCollapseTooltip,
+      tooltipWhenExpanded: true,
+      builder: (context, hovered) {
+        final foreground = hovered ? colors.text : colors.textSecondary;
+        final icon = Icon(
+          collapsed
+              ? LucideIcons300.panelLeftOpen
+              : LucideIcons300.panelLeftClose,
+          size: AppSizes.icon,
+          color: foreground,
+        );
+        if (collapsed) return icon;
+        return Row(
+          children: [
+            icon,
+            const SizedBox(width: AppSpacing.navIconGap),
+            Expanded(
+              child: Text(
+                l10n.sidebarCollapse,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: foreground),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 

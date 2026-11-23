@@ -8,8 +8,8 @@ import '../storage/ui_preferences.dart';
 /// (`docs/design/00-design-system.md` §5).
 ///
 /// Chrome state rather than feature state, so it lives in `core/` beside the
-/// shell that reads it. It is a preference (Paramètres → Préférences →
-/// Barre latérale, or `Ctrl+B`) kept on this device: it describes the window,
+/// shell that reads it. It is toggled from the sidebar's own button or with
+/// `Ctrl+B`, and kept on this device: it describes the window,
 /// not the user's data, so it does not follow a backup to another machine.
 class SidebarCollapsed extends Notifier<bool> {
   /// Set once the user chose, so a slow read of the saved value cannot undo a
