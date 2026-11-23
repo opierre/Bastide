@@ -317,10 +317,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text(
-        'L’IA locale propose une catégorie pour 2 opérations. '
-        'Rien n’est classé sans votre accord.',
-      ),
+      find.text('L’IA locale propose une catégorie pour 2 opérations.'),
       findsOneWidget,
     );
     expect(find.byKey(const Key('reviewQueueRunButton')), findsOneWidget);
@@ -361,53 +358,53 @@ void main() {
     });
   }
 
-  testWidgets('a narrow row cuts the Note with an ellipsis, never wraps', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1100, 900);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      _wrap(
-        controller: _controller([_proposed()]),
-        availability: _aiOn,
-        total: 1,
-      ),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'a row too narrow for the Note cuts it with an ellipsis, never wraps',
+    (tester) async {
+      tester.view.physicalSize = const Size(1100, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        _wrap(
+          controller: _controller([_proposed()]),
+          availability: _aiOn,
+          total: 1,
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    final text = tester.widget<Text>(
-      find.descendant(
-        of: find.byKey(const Key('reviewAiNote')),
-        matching: find.byType(Text),
-      ),
-    );
-    expect(text.maxLines, 1);
-    expect(text.overflow, TextOverflow.ellipsis);
-    final paragraph = tester.renderObject<RenderParagraph>(
-      find.descendant(
-        of: find.descendant(
+      final text = tester.widget<Text>(
+        find.descendant(
           of: find.byKey(const Key('reviewAiNote')),
           matching: find.byType(Text),
         ),
-        matching: find.byType(RichText),
-      ),
-    );
-    expect(paragraph.didExceedMaxLines, isTrue);
-    final row = tester.getRect(find.byKey(const Key('reviewProgressRow')));
-    final button = tester.getRect(
-      find.byKey(const Key('reviewQueueRunButton')),
-    );
-    expect(button.right, moreOrLessEquals(row.right));
-    // The cut Note keeps its distance from the progress block.
-    expect(
-      tester.getRect(find.byKey(const Key('reviewAiNote'))).left,
-      moreOrLessEquals(
-        row.left + AppTransactions.progressWidth + AppSpacing.md,
-      ),
-    );
-    expect(tester.takeException(), isNull);
-  });
+      );
+      expect(text.maxLines, 1);
+      expect(text.overflow, TextOverflow.ellipsis);
+      final paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(
+          of: find.descendant(
+            of: find.byKey(const Key('reviewAiNote')),
+            matching: find.byType(Text),
+          ),
+          matching: find.byType(RichText),
+        ),
+      );
+      // The test font is wider than Geist, so the Note is cut here: the
+      // ellipsis is the safety net for a narrow window.
+      expect(paragraph.didExceedMaxLines, isTrue);
+      final row = tester.getRect(find.byKey(const Key('reviewProgressRow')));
+      final button = tester.getRect(
+        find.byKey(const Key('reviewQueueRunButton')),
+      );
+      expect(button.right, moreOrLessEquals(row.right));
+      expect(
+        tester.getRect(find.byKey(const Key('reviewAiNote'))).right,
+        moreOrLessEquals(button.left - AppSpacing.md),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('the progress counts against the session baseline', (
     tester,

@@ -1637,7 +1637,7 @@
   "@reviewProgressCaption": {
     "description": "Follows the review progress count."
   },
-  "reviewAiNote": "{count, plural, =0{L’IA locale n’a proposé aucune catégorie. Rien n’est classé sans votre accord.} =1{L’IA locale propose une catégorie pour 1 opération. Rien n’est classé sans votre accord.} other{L’IA locale propose une catégorie pour {count} opérations. Rien n’est classé sans votre accord.}}",
+  "reviewAiNote": "{count, plural, =0{L’IA locale n’a proposé aucune catégorie.} =1{L’IA locale propose une catégorie pour 1 opération.} other{L’IA locale propose une catégorie pour {count} opérations.}}",
   "@reviewAiNote": {
     "description": "Note on the review progress row while local AI is on.",
     "placeholders": {

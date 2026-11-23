@@ -1327,12 +1327,9 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          'L’IA locale propose une catégorie pour $count opérations. Rien n’est classé sans votre accord.',
-      one:
-          'L’IA locale propose une catégorie pour 1 opération. Rien n’est classé sans votre accord.',
-      zero:
-          'L’IA locale n’a proposé aucune catégorie. Rien n’est classé sans votre accord.',
+      other: 'L’IA locale propose une catégorie pour $count opérations.',
+      one: 'L’IA locale propose une catégorie pour 1 opération.',
+      zero: 'L’IA locale n’a proposé aucune catégorie.',
     );
     return '$_temp0';
   }

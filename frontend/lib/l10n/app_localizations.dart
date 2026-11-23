@@ -2098,7 +2098,7 @@ abstract class AppLocalizations {
   /// Note on the review progress row while local AI is on.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =0{L’IA locale n’a proposé aucune catégorie. Rien n’est classé sans votre accord.} =1{L’IA locale propose une catégorie pour 1 opération. Rien n’est classé sans votre accord.} other{L’IA locale propose une catégorie pour {count} opérations. Rien n’est classé sans votre accord.}}'**
+  /// **'{count, plural, =0{L’IA locale n’a proposé aucune catégorie.} =1{L’IA locale propose une catégorie pour 1 opération.} other{L’IA locale propose une catégorie pour {count} opérations.}}'**
   String reviewAiNote(int count);
 
   /// Column header.
