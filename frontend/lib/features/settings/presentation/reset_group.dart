@@ -34,14 +34,17 @@ class ResetGroup extends ConsumerWidget {
           name: l10n.settingsResetRowTitle,
           description: l10n.settingsResetSubtitle,
           children: [
-            AppButton(
-              key: const Key('settingsResetButton'),
-              label: l10n.settingsResetButton,
-              icon: LucideIcons300.trash2,
-              variant: AppButtonVariant.danger,
-              onPressed: () => showAppModal<void>(
-                context: context,
-                builder: (_) => const ResetConfirmModal(),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: AppButton(
+                key: const Key('settingsResetButton'),
+                label: l10n.settingsResetButton,
+                icon: LucideIcons300.trash2,
+                variant: AppButtonVariant.danger,
+                onPressed: () => showAppModal<void>(
+                  context: context,
+                  builder: (_) => const ResetConfirmModal(),
+                ),
               ),
             ),
             // A refused reset is reported here, not in the modal: the modal

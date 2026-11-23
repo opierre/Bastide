@@ -195,6 +195,21 @@ void main() {
   });
 
   group('card', () {
+    testWidgets('the button sits against the right edge of its row', (
+      tester,
+    ) async {
+      useDesktopSurface(tester);
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      final row = tester.getRect(find.byKey(const Key('settingsResetRow')));
+      final button = tester.getRect(
+        find.byKey(const Key('settingsResetButton')),
+      );
+      expect(button.right, row.right);
+      expect(button.width, lessThan(row.width / 2));
+    });
+
     testWidgets('⑩ states the stake and opens the confirmation', (
       tester,
     ) async {

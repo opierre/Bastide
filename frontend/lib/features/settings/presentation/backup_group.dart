@@ -87,31 +87,38 @@ class BackupGroup extends ConsumerWidget {
           children: [
             // Loading keeps the button's width and refuses a second click:
             // it would start a second export.
-            PrimaryButton(
-              key: const Key('settingsBackupExportButton'),
-              label: l10n.settingsBackupExport,
-              loadingLabel: l10n.settingsBackupExportPreparing,
-              icon: LucideIcons300.download,
-              isLoading: state.isExporting,
-              onPressed: () => _export(context, ref),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: PrimaryButton(
+                key: const Key('settingsBackupExportButton'),
+                label: l10n.settingsBackupExport,
+                loadingLabel: l10n.settingsBackupExportPreparing,
+                icon: LucideIcons300.download,
+                isLoading: state.isExporting,
+                onPressed: () => _export(context, ref),
+              ),
             ),
             // The line waits for the settings it reads: « no backup » shown
             // while loading would be a claim about a value not known yet.
+            // It sits under the button it dates, so it follows its edge.
             if (loaded)
-              Text(
-                lastBackupAt == null
-                    ? l10n.settingsBackupNone
-                    : l10n.settingsBackupLast(
-                        formatBackupInstant(
-                          l10n,
-                          Localizations.localeOf(context).toString(),
-                          lastBackupAt,
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: Text(
+                  lastBackupAt == null
+                      ? l10n.settingsBackupNone
+                      : l10n.settingsBackupLast(
+                          formatBackupInstant(
+                            l10n,
+                            Localizations.localeOf(context).toString(),
+                            lastBackupAt,
+                          ),
                         ),
-                      ),
-                key: const Key('settingsBackupLast'),
-                style: tabularNumberStyle(
-                  Theme.of(context).textTheme.bodySmall!.copyWith(
-                    color: context.colors.textTertiary,
+                  key: const Key('settingsBackupLast'),
+                  style: tabularNumberStyle(
+                    Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: context.colors.textTertiary,
+                    ),
                   ),
                 ),
               ),
@@ -122,11 +129,16 @@ class BackupGroup extends ConsumerWidget {
           name: l10n.settingsBackupRestoreTitle,
           description: l10n.settingsBackupRestoreSubtitle,
           children: [
-            AppButton(
-              key: const Key('settingsBackupRestoreButton'),
-              label: l10n.settingsBackupRestoreButton,
-              icon: LucideIcons300.upload,
-              onPressed: state.isPicking ? null : () => _restore(context, ref),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: AppButton(
+                key: const Key('settingsBackupRestoreButton'),
+                label: l10n.settingsBackupRestoreButton,
+                icon: LucideIcons300.upload,
+                onPressed: state.isPicking
+                    ? null
+                    : () => _restore(context, ref),
+              ),
             ),
             // A file refused before anything was touched, a newer version's
             // chiefly, is reported under the row that picked it.
