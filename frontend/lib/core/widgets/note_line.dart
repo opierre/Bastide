@@ -7,15 +7,21 @@ import '../theme/tokens.dart';
 /// (`docs/design/00-design-system.md` §7). A 14 px `textTertiary` icon and
 /// 12 `textSecondary` text, no box. Something the user can act on is an
 /// [InlineBanner] instead.
+///
+/// [singleLine] keeps the text on one line, ended with an ellipsis when it
+/// runs out of room, and centres the icon on that line: for a Note set beside
+/// a control it must line up with.
 class NoteLine extends StatelessWidget {
   const NoteLine({
     super.key,
     required this.text,
     this.icon = LucideIcons300.info,
+    this.singleLine = false,
   });
 
   final String text;
   final IconData icon;
+  final bool singleLine;
 
   @override
   Widget build(BuildContext context) {
@@ -25,12 +31,16 @@ class NoteLine extends StatelessWidget {
     ).textTheme.bodySmall?.copyWith(color: colors.textSecondary);
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: singleLine
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           // Centres the icon on the first line of 12 px text.
-          padding: const EdgeInsets.only(top: AppSpacing.xxs),
+          padding: singleLine
+              ? EdgeInsets.zero
+              : const EdgeInsets.only(top: AppSpacing.xxs),
           child: Icon(
             icon,
             size: AppSizes.iconSmall,
@@ -38,7 +48,14 @@ class NoteLine extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.xsPlus),
-        Flexible(child: Text(text, style: style)),
+        Flexible(
+          child: Text(
+            text,
+            style: style,
+            maxLines: singleLine ? 1 : null,
+            overflow: singleLine ? TextOverflow.ellipsis : null,
+          ),
+        ),
       ],
     );
   }

@@ -651,7 +651,7 @@ in both themes (like the crop circle, §7).
 | 220 px | `filterMaxWidth` | The widest a filter-row select grows |
 | 240 / 128 px | `categoryColumn`, `amountColumn` | Table columns |
 | 230 / 280 px | `pickerWidth`, `pickerListHeight` | The category picker popover and its list |
-| 260 / 420 px | `progressWidth`, `noteMaxWidth` | The review tab's progress block and the Note beside it |
+| 260 px | `progressWidth` | The review tab's progress block |
 | 88 / 380 px | `reviewDateColumn`, `reviewActionsColumn` | Review table columns |
 
 ### Abonnements: `AppSubscriptions` (`10-subscriptions.md`)
