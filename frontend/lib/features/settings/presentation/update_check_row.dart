@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/tokens.dart';
@@ -169,10 +168,11 @@ class _Result extends StatelessWidget {
         label: l10n.settingsUpdatesOffline,
       );
     }
+    // All good, like the local model's « Connecté »: the same positive tone.
     return StatusText(
       key: const Key('settingsUpdateStatus'),
       label: l10n.settingsUpdatesLatest,
-      icon: LucideIcons300.check,
+      tone: StatusTone.positive,
     );
   }
 }
