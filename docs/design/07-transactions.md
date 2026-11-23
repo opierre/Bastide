@@ -67,7 +67,8 @@ Single pane.
   to the row's end: a Note (`cpu` icon) « L’IA locale propose une catégorie pour {n}
   opérations. Rien n’est classé sans votre accord. », then 12 px further secondary
   « Catégoriser avec l’IA » (`cpu`). The Note stays on one line, its icon and text centred
-  on the button; when the row is too narrow it ends in an ellipsis rather than wrapping.
+  on the button; when the row is too narrow it ends in an ellipsis rather than wrapping,
+  and stays at least 12 px from the progress block.
   The free width sits before the Note, never after the button, so the Note always ends
   right beside it.
 - **Table,** edge to edge:
