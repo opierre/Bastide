@@ -33,7 +33,9 @@ Flush panel, two panes: **category tree** (340 px, right hairline, padding 16 12
 - Header row, padding 16 32 0: « Règles » 13/600 · when a category is selected, a 28 px
   select-look holding its category label and an `x` that returns to « Toutes les règles » ·
   spacer · 12 `textTertiary`: « Appliquées dans cet ordre. Une catégorie choisie à la main
-  n’est jamais remplacée. »
+  n’est jamais remplacée. » · the pack actions (import a file, import the built-in pack,
+  export), 8 px apart: secondary icon buttons, 28 px high with the button's 0 10 padding
+  around the 14 px icon (36 × 28), each named by a tooltip.
 - Table, edge to edge:
 
 | Column | Content |
