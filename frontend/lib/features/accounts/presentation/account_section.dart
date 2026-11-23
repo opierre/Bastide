@@ -180,22 +180,32 @@ class _SectionHeaderState extends State<_SectionHeader> {
               name: group.hasNoInstitution ? '' : group.institution ?? '',
             ),
           const SizedBox(width: AppSpacing.sm),
-          Flexible(
-            child: Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: textTheme.titleSmall,
+          // The name and count take all the free space, so the share and
+          // the subtotal sit flush right and line up from one header to the
+          // next. A loose name beside a `Spacer` would split that space with
+          // it and leave the unused part after the subtotal.
+          Expanded(
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.titleSmall,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  '${group.accounts.length}',
+                  style: tabularNumberStyle(
+                    textTheme.bodyMedium!,
+                  ).copyWith(color: colors.textTertiary),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Text(
-            '${group.accounts.length}',
-            style: tabularNumberStyle(
-              textTheme.bodyMedium!,
-            ).copyWith(color: colors.textTertiary),
-          ),
-          const Spacer(),
           Text(
             l10n.accountsGroupShare(group.sharePercent),
             key: Key('accountSectionShare-${group.id}'),

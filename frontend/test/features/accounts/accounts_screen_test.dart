@@ -314,6 +314,42 @@ void main() {
       );
     });
 
+    testWidgets('shares and subtotals line up in columns across headers', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        _wrap(controller: FakeAccountsController(initialAccounts: _mixed())),
+      );
+
+      // Names of different lengths must not shift the right-hand figures.
+      const ids = [
+        'type:checking',
+        'type:savings',
+        'type:deferredCard',
+        'type:other',
+      ];
+      double rightOf(String key) => tester.getTopRight(find.byKey(Key(key))).dx;
+      final headerRight = rightOf('accountSectionHeader-type:checking');
+      for (final id in ids) {
+        expect(rightOf('accountSectionHeader-$id'), headerRight);
+        // Flush right: only the bar's border and padding after the subtotal.
+        expect(
+          rightOf('accountSectionSubtotal-$id'),
+          headerRight - 1 - AppAccountSection.headerPaddingX,
+        );
+        // The share ends just before the subtotal's slot.
+        expect(
+          rightOf('accountSectionShare-$id'),
+          headerRight -
+              1 -
+              AppAccountSection.headerPaddingX -
+              AppAccountSection.subtotalWidth -
+              AppSpacing.md,
+        );
+      }
+    });
+
     testWidgets('a row shows its import, its month change and its balance', (
       tester,
     ) async {
