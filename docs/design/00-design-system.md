@@ -190,8 +190,8 @@ Mockup: any panel.
      barre latérale (Ctrl+B) ».
   6. « Paramètres » item.
   7. Foot, above a `line` hairline: user row (22 px avatar, display name, `chevrons-up-down`
-     14 px) that opens the user menu (Paramètres, Se déconnecter); then the privacy line, `lock`
-     14 px + « Données locales » 12 `textTertiary`.
+     14 px) that opens the user menu (Se déconnecter only: Paramètres is item 6, not repeated
+     there); then the privacy line, `lock` 14 px + « Données locales » 12 `textTertiary`.
 - **Collapsed sidebar**, 56 px: icons only, centred, tooltips with the label; brand row shows
   the mark; foot shows the avatar and the lock. Group labels become an 8 px gap. Toggled from
   the collapse button and with `Ctrl+B`; the choice is kept on this device.

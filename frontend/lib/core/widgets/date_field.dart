@@ -78,30 +78,130 @@ class DateField extends StatelessWidget {
       keyboardType: TextInputType.datetime,
       inputFormatters: [_DateInputFormatter.forLocale(locale)],
       style: tabularNumberStyle(Theme.of(context).textTheme.bodyMedium!),
-      decoration: InputDecoration(
-        suffixIcon: IconButton(
-          onPressed: () => _pick(context),
-          tooltip: calendarTooltip,
-          iconSize: AppSizes.iconSmall,
-          visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.zero,
-          icon: Icon(
-            LucideIcons300.calendar,
-            color: context.colors.textTertiary,
-          ),
-        ),
-        // The 32 px field height is measured without an icon in it; left at
-        // Material's default the button's own hit box would push the field
-        // taller than the one beside it.
-        suffixIconConstraints: const BoxConstraints(
-          minWidth: AppSizes.formField - 2,
-          maxHeight: AppSizes.formField - 2,
-        ),
+      decoration: _calendarDecoration(
+        context,
+        onPressed: () => _pick(context),
+        tooltip: calendarTooltip,
       ),
       validator: validator,
     );
   }
 }
+
+/// The calendar button every date input carries, so a day field and a month
+/// field read as one family.
+InputDecoration _calendarDecoration(
+  BuildContext context, {
+  required VoidCallback onPressed,
+  String? tooltip,
+  String? hintText,
+}) {
+  return InputDecoration(
+    hintText: hintText,
+    suffixIcon: IconButton(
+      onPressed: onPressed,
+      tooltip: tooltip,
+      iconSize: AppSizes.iconSmall,
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      icon: Icon(LucideIcons300.calendar, color: context.colors.textTertiary),
+    ),
+    // The 32 px field height is measured without an icon in it; left at
+    // Material's default the button's own hit box would push the field taller
+    // than the one beside it.
+    suffixIconConstraints: const BoxConstraints(
+      minWidth: AppSizes.formField - 2,
+      maxHeight: AppSizes.formField - 2,
+    ),
+  );
+}
+
+/// [DateField] for the inputs that only ever mean a month — a goal's
+/// deadline, a declared month-end total.
+///
+/// Typed as « MM/AAAA », the slash put in as the month fills, or picked: the
+/// calendar opens on its year view and, whatever day is then picked, only its
+/// month is kept. The same spelling in every locale — a month has no day to
+/// put first or last.
+class MonthField extends StatelessWidget {
+  const MonthField({
+    super.key,
+    required this.controller,
+    required this.firstDate,
+    required this.lastDate,
+    this.focusNode,
+    this.hintText,
+    this.calendarTooltip,
+    this.validator,
+    this.onChanged,
+  });
+
+  final TextEditingController controller;
+
+  /// The range the calendar offers, as in [DateField]: the picker only.
+  final DateTime firstDate;
+  final DateTime lastDate;
+
+  final FocusNode? focusNode;
+  final String? hintText;
+  final String? calendarTooltip;
+  final String? Function(String?)? validator;
+
+  /// Called with the first of the month the calendar wrote into the field: a
+  /// programmatic change the form's own `onChanged` doesn't see.
+  final ValueChanged<DateTime>? onChanged;
+
+  Future<void> _pick(BuildContext context) async {
+    var initial = parseMonthInput(controller.text) ?? DateTime.now();
+    if (initial.isBefore(firstDate)) initial = firstDate;
+    if (initial.isAfter(lastDate)) initial = lastDate;
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      initialDatePickerMode: DatePickerMode.year,
+      locale: Localizations.localeOf(context),
+    );
+    if (picked == null) return;
+    final month = DateTime(picked.year, picked.month);
+    controller.text = formatMonthInput(month);
+    onChanged?.call(month);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      focusNode: focusNode,
+      keyboardType: TextInputType.datetime,
+      inputFormatters: [_DateInputFormatter.month()],
+      style: tabularNumberStyle(Theme.of(context).textTheme.bodyMedium!),
+      decoration: _calendarDecoration(
+        context,
+        onPressed: () => _pick(context),
+        tooltip: calendarTooltip,
+        hintText: hintText,
+      ),
+      validator: validator,
+    );
+  }
+}
+
+/// Reads a [MonthField]'s « 03/2025 » (or « 3/2025 ») as the first day of that
+/// month, or `null` when it doesn't read as one.
+DateTime? parseMonthInput(String raw) {
+  final match = RegExp(r'^\s*(\d{1,2})\s*/\s*(\d{4})\s*$').firstMatch(raw);
+  if (match == null) return null;
+  final month = int.parse(match.group(1)!);
+  if (month < 1 || month > 12) return null;
+  return DateTime(int.parse(match.group(2)!), month);
+}
+
+/// The inverse, for loading a month back into a [MonthField].
+String formatMonthInput(DateTime month) =>
+    '${month.month.toString().padLeft(2, '0')}/${month.year}';
 
 /// Keeps the field to the locale's own date spelling: digits, and the
 /// separator put in for the user as each section fills.
@@ -138,6 +238,10 @@ class _DateInputFormatter extends TextInputFormatter {
       sectionLengths: sections.isEmpty ? const [2, 2, 4] : sections,
     );
   }
+
+  /// A month: two digits, a slash, the year.
+  factory _DateInputFormatter.month() =>
+      _DateInputFormatter._(separator: '/', sectionLengths: const [2, 4]);
 
   final String separator;
   final List<int> sectionLengths;
