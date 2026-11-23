@@ -269,6 +269,25 @@ void main() {
       expect(find.byKey(const Key('settingsBackupRestoreError')), findsNothing);
     });
 
+    testWidgets('both buttons and the backup line sit against the right edge', (
+      tester,
+    ) async {
+      useDesktopSurface(tester);
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      Rect rect(String key) => tester.getRect(find.byKey(Key(key)));
+      final exportRow = rect('settingsBackupExportRow');
+      final restoreRow = rect('settingsBackupRestoreRow');
+      expect(rect('settingsBackupExportButton').right, exportRow.right);
+      expect(rect('settingsBackupLast').right, exportRow.right);
+      expect(rect('settingsBackupRestoreButton').right, restoreRow.right);
+      expect(
+        rect('settingsBackupRestoreButton').width,
+        lessThan(restoreRow.width / 2),
+      );
+    });
+
     testWidgets('says so when there has never been a backup', (tester) async {
       useDesktopSurface(tester);
       await tester.pumpWidget(wrap());

@@ -91,6 +91,9 @@ Three rows change what exists today and need more than a restyle:
 | | Restaurer une sauvegarde · « Remplace toutes les données actuelles, après confirmation. » | Secondary « Importer un fichier » (`upload`). |
 | Réinitialisation | Réinitialiser la base de données · « Supprime opérations, comptes, règles, catégories personnalisées, objectifs, abonnements, crédits, biens, placements et simulations de ce profil. Les sauvegardes exportées ne sont pas touchées. » | Danger button « Réinitialiser… » (`trash-2`). |
 
+In Sauvegarde and Réinitialisation the controls sit against the row's right edge, the
+line « Dernière sauvegarde… » under « Exporter » included; banners keep the full width.
+
 Modals (all 500 px):
 - **Restore confirmation:** title « Restaurer cette sauvegarde ? », lead « Les données
   exportées le {date} remplacent toutes vos données actuelles. » (long date, « 11 mai 2026 »),
