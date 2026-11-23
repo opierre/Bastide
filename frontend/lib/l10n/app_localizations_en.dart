@@ -368,6 +368,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsUpdatesUnavailable => 'Update status unavailable.';
 
   @override
+  String get settingsUpdatesToastLatest => 'Bastide is up to date';
+
+  @override
+  String settingsUpdatesToastAvailable(String version) {
+    return 'New version available: Bastide $version';
+  }
+
+  @override
+  String get settingsUpdatesToastFailed => 'The check failed';
+
+  @override
+  String get settingsUpdatesToastOffline =>
+      'GitHub could not be reached. Try again later.';
+
+  @override
+  String get settingsUpdatesToastError =>
+      'Bastide could not start the check. Try again.';
+
+  @override
   String get settingsAboutPrivacy =>
       'All your data stays on this computer. Bastide connects to no bank and sends nothing over the internet, apart from the update check if you turn it on.';
 

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/api/api_client_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/settings/application/update_check_controller.dart';
 import 'package:bastide/features/settings/presentation/update_check_row.dart';
 import 'package:bastide/l10n/app_localizations.dart';
@@ -131,8 +132,11 @@ void main() {
       stubCheck(_status(latest: '0.2.0', available: true));
       await container.read(updateCheckControllerProvider.future);
 
-      await container.read(updateCheckControllerProvider.notifier).checkNow();
+      final outcome = await container
+          .read(updateCheckControllerProvider.notifier)
+          .checkNow();
 
+      expect(outcome, UpdateCheckOutcome.updateAvailable);
       verify(() => apiClient.post('/settings/updates/check')).called(1);
       verify(() => apiClient.get('/settings/updates')).called(1);
       final state = container.read(updateCheckControllerProvider).value!;
@@ -149,12 +153,40 @@ void main() {
       ).thenThrow(Exception('sidecar down'));
       await container.read(updateCheckControllerProvider.future);
 
-      await container.read(updateCheckControllerProvider.notifier).checkNow();
+      final outcome = await container
+          .read(updateCheckControllerProvider.notifier)
+          .checkNow();
 
+      expect(outcome, UpdateCheckOutcome.failed);
       final state = container.read(updateCheckControllerProvider).value!;
       expect(state.status.latestVersion, '0.1.0');
       expect(state.isBusy, isFalse);
       expect(state.isChecking, isFalse);
+    });
+
+    test('a check that finds the same version reports up to date', () async {
+      stubStatus(_status(latest: '0.1.0'));
+      stubCheck(_status(latest: '0.1.0'));
+      await container.read(updateCheckControllerProvider.future);
+
+      final outcome = await container
+          .read(updateCheckControllerProvider.notifier)
+          .checkNow();
+
+      expect(outcome, UpdateCheckOutcome.upToDate);
+    });
+
+    test('a check that cannot reach GitHub reports it, even with a newer '
+        'release found earlier', () async {
+      stubStatus(_status(latest: '0.2.0', available: true));
+      stubCheck(_status(latest: '0.2.0', available: true, reachable: false));
+      await container.read(updateCheckControllerProvider.future);
+
+      final outcome = await container
+          .read(updateCheckControllerProvider.notifier)
+          .checkNow();
+
+      expect(outcome, UpdateCheckOutcome.unreachable);
     });
   });
 
@@ -215,6 +247,22 @@ void main() {
       expect(find.byKey(const Key('settingsUpdateDownload')), findsNothing);
     });
 
+    testWidgets('up to date reads like the local model « Connecté »', (
+      tester,
+    ) async {
+      useDesktopSurface(tester);
+      stubStatus(_status(latest: '0.1.0'));
+
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      final status = tester.widget<StatusText>(
+        find.byKey(const Key('settingsUpdateStatus')),
+      );
+      expect(status.tone, StatusTone.positive);
+      expect(status.icon, isNull);
+    });
+
     testWidgets('offline says GitHub could not be reached', (tester) async {
       useDesktopSurface(tester);
       stubStatus(_status(reachable: false));
@@ -272,6 +320,49 @@ void main() {
       verify(() => apiClient.post('/settings/updates/check')).called(1);
       verify(() => apiClient.get('/settings/updates')).called(1);
       expect(find.text('Bastide 0.2.0 est disponible'), findsOneWidget);
+      expect(find.byKey(const Key('appToast')), findsOneWidget);
+      expect(
+        find.text('Nouvelle version disponible : Bastide 0.2.0'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a check that finds nothing newer ends on a toast', (
+      tester,
+    ) async {
+      useDesktopSurface(tester);
+      stubStatus(_status(latest: '0.1.0'));
+      stubCheck(_status(latest: '0.1.0'));
+
+      await tester.pumpWidget(wrap(locale: const Locale('en')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('appToast')), findsNothing);
+      await tester.tap(find.byKey(const Key('settingsUpdateCheckNow')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('appToast')), findsOneWidget);
+      expect(find.text('Bastide is up to date'), findsOneWidget);
+    });
+
+    testWidgets('a check the sidecar refuses ends on an error toast', (
+      tester,
+    ) async {
+      useDesktopSurface(tester);
+      stubStatus(_status(latest: '0.1.0'));
+      when(
+        () => apiClient.post('/settings/updates/check'),
+      ).thenThrow(Exception('sidecar down'));
+
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('settingsUpdateCheckNow')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('La vérification a échoué'), findsOneWidget);
+      expect(
+        find.text('Bastide n’a pas pu lancer la vérification. Réessayez.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('« Vérifier maintenant » spins while the check runs', (
@@ -325,6 +416,21 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('GitHub could not be reached.'), findsOneWidget);
+      expect(find.text('The check failed'), findsOneWidget);
+      expect(
+        find.text('GitHub could not be reached. Try again later.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('loading the card shows no toast', (tester) async {
+      useDesktopSurface(tester);
+      stubStatus(_status(latest: '0.2.0', available: true));
+
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('appToast')), findsNothing);
     });
 
     testWidgets('a sidecar that cannot be asked says so', (tester) async {
