@@ -26,7 +26,10 @@ Standard padding. Three blocks, 24 px apart:
 | 2 | « Capital restant dû » | `234 129,21 €` 20 px | « sur 255 000,00 € · 8,2 % remboursés » |
 | 3, 360 px wide | « Taux d’endettement » on the left, the ratio `32,7 %` at 20 px on the right of the same line | — | The repère: scale 0–60 %, mark at 35 % labelled « repère HCSF 35 % ». Then 12 `textTertiary`: « 1 506,25 € sur un revenu déclaré de 4 600,00 €. Lecture indicative, qui n’engage aucun prêteur. » |
 
-Vertical hairlines between the three items.
+Vertical hairlines between the three items. Item 3 carries more under its figure than the
+others, so the items are laid out from the top rather than bottom-aligned (`00` §7): the three
+figures share the lead's baseline, and the two captions and the repère start on one line under
+them.
 
 Ratio states of item 3:
 | State | What shows |
