@@ -49,8 +49,10 @@ Flush panel, two panes: **list** (flexible, padding 24 32) · **inspector** (440
      16/600 `text` and deadline 12 `textSecondary` bottom-left; top-right secondary « Ajouter
      une image » (`image-plus`).
 2. Padded content (18 24 24), 16 px apart:
-   - A row: saved at 28 px · « sur {target} » `textSecondary` · spacer · secondary
-     « Archiver » (`archive`).
+   - A row: saved at 28 px · « sur {target} » `textSecondary` · spacer · three square
+     secondary icon-only tool buttons, 6 px apart: « Modifier » (`pencil`), « Archiver »
+     (`archive`) and « Supprimer » (`trash-2`). Each label is the button's tooltip and
+     accessible name.
    - Repère (`done` when reached).
    - Without an image, or when not reached: one 12 `textTertiary` line « {deadline} · reste
      {remaining} ».
@@ -70,13 +72,12 @@ Flush panel, two panes: **list** (flexible, padding 24 32) · **inspector** (440
 
 ### Modals
 - **New / edit goal** (440 px): Nom · Montant cible · Échéance (facultative, a month) ·
-  Image (facultative, same picker). Footer « Annuler » · « Enregistrer ». Editing puts the
-  ghost « Supprimer » on the left of the footer, as for a placement.
+  Image (facultative, same picker). Footer « Annuler » · « Enregistrer ». No « Supprimer »:
+  deleting is the inspector's « Supprimer » tool button.
 - **Delete goal** (440 px): title « Supprimer l’objectif « {name} » ? », lead « Ses
   allocations et son image seront supprimées. Pour garder son historique, archivez-le
   plutôt. Vos comptes ne sont pas modifiés. » Footer « Annuler » · destructive
-  « Supprimer ». The edit modal closes with it and the inspector falls back to the first
-  goal.
+  « Supprimer ». The inspector falls back to the first goal.
 - **Allocation** (440 px): title « Nouvelle allocation », lead = the goal's name. Montant
   (helper « Un montant négatif retire de l’objectif. ») · Date · Note (facultative). Footer
   « Annuler » · « Ajouter ». One signed amount field; no deposit/withdraw modes.
@@ -92,7 +93,7 @@ Flush panel, two panes: **list** (flexible, padding 24 32) · **inspector** (440
 | Populated, goal without image | The tomettes banner. |
 | Goal reached | `done` repère, « Atteint en {mois} » in the list and on the banner. Reached goals are not archived automatically. |
 | Over-allocated | The Banner in the list pane. |
-| Archived list open | Archived rows under the table; selecting one shows it in the inspector with « Désarchiver » in place of « Archiver » and no « Allouer ». |
+| Archived list open | Archived rows under the table; selecting one shows it in the inspector with « Désarchiver » (`archive-restore`) in place of « Archiver », no « Modifier » and no « Allouer »; « Supprimer » stays. |
 | Empty | Single pane, empty state: « Aucun objectif » · « Un objectif réserve une somme sur le papier. Vos comptes ne sont pas modifiés. » · primary « Nouvel objectif ». |
 | Loading | Silhouettes of both panes. |
 | English | « Reserved across 4 goals », « Reached in April 2026 ». |
