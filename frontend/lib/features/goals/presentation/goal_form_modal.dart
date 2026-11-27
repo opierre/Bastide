@@ -242,7 +242,6 @@ class _GoalFormModalState extends ConsumerState<GoalFormModal> {
                   key: const Key('goalFormTarget'),
                   controller: _targetController,
                   currency: currency,
-                  textAlign: TextAlign.end,
                   validator: (value) =>
                       _parseTarget(value ?? '', locale) == null
                       ? l10n.goalFormTargetInvalid

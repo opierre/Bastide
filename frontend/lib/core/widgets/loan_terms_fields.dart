@@ -83,7 +83,6 @@ class LoanTermsFields extends StatelessWidget {
         currency: currency,
         autofocus: input.autofocus,
         hintText: hint,
-        textAlign: TextAlign.end,
         onChanged: input.onChanged,
         validator: input.validator,
       ),

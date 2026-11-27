@@ -213,7 +213,6 @@ class _MovementModalState extends ConsumerState<MovementModal> {
                 currency: widget.investment.currency,
                 allowNegative: true,
                 autofocus: true,
-                textAlign: TextAlign.end,
                 onChanged: changed,
                 validator: (value) => _parseAmount(value ?? '', locale) == null
                     ? l10n.placementMovementAmountInvalid

@@ -5,6 +5,7 @@ import 'package:bastide/core/l10n/locale_provider.dart';
 import 'package:bastide/core/session/current_user_provider.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/app_slider.dart';
+import 'package:bastide/core/widgets/money_field.dart';
 import 'package:bastide/features/auth/domain/auth_user.dart';
 import 'package:bastide/features/settings/application/about_info.dart';
 import 'package:bastide/features/settings/application/settings_controller.dart';
@@ -103,6 +104,23 @@ Widget _wrap({
 Future<void> _open(WidgetTester tester, SettingsSection section) async {
   await tester.tap(find.byKey(Key('settingsSection-${section.name}')));
   await tester.pumpAndSettle();
+}
+
+/// The amount field under [key] is the shared [MoneyField], right-aligned.
+void _expectSharedAmountField(WidgetTester tester, String key) {
+  expect(tester.widget(find.byKey(Key(key))), isA<MoneyField>(), reason: key);
+  expect(
+    tester
+        .widget<TextField>(
+          find.descendant(
+            of: find.byKey(Key(key)),
+            matching: find.byType(TextField),
+          ),
+        )
+        .textAlign,
+    TextAlign.end,
+    reason: key,
+  );
 }
 
 void main() {
@@ -261,7 +279,10 @@ void main() {
       of: find.byKey(const Key('settingsIncomeField')),
       matching: find.byType(EditableText),
     );
-    expect(tester.widget<EditableText>(field).controller.text, contains('200'));
+    // Seeded in the locale's spelling and right-aligned in the shared amount
+    // field, like every other amount input.
+    expect(tester.widget<EditableText>(field).controller.text, '3\u202F200');
+    _expectSharedAmountField(tester, 'settingsIncomeField');
 
     await tester.enterText(field, '4100,50');
     await tester.testTextInput.receiveAction(TextInputAction.done);

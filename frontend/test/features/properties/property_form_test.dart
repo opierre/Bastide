@@ -2,6 +2,7 @@ import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/app_button.dart';
+import 'package:bastide/core/widgets/money_field.dart';
 import 'package:bastide/features/properties/application/properties_controller.dart';
 import 'package:bastide/features/properties/domain/property.dart';
 import 'package:bastide/features/properties/presentation/property_form_modal.dart';
@@ -61,6 +62,23 @@ Future<void> _fillStudio(WidgetTester tester, {String ownership = '50'}) async {
   await tester.pump();
 }
 
+/// The amount field under [key] is the shared [MoneyField], right-aligned.
+void _expectSharedAmountField(WidgetTester tester, String key) {
+  expect(tester.widget(find.byKey(Key(key))), isA<MoneyField>(), reason: key);
+  expect(
+    tester
+        .widget<TextField>(
+          find.descendant(
+            of: find.byKey(Key(key)),
+            matching: find.byType(TextField),
+          ),
+        )
+        .textAlign,
+    TextAlign.end,
+    reason: key,
+  );
+}
+
 void main() {
   group('ownership percent', () {
     test('reads to basis points on the digits', () {
@@ -118,6 +136,30 @@ void main() {
       );
     },
   );
+
+  testWidgets('every amount is the shared field, right-aligned', (
+    tester,
+  ) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakePropertiesController(),
+        modal: const PropertyFormModal(currency: 'EUR'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    _expectSharedAmountField(tester, 'propertyFormValue');
+    _expectSharedAmountField(tester, 'propertyFormAcquisitionPrice');
+
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakePropertiesController(),
+        modal: PropertyRevalueModal(property: testStudio()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    _expectSharedAmountField(tester, 'propertyRevalueValue');
+  });
 
   testWidgets('the new valuation is 420 px and leads with the current one', (
     tester,

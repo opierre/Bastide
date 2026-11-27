@@ -169,7 +169,6 @@ class _AllocationModalState extends ConsumerState<AllocationModal> {
                 currency: currency,
                 allowNegative: true,
                 autofocus: true,
-                textAlign: TextAlign.end,
                 validator: (value) => _parseAmount(value ?? '', locale) == null
                     ? l10n.allocationAmountInvalid
                     : null,
