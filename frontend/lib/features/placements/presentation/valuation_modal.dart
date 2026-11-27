@@ -177,7 +177,6 @@ class _ValuationModalState extends ConsumerState<ValuationModal> {
                 controller: _value,
                 currency: widget.investment.currency,
                 autofocus: true,
-                textAlign: TextAlign.end,
                 validator: (value) =>
                     parseMoneyMinor(value ?? '', locale) == null
                     ? l10n.placementValuationValueInvalid

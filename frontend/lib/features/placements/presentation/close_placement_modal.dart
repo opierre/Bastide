@@ -141,7 +141,6 @@ class _ClosePlacementModalState extends ConsumerState<ClosePlacementModal> {
               key: const Key('closePlacementAmount'),
               controller: _amount,
               currency: widget.investment.currency,
-              textAlign: TextAlign.end,
               validator: (value) => parseMoneyMinor(value ?? '', locale) == null
                   ? l10n.placementCloseAmountInvalid
                   : null,

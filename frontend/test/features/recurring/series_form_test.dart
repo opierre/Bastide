@@ -1,5 +1,6 @@
 import 'package:bastide/core/api/api_client.dart';
 import 'package:bastide/core/theme/app_theme.dart';
+import 'package:bastide/core/widgets/money_field.dart';
 import 'package:bastide/features/recurring/application/subscriptions_controller.dart';
 import 'package:bastide/features/recurring/domain/recurring_series.dart';
 import 'package:bastide/features/recurring/presentation/series_form_modal.dart';
@@ -41,6 +42,23 @@ Widget _wrap({
   );
 }
 
+/// The amount field under [key] is the shared [MoneyField], right-aligned.
+void _expectSharedAmountField(WidgetTester tester, String key) {
+  expect(tester.widget(find.byKey(Key(key))), isA<MoneyField>(), reason: key);
+  expect(
+    tester
+        .widget<TextField>(
+          find.descendant(
+            of: find.byKey(Key(key)),
+            matching: find.byType(TextField),
+          ),
+        )
+        .textAlign,
+    TextAlign.end,
+    reason: key,
+  );
+}
+
 void main() {
   testWidgets('saving stores the amount as a signed outflow', (tester) async {
     final controller = FakeSubscriptionsController();
@@ -61,6 +79,12 @@ void main() {
     expect(seriesId, 's1');
     expect(label, 'Basic-Fit');
     expect(amount, -2999);
+  });
+
+  testWidgets('the amount is the shared field, right-aligned', (tester) async {
+    await tester.pumpWidget(_wrap(controller: FakeSubscriptionsController()));
+    await tester.pumpAndSettle();
+    _expectSharedAmountField(tester, 'seriesFormAmount');
   });
 
   testWidgets('the cadence select offers Irrégulier', (tester) async {

@@ -8,9 +8,9 @@ import 'labeled_field.dart';
 /// An amount input: digits only, and the currency riding at the end of the
 /// field as a unit rather than as a value the form is asking for.
 ///
-/// The same arrangement the account form's opening balance uses — this widget
-/// is that pattern made shareable, with the keystroke filter the form fields
-/// were missing. Rejecting a letter as it is typed beats accepting it and
+/// The one amount input in the app: every form that asks for money uses it,
+/// so each amount is right-aligned, grouped in the locale's own separators as
+/// it is typed, and read back with [parseMoneyMinor]. Rejecting a letter as it is typed beats accepting it and
 /// answering with a red line underneath: the field can only ever hold an
 /// amount, so it never has to explain that it wanted one.
 class MoneyField extends StatelessWidget {
@@ -24,7 +24,6 @@ class MoneyField extends StatelessWidget {
     this.onFieldSubmitted,
     this.onChanged,
     this.hintText,
-    this.textAlign = TextAlign.start,
   });
 
   final TextEditingController controller;
@@ -49,9 +48,6 @@ class MoneyField extends StatelessWidget {
   /// opens blank rather than on a value.
   final String? hintText;
 
-  /// [TextAlign.end] in a form whose amounts are right-aligned (`00` §6).
-  final TextAlign textAlign;
-
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
@@ -71,7 +67,10 @@ class MoneyField extends StatelessWidget {
           allowNegative: allowNegative,
         ),
       ],
-      textAlign: textAlign,
+      // Amounts are right-aligned in every form (`00` §6), so the figure
+      // lines up with the currency at the field's end. Not a parameter: one
+      // amount field, one alignment.
+      textAlign: TextAlign.end,
       // A form value is a neutral figure, not a movement, so it keeps the
       // primary ink rather than a sign color.
       style: tabularNumberStyle(Theme.of(context).textTheme.bodyLarge!),
@@ -246,5 +245,12 @@ int? parseMoneyMinor(String raw, String locale, {bool allowNegative = false}) {
 }
 
 /// The inverse, for filling a [MoneyField] from a stored amount.
+///
+/// Whole amounts print without decimals (« 145 000 »); an amount with cents
+/// prints both digits (« 2 847,50 », not « 2 847,5 »), the way money reads
+/// everywhere else in the app.
 String formatMoneyInput(int amountMinor, String locale) =>
-    NumberFormat.decimalPattern(locale).format(amountMinor / 100);
+    NumberFormat.decimalPatternDigits(
+      locale: locale,
+      decimalDigits: amountMinor % 100 == 0 ? 0 : 2,
+    ).format(amountMinor / 100);

@@ -42,6 +42,20 @@ void main() {
       expect(field.decoration?.suffixText, 'EUR');
     });
 
+    testWidgets('right-aligns the amount, as every form amount is', (
+      tester,
+    ) async {
+      final controller = TextEditingController();
+      await tester.pumpWidget(_wrap(controller: controller));
+      await tester.pumpAndSettle();
+
+      // No caller can opt out: one amount field, one alignment (`00` §6).
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).textAlign,
+        TextAlign.end,
+      );
+    });
+
     testWidgets('prints no suffix before the profile currency is known', (
       tester,
     ) async {
@@ -164,7 +178,6 @@ void main() {
                   child: MoneyField(
                     controller: TextEditingController(),
                     currency: 'EUR',
-                    textAlign: TextAlign.end,
                     validator: (_) => message,
                   ),
                 ),
@@ -226,7 +239,20 @@ void main() {
       for (final locale in ['fr', 'en']) {
         final text = formatMoneyInput(1000050, locale);
         expect(parseMoneyMinor(text, locale), 1000050, reason: locale);
+        final negative = formatMoneyInput(-31240, locale);
+        expect(
+          parseMoneyMinor(negative, locale, allowNegative: true),
+          -31240,
+          reason: locale,
+        );
       }
+    });
+
+    test('prints both cent digits, or none on a whole amount', () {
+      expect(formatMoneyInput(284750, 'fr'), '2 847,50');
+      expect(formatMoneyInput(284750, 'en'), '2,847.50');
+      expect(formatMoneyInput(14500000, 'fr'), '145 000');
+      expect(formatMoneyInput(1205, 'fr'), '12,05');
     });
   });
 }
