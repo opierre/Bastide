@@ -4,6 +4,7 @@ import 'package:bastide/core/widgets/app_modal.dart';
 import 'package:bastide/core/widgets/inline_banner.dart';
 import 'package:bastide/core/widgets/institution_avatar.dart';
 import 'package:bastide/core/widgets/labeled_field.dart';
+import 'package:bastide/core/widgets/money_field.dart';
 import 'package:bastide/core/widgets/note_line.dart';
 import 'package:bastide/features/accounts/application/accounts_controller.dart';
 import 'package:bastide/features/accounts/domain/account.dart';
@@ -101,6 +102,40 @@ void main() {
       expect(call.openingBalanceMinor, 123456);
     },
   );
+
+  testWidgets('an overdrawn opening balance is grouped as typed and signed', (
+    tester,
+  ) async {
+    final controller = FakeAccountsController();
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('accountNameField')),
+      'Compte joint',
+    );
+    await tester.enterText(
+      find.byKey(const Key('accountInstitutionField')),
+      'Banque Exemple',
+    );
+    await tester.enterText(
+      find.byKey(const Key('accountOpeningBalanceField')),
+      '-1250,40',
+    );
+    // The shared field groups the thousands in the locale's own spelling.
+    expect(find.text('-1 250,40'), findsOneWidget);
+    // Letters never reach it.
+    await tester.enterText(
+      find.byKey(const Key('accountOpeningBalanceField')),
+      '12a',
+    );
+    expect(find.text('-1 250,40'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('accountFormSubmitButton')));
+    await tester.pumpAndSettle();
+
+    expect(controller.createCalls.single.openingBalanceMinor, -125040);
+  });
 
   testWidgets(
     'a prefill seeds the create form, and what it proposes stays editable',
@@ -519,10 +554,13 @@ void main() {
     await tester.pumpWidget(_wrap(controller: controller, initial: initial));
     await tester.pumpAndSettle();
 
-    final field = tester.widget<TextFormField>(
-      find.byKey(const Key('accountOpeningBalanceField')),
+    final field = tester.widget<TextField>(
+      find.descendant(
+        of: find.byKey(const Key('accountOpeningBalanceField')),
+        matching: find.byType(TextField),
+      ),
     );
-    expect(field.enabled, isTrue);
+    expect(field.enabled, isNot(false));
     // With transactions on top of it, the stored figure is only where the
     // account started — no longer what it holds.
     expect(find.text('Solde initial'), findsOneWidget);
@@ -711,7 +749,11 @@ void main() {
       expect(top('Solde initial'), lessThan(top('Devise')));
       expect(find.text('Annuler'), findsOneWidget);
       expect(find.text('Enregistrer'), findsOneWidget);
-      // Amounts are right-aligned (`00` §6).
+      // Amounts are right-aligned, in the shared amount field (`00` §6).
+      expect(
+        tester.widget(find.byKey(const Key('accountOpeningBalanceField'))),
+        isA<MoneyField>(),
+      );
       expect(
         tester
             .widget<TextField>(

@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
 import '../../../core/session/current_user_provider.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_modal.dart';
 import '../../../core/widgets/app_segmented.dart';
 import '../../../core/widgets/app_select.dart';
 import '../../../core/widgets/institution_avatar.dart';
 import '../../../core/widgets/labeled_field.dart';
+import '../../../core/widgets/money_field.dart';
 import '../../../core/widgets/note_line.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -88,9 +87,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   /// Guards the one-time locale-aware fill of [_openingBalanceController] —
   /// with the account's own figure when editing, with the balance the statement
   /// declares when creating from one. Done in [didChangeDependencies] rather
-  /// than at field-init time because it must match the same [NumberFormat]
-  /// `_parseMinorUnits` re-parses on submit, which needs `context` for the
-  /// active locale — unavailable before the widget is mounted.
+  /// than at field-init time because it must use the locale [parseMoneyMinor]
+  /// re-parses with on submit, which needs `context` — unavailable before the
+  /// widget is mounted.
   bool _openingBalanceFilled = false;
 
   late AccountType _type =
@@ -144,9 +143,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         widget.initial?.openingBalanceMinor ?? widget.prefill?.balanceMinor;
     if (balanceMinor == null) return;
     final locale = Localizations.localeOf(context).toString();
-    _openingBalanceController.text = NumberFormat.decimalPattern(
-      locale,
-    ).format(balanceMinor / 100);
+    _openingBalanceController.text = formatMoneyInput(balanceMinor, locale);
     _openingBalanceFilled = true;
   }
 
@@ -197,7 +194,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       // never typed, so there is nothing to re-parse and no rounding to risk.
       final openingBalanceMinor = _balanceFromStatement
           ? widget.prefill!.balanceMinor!
-          : _parseMinorUnits(_openingBalanceController.text, locale);
+          : parseMoneyMinor(
+              _openingBalanceController.text,
+              locale,
+              allowNegative: true,
+            )!;
 
       Account? created;
       if (_isEditing) {
@@ -238,23 +239,16 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     }
   }
 
-  int _parseMinorUnits(String text, String locale) {
-    final value = NumberFormat.decimalPattern(locale).parse(text.trim());
-    return (value.toDouble() * 100).round();
-  }
-
   String? _validateOpeningBalance(String? value, AppLocalizations l10n) {
     if (value == null || value.trim().isEmpty) {
       return l10n.accountOpeningBalanceRequired;
     }
-    try {
-      NumberFormat.decimalPattern(
-        Localizations.localeOf(context).toString(),
-      ).parse(value.trim());
-      return null;
-    } on FormatException {
-      return l10n.accountOpeningBalanceInvalid;
-    }
+    final minor = parseMoneyMinor(
+      value,
+      Localizations.localeOf(context).toString(),
+      allowNegative: true,
+    );
+    return minor == null ? l10n.accountOpeningBalanceInvalid : null;
   }
 
   @override
@@ -473,24 +467,12 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                       value: _openingBalanceController.text,
                       suffix: currency,
                     )
-                  : TextFormField(
+                  : MoneyField(
                       key: const Key('accountOpeningBalanceField'),
                       controller: _openingBalanceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                        signed: true,
-                      ),
-                      // Amounts are right-aligned in a form (`00` §6).
-                      textAlign: TextAlign.end,
-                      // A form value is a neutral figure, not a movement, so it
-                      // keeps the primary text color rather than a sign color.
-                      style: tabularNumberStyle(
-                        Theme.of(context).textTheme.bodyLarge!,
-                      ),
-                      decoration: InputDecoration(
-                        suffixText: currency,
-                        suffixStyle: fieldSuffixStyle(context),
-                      ),
+                      currency: currency,
+                      // An overdrawn account opens below zero.
+                      allowNegative: true,
                       validator: (value) =>
                           _validateOpeningBalance(value, l10n),
                     ),
