@@ -1,17 +1,15 @@
 import '../../l10n/app_localizations.dart';
 
-/// Resolves an embedded/picker category to one of the eight pinned
-/// design-system hues (`CategoryHues`/`CategoryIcons` in `core/theme/tokens.dart`
-/// and `core/widgets/category_label.dart`).
+/// Resolves an embedded/picker category to its top-level bucket's slug, which
+/// picks a hue (`CategoryColors.slotForSlug` in `core/theme/tokens.dart`) and
+/// a fallback glyph (`CategoryIcons.slugKeys`) where a row's own slot and icon
+/// aren't at hand.
 ///
 /// The backend's system catalog (`backend/app/core/seed.py`) seeds ~70
-/// categories and subcategories — more than the eight hues `docs/design/00`
-/// pins, since several categories (Achats, Finances, Divers) intentionally
-/// share the neutral "Autres/Épargne" catch-all. `seed.py`'s `color` is kept
-/// in lockstep with the pinned hues (the design spec is the single source of
-/// truth for color), so this bucketing and the backend's own `color` field
-/// agree — the bucket is still needed here because a slug, not a hex string,
-/// is what picks the matching glyph from `CategoryIcons`.
+/// categories and subcategories under twelve top-level buckets, each with a
+/// hue slot of its own (`docs/design/00` §2.4); Divers keeps the neutral
+/// catch-all. `seed.py`'s `color` is kept in lockstep with those slots, so
+/// this bucketing and the backend's own `color` field agree.
 ///
 /// System category names are i18n keys shaped `category.<bucket>` or
 /// `category.<bucket>.<child>` (see seed.py) — the bucket segment is what we
@@ -23,10 +21,8 @@ import '../../l10n/app_localizations.dart';
 /// transactions and dashboard features resolve category display names — see
 /// the architecture skill's "logic needed by two features? extract it" rule.
 String categorySlugFor({required String name, required String kind}) {
-  // A savings-flavoured category reads as "épargne" regardless of which
-  // bucket it lives under (e.g. `category.finance.savings`).
-  if (kind == 'transfer') return 'epargne';
-
+  // A system entry always takes its bucket, so a subcategory wears its main
+  // category's hue and glyph (`category.finance.savings` is Finances).
   if (name.startsWith('category.')) {
     final segments = name.split('.');
     final bucket = segments.length > 1 ? segments[1] : '';
@@ -45,13 +41,23 @@ String categorySlugFor({required String name, required String kind}) {
         return 'abonnements';
       case 'income':
         return 'revenus';
+      case 'shopping':
+        return 'achats';
+      case 'finance':
+        return 'finances';
+      case 'children':
+        return 'enfants';
+      case 'pets':
+        return 'animaux';
       default:
         return 'autres';
     }
   }
 
+  // A user's savings-flavoured category reads as "épargne".
   return switch (kind) {
     'income' => 'revenus',
+    'transfer' => 'epargne',
     _ => 'autres',
   };
 }

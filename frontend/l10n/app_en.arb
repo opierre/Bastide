@@ -508,7 +508,7 @@
   "categoryFormIconLabel": "Icon",
   "categoryFormColorLabel": "Color",
   "categoryFormColorHelper": "The color follows the category everywhere: charts, legends and labels.",
-  "categoryColorName": "{slot, select, cat1{Blue} cat2{Orange} cat3{Green} cat4{Amber} cat5{Pink} cat6{Violet} other{Gray}}",
+  "categoryColorName": "{slot, select, cat1{Blue} cat2{Orange} cat3{Green} cat4{Amber} cat5{Pink} cat6{Violet} cat7{Plum} cat8{Cyan} cat9{Olive} cat10{Brown} other{Gray}}",
   "categoryFormSave": "Save",
   "categoryKindExpense": "Expense",
   "categoryKindIncome": "Income",

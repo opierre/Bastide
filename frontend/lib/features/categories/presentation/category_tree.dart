@@ -149,11 +149,21 @@ class _TreeList extends ConsumerWidget {
         ),
       );
       if (!open) continue;
+      final parentHue = categoryColor(context, category);
       for (final child in node.children) {
         items.add(
           _TreeItem(
             key: Key('categoryTreeSubitem-${child.id}'),
             indent: AppCategoriesPanel.subcategoryIndent,
+            // Its own glyph in its main category's hue: the subcategory reads
+            // as a member of that family without a dot of its own.
+            leading: [
+              Icon(
+                categoryIcon(child),
+                key: Key('categoryIcon-${child.id}'),
+                color: parentHue,
+              ),
+            ],
             label: localizedCategoryName(l10n, child.name),
             // A system subcategory is inert; a custom one opens its form.
             onTap: child.isSystem

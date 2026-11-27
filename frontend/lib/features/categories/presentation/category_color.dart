@@ -17,21 +17,19 @@ CategorySlot categorySlot(AppCategory category) =>
 Color categoryColor(BuildContext context, AppCategory category) =>
     context.categoryColors.forSlot(categorySlot(category));
 
-/// The glyph a category is drawn with on its card.
+/// The glyph a category is drawn with in the tree.
 ///
-/// A system category takes its chip's glyph, so a category looks the same on
-/// the panel as on every transaction row (`docs/design/08`). A user category
-/// takes the icon chosen in its modal — a [CategoryIcons] key, or a pre-Lucide
-/// key [CategoryIcons.resolveKey] maps — falling back to the chip's glyph for
-/// a key the app doesn't know.
+/// Every row stores its icon as a [CategoryIcons] key: a system entry the one
+/// the catalog picked for it, a user category the one chosen in its modal. A
+/// key the app doesn't know falls back to its bucket's glyph.
 IconData categoryIcon(AppCategory category) =>
     CategoryIcons.forKey(categoryIconKey(category));
 
 /// The [CategoryIcons] key behind [categoryIcon] — what a subcategory stores
 /// to wear its parent's glyph.
-String categoryIconKey(AppCategory category) {
-  final chipKey = CategoryIcons
-      .slugKeys[categorySlugFor(name: category.name, kind: category.kind)]!;
-  if (category.isSystem) return chipKey;
-  return CategoryIcons.resolveKey(category.icon) ?? chipKey;
-}
+String categoryIconKey(AppCategory category) =>
+    CategoryIcons.resolveKey(category.icon) ??
+    CategoryIcons.slugKeys[categorySlugFor(
+      name: category.name,
+      kind: category.kind,
+    )]!;

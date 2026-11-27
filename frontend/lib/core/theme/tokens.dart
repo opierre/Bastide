@@ -229,7 +229,7 @@ class AppColors extends ThemeExtension<AppColors> {
 
 /// The category slots of `00` §2.4. A category stores its slot, never a hex;
 /// the theme resolves it to a colour. A custom category picks one of
-/// [cat1]–[cat6] or [cat0]. [income] is Revenus, drawn in `positive`.
+/// [cat1]–[cat10] or [cat0]. [income] is Revenus, drawn in `positive`.
 enum CategorySlot {
   cat0,
   cat1,
@@ -238,6 +238,10 @@ enum CategorySlot {
   cat4,
   cat5,
   cat6,
+  cat7,
+  cat8,
+  cat9,
+  cat10,
   income;
 
   /// The slot a stored value names, [cat0] for anything else.
@@ -248,6 +252,10 @@ enum CategorySlot {
     'cat4' => cat4,
     'cat5' => cat5,
     'cat6' => cat6,
+    'cat7' => cat7,
+    'cat8' => cat8,
+    'cat9' => cat9,
+    'cat10' => cat10,
     'income' => income,
     _ => cat0,
   };
@@ -256,12 +264,29 @@ enum CategorySlot {
   String get wire => name;
 
   /// The slots a custom category may pick, in the design system's order.
-  static const pickable = [cat1, cat2, cat3, cat4, cat5, cat6, cat0];
+  static const pickable = [
+    cat1,
+    cat2,
+    cat3,
+    cat4,
+    cat5,
+    cat6,
+    cat7,
+    cat8,
+    cat9,
+    cat10,
+    cat0,
+  ];
 }
 
 /// The category palette of `00` §2.4, one set per theme. Read with
-/// `context.categoryColors`. Category hues are marks (dots, bars), never text
-/// colour; the net-worth composition reuses the slots in order.
+/// `context.categoryColors`. Category hues are marks (dots, bars, a
+/// subcategory's glyph), never text colour; the net-worth composition reuses
+/// the slots in order.
+///
+/// Every hue is at least 3:1 against `bg`, `rail` and `hover` in its theme,
+/// the non-text contrast a mark needs, and the form's check glyph (`bg` in
+/// dark, `text` in light) is at least 3:1 on every hue.
 @immutable
 class CategoryColors extends ThemeExtension<CategoryColors> {
   const CategoryColors({
@@ -272,10 +297,14 @@ class CategoryColors extends ThemeExtension<CategoryColors> {
     required this.cat4,
     required this.cat5,
     required this.cat6,
+    required this.cat7,
+    required this.cat8,
+    required this.cat9,
+    required this.cat10,
     required this.income,
   });
 
-  /// Autres, Épargne, any custom category without a hue.
+  /// Divers, any custom category without a hue.
   final Color cat0;
 
   /// Logement.
@@ -296,6 +325,18 @@ class CategoryColors extends ThemeExtension<CategoryColors> {
   /// Santé.
   final Color cat6;
 
+  /// Achats.
+  final Color cat7;
+
+  /// Finances.
+  final Color cat8;
+
+  /// Enfants.
+  final Color cat9;
+
+  /// Animaux.
+  final Color cat10;
+
   /// Revenus, equal to the theme's `positive`.
   final Color income;
 
@@ -307,17 +348,25 @@ class CategoryColors extends ThemeExtension<CategoryColors> {
     cat4: const Color(0xFFC98500),
     cat5: const Color(0xFFD55181),
     cat6: const Color(0xFF9085E9),
+    cat7: const Color(0xFFBF62CC),
+    cat8: const Color(0xFF2AA5BD),
+    cat9: const Color(0xFF94AB2E),
+    cat10: const Color(0xFFB07D55),
     income: AppColors.dark.positive,
   );
 
   static final light = CategoryColors(
-    cat0: const Color(0xFF9A9EA6),
+    cat0: const Color(0xFF80848C),
     cat1: const Color(0xFF2A78D6),
-    cat2: const Color(0xFFEB6834),
-    cat3: const Color(0xFF1BAF7A),
-    cat4: const Color(0xFFEDA100),
-    cat5: const Color(0xFFE87BA4),
+    cat2: const Color(0xFFD9551F),
+    cat3: const Color(0xFF14946A),
+    cat4: const Color(0xFFB57A00),
+    cat5: const Color(0xFFD1497D),
     cat6: const Color(0xFF6250D6),
+    cat7: const Color(0xFFA443AE),
+    cat8: const Color(0xFF16899E),
+    cat9: const Color(0xFF748A14),
+    cat10: const Color(0xFF99653B),
     income: AppColors.light.positive,
   );
 
@@ -333,6 +382,10 @@ class CategoryColors extends ThemeExtension<CategoryColors> {
     CategorySlot.cat4 => cat4,
     CategorySlot.cat5 => cat5,
     CategorySlot.cat6 => cat6,
+    CategorySlot.cat7 => cat7,
+    CategorySlot.cat8 => cat8,
+    CategorySlot.cat9 => cat9,
+    CategorySlot.cat10 => cat10,
     CategorySlot.income => income,
   };
 
@@ -345,6 +398,10 @@ class CategoryColors extends ThemeExtension<CategoryColors> {
     'abonnements' => CategorySlot.cat4,
     'loisirs' => CategorySlot.cat5,
     'sante' => CategorySlot.cat6,
+    'achats' => CategorySlot.cat7,
+    'finances' => CategorySlot.cat8,
+    'enfants' => CategorySlot.cat9,
+    'animaux' => CategorySlot.cat10,
     'revenus' => CategorySlot.income,
     _ => CategorySlot.cat0,
   };
@@ -365,6 +422,10 @@ class CategoryColors extends ThemeExtension<CategoryColors> {
     Color? cat4,
     Color? cat5,
     Color? cat6,
+    Color? cat7,
+    Color? cat8,
+    Color? cat9,
+    Color? cat10,
     Color? income,
   }) => CategoryColors(
     cat0: cat0 ?? this.cat0,
@@ -374,6 +435,10 @@ class CategoryColors extends ThemeExtension<CategoryColors> {
     cat4: cat4 ?? this.cat4,
     cat5: cat5 ?? this.cat5,
     cat6: cat6 ?? this.cat6,
+    cat7: cat7 ?? this.cat7,
+    cat8: cat8 ?? this.cat8,
+    cat9: cat9 ?? this.cat9,
+    cat10: cat10 ?? this.cat10,
     income: income ?? this.income,
   );
 

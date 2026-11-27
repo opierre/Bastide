@@ -2255,7 +2255,7 @@
   "@categoryFormColorHelper": {
     "description": "Helper under the colour picker, explaining that the hue is reused across the app."
   },
-  "categoryColorName": "{slot, select, cat1{Bleu} cat2{Orange} cat3{Vert} cat4{Ambre} cat5{Rose} cat6{Violet} other{Gris}}",
+  "categoryColorName": "{slot, select, cat1{Bleu} cat2{Orange} cat3{Vert} cat4{Ambre} cat5{Rose} cat6{Violet} cat7{Prune} cat8{Cyan} cat9{Olive} cat10{Brun} other{Gris}}",
   "@categoryColorName": {
     "description": "Accessible name and tooltip of a colour square in the category form, by slot.",
     "placeholders": {

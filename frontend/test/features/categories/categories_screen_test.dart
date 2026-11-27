@@ -72,7 +72,7 @@ final _own = testCategory(
   id: 'own',
   userId: 'u1',
   name: 'Épargne projet',
-  icon: 'loisirs',
+  icon: 'star',
   color: 'cat0',
   isSystem: false,
 );
@@ -149,10 +149,48 @@ void main() {
     final food = tester.widget<Icon>(
       find.byKey(const Key('categoryIcon-food')),
     );
-    expect(food.icon, LucideIcons300.soup);
+    expect(food.icon, LucideIcons300.utensils);
     final own = tester.widget<Icon>(find.byKey(const Key('categoryIcon-own')));
     expect(own.icon, LucideIcons300.star);
     expect(_inItem('food', find.text('Alimentation')), findsOneWidget);
+  });
+
+  testWidgets('an open category lists each subcategory with its own glyph in '
+      'the main category’s hue', (tester) async {
+    _useDesktopSurface(tester);
+    await tester.pumpWidget(
+      _wrap(
+        controller: FakeCategoriesController(
+          initialCategories: [
+            testCategory(
+              id: 'pets',
+              name: 'category.pets',
+              icon: 'paw-print',
+              color: 'cat10',
+            ),
+            testCategory(
+              id: 'vet',
+              parentId: 'pets',
+              name: 'category.pets.vet',
+              icon: 'syringe',
+              color: 'cat10',
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('categoryTreeItem-pets')));
+    await tester.pumpAndSettle();
+
+    final dot = tester.widget<Container>(
+      find.byKey(const Key('categoryDot-pets')),
+    );
+    expect((dot.decoration! as BoxDecoration).color, CategoryColors.dark.cat10);
+    final vet = tester.widget<Icon>(find.byKey(const Key('categoryIcon-vet')));
+    expect(vet.icon, LucideIcons300.syringe);
+    expect(vet.color, CategoryColors.dark.cat10);
+    expect(find.byKey(const Key('categoryDot-vet')), findsNothing);
   });
 
   testWidgets('the panel carries no badge, no amount and no share', (
@@ -488,39 +526,36 @@ void main() {
     },
   );
 
-  testWidgets(
-    'editing a pre-Lucide category selects the Lucide glyph its key maps to',
-    (tester) async {
-      _useDesktopSurface(tester);
-      final controller = FakeCategoriesController(initialCategories: [_own]);
-      await tester.pumpWidget(_wrap(controller: controller));
-      await tester.pumpAndSettle();
+  testWidgets('editing a category selects the glyph it stores', (tester) async {
+    _useDesktopSurface(tester);
+    final controller = FakeCategoriesController(initialCategories: [_own]);
+    await tester.pumpWidget(_wrap(controller: controller));
+    await tester.pumpAndSettle();
 
-      await _hover(tester, find.byKey(const Key('categoryTreeItem-own')));
-      await tester.tap(find.byKey(const Key('categoryMenu-own')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('categoryEdit-own')));
-      await tester.pumpAndSettle();
+    await _hover(tester, find.byKey(const Key('categoryTreeItem-own')));
+    await tester.tap(find.byKey(const Key('categoryMenu-own')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('categoryEdit-own')));
+    await tester.pumpAndSettle();
 
-      // `_own` stores the old « loisirs » slug: « star » is the selected cell.
-      expect(
-        tester.getSemantics(find.byKey(const Key('categoryFormIcon-star'))),
-        isSemantics(
-          isSelected: true,
-          isButton: true,
-          hasTapAction: true,
-          label: 'Loisirs',
-        ),
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(const Key('categoryFormIcon')),
-          matching: find.byType(Icon),
-        ),
-        findsNWidgets(CategoryIcons.glyphs.length),
-      );
-    },
-  );
+    // `_own` stores « star »: that is the selected cell.
+    expect(
+      tester.getSemantics(find.byKey(const Key('categoryFormIcon-star'))),
+      isSemantics(
+        isSelected: true,
+        isButton: true,
+        hasTapAction: true,
+        label: 'Loisirs',
+      ),
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('categoryFormIcon')),
+        matching: find.byType(Icon),
+      ),
+      findsNWidgets(CategoryIcons.glyphs.length),
+    );
+  });
 
   testWidgets('a custom category with an unknown key falls back to its glyph', (
     tester,
@@ -558,7 +593,7 @@ void main() {
     );
     expect(
       tester.widget<Icon>(find.byKey(const Key('categoryIcon-odd'))).icon,
-      LucideIcons300.coins,
+      LucideIcons300.shapes,
     );
   });
 
@@ -670,6 +705,19 @@ void main() {
       await tester.pumpAndSettle();
       expect(checkIn('cat0'), findsNothing);
       expect(checkIn('cat1'), findsOneWidget);
+
+      // Every slot is offered, each under its own name.
+      for (final (slot, name) in const [
+        ('cat7', 'Prune'),
+        ('cat8', 'Cyan'),
+        ('cat9', 'Olive'),
+        ('cat10', 'Brun'),
+      ]) {
+        expect(
+          tester.getSemantics(find.byKey(Key('categoryFormColor-$slot'))),
+          isSemantics(isButton: true, hasTapAction: true, label: name),
+        );
+      }
     },
   );
 

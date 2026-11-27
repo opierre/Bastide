@@ -62,11 +62,9 @@ class _CategoryFormModalState extends ConsumerState<CategoryFormModal> {
 
   late String _kind = widget.initial?.kind ?? widget.parent?.kind ?? 'expense';
   late String? _parentId = widget.initial?.parentId ?? widget.parent?.id;
-  // A row saved before Lucide carries a legacy key: the form shows (and saves
-  // back) its Lucide equivalent rather than an empty select.
   late String _icon =
       CategoryIcons.resolveKey(widget.initial?.icon) ??
-      CategoryIcons.slugKeys['autres']!;
+      CategoryIcons.defaultKey;
   late CategorySlot _slot = switch ((widget.initial, widget.parent)) {
     (final AppCategory initial, _) => categorySlot(initial),
     (null, final AppCategory parent) => categorySlot(parent),
@@ -407,7 +405,7 @@ class _IconGrid extends StatelessWidget {
   }
 }
 
-/// The seven category slots as 20 px squares, 8 px apart, each named (« Bleu »)
+/// The eleven category slots as 20 px squares, 8 px apart, each named (« Bleu »)
 /// in a tooltip that is also its semantic label. A picker rather than a colour
 /// wheel: the hues are fixed by the design system so a category means the same
 /// colour in every chart, legend and label (`00` §2.4). The selected square

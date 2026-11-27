@@ -2956,7 +2956,7 @@ abstract class AppLocalizations {
   /// Accessible name and tooltip of a colour square in the category form, by slot.
   ///
   /// In fr, this message translates to:
-  /// **'{slot, select, cat1{Bleu} cat2{Orange} cat3{Vert} cat4{Ambre} cat5{Rose} cat6{Violet} other{Gris}}'**
+  /// **'{slot, select, cat1{Bleu} cat2{Orange} cat3{Vert} cat4{Ambre} cat5{Rose} cat6{Violet} cat7{Prune} cat8{Cyan} cat9{Olive} cat10{Brun} other{Gris}}'**
   String categoryColorName(String slot);
 
   /// Submit button of the category modal.

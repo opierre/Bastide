@@ -9,6 +9,7 @@ from app.features.categories.hues import slot_for
     ("stored", "slot"),
     [
         ("cat4", "cat4"),
+        ("cat10", "cat10"),
         ("income", "income"),
         ("#4FD1E8", "cat1"),
         ("#a3e635", "cat6"),
