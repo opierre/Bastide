@@ -70,7 +70,7 @@ AppCategory testCategory({
   String? parentId,
   String name = 'category.food',
   String kind = 'expense',
-  String icon = 'alimentation',
+  String icon = 'utensils',
   String color = 'cat2',
   bool isSystem = true,
 }) => AppCategory(

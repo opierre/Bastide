@@ -202,9 +202,14 @@ class _CategoryGlyph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final slug = categorySlugFor(name: category.name, kind: category.kind);
+    final key =
+        CategoryIcons.resolveKey(category.icon) ??
+        CategoryIcons.slugKeys[categorySlugFor(
+          name: category.name,
+          kind: category.kind,
+        )];
     return Icon(
-      CategoryIcons.forSlug(slug),
+      CategoryIcons.forKey(key),
       size: AppSizes.iconSmall,
       color: context.categoryColors.forSlot(
         CategorySlot.fromWire(category.color),

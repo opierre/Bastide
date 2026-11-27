@@ -112,6 +112,39 @@ void main() {
         }
       });
     }
+
+    for (final (name, colors, hues, check) in [
+      ('dark', AppColors.dark, CategoryColors.dark, AppColors.dark.bg),
+      ('light', AppColors.light, CategoryColors.light, AppColors.light.text),
+    ]) {
+      test('$name: every category hue is a 3:1 mark (`00` §2.4)', () {
+        for (final slot in CategorySlot.values) {
+          final hue = hues.forSlot(slot);
+          for (final (surface, ground) in [
+            ('bg', colors.bg),
+            ('rail', colors.rail),
+            ('hover', colors.hover),
+          ]) {
+            expect(
+              ratio(hue, ground),
+              greaterThanOrEqualTo(3),
+              reason: '${slot.name} on $surface',
+            );
+          }
+          // The form's check glyph on the selected square (`08`).
+          expect(
+            ratio(check, hue),
+            greaterThanOrEqualTo(3),
+            reason: 'check on ${slot.name}',
+          );
+        }
+      });
+
+      test('$name: every top-level hue is distinct', () {
+        final slots = CategorySlot.values;
+        expect(slots.map(hues.forSlot).toSet(), hasLength(slots.length));
+      });
+    }
   });
 
   group('themes', () {
@@ -132,6 +165,10 @@ void main() {
 
     test('a stored slot resolves through the theme', () {
       expect(CategorySlot.fromWire('cat3'), CategorySlot.cat3);
+      expect(CategorySlot.fromWire('cat10'), CategorySlot.cat10);
+      for (final slot in CategorySlot.values) {
+        expect(CategorySlot.fromWire(slot.wire), slot);
+      }
       expect(CategorySlot.fromWire('#64748B'), CategorySlot.cat0);
       expect(
         CategoryColors.light.forSlot(CategorySlot.cat1),

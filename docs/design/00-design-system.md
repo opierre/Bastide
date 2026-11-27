@@ -96,22 +96,35 @@ surfaces. The tokens ticket adds a test that recomputes this.
 ### 2.4 Category palette
 
 Fixed order. A hue follows its category everywhere and always sits beside the category name.
+Each top-level category of the system catalog has a hue of its own, so the categories panel
+reads at a glance; a subcategory inherits its main category's slot.
 
 | Slot | Category | Dark | Light |
 |---|---|---|---|
 | `cat1` | Logement | `#3987E5` | `#2A78D6` |
-| `cat2` | Alimentation | `#D95926` | `#EB6834` |
-| `cat3` | Transport | `#199E70` | `#1BAF7A` |
-| `cat4` | Abonnements | `#C98500` | `#EDA100` |
-| `cat5` | Loisirs | `#D55181` | `#E87BA4` |
+| `cat2` | Alimentation | `#D95926` | `#D9551F` |
+| `cat3` | Transport | `#199E70` | `#14946A` |
+| `cat4` | Abonnements | `#C98500` | `#B57A00` |
+| `cat5` | Loisirs | `#D55181` | `#D1497D` |
 | `cat6` | Santé | `#9085E9` | `#6250D6` |
-| `cat0` | Autres, Épargne, any custom category without a hue | `#6B7078` | `#9A9EA6` |
+| `cat7` | Achats | `#BF62CC` | `#A443AE` |
+| `cat8` | Finances | `#2AA5BD` | `#16899E` |
+| `cat9` | Enfants | `#94AB2E` | `#748A14` |
+| `cat10` | Animaux | `#B07D55` | `#99653B` |
+| `cat0` | Divers, any custom category without a hue | `#6B7078` | `#80848C` |
 | — | Revenus | = `positive` | = `positive` |
 
-A custom category picks one of `cat1`–`cat6` or `cat0`. A category therefore stores a
+A custom category picks one of `cat1`–`cat10` or `cat0`. A category therefore stores a
 **slot**, not a hex: the v1 hex values held in the database (`backend/app/core/seed.py` and
-user categories) are mapped to their slot once, and the theme resolves the slot to a colour. Category hues are marks (dots, bars),
-never text colour. The net-worth composition bar reuses the slots in order for its segments.
+user categories) are mapped to their slot once, and the theme resolves the slot to a colour. Category hues are marks (dots, bars,
+a subcategory's glyph in the categories tree), never text colour. The net-worth composition bar
+reuses `cat1`–`cat6` in order for its segments.
+
+Measured contrast (WCAG non-text, 3:1): every slot is ≥ 3:1 on `bg`, `rail` and `hover` in its
+theme, and the category form's check glyph (`bg` in dark, `text` in light) is ≥ 3:1 on every
+slot. `cat7`–`cat10` sit between the first six on the hue circle (plum, cyan, olive, brown) and
+stay clear of `negative`, so no category reads as a loss. `theme_tokens_test.dart` recomputes
+both.
 
 ## 3. Typography
 
@@ -422,6 +435,9 @@ line 1 px `lineStrong` when a series crosses it; category axis in a 22 px band b
 Lucide only (`lucide_icons_flutter`, the weight that draws a 1.5 px stroke), navigation
 included. 16 px by default, 14 px inside buttons, selects and notes, 13 px in status text. A
 category stores its icon as a Lucide name. No emoji, no Unicode glyph standing in for an icon.
+Every system category, subcategories included, has a glyph of its own, picked in
+`backend/app/core/seed.py` and drawn from `frontend/lib/core/widgets/category_icons.dart`; the
+category form's picker offers a shorter curated set.
 
 ## 11. Brand
 

@@ -3,11 +3,13 @@
 import json
 from collections.abc import Iterator
 from pathlib import Path
+from typing import get_args
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.core.seed import SYSTEM_CATEGORIES, CategorySeed, seed_categories
+from app.features.categories.hues import CategoryHue
 from app.features.categories.models import Category
 from app.features.categorization.prompt import leaf_categories
 from tests.factories import make_user
@@ -126,6 +128,24 @@ def test_every_key_sits_under_its_named_parent_and_shares_its_hue() -> None:
             assert not child.children
 
 
+def test_every_top_level_bucket_has_a_hue_of_its_own() -> None:
+    slots = [group.color for group in SYSTEM_CATEGORIES]
+
+    assert len(slots) == len(set(slots))
+    assert set(slots) <= set(get_args(CategoryHue))
+
+
+def test_every_category_has_its_own_lucide_icon_the_app_draws() -> None:
+    icons = (_FRONTEND / "lib" / "core" / "widgets" / "category_icons.dart").read_text(
+        encoding="utf-8"
+    )
+    nodes = list(_flatten(SYSTEM_CATEGORIES))
+
+    assert len({node.icon for node in nodes}) == len(nodes)
+    for node in nodes:
+        assert f"'{node.icon}': LucideIcons300." in icons, node.key
+
+
 def _arb_key(category_key: str) -> str:
     words = [word for part in category_key.split(".")[1:] for word in part.split("_")]
     return "categorySystem" + "".join(word.capitalize() for word in words)
@@ -168,6 +188,23 @@ def test_reseed_adds_new_entries_without_touching_existing_ones(db_session: Sess
     pets_id = after["category.pets"][0]
     assert after["category.pets.vet"][1] == pets_id
     assert after["category.health.dentist"][1] == after["category.health"][0]
+
+
+def test_reseed_restyles_system_rows_and_leaves_their_ids(db_session: Session) -> None:
+    """A catalog restyle reaches an install seeded before it, without touching user rows."""
+    seed_categories(db_session)
+    shopping = db_session.query(Category).filter_by(name="category.shopping").one()
+    shopping_id = shopping.id
+    shopping.icon = "shopping_bag"
+    shopping.color = "cat0"
+    db_session.commit()
+
+    created = seed_categories(db_session)
+
+    restyled = db_session.query(Category).filter_by(name="category.shopping").one()
+    assert created == 0
+    assert restyled.id == shopping_id
+    assert (restyled.icon, restyled.color) == ("shopping-bag", "cat7")
 
 
 def test_categorization_prompt_offers_the_new_leaves(db_session: Session) -> None:

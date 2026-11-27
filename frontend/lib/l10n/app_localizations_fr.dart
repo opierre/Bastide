@@ -1815,6 +1815,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'cat4': 'Ambre',
       'cat5': 'Rose',
       'cat6': 'Violet',
+      'cat7': 'Prune',
+      'cat8': 'Cyan',
+      'cat9': 'Olive',
+      'cat10': 'Brun',
       'other': 'Gris',
     });
     return '$_temp0';

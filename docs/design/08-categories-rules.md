@@ -20,8 +20,8 @@ Flush panel, two panes: **category tree** (340 px, right hairline, padding 16 12
   `chevron-right` / `chevron-down` 14 px `textTertiary` · 8 px dot in the category hue ·
   category icon 14 px · name · on the right, 11 `textTertiary`: « 2 règles », or « aucune
   règle » in `warning`.
-- An open category lists its subcategories indented 52 px (no dot, no icon), then a
-  `textTertiary` item `plus` + « Sous-catégorie ».
+- An open category lists its subcategories indented 52 px, each with its own icon 14 px in
+  its main category's hue and no dot, then a `textTertiary` item `plus` + « Sous-catégorie ».
 - Selected item: `hover` ground, `text`.
 - A system category shows a `lock` 14 px `textTertiary` on hover in place of the menu; a
   custom one shows `ellipsis` (menu: « Modifier », « Supprimer »). A custom subcategory opens
@@ -62,8 +62,8 @@ confirmed) · « Annuler » · « Enregistrer ».
 ### Category form (modal, 480 px)
 Nom · Type (Dépense, Revenu, Transfert) · Parent (select, optional) · Icône (a grid of the
 curated Lucide set, 32 px cells, selected cell `hover` + `accent` outline; each cell is named in
-French, « Tirelire » for `piggy-bank`) · Couleur (the seven category slots as 20 px squares, named
-Bleu, Orange, Vert, Ambre, Rose, Violet, Gris; the selected one takes the `accent` outline and a
+French, « Tirelire » for `piggy-bank`) · Couleur (the eleven category slots as 20 px squares, named
+Bleu, Orange, Vert, Ambre, Rose, Violet, Prune, Cyan, Olive, Brun, Gris; the selected one takes the `accent` outline and a
 12 px `check` in `bg` in dark and `text` in light, at least 3:1 on every slot). With a parent set, Type, Icône and Couleur are hidden and the
 modal's lead repeats the parent's category label.
 

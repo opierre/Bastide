@@ -27,8 +27,8 @@ Order of authority: `00-design-system.md`, then the panel spec, then the mockup
 
 - Neutral graphite dark theme and white light theme; tokens in `00` §2.
 - Primary button in ink; blue accent for selection, links, focus and progress. Flat.
-- Green and red are the sign of money; amber is "worth a look"; categories have six fixed
-  hues plus grey, stored as slots.
+- Green and red are the sign of money; amber is "worth a look"; categories have ten fixed
+  hues plus grey, one per top-level category, stored as slots.
 - Geist only (400, 500, 600), Geist Mono for raw labels and paths. Sizes 40, 28, 20, 16, 14,
   13, 12, 11.
 - Radius 6 on controls, 8 on containers, 12 on modals. Title bar 48, sidebar 224, rows 36.

@@ -4,14 +4,19 @@
 it to a localized string via its own ARB entries.  The fr/en names below are the catalog's
 source of truth for those translations, not persisted columns.
 
-``color`` holds the category's hue slot from ``docs/design/00-design-system.md`` §2.4
-(Logement/Alimentation/Transport/Abonnements/Loisirs/Santé/Autres·Épargne/Revenus), which the
-app's theme resolves to a colour. Every child inherits its top-level bucket's slot. Categories
-with no dedicated slot (Achats, Finances, Enfants, Animaux) take the "Autres/Épargne" catch-all
-``cat0``, which is also why Épargne needs no slot of its own. Abonnements is a top-level
-bucket, not a child of Loisirs, because the design spec gives it its own slot distinct from
-Loisirs. It also stays childless: the categorisation prompt only
-offers leaves, and the built-in rule pack files every streaming and telecom merchant under it.
+``color`` holds the category's hue slot from ``docs/design/00-design-system.md`` §2.4, which the
+app's theme resolves to a colour. Every top-level bucket has a slot of its own, so the panel
+reads at a glance, and every child inherits its bucket's slot. Divers, the catch-all, keeps the
+neutral ``cat0``. Abonnements is a top-level bucket, not a child of Loisirs, because the design
+spec gives it its own slot distinct from Loisirs. It also stays childless: the categorisation
+prompt only offers leaves, and the built-in rule pack files every streaming and telecom merchant
+under it.
+
+``icon`` is a Lucide icon name (§10), one fitting glyph per entry; the app draws it from the
+curated set in ``frontend/lib/core/widgets/category_icons.dart``.
+
+System rows are read-only to users, so the seed owns their icon and slot: a boot rewrites both
+on a row whose values differ from the catalog's, which is how a restyle reaches every install.
 
 Keys are permanent: rules and rule packs reference categories by key, so an entry is only ever
 added, never renamed or moved to another parent. A new entry reaches existing installs through
@@ -37,7 +42,11 @@ _TRANSPORT = "cat3"
 _ABONNEMENTS = "cat4"
 _LOISIRS = "cat5"
 _SANTE = "cat6"
-_AUTRES_EPARGNE = "cat0"
+_ACHATS = "cat7"
+_FINANCES = "cat8"
+_ENFANTS = "cat9"
+_ANIMAUX = "cat10"
+_DIVERS = "cat0"
 _REVENUS = "income"
 
 
@@ -60,27 +69,29 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         "Logement",
         "Housing",
         "expense",
-        "home",
+        "house",
         _LOGEMENT,
         children=(
-            CategorySeed("category.housing.rent", "Loyer", "Rent", "expense", "key", _LOGEMENT),
+            CategorySeed(
+                "category.housing.rent", "Loyer", "Rent", "expense", "key-round", _LOGEMENT
+            ),
             CategorySeed(
                 "category.housing.mortgage",
                 "Prêt immobilier",
                 "Mortgage",
                 "expense",
-                "home_work",
+                "landmark",
                 _LOGEMENT,
             ),
             CategorySeed(
-                "category.housing.utilities", "Charges", "Utilities", "expense", "bolt", _LOGEMENT
+                "category.housing.utilities", "Charges", "Utilities", "expense", "zap", _LOGEMENT
             ),
             CategorySeed(
                 "category.housing.home_insurance",
                 "Assurance habitation",
                 "Home insurance",
                 "expense",
-                "shield_home",
+                "umbrella",
                 _LOGEMENT,
             ),
             CategorySeed(
@@ -88,7 +99,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Charges de copropriété",
                 "Condo fees",
                 "expense",
-                "apartment",
+                "building-2",
                 _LOGEMENT,
             ),
             CategorySeed(
@@ -96,7 +107,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Travaux et entretien",
                 "Repairs and maintenance",
                 "expense",
-                "handyman",
+                "hammer",
                 _LOGEMENT,
             ),
             CategorySeed(
@@ -104,7 +115,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Services à domicile",
                 "Home services",
                 "expense",
-                "cleaning_services",
+                "spray-can",
                 _LOGEMENT,
             ),
         ),
@@ -114,7 +125,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         "Alimentation",
         "Food",
         "expense",
-        "restaurant",
+        "utensils",
         _ALIMENTATION,
         children=(
             CategorySeed(
@@ -122,7 +133,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Courses",
                 "Groceries",
                 "expense",
-                "shopping_cart",
+                "shopping-cart",
                 _ALIMENTATION,
             ),
             CategorySeed(
@@ -130,18 +141,18 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Restaurants",
                 "Restaurants",
                 "expense",
-                "restaurant",
+                "utensils-crossed",
                 _ALIMENTATION,
             ),
             CategorySeed(
-                "category.food.coffee", "Café", "Coffee", "expense", "local_cafe", _ALIMENTATION
+                "category.food.coffee", "Café", "Coffee", "expense", "coffee", _ALIMENTATION
             ),
             CategorySeed(
                 "category.food.takeaway",
                 "Livraison et à emporter",
                 "Takeaway and delivery",
                 "expense",
-                "takeout_dining",
+                "pizza",
                 _ALIMENTATION,
             ),
             CategorySeed(
@@ -149,7 +160,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Cantine",
                 "Canteen",
                 "expense",
-                "lunch_dining",
+                "sandwich",
                 _ALIMENTATION,
             ),
         ),
@@ -159,7 +170,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         "Transport",
         "Transport",
         "expense",
-        "directions_car",
+        "car",
         _TRANSPORT,
         children=(
             CategorySeed(
@@ -167,7 +178,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Carburant",
                 "Fuel",
                 "expense",
-                "local_gas_station",
+                "fuel",
                 _TRANSPORT,
             ),
             CategorySeed(
@@ -175,7 +186,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Transports en commun",
                 "Public transit",
                 "expense",
-                "directions_bus",
+                "bus",
                 _TRANSPORT,
             ),
             CategorySeed(
@@ -183,7 +194,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Stationnement",
                 "Parking",
                 "expense",
-                "local_parking",
+                "square-parking",
                 _TRANSPORT,
             ),
             CategorySeed(
@@ -191,7 +202,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Entretien auto",
                 "Car maintenance",
                 "expense",
-                "car_repair",
+                "wrench",
                 _TRANSPORT,
             ),
             CategorySeed(
@@ -199,7 +210,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Assurance auto",
                 "Car insurance",
                 "expense",
-                "shield_car",
+                "shield-check",
                 _TRANSPORT,
             ),
             CategorySeed(
@@ -207,7 +218,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Péages",
                 "Tolls",
                 "expense",
-                "toll",
+                "route",
                 _TRANSPORT,
             ),
             CategorySeed(
@@ -215,7 +226,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Taxi et VTC",
                 "Taxi and ride-hailing",
                 "expense",
-                "local_taxi",
+                "car-taxi-front",
                 _TRANSPORT,
             ),
             CategorySeed(
@@ -223,7 +234,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Location de véhicule",
                 "Vehicle rental",
                 "expense",
-                "car_rental",
+                "car-front",
                 _TRANSPORT,
             ),
         ),
@@ -233,7 +244,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         "Santé",
         "Health",
         "expense",
-        "health_and_safety",
+        "heart-pulse",
         _SANTE,
         children=(
             CategorySeed(
@@ -241,7 +252,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Médecin",
                 "Doctor",
                 "expense",
-                "medical_services",
+                "stethoscope",
                 _SANTE,
             ),
             CategorySeed(
@@ -249,7 +260,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Pharmacie",
                 "Pharmacy",
                 "expense",
-                "local_pharmacy",
+                "pill",
                 _SANTE,
             ),
             CategorySeed(
@@ -257,7 +268,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Mutuelle",
                 "Health insurance",
                 "expense",
-                "shield_health",
+                "shield-plus",
                 _SANTE,
             ),
             CategorySeed(
@@ -265,7 +276,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Dentiste",
                 "Dentist",
                 "expense",
-                "dentistry",
+                "smile",
                 _SANTE,
             ),
             CategorySeed(
@@ -273,7 +284,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Optique",
                 "Optician",
                 "expense",
-                "visibility",
+                "glasses",
                 _SANTE,
             ),
         ),
@@ -283,7 +294,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         "Loisirs",
         "Leisure",
         "expense",
-        "celebration",
+        "ferris-wheel",
         _LOISIRS,
         children=(
             CategorySeed(
@@ -291,18 +302,18 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Sorties",
                 "Outings",
                 "expense",
-                "local_activity",
+                "ticket",
                 _LOISIRS,
             ),
             CategorySeed(
-                "category.leisure.travel", "Voyages", "Travel", "expense", "flight", _LOISIRS
+                "category.leisure.travel", "Voyages", "Travel", "expense", "plane", _LOISIRS
             ),
             CategorySeed(
                 "category.leisure.accommodation",
                 "Hébergement",
                 "Accommodation",
                 "expense",
-                "hotel",
+                "bed-double",
                 _LOISIRS,
             ),
             CategorySeed(
@@ -310,7 +321,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Sport",
                 "Sports",
                 "expense",
-                "fitness_center",
+                "dumbbell",
                 _LOISIRS,
             ),
             CategorySeed(
@@ -318,7 +329,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Culture",
                 "Culture",
                 "expense",
-                "menu_book",
+                "book-open",
                 _LOISIRS,
             ),
         ),
@@ -328,7 +339,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         "Abonnements",
         "Subscriptions",
         "expense",
-        "subscriptions",
+        "refresh-cw",
         _ABONNEMENTS,
     ),
     CategorySeed(
@@ -336,48 +347,48 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         "Achats",
         "Shopping",
         "expense",
-        "shopping_bag",
-        _AUTRES_EPARGNE,
+        "shopping-bag",
+        _ACHATS,
         children=(
             CategorySeed(
                 "category.shopping.clothing",
                 "Vêtements",
                 "Clothing",
                 "expense",
-                "checkroom",
-                _AUTRES_EPARGNE,
+                "shirt",
+                _ACHATS,
             ),
             CategorySeed(
                 "category.shopping.electronics",
                 "Électronique",
                 "Electronics",
                 "expense",
-                "devices",
-                _AUTRES_EPARGNE,
+                "monitor-smartphone",
+                _ACHATS,
             ),
             CategorySeed(
                 "category.shopping.home",
                 "Maison",
                 "Home",
                 "expense",
-                "chair",
-                _AUTRES_EPARGNE,
+                "sofa",
+                _ACHATS,
             ),
             CategorySeed(
                 "category.shopping.personal_care",
                 "Beauté et soins",
                 "Personal care",
                 "expense",
-                "spa",
-                _AUTRES_EPARGNE,
+                "scissors",
+                _ACHATS,
             ),
             CategorySeed(
                 "category.shopping.gifts",
                 "Cadeaux",
                 "Gifts",
                 "expense",
-                "redeem",
-                _AUTRES_EPARGNE,
+                "gift",
+                _ACHATS,
             ),
         ),
     ),
@@ -386,32 +397,32 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         "Finances",
         "Finances",
         "expense",
-        "account_balance",
-        _AUTRES_EPARGNE,
+        "wallet",
+        _FINANCES,
         children=(
             CategorySeed(
                 "category.finance.bank_fees",
                 "Frais bancaires",
                 "Bank fees",
                 "expense",
-                "receipt_long",
-                _AUTRES_EPARGNE,
+                "receipt",
+                _FINANCES,
             ),
             CategorySeed(
                 "category.finance.taxes",
                 "Impôts",
                 "Taxes",
                 "expense",
-                "payments",
-                _AUTRES_EPARGNE,
+                "scroll-text",
+                _FINANCES,
             ),
             CategorySeed(
                 "category.finance.savings",
                 "Épargne",
                 "Savings",
                 "transfer",
-                "savings",
-                _AUTRES_EPARGNE,
+                "piggy-bank",
+                _FINANCES,
             ),
             # The one debit a deferred-debit card makes on the current account each month. A
             # transfer, because the purchases it settles are already booked one by one on the
@@ -421,16 +432,16 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Règlement carte différée",
                 "Deferred card settlement",
                 "transfer",
-                "credit_card",
-                _AUTRES_EPARGNE,
+                "credit-card",
+                _FINANCES,
             ),
             CategorySeed(
                 "category.finance.interest",
                 "Intérêts",
                 "Interest",
                 "income",
-                "trending_up",
-                _AUTRES_EPARGNE,
+                "badge-percent",
+                _FINANCES,
             ),
             # A transfer, like savings: money moved to a brokerage or life-insurance contract
             # still belongs to the user, so it is not spending.
@@ -439,16 +450,16 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Investissements",
                 "Investments",
                 "transfer",
-                "show_chart",
-                _AUTRES_EPARGNE,
+                "chart-line",
+                _FINANCES,
             ),
             CategorySeed(
                 "category.finance.loans",
                 "Remboursement de crédit",
                 "Loan repayment",
                 "expense",
-                "credit_score",
-                _AUTRES_EPARGNE,
+                "hand-coins",
+                _FINANCES,
             ),
         ),
     ),
@@ -457,17 +468,19 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         "Revenus",
         "Income",
         "income",
-        "attach_money",
+        "banknote-arrow-up",
         _REVENUS,
         children=(
-            CategorySeed("category.income.salary", "Salaire", "Salary", "income", "work", _REVENUS),
+            CategorySeed(
+                "category.income.salary", "Salaire", "Salary", "income", "briefcase", _REVENUS
+            ),
             # A pension and a dividend are ordinary income a user categorises beside a salary.
             CategorySeed(
                 "category.income.pension",
                 "Retraite",
                 "Pension",
                 "income",
-                "elderly",
+                "armchair",
                 _REVENUS,
             ),
             CategorySeed(
@@ -475,7 +488,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Dividendes",
                 "Dividends",
                 "income",
-                "savings",
+                "coins",
                 _REVENUS,
             ),
             CategorySeed(
@@ -483,7 +496,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Remboursements",
                 "Refunds",
                 "income",
-                "replay",
+                "rotate-ccw",
                 _REVENUS,
             ),
             CategorySeed(
@@ -491,7 +504,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Allocations et aides",
                 "Benefits",
                 "income",
-                "family_restroom",
+                "hand-helping",
                 _REVENUS,
             ),
             CategorySeed(
@@ -499,7 +512,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Revenus locatifs",
                 "Rental income",
                 "income",
-                "real_estate_agent",
+                "building",
                 _REVENUS,
             ),
             CategorySeed(
@@ -507,7 +520,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Ventes",
                 "Sales",
                 "income",
-                "sell",
+                "tag",
                 _REVENUS,
             ),
             CategorySeed(
@@ -515,7 +528,7 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Autres revenus",
                 "Other income",
                 "income",
-                "add_circle",
+                "circle-plus",
                 _REVENUS,
             ),
         ),
@@ -525,16 +538,16 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         "Divers",
         "Other",
         "expense",
-        "category",
-        _AUTRES_EPARGNE,
+        "shapes",
+        _DIVERS,
         children=(
             CategorySeed(
                 "category.other.uncategorized",
                 "Non catégorisé",
                 "Uncategorized",
                 "expense",
-                "help",
-                _AUTRES_EPARGNE,
+                "circle-help",
+                _DIVERS,
             ),
             # Cash leaves the account for an unknowable purpose, so a withdrawal is a category
             # in its own right rather than a guess at what the cash was later spent on. This is
@@ -547,16 +560,16 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Retraits espèces",
                 "Cash withdrawals",
                 "expense",
-                "atm",
-                _AUTRES_EPARGNE,
+                "banknote",
+                _DIVERS,
             ),
             CategorySeed(
                 "category.other.donations",
                 "Dons",
                 "Donations",
                 "expense",
-                "volunteer_activism",
-                _AUTRES_EPARGNE,
+                "hand-heart",
+                _DIVERS,
             ),
         ),
     ),
@@ -565,16 +578,16 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         "Enfants",
         "Children",
         "expense",
-        "child_care",
-        _AUTRES_EPARGNE,
+        "baby",
+        _ENFANTS,
         children=(
             CategorySeed(
                 "category.children.childcare",
                 "Garde d’enfants",
                 "Childcare",
                 "expense",
-                "child_friendly",
-                _AUTRES_EPARGNE,
+                "heart-handshake",
+                _ENFANTS,
             ),
             CategorySeed(
                 "category.children.school",
@@ -582,15 +595,15 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
                 "Schooling",
                 "expense",
                 "school",
-                _AUTRES_EPARGNE,
+                _ENFANTS,
             ),
             CategorySeed(
                 "category.children.activities",
                 "Activités enfants",
                 "Kids’ activities",
                 "expense",
-                "toys",
-                _AUTRES_EPARGNE,
+                "puzzle",
+                _ENFANTS,
             ),
         ),
     ),
@@ -599,24 +612,24 @@ SYSTEM_CATEGORIES: tuple[CategorySeed, ...] = (
         "Animaux",
         "Pets",
         "expense",
-        "pets",
-        _AUTRES_EPARGNE,
+        "paw-print",
+        _ANIMAUX,
         children=(
             CategorySeed(
                 "category.pets.food",
                 "Alimentation animaux",
                 "Pet food",
                 "expense",
-                "pet_supplies",
-                _AUTRES_EPARGNE,
+                "bone",
+                _ANIMAUX,
             ),
             CategorySeed(
                 "category.pets.vet",
                 "Vétérinaire",
                 "Vet",
                 "expense",
-                "vaccines",
-                _AUTRES_EPARGNE,
+                "syringe",
+                _ANIMAUX,
             ),
         ),
     ),
@@ -629,38 +642,44 @@ def ensure_system_categories(db: Session) -> int:
     The existing catalog is read in one query and new rows get their ids up front, so a boot
     against an already-seeded database costs a single SELECT rather than one per entry.
 
+    A system row that already exists takes the catalog's current icon and slot when they differ:
+    users can't edit system rows, so the catalog is the only source of their styling.
+
     Leaves the transaction open, so a caller that is already in one — the database reset, which
     empties a profile and restores the catalog atomically — commits the whole thing once.
 
     Returns:
         How many rows were added.
     """
-    ids_by_key = {
-        name: category_id
-        for name, category_id in db.execute(
-            select(Category.name, Category.id).where(Category.is_system.is_(True))
-        )
+    existing = {
+        row.name: row for row in db.scalars(select(Category).where(Category.is_system.is_(True)))
     }
     created = 0
 
     def ensure(seed: CategorySeed, parent_id: str | None) -> str:
         nonlocal created
-        category_id = ids_by_key.get(seed.key)
-        if category_id is None:
-            category_id = str(uuid4())
-            db.add(
-                Category(
-                    id=category_id,
-                    user_id=None,
-                    parent_id=parent_id,
-                    name=seed.key,
-                    kind=seed.kind,
-                    icon=seed.icon,
-                    color=seed.color,
-                    is_system=True,
-                )
+        row = existing.get(seed.key)
+        if row is not None:
+            # Assigned only on a change, so a boot on an up-to-date catalog writes nothing.
+            if row.icon != seed.icon:
+                row.icon = seed.icon
+            if row.color != seed.color:
+                row.color = seed.color
+            return row.id
+        category_id = str(uuid4())
+        db.add(
+            Category(
+                id=category_id,
+                user_id=None,
+                parent_id=parent_id,
+                name=seed.key,
+                kind=seed.kind,
+                icon=seed.icon,
+                color=seed.color,
+                is_system=True,
             )
-            created += 1
+        )
+        created += 1
         return category_id
 
     for group in SYSTEM_CATEGORIES:
@@ -687,8 +706,9 @@ def seed_system_categories(session_factory: SessionFactory) -> int:
     and every reference matters: the rule engine assigns these ids, `from-transaction` targets
     them, and rule packs resolve their `category_key` against them.
 
-    Safe to run on every boot: `_get_or_create` skips keys that already exist, which is also how
-    a catalog entry added in a later release reaches installs seeded before it.
+    Safe to run on every boot: `ensure_system_categories` skips keys that already exist, which is
+    also how a catalog entry added in a later release reaches installs seeded before it, and
+    restyles an existing row whose icon or slot the catalog has since changed.
     """
     db = session_factory()
     try:

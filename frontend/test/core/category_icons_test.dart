@@ -25,7 +25,11 @@ void main() {
         'category.leisure',
         'category.subscriptions',
         'category.income',
-        'category.misc',
+        'category.shopping',
+        'category.finance',
+        'category.children',
+        'category.pets',
+        'category.other',
       ])
         categorySlugFor(name: name, kind: 'expense'),
       categorySlugFor(name: 'Mine', kind: 'income'),
@@ -37,23 +41,40 @@ void main() {
       expect(slugs, unorderedEquals(CategoryIcons.slugKeys.keys));
       for (final slug in slugs) {
         final key = CategoryIcons.slugKeys[slug];
-        expect(CategoryIcons.glyphs, contains(key), reason: slug);
+        expect(CategoryIcons.resolveKey(key), key, reason: slug);
         final icon = CategoryIcons.forSlug(slug);
         expect(_isLucide300(icon), isTrue, reason: slug);
         expect(icon, isNot(CategoryIcons.fallback), reason: slug);
       }
     });
 
-    test('the chips wear the glyphs the spec names', () {
+    test('each top-level bucket wears a glyph of its own', () {
       expect(CategoryIcons.forSlug('logement'), LucideIcons300.house);
-      expect(CategoryIcons.forSlug('alimentation'), LucideIcons300.soup);
+      expect(CategoryIcons.forSlug('alimentation'), LucideIcons300.utensils);
       expect(CategoryIcons.forSlug('transport'), LucideIcons300.car);
-      expect(CategoryIcons.forSlug('loisirs'), LucideIcons300.star);
+      expect(CategoryIcons.forSlug('loisirs'), LucideIcons300.ferrisWheel);
       expect(CategoryIcons.forSlug('abonnements'), LucideIcons300.refreshCw);
-      expect(CategoryIcons.forSlug('sante'), LucideIcons300.cross);
-      expect(CategoryIcons.forSlug('autres'), LucideIcons300.coins);
-      expect(CategoryIcons.forSlug('epargne'), LucideIcons300.coins);
-      expect(CategoryIcons.forSlug('revenus'), LucideIcons300.arrowUp);
+      expect(CategoryIcons.forSlug('sante'), LucideIcons300.heartPulse);
+      expect(CategoryIcons.forSlug('achats'), LucideIcons300.shoppingBag);
+      expect(CategoryIcons.forSlug('finances'), LucideIcons300.wallet);
+      expect(CategoryIcons.forSlug('enfants'), LucideIcons300.baby);
+      expect(CategoryIcons.forSlug('animaux'), LucideIcons300.pawPrint);
+      expect(CategoryIcons.forSlug('autres'), LucideIcons300.shapes);
+      expect(CategoryIcons.forSlug('epargne'), LucideIcons300.piggyBank);
+      expect(CategoryIcons.forSlug('revenus'), LucideIcons300.banknoteArrowUp);
+      final keys = CategoryIcons.slugKeys.values.toList();
+      expect(keys.toSet(), hasLength(keys.length));
+    });
+
+    test('a system subcategory takes its bucket, whatever its kind', () {
+      expect(
+        categorySlugFor(name: 'category.finance.savings', kind: 'transfer'),
+        'finances',
+      );
+      expect(
+        categorySlugFor(name: 'category.finance.interest', kind: 'income'),
+        'finances',
+      );
     });
 
     test('an unknown or missing slug falls back to the tag', () {
@@ -64,43 +85,39 @@ void main() {
   });
 
   group('stored keys', () {
-    test('every curated glyph is a weight-300 Lucide icon', () {
-      for (final entry in CategoryIcons.glyphs.entries) {
+    test('every curated and catalog glyph is a weight-300 Lucide icon', () {
+      for (final entry in {
+        ...CategoryIcons.glyphs,
+        ...CategoryIcons.catalogGlyphs,
+      }.entries) {
         expect(_isLucide300(entry.value), isTrue, reason: entry.key);
       }
       expect(_isLucide300(CategoryIcons.uncategorized), isTrue);
       expect(_isLucide300(CategoryIcons.fallback), isTrue);
     });
 
+    test('the catalog set never repeats a curated key', () {
+      expect(
+        CategoryIcons.catalogGlyphs.keys.where(
+          CategoryIcons.glyphs.containsKey,
+        ),
+        isEmpty,
+      );
+    });
+
+    test('the form starts on a curated glyph', () {
+      expect(CategoryIcons.glyphs, contains(CategoryIcons.defaultKey));
+    });
+
     test('a current Lucide key resolves to itself', () {
-      for (final key in CategoryIcons.glyphs.keys) {
+      for (final key in {
+        ...CategoryIcons.glyphs.keys,
+        ...CategoryIcons.catalogGlyphs.keys,
+      }) {
         expect(CategoryIcons.resolveKey(key), key);
       }
       expect(CategoryIcons.forKey('piggy-bank'), LucideIcons300.piggyBank);
-    });
-
-    test('a slug saved by the pre-Lucide form maps to its chip glyph', () {
-      expect(CategoryIcons.resolveKey('loisirs'), 'star');
-      expect(CategoryIcons.forKey('logement'), LucideIcons300.house);
-      expect(CategoryIcons.forKey('epargne'), LucideIcons300.coins);
-    });
-
-    test('a Material name maps to its Lucide equivalent', () {
-      expect(CategoryIcons.forKey('restaurant'), LucideIcons300.utensils);
-      expect(CategoryIcons.forKey('savings'), LucideIcons300.piggyBank);
-      expect(CategoryIcons.forKey('local_pharmacy'), LucideIcons300.pill);
-      expect(CategoryIcons.forKey('rice_bowl_outlined'), LucideIcons300.soup);
-    });
-
-    test('every legacy Material name lands on a glyph or the fallback', () {
-      for (final entry in CategoryIcons.legacyMaterialKeys.entries) {
-        final target = entry.value;
-        expect(
-          CategoryIcons.glyphs.containsKey(target) || target == 'tag',
-          isTrue,
-          reason: '${entry.key} → $target',
-        );
-      }
+      expect(CategoryIcons.forKey('stethoscope'), LucideIcons300.stethoscope);
     });
 
     test('an unknown, empty or missing key falls back', () {
@@ -108,10 +125,10 @@ void main() {
       expect(CategoryIcons.forKey('not-an-icon'), CategoryIcons.fallback);
       expect(CategoryIcons.forKey(''), CategoryIcons.fallback);
       expect(CategoryIcons.forKey(null), CategoryIcons.fallback);
-      // Mapped to the tag, which the picker does not offer: renders as the
-      // fallback rather than resolving to a key the form can't select.
-      expect(CategoryIcons.resolveKey('sell'), isNull);
-      expect(CategoryIcons.forKey('sell'), LucideIcons300.tag);
+      // Neither a Material name nor a slug from before Lucide is stored
+      // anywhere any more.
+      expect(CategoryIcons.resolveKey('restaurant'), isNull);
+      expect(CategoryIcons.resolveKey('loisirs'), isNull);
     });
   });
 
