@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../theme/motion.dart';
 import '../theme/tokens.dart';
 import 'app_button.dart';
 import 'inline_banner.dart';
+import 'motion/appear_transition.dart';
 
 /// What a modal is for. It decides where focus lands when the modal opens
 /// and whether Escape and the scrim may close it (`00` §7 « Modal »,
@@ -34,8 +36,8 @@ enum AppModalKind {
 }
 
 /// Shows a modal route for an [AppModal] (or the [LogoZoomDialog]): the
-/// `scrim` behind it and the 120 ms ease-out fade of `00` §13, none with
-/// the OS "reduce motion" setting.
+/// `scrim` behind it and the `enter` fade of `00` §13, which reduced motion
+/// keeps (it is a fade).
 ///
 /// The barrier itself never closes the route: the modal decides what a click
 /// on the scrim does, since that depends on its kind and state.
@@ -43,9 +45,7 @@ Future<T?> showAppModal<T>({
   required BuildContext context,
   required WidgetBuilder builder,
 }) {
-  final duration = MediaQuery.maybeDisableAnimationsOf(context) ?? false
-      ? Duration.zero
-      : AppMotion.overlay;
+  final duration = MotionSpec.of(context).duration(MotionKind.appear);
   // Focus returns to what opened the modal (`00` §7, Keyboard).
   final opener = FocusManager.instance.primaryFocus;
   final route = showDialog<T>(
@@ -55,9 +55,16 @@ Future<T?> showAppModal<T>({
     animationStyle: AnimationStyle(
       duration: duration,
       reverseDuration: duration,
-      curve: Curves.easeOut,
+      // The route's own fade is held at full opacity: [AppearTransition]
+      // fades the modal instead, on the shared curve.
+      curve: const Threshold(0),
+      reverseCurve: const Threshold(0),
     ),
-    builder: builder,
+    builder: (context) => AppearTransition.driven(
+      animation: ModalRoute.of(context)!.animation!,
+      travel: false,
+      child: builder(context),
+    ),
   );
   return route.whenComplete(() {
     if (opener != null && opener.context != null && opener.canRequestFocus) {

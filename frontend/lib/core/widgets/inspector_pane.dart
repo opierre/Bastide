@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../theme/motion.dart';
 import '../theme/tokens.dart';
+import 'motion/appear_transition.dart';
 
 /// The inspector pane of `docs/design/00-design-system.md` §7: the right
 /// pane, 440 px, on `rail` behind a left `line` hairline, padding 24; its
 /// [blocks] 16 px apart, separated by hairlines. It shows the row selected
 /// in the list on its left (Transactions, Objectifs, Placements).
 ///
-/// When [selection] changes, the new content fades in over 120 ms
-/// (`00` §13), and at once under the OS "reduce motion" setting. The pane
-/// itself never moves.
+/// When [selection] changes, the new content fades in over `enter`
+/// (`00` §13), a fade that reduced motion keeps. The pane itself never
+/// moves.
 class InspectorPane extends StatelessWidget {
   const InspectorPane({
     super.key,
@@ -37,9 +39,6 @@ class InspectorPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final duration = MediaQuery.disableAnimationsOf(context)
-        ? Duration.zero
-        : AppMotion.overlay;
 
     return Container(
       width: AppSizes.inspector,
@@ -48,10 +47,15 @@ class InspectorPane extends StatelessWidget {
         border: Border(left: BorderSide(color: colors.line)),
       ),
       child: AnimatedSwitcher(
-        duration: duration,
-        switchInCurve: Curves.easeOut,
-        // The old content leaves at once; only the new one fades in.
+        duration: MotionSpec.of(context).duration(MotionKind.appear),
+        // The old content stays fully drawn under the new one until it is
+        // removed; only the new one fades in, on the shared curve.
         switchOutCurve: const Threshold(0),
+        transitionBuilder: (child, animation) => AppearTransition.driven(
+          animation: animation,
+          travel: false,
+          child: child,
+        ),
         layoutBuilder: (current, previous) => Stack(
           alignment: Alignment.topLeft,
           children: [...previous, ?current],

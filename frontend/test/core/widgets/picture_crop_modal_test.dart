@@ -62,7 +62,7 @@ void main() {
     // A running upload spins forever, so it never settles.
     if (busy) {
       await tester.pump();
-      await tester.pump(AppMotion.overlay);
+      await tester.pump(AppMotion.enter);
     } else {
       await tester.pumpAndSettle();
     }

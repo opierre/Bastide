@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
+import 'motion/measure_tween.dart';
 
 /// How a [RepereMeter] fills (`docs/design/00-design-system.md` §8).
 enum RepereTone {
@@ -34,9 +35,9 @@ enum RepereTone {
 /// clamps at the track's end; the exact value is printed by the caller,
 /// beside or above the meter, never inside it.
 ///
-/// When [fraction] changes the fill moves once, 240 ms ease-out; nothing
-/// moves on first paint, and nothing at all under the OS "reduce motion"
-/// setting (`00` §13).
+/// When [fraction] changes the fill travels on the `measure` clock, through
+/// [MeasureTween]; nothing moves on first paint, and nothing at all under
+/// the OS « reduce motion » setting (`00` §13).
 class RepereMeter extends StatelessWidget {
   const RepereMeter({
     super.key,
@@ -84,19 +85,12 @@ class RepereMeter extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final mark = markFraction?.clamp(0.0, 1.0);
-    final duration = MediaQuery.disableAnimationsOf(context)
-        ? Duration.zero
-        : AppMotion.meter;
     final labelStyle = Theme.of(
       context,
     ).textTheme.labelSmall?.copyWith(color: colors.textSecondary, height: 1.1);
 
-    final track = TweenAnimationBuilder<double>(
-      // `end` alone: on first build the tween starts where it ends, so the
-      // fill is drawn, not grown; later values animate from the last one.
-      tween: Tween(end: fraction.clamp(0.0, 1.0)),
-      duration: duration,
-      curve: Curves.easeOut,
+    final track = MeasureTween<double>(
+      value: fraction.clamp(0.0, 1.0),
       builder: (context, value, _) => CustomPaint(
         key: const Key('repereTrack'),
         size: Size(0, mark == null ? trackHeight : markHeight),

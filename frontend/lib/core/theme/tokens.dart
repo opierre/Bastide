@@ -588,9 +588,6 @@ abstract final class AppMotion {
   /// Loading silhouette pulse.
   static const shimmer = Duration(milliseconds: 1600);
 
-  static const overlay = Duration(milliseconds: 120);
-  static const meter = Duration(milliseconds: 240);
-
   /// Every timed change: ease-out quart, `cubic-bezier(.25, 1, .5, 1)`.
   static const curve = Cubic(0.25, 1, 0.5, 1);
 }

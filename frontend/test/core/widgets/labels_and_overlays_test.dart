@@ -474,7 +474,7 @@ void main() {
       tester,
     ) async {
       await show(tester);
-      await tester.pump(AppMotion.overlay);
+      await tester.pump(AppMotion.enter);
       final toast = find.byKey(const Key('appToast'));
       final screen = tester.getSize(find.byType(MaterialApp));
       final rect = tester.getRect(toast);
@@ -498,15 +498,38 @@ void main() {
       expect(second.style?.color, dark.textSecondary);
     });
 
-    testWidgets('comes in over 120 ms and leaves after 4 s', (tester) async {
+    double opacity(WidgetTester tester) => tester
+        .widget<FadeTransition>(
+          find
+              .ancestor(
+                of: find.byKey(const Key('appToast')),
+                matching: find.byType(FadeTransition),
+              )
+              .first,
+        )
+        .opacity
+        .value;
+
+    double rise(WidgetTester tester) => tester
+        .widget<Transform>(
+          find
+              .ancestor(
+                of: find.byKey(const Key('appToast')),
+                matching: find.byType(Transform),
+              )
+              .first,
+        )
+        .transform
+        .getTranslation()
+        .y;
+
+    testWidgets('comes in over enter and leaves after 4 s', (tester) async {
       await show(tester, tone: BannerTone.error);
-      final opacity = find.ancestor(
-        of: find.byKey(const Key('appToast')),
-        matching: find.byType(Opacity),
-      );
-      expect(tester.widget<Opacity>(opacity.first).opacity, lessThan(1));
-      await tester.pump(AppMotion.overlay);
-      expect(tester.widget<Opacity>(opacity.first).opacity, 1);
+      expect(opacity(tester), lessThan(1));
+      expect(rise(tester), greaterThan(0));
+      await tester.pump(AppMotion.enter);
+      expect(opacity(tester), 1);
+      expect(rise(tester), 0);
       expect(
         tester.widget<Icon>(find.byKey(const Key('appToastIcon'))).color,
         dark.negative,
@@ -514,6 +537,22 @@ void main() {
 
       await tester.pump(toastDuration);
       expect(find.byKey(const Key('appToast')), findsNothing);
+    });
+
+    testWidgets('reduced motion keeps the fade and drops the travel', (
+      tester,
+    ) async {
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      await show(tester);
+      await tester.pump(AppMotion.enter ~/ 2);
+      expect(opacity(tester), inExclusiveRange(0, 1));
+      expect(rise(tester), 0);
+      await tester.pump(AppMotion.enter ~/ 2);
+      expect(opacity(tester), 1);
     });
   });
 
