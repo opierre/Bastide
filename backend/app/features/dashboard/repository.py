@@ -1,8 +1,9 @@
 """Data access for the dashboard summary: monthly income/expense aggregation."""
 
 from datetime import date
+from typing import Any
 
-from sqlalchemy import case, extract, func, or_, select
+from sqlalchemy import ColumnElement, case, extract, func, or_, select
 from sqlalchemy.orm import Session, aliased
 
 from app.features.accounts.models import Account
@@ -86,29 +87,69 @@ class DashboardRepository:
         grouped into a single `None`/`UNCATEGORIZED_KEY` bucket. `amount_minor` is the positive
         magnitude of the (negative) expense.
         """
+        rows = self._expense_by_top_category(user_id, month_start, month_end, by_month=False)
+        return [(category_id, name, hue, amount) for category_id, name, hue, _, amount in rows]
+
+    def expense_by_category_and_month(
+        self, user_id: str, start: date, end: date
+    ) -> list[tuple[str | None, str, CategoryHue, tuple[int, int], int]]:
+        """`(category_id, name, hue, (year, month), amount_minor)` for expenses in `[start, end)`.
+
+        The same buckets as `expense_breakdown` (top-level categories with their subcategories,
+        transfers excluded, one uncategorised bucket, positive magnitudes), split per month in
+        one grouped query. A month without spending in a category is absent.
+        """
+        return self._expense_by_top_category(user_id, start, end, by_month=True)
+
+    def first_booked_date(self, user_id: str) -> date | None:
+        """The booking date of the user's earliest transaction, any kind; `None` with none."""
+        return self._db.scalar(
+            select(func.min(Transaction.booked_date))
+            .select_from(Transaction)
+            .join(Account, Account.id == Transaction.account_id)
+            .where(Account.user_id == user_id)
+        )
+
+    def _expense_by_top_category(
+        self, user_id: str, start: date, end: date, *, by_month: bool
+    ) -> list[tuple[str | None, str, CategoryHue, tuple[int, int], int]]:
+        """Expense magnitudes per top-level category in `[start, end)`, optionally per month.
+
+        Without `by_month` every row carries `(0, 0)` as its month.
+        """
         parent = aliased(Category)
         top_id = func.coalesce(parent.id, Category.id)
         top_name = func.coalesce(parent.name, Category.name)
         top_color = func.coalesce(parent.color, Category.color)
         amount_expr = func.sum(-Transaction.amount_minor)
+        group_columns: list[ColumnElement[Any]] = [top_id, top_name, top_color]
+        if by_month:
+            group_columns += [
+                extract("year", Transaction.booked_date),
+                extract("month", Transaction.booked_date),
+            ]
         rows = self._db.execute(
-            select(top_id, top_name, top_color, amount_expr)
+            select(*group_columns, amount_expr)
             .select_from(Transaction)
             .join(Account, Account.id == Transaction.account_id)
             .outerjoin(Category, Category.id == Transaction.category_id)
             .outerjoin(parent, parent.id == Category.parent_id)
             .where(
                 Account.user_id == user_id,
-                Transaction.booked_date >= month_start,
-                Transaction.booked_date < month_end,
+                Transaction.booked_date >= start,
+                Transaction.booked_date < end,
                 Transaction.amount_minor < 0,
                 or_(Category.kind.is_(None), Category.kind != "transfer"),
             )
-            .group_by(top_id, top_name, top_color)
+            .group_by(*group_columns)
         ).all()
-        return [
-            (category_id, name, slot_for(color), amount)
-            if category_id is not None
-            else (None, UNCATEGORIZED_KEY, UNCATEGORIZED_HUE, amount)
-            for category_id, name, color, amount in rows
-        ]
+        result: list[tuple[str | None, str, CategoryHue, tuple[int, int], int]] = []
+        for row in rows:
+            category_id, name, color = row[0], row[1], row[2]
+            month = (int(row[3]), int(row[4])) if by_month else (0, 0)
+            amount = int(row[-1])
+            if category_id is None:
+                result.append((None, UNCATEGORIZED_KEY, UNCATEGORIZED_HUE, month, amount))
+            else:
+                result.append((category_id, name, slot_for(color), month, amount))
+        return result
