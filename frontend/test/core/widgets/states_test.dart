@@ -240,13 +240,13 @@ void main() {
       expect(gap, InspectorPane.blockGap * 2 + 1);
     });
 
-    testWidgets('a new selection fades in over 120 ms', (tester) async {
+    testWidgets('a new selection fades in over enter', (tester) async {
       await pumpHost(tester, pane('t1'));
       await pumpHost(
         tester,
         pane('t2', blocks: const [Text('Autre', key: Key('c'))]),
       );
-      await tester.pump(AppMotion.overlay ~/ 2);
+      await tester.pump(AppMotion.enter ~/ 2);
       final fading = tester.widget<FadeTransition>(
         find
             .ancestor(
@@ -258,6 +258,30 @@ void main() {
       expect(fading.opacity.value, inExclusiveRange(0, 1));
       await tester.pumpAndSettle();
       expect(find.text('Bloc A'), findsNothing);
+      expect(find.text('Autre'), findsOneWidget);
+    });
+
+    testWidgets('reduced motion keeps the fade', (tester) async {
+      Widget reduced(Object selection, {List<Widget>? blocks}) => MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: pane(selection, blocks: blocks),
+      );
+      await pumpHost(tester, reduced('t1'));
+      await pumpHost(
+        tester,
+        reduced('t2', blocks: const [Text('Autre', key: Key('c'))]),
+      );
+      await tester.pump(AppMotion.enter ~/ 2);
+      final fading = tester.widget<FadeTransition>(
+        find
+            .ancestor(
+              of: find.byKey(const Key('c')),
+              matching: find.byType(FadeTransition),
+            )
+            .first,
+      );
+      expect(fading.opacity.value, inExclusiveRange(0, 1));
+      await tester.pumpAndSettle();
       expect(find.text('Autre'), findsOneWidget);
     });
   });

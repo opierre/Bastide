@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 import 'inline_banner.dart';
+import 'motion/appear_transition.dart';
 
 /// How long a toast stays before it leaves (`docs/design/00-design-system.md`
 /// §7).
@@ -12,7 +13,8 @@ const toastDuration = Duration(seconds: 4);
 /// Shows a toast in the bottom-right corner, 24 px from the edges: `surface`,
 /// 1 px `lineStrong`, radius 8, `shadow`, padding 10 14; the status icon and
 /// a 13 px [title], with an optional second line 12 `textSecondary`. It comes
-/// in over 120 ms (opacity and 4 px of travel) and leaves after 4 s.
+/// in over `enter` (a fade and 4 px of travel, through [AppearTransition])
+/// and leaves after 4 s.
 ///
 /// An [OverlayEntry] rather than a [SnackBar], for the position: Material pins
 /// a snack bar to the bottom centre.
@@ -70,15 +72,8 @@ class _Toast extends StatefulWidget {
   State<_Toast> createState() => _ToastState();
 }
 
-class _ToastState extends State<_Toast> with SingleTickerProviderStateMixin {
+class _ToastState extends State<_Toast> {
   Timer? _timer;
-  late final AnimationController _entrance = AnimationController(
-    vsync: this,
-    duration: AppMotion.overlay,
-  );
-
-  /// How far the toast travels as it comes in.
-  static const _travel = 4.0;
 
   @override
   void initState() {
@@ -87,22 +82,8 @@ class _ToastState extends State<_Toast> with SingleTickerProviderStateMixin {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_entrance.isDismissed) {
-      // Reduced motion: every duration is 0 (`00` §13).
-      if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
-        _entrance.value = 1;
-      } else {
-        _entrance.forward();
-      }
-    }
-  }
-
-  @override
   void dispose() {
     _timer?.cancel();
-    _entrance.dispose();
     super.dispose();
   }
 
@@ -110,20 +91,11 @@ class _ToastState extends State<_Toast> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colors = context.colors;
-    final curve = CurvedAnimation(parent: _entrance, curve: Curves.easeOut);
 
     return Positioned(
       right: AppSpacing.lg,
       bottom: AppSpacing.lg,
-      child: AnimatedBuilder(
-        animation: curve,
-        builder: (context, child) => Opacity(
-          opacity: curve.value,
-          child: Transform.translate(
-            offset: Offset(0, _travel * (1 - curve.value)),
-            child: child,
-          ),
-        ),
+      child: AppearTransition(
         child: Material(
           color: Colors.transparent,
           child: Container(

@@ -565,16 +565,31 @@ abstract final class AppShadows {
 }
 
 /// Timings (`00` §13). Hover and pressed states change at once, so there is no
-/// duration for them.
+/// duration for them. Widgets read these through `MotionSpec.of(context)`
+/// (`core/theme/motion.dart`), which applies the reduced-motion split.
 abstract final class AppMotion {
-  /// Popover, menu, modal, toast and inspector content, ease-out.
-  static const overlay = Duration(milliseconds: 120);
+  /// Something appears: popover, menu, tooltip, modal, toast, an inspector
+  /// opening from empty, the theme switch.
+  static const enter = Duration(milliseconds: 120);
 
-  /// A meter's fill when its value changes, ease-out, once.
-  static const meter = Duration(milliseconds: 240);
+  /// Something leaves; always shorter than its entrance.
+  static const exit = Duration(milliseconds: 80);
+
+  /// The knob of a toggle.
+  static const toggle = Duration(milliseconds: 120);
+
+  /// A selection moves: segment thumb, tab underline, the sidebar
+  /// collapsing, a list row opening its place.
+  static const move = Duration(milliseconds: 180);
+
+  /// A value changes: a figure, a meter's fill, a chart's bars, on one clock.
+  static const measure = Duration(milliseconds: 320);
 
   /// Loading silhouette pulse.
   static const shimmer = Duration(milliseconds: 1600);
+
+  /// Every timed change: ease-out quart, `cubic-bezier(.25, 1, .5, 1)`.
+  static const curve = Cubic(0.25, 1, 0.5, 1);
 }
 
 abstract final class AppFonts {

@@ -672,4 +672,61 @@ void main() {
       });
     }
   });
+
+  group('motion', () {
+    /// The modal's own fade, from [AppearTransition].
+    double opacity(WidgetTester tester) => tester
+        .widget<FadeTransition>(
+          find
+              .ancestor(
+                of: find.byKey(_frame),
+                matching: find.byType(FadeTransition),
+              )
+              .first,
+        )
+        .opacity
+        .value;
+
+    Future<void> tapOpen(WidgetTester tester) async {
+      await pumpHost(
+        tester,
+        Builder(
+          builder: (context) => TextButton(
+            key: _open,
+            onPressed: () =>
+                showAppModal<void>(context: context, builder: _confirmation),
+            child: const Text('ouvrir'),
+          ),
+        ),
+      );
+      await tester.tap(find.byKey(_open));
+      await tester.pump();
+    }
+
+    testWidgets('fades in over enter, in place', (tester) async {
+      await tapOpen(tester);
+      await tester.pump(AppMotion.enter ~/ 2);
+      expect(opacity(tester), inExclusiveRange(0, 1));
+      final midway = tester.getTopLeft(find.byKey(_frame));
+      await tester.pump(AppMotion.enter ~/ 2);
+      expect(opacity(tester), 1);
+      expect(tester.getTopLeft(find.byKey(_frame)), midway);
+    });
+
+    testWidgets('reduced motion: shown, nothing travels', (tester) async {
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      await tapOpen(tester);
+      // The route's own controller is shortened by Flutter under the
+      // platform setting, so the fade is over within the duration.
+      await tester.pump(AppMotion.enter);
+      expect(opacity(tester), 1);
+      final rest = tester.getTopLeft(find.byKey(_frame));
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(find.byKey(_frame)), rest);
+    });
+  });
 }

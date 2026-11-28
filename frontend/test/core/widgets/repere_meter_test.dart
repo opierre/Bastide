@@ -140,16 +140,16 @@ void main() {
     );
 
   testWidgets('first paint draws the fill at its value; a change moves it '
-      'over 240 ms', (tester) async {
+      'on the measure clock', (tester) async {
     final track = find.byKey(const Key('repereTrack'));
     await pumpHost(tester, meter(fraction: 0.2));
     expect(track, fillOf(40));
 
     await pumpHost(tester, meter(fraction: 0.8));
-    await tester.pump(AppMotion.meter ~/ 2);
+    await tester.pump(AppMotion.measure ~/ 2);
     expect(track, isNot(fillOf(40)));
     expect(track, isNot(fillOf(160)));
-    await tester.pump(AppMotion.meter);
+    await tester.pump(AppMotion.measure);
     expect(track, fillOf(160));
   });
 

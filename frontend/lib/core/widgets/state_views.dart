@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 
+import '../theme/motion.dart';
 import '../theme/tokens.dart';
 import 'tomettes.dart';
 
@@ -232,16 +233,22 @@ class SkeletonPulse extends StatefulWidget {
 
 class _SkeletonPulseState extends State<SkeletonPulse>
     with SingleTickerProviderStateMixin {
-  // One cycle goes 1 → .5 → 1 over the shimmer duration.
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: AppMotion.shimmer ~/ 2,
-  );
+  late final AnimationController _controller = AnimationController(vsync: this);
+  MotionSpec _motion = const MotionSpec();
 
   @override
-  void initState() {
-    super.initState();
-    _controller.repeat(reverse: true);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _motion = MotionSpec.of(context);
+    // One cycle goes 1 → .5 → 1 over the shimmer duration.
+    _controller.duration = _motion.shimmer ~/ 2;
+    if (!_motion.pulses) {
+      _controller
+        ..stop()
+        ..value = 0;
+    } else if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
   }
 
   @override
@@ -252,13 +259,12 @@ class _SkeletonPulseState extends State<SkeletonPulse>
 
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.disableAnimationsOf(context)) return widget.child;
+    if (!_motion.pulses) return widget.child;
 
     return FadeTransition(
-      opacity: Tween<double>(
-        begin: 1,
-        end: SkeletonPulse.minOpacity,
-      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut)),
+      opacity: _controller
+          .drive(CurveTween(curve: _motion.pulseCurve))
+          .drive(Tween<double>(begin: 1, end: SkeletonPulse.minOpacity)),
       child: widget.child,
     );
   }
