@@ -2767,18 +2767,6 @@ abstract class AppLocalizations {
   /// **'en moyenne sur 12 mois'**
   String get dashboardSavingsTrendAverage;
 
-  /// Title of the recent-transactions card.
-  ///
-  /// In fr, this message translates to:
-  /// **'Activité récente'**
-  String get dashboardRecentActivityTitle;
-
-  /// Link on the right of the « Activité récente » heading, opening Transactions.
-  ///
-  /// In fr, this message translates to:
-  /// **'Toutes les transactions'**
-  String get dashboardViewAllTransactions;
-
   /// Heading shown when the dashboard has no transactions to show.
   ///
   /// In fr, this message translates to:

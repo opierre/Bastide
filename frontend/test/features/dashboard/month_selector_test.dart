@@ -43,7 +43,7 @@ FakeDashboardController _controllerAt(DateTime month) =>
         month: month,
         summary: _summary,
         trends: specTrends(),
-        recent: specRecent(),
+        hasTransactions: true,
       ),
     );
 

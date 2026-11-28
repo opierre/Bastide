@@ -2143,14 +2143,6 @@
   "@dashboardSavingsTrendAverage": {
     "description": "Follows the signed 12-month average on the right of the « Épargne mensuelle » heading."
   },
-  "dashboardRecentActivityTitle": "Activité récente",
-  "@dashboardRecentActivityTitle": {
-    "description": "Title of the recent-transactions card."
-  },
-  "dashboardViewAllTransactions": "Toutes les transactions",
-  "@dashboardViewAllTransactions": {
-    "description": "Link on the right of the « Activité récente » heading, opening Transactions."
-  },
   "dashboardEmptyTitle": "Aucune donnée pour ce mois",
   "@dashboardEmptyTitle": {
     "description": "Heading shown when the dashboard has no transactions to show."

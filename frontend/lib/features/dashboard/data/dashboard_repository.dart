@@ -11,9 +11,9 @@ import '../../../core/logos/logo_ref.dart';
 
 final _monthParam = DateFormat('yyyy-MM');
 
-/// Calls the `/dashboard/summary` and `/transactions` endpoints and maps the wire JSON to domain
-/// models. `/transactions` is read directly (rather than through the transactions feature) to
-/// find the latest month with data — the same pattern the transactions repository itself uses to
+/// Calls the `/dashboard/*`, `/recurring/upcoming` and `/transactions` endpoints and maps the
+/// wire JSON to domain models. `/transactions` is read directly (rather than through the
+/// transactions feature) to find the latest month with data — the same pattern the transactions repository itself uses to
 /// call `/categories` and `/rules` — since a feature owns everything it needs rather than
 /// reaching into another feature's Dart internals (see the architecture skill).
 class DashboardRepository {
@@ -94,64 +94,9 @@ class DashboardRepository {
     );
   }
 
-  /// The newest [limit] transactions, with their account names already resolved.
-  ///
-  /// Reads `/transactions` and `/accounts` directly rather than through those features' Dart
-  /// internals — a feature owns everything it needs (see the architecture skill), the same way
-  /// the transactions repository calls `/categories` itself.
-  /// The default is a ceiling, not a target: « Activité récente » draws as many of these as fit
-  /// in the height the panel gives it, so the list is fetched deep enough to fill a tall window
-  /// rather than to the six rows the spec's 900 px frame shows.
-  Future<List<RecentTransaction>> recentTransactions({int limit = 12}) async {
-    final (page, accounts) = await (
-      _apiClient.get('/transactions', query: {'page': '1'}),
-      _apiClient.get('/accounts'),
-    ).wait;
-
-    final names = {
-      for (final entry
-          in (accounts as List<dynamic>).cast<Map<String, dynamic>>())
-        entry['id'] as String: _accountLabel(entry),
-    };
-
-    return [
-      for (final entry
-          in ((page as Map<String, dynamic>)['items'] as List<dynamic>)
-              .cast<Map<String, dynamic>>()
-              .take(limit))
-        RecentTransaction(
-          id: entry['id'] as String,
-          label: _transactionLabel(entry),
-          accountLabel: names[entry['account_id'] as String] ?? '',
-          bookedDate: DateTime.parse(entry['booked_date'] as String),
-          amountMinor: entry['amount_minor'] as int,
-          currency: entry['currency'] as String,
-          logo: LogoRef.fromJson(entry),
-          isRawLabel: _merchant(entry).isEmpty,
-        ),
-    ];
-  }
-
-  /// « BNP Compte courant », as the spec's activity rows write it; an account with no
-  /// institution recorded falls back to its name alone.
-  String _accountLabel(Map<String, dynamic> json) {
-    final institution = (json['institution'] as String?)?.trim() ?? '';
-    final name = json['name'] as String;
-    return institution.isEmpty ? name : '$institution $name';
-  }
-
-  String _merchant(Map<String, dynamic> json) =>
-      (json['merchant'] as String?)?.trim() ?? '';
-
-  /// The merchant when the import recognised one, else the cleaned description.
-  String _transactionLabel(Map<String, dynamic> json) {
-    final merchant = _merchant(json);
-    return merchant.isEmpty ? json['description_clean'] as String : merchant;
-  }
-
   /// The recurring charges still due before the end of the current month, and
   /// the missed ones, for « À venir ». Reads `/recurring/upcoming` directly
-  /// rather than through the recurring feature, as [recentTransactions] reads
+  /// rather than through the recurring feature, as [latestMonthWithData] reads
   /// `/transactions`. The server picks the month from its own clock: the block
   /// never follows the month selector.
   Future<UpcomingCharges> upcoming() async {

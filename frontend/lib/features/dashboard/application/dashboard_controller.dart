@@ -16,7 +16,7 @@ class DashboardState {
     required this.month,
     required this.summary,
     required this.trends,
-    required this.recent,
+    required this.hasTransactions,
   });
 
   final DateTime month;
@@ -25,11 +25,8 @@ class DashboardState {
 
   /// Whether the user has any transaction at all. Without one the panel shows
   /// its empty state; a month without data still draws the panel with « — ».
-  bool get hasTransactions => recent.isNotEmpty;
-
-  /// The newest transactions, for « Activité récente ». Not keyed to [month] —
-  /// "recent" means recent, not "recent within the month you happen to be looking at".
-  final List<RecentTransaction> recent;
+  /// Not keyed to [month]: a month change cannot alter it.
+  final bool hasTransactions;
 }
 
 /// Loads the dashboard summary for a selected month, defaulting to the latest month with data.
@@ -40,18 +37,18 @@ class DashboardController extends AsyncNotifier<DashboardState> {
   @override
   Future<DashboardState> build() async {
     final repository = ref.read(dashboardRepositoryProvider);
-    final month = await repository.latestMonthWithData() ?? _currentMonth();
+    final latest = await repository.latestMonthWithData();
+    final month = latest ?? _currentMonth();
     // Independent of each other, so they go out together rather than in series.
-    final (summary, trends, recent) = await (
+    final (summary, trends) = await (
       repository.summary(month),
       repository.trends(month, currentMonth: _currentMonth()),
-      repository.recentTransactions(),
     ).wait;
     return DashboardState(
       month: month,
       summary: summary,
       trends: trends,
-      recent: recent,
+      hasTransactions: latest != null,
     );
   }
 
@@ -66,13 +63,13 @@ class DashboardController extends AsyncNotifier<DashboardState> {
 
   Future<void> refresh() {
     final current = state.value;
-    return _load(current?.month ?? _currentMonth(), reloadRecent: true);
+    return _load(current?.month ?? _currentMonth(), recheckData: true);
   }
 
-  /// Reloads the summary and the savings series for [month]. The activity list is re-fetched
-  /// only on an explicit refresh: it doesn't depend on the month, so paging the picker would
-  /// otherwise re-request data that cannot have changed.
-  Future<void> _load(DateTime month, {bool reloadRecent = false}) async {
+  /// Reloads the summary and the savings series for [month]. Whether the user has any
+  /// transaction is re-read only on an explicit refresh: it doesn't depend on the month, so
+  /// paging the picker would otherwise re-request an answer that cannot have changed.
+  Future<void> _load(DateTime month, {bool recheckData = false}) async {
     final previous = state.value;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
@@ -81,16 +78,16 @@ class DashboardController extends AsyncNotifier<DashboardState> {
       // The summary goes first and alone, so its failure (a bad month) surfaces as itself
       // rather than wrapped in a `ParallelWaitError`.
       final summary = await repository.summary(month);
-      if (reloadRecent || previous == null) {
-        final (trends, recent) = await (
+      if (recheckData || previous == null) {
+        final (trends, latest) = await (
           repository.trends(month, currentMonth: currentMonth),
-          repository.recentTransactions(),
+          repository.latestMonthWithData(),
         ).wait;
         return DashboardState(
           month: month,
           summary: summary,
           trends: trends,
-          recent: recent,
+          hasTransactions: latest != null,
         );
       }
       final trends = await repository.trends(month, currentMonth: currentMonth);
@@ -98,7 +95,7 @@ class DashboardController extends AsyncNotifier<DashboardState> {
         month: month,
         summary: summary,
         trends: trends,
-        recent: previous.recent,
+        hasTransactions: previous.hasTransactions,
       );
     });
   }
