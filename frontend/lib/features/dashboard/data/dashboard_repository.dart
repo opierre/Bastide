@@ -6,6 +6,7 @@ import '../../../core/api/api_client_provider.dart';
 import '../domain/dashboard_habits.dart';
 import '../domain/dashboard_summary.dart';
 import '../domain/dashboard_trends.dart';
+import '../domain/upcoming_charges.dart';
 import '../../../core/logos/logo_ref.dart';
 
 final _monthParam = DateFormat('yyyy-MM');
@@ -146,6 +147,44 @@ class DashboardRepository {
   String _transactionLabel(Map<String, dynamic> json) {
     final merchant = _merchant(json);
     return merchant.isEmpty ? json['description_clean'] as String : merchant;
+  }
+
+  /// The recurring charges still due before the end of the current month, and
+  /// the missed ones, for « À venir ». Reads `/recurring/upcoming` directly
+  /// rather than through the recurring feature, as [recentTransactions] reads
+  /// `/transactions`. The server picks the month from its own clock: the block
+  /// never follows the month selector.
+  Future<UpcomingCharges> upcoming() async {
+    final json =
+        await _apiClient.get('/recurring/upcoming') as Map<String, dynamic>;
+    return UpcomingCharges(
+      through: DateTime.parse(json['through'] as String),
+      totalMinor: json['total_minor'] as int,
+      due: [
+        for (final entry
+            in (json['charges'] as List<dynamic>).cast<Map<String, dynamic>>())
+          UpcomingDue(
+            seriesId: entry['series_id'] as String,
+            label: entry['label'] as String,
+            amountMinor: entry['amount_minor'] as int,
+            logo: LogoRef.fromJson(entry),
+            dueOn: DateTime.parse(entry['due_on'] as String),
+            priceIncreaseMinor: entry['price_increase_minor'] as int?,
+          ),
+      ],
+      missed: [
+        for (final entry
+            in (json['missed'] as List<dynamic>).cast<Map<String, dynamic>>())
+          UpcomingMissed(
+            seriesId: entry['series_id'] as String,
+            label: entry['label'] as String,
+            amountMinor: entry['amount_minor'] as int,
+            logo: LogoRef.fromJson(entry),
+            expectedOn: DateTime.parse(entry['expected_on'] as String),
+          ),
+      ],
+      currency: json['currency'] as String,
+    );
   }
 
   /// The first-of-month for the most recent transaction, or `null` if the user has none yet —

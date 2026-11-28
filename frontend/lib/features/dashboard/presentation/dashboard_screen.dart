@@ -10,9 +10,12 @@ import '../../../l10n/app_localizations.dart';
 import '../../goals/application/goals_controller.dart';
 import '../../goals/presentation/goals_screen.dart';
 import '../../imports/presentation/imports_screen.dart';
+import '../../recurring/application/subscriptions_controller.dart';
+import '../../recurring/presentation/subscriptions_screen.dart';
 import '../../transactions/application/transactions_controller.dart';
 import '../../transactions/presentation/transactions_screen.dart';
 import '../application/dashboard_controller.dart';
+import '../application/upcoming_charges_provider.dart';
 import '../domain/dashboard_summary.dart';
 import 'category_habits.dart';
 import 'category_spending.dart';
@@ -20,12 +23,14 @@ import 'goals_section.dart';
 import 'monthly_savings.dart';
 import 'reading_line.dart';
 import 'recent_activity.dart';
+import 'upcoming_charges_section.dart';
 
 /// « Tableau de bord », the « Lecture du mois » (`docs/design/04-dashboard.md`):
 /// five blocks 24 px apart in the content region. The reading line, a
 /// hairline, « Dépenses par catégorie » beside « Épargne mensuelle », a
 /// hairline, then « Par rapport à vos habitudes » beside « Objectifs » and
-/// « Activité récente ». Sections, not cards: nothing here is framed.
+/// « Activité récente », and « À venir » while charges remain this month.
+/// Sections, not cards: nothing here is framed.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -97,6 +102,10 @@ class _DashboardContent extends ConsumerWidget {
     // putting an error about a side section on the dashboard.
     final goals =
         ref.watch(goalsControllerProvider).value?.topGoals ?? const [];
+    // The same for « À venir », which also stays away while there is nothing
+    // left to charge this month.
+    final upcoming = ref.watch(upcomingChargesProvider).value;
+    final showUpcoming = upcoming != null && !upcoming.isEmpty;
     final summary = state.summary;
 
     void openCategory(String? categoryId, DateTime month) {
@@ -157,6 +166,22 @@ class _DashboardContent extends ConsumerWidget {
             ],
           ),
         ),
+        if (showUpcoming) ...[
+          const SizedBox(width: AppSpacing.gutter),
+          Expanded(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: UpcomingChargesSection(
+                upcoming: upcoming,
+                onViewAll: () => context.go(SubscriptionsScreen.path),
+                onOpen: (seriesId) {
+                  ref.read(selectedSeriesProvider.notifier).open(seriesId);
+                  context.go(SubscriptionsScreen.path);
+                },
+              ),
+            ),
+          ),
+        ],
       ],
     );
 
