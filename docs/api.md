@@ -112,6 +112,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | Method | Path | Query | Body | Response |
 |--------|------|-------|------|----------|
 | `GET` | `/dashboard/summary` | `month` |  | 200 `DashboardSummary` |
+| `GET` | `/dashboard/habits` | `month` |  | 200 `DashboardHabits` |
 | `GET` | `/dashboard/trends` | `month` |  | 200 `DashboardTrends` |
 
 ## settings
@@ -169,6 +170,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | `POST` | `/recurring/preview` |  | `PreviewRequest` | 200 `RecurringPreviewRead` |
 | `POST` | `/recurring/detect` |  | `DetectRequest` | 200 `DetectionResultRead` |
 | `GET` | `/recurring/summary` |  |  | 200 `RecurringSummary` |
+| `GET` | `/recurring/upcoming` |  |  | 200 `UpcomingCharges` |
 | `GET` | `/recurring/merge-suggestions` |  |  | 200 [`MergeSuggestionRead`] |
 | `POST` | `/recurring/merge-suggestions/dismiss` |  | `MergeDismissRequest` | 204 |
 | `GET` | `/recurring/{series_id}` |  |  | 200 `SeriesDetailRead` |
