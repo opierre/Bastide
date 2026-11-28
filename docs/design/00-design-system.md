@@ -380,7 +380,7 @@ One component for every value read against a reference.
   (fill `positive`, the target is reached), `muted` (fill `textTertiary`, archived).
 - The value itself is printed beside or above the meter in text, never inside it.
 - The fill clamps at 100 %; the printed value stays exact.
-- When the value changes the fill animates once, 240 ms (§13).
+- When the value changes the fill travels from the old value to the new one, `measure` (§13).
 
 | Use | Scale | Mark |
 |---|---|---|
@@ -402,7 +402,8 @@ Progress rings, confidence gauges and the four-segment password meter are remove
 All charts share one frame: value axis in a 56 px left gutter, labels right-aligned ending 8 px
 before the plot, 11 `textTertiary`; horizontal gridlines 1 px `line` on clean ticks; the zero
 line 1 px `lineStrong` when a series crosses it; category axis in a 22 px band beneath, 11
-`textTertiary`. No vertical gridlines, no chart border, no animation on appearance.
+`textTertiary`. No vertical gridlines, no chart border, no animation on appearance. When the
+period changes, bars travel to their new height (§13, Measure).
 
 | Form | Recipe |
 |---|---|
@@ -472,13 +473,55 @@ One pattern: **tomettes**, a hexagonal line pattern (Provençal floor tiles).
 
 ## 13. Motion
 
-- Hover and pressed states change at once.
-- Popover, menu, modal, toast and inspector content: 120 ms ease-out (opacity, and 4 px of
-  travel for popovers and toasts).
-- A meter's fill: 240 ms ease-out, once, when its value changes.
-- Loading silhouette pulse: 1.6 s.
-- Nothing animates on first paint of a panel. Charts are drawn, not animated.
-- With the OS "reduce motion" setting, every duration is 0.
+One rule: **what changes value travels from the old value to the new one; what is new just
+appears.** Motion shows how much something changed. It never decorates, never loops outside
+loading, and never delays an action. Agreed in ticket #366 from `proposal_v8` (« Mouvement »,
+proposal B · Repère).
+
+### Tokens
+
+| Token | Value | Used for |
+|---|---|---|
+| `enter` | 120 ms | Something appears: popover, menu, tooltip, modal, toast, an inspector opening from empty, the theme switch |
+| `exit` | 80 ms | Something leaves; always shorter than its entrance |
+| `toggle` | 120 ms | The knob of a toggle |
+| `move` | 180 ms | A selection moves: segment thumb, tab underline, the sidebar collapsing, a list row opening its place |
+| `measure` | 320 ms | A value changes: a figure, a meter's fill, a chart's bars, on one clock |
+| `shimmer` | 1.6 s | Loading silhouette pulse |
+| `curve` | ease-out quart, `cubic-bezier(.25, 1, .5, 1)` | Every timed change |
+
+### Rules
+
+- **Hover and pressed** change at once.
+- **Appear and leave.** Popover, menu, tooltip and toast fade with 4 px of travel, `enter` in
+  and `exit` out; the toast leaves the way it came. The modal and its scrim fade over `enter`,
+  the modal rising 4 px, and fade out over `exit`.
+- **Selection.** A toggle's knob slides over `toggle`, its track colour changing with it. A
+  segmented control's thumb and the active tab's underline slide over `move`. The labels
+  change state at once.
+- **Measure.** When a figure's value changes (month change, a new import), the figure counts
+  from the old value to the new one, its meter and its chart bars travel, all on one `measure`
+  clock. Only the figure that heads a block counts; amounts in rows change at once while their
+  bars travel. A counting figure uses tabular numerals and nothing beside it on its line moves.
+- **First paint.** Nothing animates when a panel or a chart first appears: values are drawn
+  where they are. Measure only plays on a later change.
+- **Panels.** Changing panel has no transition. The sidebar and the title bar never move,
+  except the sidebar collapsing and expanding, whose width travels over `move`.
+- **Inspector.** Selecting another row replaces the content at once; the pane never blanks.
+  Content opening into an empty pane fades over `enter`.
+- **Lists.** A row added at the top (a finished import) opens its place over `move` and pushes
+  the rows below. A highlight holds, then fades over its last second.
+- **Theme.** Switching theme cross-fades the colours over `enter`.
+- **Waiting.** A spinner (14 px, 1.5 px stroke, `textTertiary`) only inside a button, at
+  startup and during a model run; the loading silhouette everywhere else.
+
+### Reduced motion
+
+With the OS « reduce motion » setting, travel, growth and counting are 0: figures, meters and
+bars land at once, thumbs and knobs jump, rows take their place at once, the sidebar snaps.
+Fades stay, `enter` in and `exit` out, so an appearing or leaving surface is still announced.
+The skeleton stops pulsing. Widgets read this from one shared resolver, never by testing the
+setting themselves.
 
 ## 14. Voice and copy
 
