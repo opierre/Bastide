@@ -68,6 +68,51 @@ class SavingsPoint(BaseModel):
     saved_minor: int
 
 
+class CategoryHabit(BaseModel):
+    """One top-level category's spending in the month against its own monthly average.
+
+    The category is bucketed exactly as in `CategoryBreakdown` (subcategories rolled up,
+    transfers excluded, one uncategorised bucket), with the same `name` and `hue` rules.
+    """
+
+    category_id: str | None
+    name: str
+    hue: CategoryHue
+
+    #: The month's spending, a positive magnitude like `CategoryBreakdown.amount_minor`.
+    amount_minor: int
+
+    #: Mean monthly spending over the months counted (`DashboardHabits.months_counted`),
+    #: a positive magnitude rounded to the minor unit, halves away from zero. `null` when the
+    #: category had no spending in those months: no history, not a zero average.
+    average_minor: int | None
+
+    #: `amount_minor − average_minor`: positive when the month spent more than usual. `null`
+    #: with no average.
+    gap_minor: int | None
+
+
+class DashboardHabits(BaseModel):
+    """« Par rapport à vos habitudes »: each category's month against its usual spending."""
+
+    #: The selected month, `YYYY-MM`.
+    month: str
+
+    #: How many months the averages cover: the 12 before the selected month, fewer for a user
+    #: whose first transaction is more recent, `0` when there is no earlier month of data.
+    months_counted: int
+
+    #: One row per top-level category with spending in the month. Rows with a gap come first,
+    #: by the size of the gap (rises and falls mixed), then the rows without history, by
+    #: amount. Not truncated: the panel's row limit is the app's to apply.
+    rows: list[CategoryHabit]
+
+    #: The sum of every row's `gap_minor`, the rows without an average left out; `null` when
+    #: no row has an average.
+    total_gap_minor: int | None
+    currency: str
+
+
 class DashboardTrends(BaseModel):
     """The dashboard's two trend series.
 

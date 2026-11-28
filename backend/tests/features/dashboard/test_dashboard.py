@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from app.features.accounts.models import Account
 from app.features.dashboard.repository import DashboardRepository
 from app.features.dashboard.schemas import DashboardTrends
-from app.features.dashboard.service import DashboardService
+from app.features.dashboard.service import DashboardService, divide_rounding_half_away
 from app.features.imports.models import ImportBatch
 from app.features.transactions.models import Transaction
 from tests.api import register as _register
@@ -883,3 +883,267 @@ def test_trends_rejects_invalid_month(client: TestClient) -> None:
     assert out_of_range.status_code == 422
     assert out_of_range.json()["error"]["code"] == "DASHBOARD_MONTH_INVALID"
     assert malformed.status_code == 422
+
+
+# --- habits: each category's month against its 12-month average -----------------------------
+
+
+def _habits(client: TestClient, headers: dict[str, str], month: str) -> dict:
+    response = client.get("/api/v1/dashboard/habits", params={"month": month}, headers=headers)
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+def _row(body: dict, category_id: str | None) -> dict:
+    return next(row for row in body["rows"] if row["category_id"] == category_id)
+
+
+def _spend(
+    tmp_path: Path, account_id: str, amount: int, day: date, category_id: str | None = None
+) -> None:
+    """Insert an outflow of `amount` minor units (given as a positive magnitude)."""
+    _insert_transaction(
+        tmp_path, account_id, amount_minor=-amount, booked_date=day, category_id=category_id
+    )
+
+
+def test_habits_averages_the_twelve_months_before_the_selected_one(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    groceries = _create_category(client, headers, kind="expense", name="Courses")
+
+    # Thirteen months back: outside the window, so it must not weigh on the average.
+    _spend(tmp_path, account_id, 900_000, date(2025, 4, 3), groceries)
+    # 2025-05 … 2026-04: 10 000 a month, except one month at 22 000 → 132 000 / 12 = 11 000.
+    for offset in range(12):
+        year, month = (2025, 5 + offset) if offset < 8 else (2026, offset - 7)
+        _spend(
+            tmp_path,
+            account_id,
+            22_000 if offset == 3 else 10_000,
+            date(year, month, 12),
+            groceries,
+        )
+    # The selected month itself: a spike that must not soften its own gap.
+    _spend(tmp_path, account_id, 15_000, date(2026, 5, 8), groceries)
+
+    body = _habits(client, headers, "2026-05")
+
+    assert body["month"] == "2026-05"
+    assert body["months_counted"] == 12
+    assert body["currency"] == "EUR"
+    row = _row(body, groceries)
+    assert row["name"] == "Courses"
+    assert row["hue"] == "cat3"
+    assert row["amount_minor"] == 15_000
+    assert row["average_minor"] == 11_000
+    assert row["gap_minor"] == 4_000
+    assert body["total_gap_minor"] == 4_000
+    assert all(type(row[key]) is int for key in ("amount_minor", "average_minor", "gap_minor"))
+
+
+def test_habits_averages_only_the_months_a_newer_user_has(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    groceries = _create_category(client, headers, kind="expense", name="Courses")
+    salary = _create_category(client, headers, kind="income", name="Salaire")
+
+    # The user's first transaction, an income, opens the counted range in 2026-02.
+    _insert_transaction(
+        tmp_path, account_id, amount_minor=250_000, booked_date=date(2026, 2, 1), category_id=salary
+    )
+    # 2026-03 has no groceries: it still counts, as zero.
+    _spend(tmp_path, account_id, 6_000, date(2026, 2, 14), groceries)
+    _spend(tmp_path, account_id, 3_000, date(2026, 4, 14), groceries)
+    _spend(tmp_path, account_id, 2_000, date(2026, 5, 2), groceries)
+
+    body = _habits(client, headers, "2026-05")
+
+    assert body["months_counted"] == 3
+    row = _row(body, groceries)
+    assert row["average_minor"] == 3_000  # 9 000 over 3 months
+    assert row["gap_minor"] == -1_000
+    assert body["total_gap_minor"] == -1_000
+
+
+def test_habits_category_without_history_has_no_average(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    groceries = _create_category(client, headers, kind="expense", name="Courses")
+    travel = _create_category(client, headers, kind="expense", name="Voyages", color="cat5")
+
+    _spend(tmp_path, account_id, 4_000, date(2026, 4, 10), groceries)
+    _spend(tmp_path, account_id, 5_000, date(2026, 5, 10), groceries)
+    # A large first-ever spend in a category: no history, so no average and no gap.
+    _spend(tmp_path, account_id, 80_000, date(2026, 5, 11), travel)
+
+    body = _habits(client, headers, "2026-05")
+
+    row = _row(body, travel)
+    assert row["amount_minor"] == 80_000
+    assert row["average_minor"] is None
+    assert row["gap_minor"] is None
+    # Placed after the rows that have a gap, and left out of the total.
+    assert [row["category_id"] for row in body["rows"]] == [groceries, travel]
+    assert body["total_gap_minor"] == 1_000
+
+
+def test_habits_first_month_of_data_has_no_averages_and_no_total(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    groceries = _create_category(client, headers, kind="expense", name="Courses")
+    _spend(tmp_path, account_id, 5_000, date(2026, 5, 10), groceries)
+
+    body = _habits(client, headers, "2026-05")
+
+    assert body["months_counted"] == 0
+    assert _row(body, groceries)["average_minor"] is None
+    assert body["total_gap_minor"] is None
+
+
+def test_habits_average_rounds_halves_away_from_zero(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    groceries = _create_category(client, headers, kind="expense", name="Courses")
+    _spend(tmp_path, account_id, 1_000, date(2026, 3, 10), groceries)
+    _spend(tmp_path, account_id, 1_001, date(2026, 4, 10), groceries)
+    _spend(tmp_path, account_id, 2_000, date(2026, 5, 10), groceries)
+
+    body = _habits(client, headers, "2026-05")
+
+    row = _row(body, groceries)
+    assert row["average_minor"] == 1_001  # 2 001 / 2 = 1 000.5 → 1 001
+    assert row["gap_minor"] == 999
+
+
+def test_divide_rounding_half_away_is_symmetric_and_exact() -> None:
+    assert divide_rounding_half_away(3, 2) == 2  # 1.5 → 2
+    assert divide_rounding_half_away(-3, 2) == -2  # −1.5 → −2
+    assert divide_rounding_half_away(31, 3) == 10  # 10.33 → 10
+    assert divide_rounding_half_away(32, 3) == 11  # 10.67 → 11
+    assert divide_rounding_half_away(-32, 3) == -11
+    assert divide_rounding_half_away(-31, 3) == -10
+    big = 2**53 + 1  # a float would round this off
+    assert divide_rounding_half_away(big * 2, 2) == big
+
+
+def test_habits_excludes_transfers(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    groceries = _create_category(client, headers, kind="expense", name="Courses")
+    transfer = _create_category(client, headers, kind="transfer", name="Virement")
+    _spend(tmp_path, account_id, 50_000, date(2026, 4, 1), transfer)
+    _spend(tmp_path, account_id, 3_000, date(2026, 4, 9), groceries)
+    _spend(tmp_path, account_id, 70_000, date(2026, 5, 1), transfer)
+    _spend(tmp_path, account_id, 3_000, date(2026, 5, 9), groceries)
+
+    body = _habits(client, headers, "2026-05")
+
+    assert [row["category_id"] for row in body["rows"]] == [groceries]
+    assert _row(body, groceries)["average_minor"] == 3_000
+    assert body["total_gap_minor"] == 0
+
+
+def test_habits_month_with_no_spending_has_no_rows(client: TestClient, tmp_path: Path) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    groceries = _create_category(client, headers, kind="expense", name="Courses")
+    salary = _create_category(client, headers, kind="income", name="Salaire")
+    _spend(tmp_path, account_id, 4_000, date(2026, 3, 10), groceries)
+    # Income only in the selected month: not spending.
+    _insert_transaction(
+        tmp_path, account_id, amount_minor=250_000, booked_date=date(2026, 5, 1), category_id=salary
+    )
+
+    body = _habits(client, headers, "2026-05")
+
+    assert body["months_counted"] == 2
+    assert body["rows"] == []
+    assert body["total_gap_minor"] is None
+
+
+def test_habits_rolls_up_subcategories_and_buckets_uncategorised(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    food = _create_category(client, headers, kind="expense", name="Alimentation")
+    bakery = _create_category(client, headers, kind="expense", name="Boulangerie", parent_id=food)
+    _spend(tmp_path, account_id, 2_000, date(2026, 4, 10), food)
+    _spend(tmp_path, account_id, 1_000, date(2026, 5, 10), food)
+    _spend(tmp_path, account_id, 1_500, date(2026, 5, 11), bakery)
+    _spend(tmp_path, account_id, 700, date(2026, 4, 12))
+    _spend(tmp_path, account_id, 300, date(2026, 5, 12))
+    _spend(tmp_path, account_id, 200, date(2026, 5, 13))
+
+    body = _habits(client, headers, "2026-05")
+
+    food_row = _row(body, food)
+    assert food_row["amount_minor"] == 2_500
+    assert food_row["average_minor"] == 2_000
+    uncategorised = _row(body, None)
+    assert uncategorised["name"] == "category.other.uncategorized"
+    assert uncategorised["hue"] == "cat0"
+    assert uncategorised["amount_minor"] == 500
+    assert uncategorised["gap_minor"] == -200
+    # One row per top-level bucket, by the size of the gap.
+    assert [row["category_id"] for row in body["rows"]] == [food, None]
+    assert body["total_gap_minor"] == 300
+
+
+def test_habits_orders_rows_by_gap_size_rises_and_falls_mixed(
+    client: TestClient, tmp_path: Path
+) -> None:
+    headers = _register(client)
+    account_id = _create_account(client, headers)
+    small_rise = _create_category(client, headers, kind="expense", name="A")
+    big_fall = _create_category(client, headers, kind="expense", name="B")
+    mid_rise = _create_category(client, headers, kind="expense", name="C")
+    for category_id, before, now in (
+        (small_rise, 1_000, 1_100),
+        (big_fall, 9_000, 1_000),
+        (mid_rise, 1_000, 4_000),
+    ):
+        _spend(tmp_path, account_id, before, date(2026, 4, 10), category_id)
+        _spend(tmp_path, account_id, now, date(2026, 5, 10), category_id)
+
+    body = _habits(client, headers, "2026-05")
+
+    assert [row["category_id"] for row in body["rows"]] == [big_fall, mid_rise, small_rise]
+    assert body["total_gap_minor"] == -8_000 + 3_000 + 100
+
+
+def test_habits_is_user_scoped(client: TestClient, tmp_path: Path) -> None:
+    alice = _register(client, "amelie@example.com")
+    bob = _register(client, "bruno@example.com")
+    account_a = _create_account(client, alice)
+    account_b = _create_account(client, bob)
+    groceries_a = _create_category(client, alice, kind="expense", name="Courses")
+    groceries_b = _create_category(client, bob, kind="expense", name="Courses")
+    _spend(tmp_path, account_a, 1_000, date(2026, 5, 10), groceries_a)
+    # Bob's earlier history must neither open Alice's counted range nor appear in her rows.
+    _spend(tmp_path, account_b, 9_000, date(2026, 1, 10), groceries_b)
+    _spend(tmp_path, account_b, 9_000, date(2026, 5, 10), groceries_b)
+
+    body = _habits(client, alice, "2026-05")
+
+    assert body["months_counted"] == 0
+    assert [row["category_id"] for row in body["rows"]] == [groceries_a]
+
+
+def test_habits_requires_auth(client: TestClient) -> None:
+    response = client.get("/api/v1/dashboard/habits", params={"month": "2026-05"})
+    assert response.status_code == 401
+
+
+def test_habits_rejects_invalid_month(client: TestClient) -> None:
+    headers = _register(client)
+    response = client.get("/api/v1/dashboard/habits", params={"month": "2026-13"}, headers=headers)
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "DASHBOARD_MONTH_INVALID"

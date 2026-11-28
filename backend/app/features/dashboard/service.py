@@ -4,9 +4,12 @@ from datetime import date
 
 from app.core.errors import ValidationError
 from app.core.months import first_of_month, month_index, month_key
+from app.features.categories.hues import CategoryHue
 from app.features.dashboard.repository import DashboardRepository
 from app.features.dashboard.schemas import (
     CategoryBreakdown,
+    CategoryHabit,
+    DashboardHabits,
     DashboardSummary,
     DashboardTrends,
     MonthlyTotals,
@@ -18,6 +21,9 @@ from app.features.settings.models import DEFAULT_SAVINGS_RATE_GOAL_PERCENT
 #: series with the selected one.
 BARS_MONTHS = 4
 SAVINGS_MONTHS = 12
+
+#: How many months before the selected one each category's habitual spending averages.
+HABITS_MONTHS = 12
 
 
 class DashboardMonthInvalidError(ValidationError):
@@ -82,6 +88,74 @@ class DashboardService:
         """The user's goal, or the default before their settings row exists."""
         goal = self._repository.savings_rate_goal_percent(user_id)
         return DEFAULT_SAVINGS_RATE_GOAL_PERCENT if goal is None else goal
+
+    def habits(self, user_id: str, currency: str, month: str) -> DashboardHabits:
+        """Each category's spending in `month` (`YYYY-MM`) against its monthly average.
+
+        The average covers the `HABITS_MONTHS` months *before* `month`, so it stays fixed while
+        the month runs and a spike never softens its own gap. Months before the user's first
+        transaction are not counted; inside that range a month without spending in a category
+        counts as zero. A category with no spending in the months counted has no average.
+
+        Raises:
+            DashboardMonthInvalidError: `month` doesn't parse as `YYYY-MM`.
+        """
+        current = _parse_month(month)
+        window_start = current - HABITS_MONTHS
+        first = self._repository.first_booked_date(user_id)
+        months_counted = (
+            0 if first is None else max(0, current - max(window_start, month_index(first)))
+        )
+
+        current_key = (first_of_month(current).year, first_of_month(current).month)
+        rows = self._repository.expense_by_category_and_month(
+            user_id, first_of_month(window_start), first_of_month(current + 1)
+        )
+        labels: dict[str | None, tuple[str, CategoryHue]] = {}
+        month_amounts: dict[str | None, int] = {}
+        history_totals: dict[str | None, int] = {}
+        for category_id, name, hue, row_month, amount in rows:
+            labels[category_id] = (name, hue)
+            if row_month == current_key:
+                month_amounts[category_id] = amount
+            else:
+                history_totals[category_id] = history_totals.get(category_id, 0) + amount
+
+        habits: list[CategoryHabit] = []
+        for category_id, amount in month_amounts.items():
+            name, hue = labels[category_id]
+            history = history_totals.get(category_id, 0)
+            average = (
+                divide_rounding_half_away(history, months_counted)
+                if months_counted > 0 and history > 0
+                else None
+            )
+            habits.append(
+                CategoryHabit(
+                    category_id=category_id,
+                    name=name,
+                    hue=hue,
+                    amount_minor=amount,
+                    average_minor=average,
+                    gap_minor=None if average is None else amount - average,
+                )
+            )
+        # Rows with a gap first, largest gap either way; then the rows without history, by amount.
+        habits.sort(
+            key=lambda row: (
+                row.gap_minor is None,
+                -abs(row.gap_minor) if row.gap_minor is not None else -row.amount_minor,
+            )
+        )
+        gaps = [row.gap_minor for row in habits if row.gap_minor is not None]
+
+        return DashboardHabits(
+            month=month_key(current),
+            months_counted=months_counted,
+            rows=habits,
+            total_gap_minor=sum(gaps) if gaps else None,
+            currency=currency,
+        )
 
     def trends(
         self, user_id: str, currency: str, today: date, month: str | None = None
@@ -149,6 +223,16 @@ def _parse_month(month: str) -> int:
         return month_index(date(int(parts[0]), int(parts[1]), 1))
     except ValueError as exc:
         raise DashboardMonthInvalidError(f"Invalid month '{month}', expected YYYY-MM.") from exc
+
+
+def divide_rounding_half_away(numerator: int, denominator: int) -> int:
+    """`numerator / denominator` rounded to the nearest minor unit, halves away from zero.
+
+    Integer arithmetic throughout, the rule of the savings card's `averageSavedMinor`: money
+    stays an integer even when the mean isn't, and no float ever holds the total.
+    """
+    magnitude = (abs(numerator) * 2 + denominator) // (denominator * 2)
+    return -magnitude if numerator < 0 else magnitude
 
 
 def _delta_pct(current: int, previous: int) -> float:
