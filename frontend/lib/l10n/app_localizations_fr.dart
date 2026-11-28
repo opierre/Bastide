@@ -1659,6 +1659,52 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dashboardCategoryNoSpending => 'Aucune dépense ce mois.';
 
   @override
+  String get dashboardHabitsTitle => 'Par rapport à vos habitudes';
+
+  @override
+  String dashboardHabitsMore(String amount) {
+    return '$amount de plus que votre moyenne';
+  }
+
+  @override
+  String dashboardHabitsLess(String amount) {
+    return '$amount de moins que votre moyenne';
+  }
+
+  @override
+  String get dashboardHabitsSame => 'Égal à votre moyenne';
+
+  @override
+  String dashboardHabitsInProgress(String month, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours',
+      one: '$days jour',
+    );
+    return '$month n’est pas terminé : ces montants comparent $_temp0 à un mois entier.';
+  }
+
+  @override
+  String get dashboardHabitsCategory => 'Catégorie';
+
+  @override
+  String dashboardHabitsAverageOver(int months) {
+    return 'moyenne sur $months mois';
+  }
+
+  @override
+  String get dashboardHabitsGap => 'Écart';
+
+  @override
+  String get dashboardHabitsNoHistory =>
+      'Aucune dépense sur les mois précédents';
+
+  @override
+  String get dashboardHabitsError =>
+      'La comparaison avec vos habitudes n’a pas pu être chargée. Rien n’a été modifié.';
+
+  @override
   String get dashboardSavingsTrendTitle => 'Épargne mensuelle';
 
   @override

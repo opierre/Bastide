@@ -12,6 +12,9 @@ import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/core/widgets/state_views.dart';
 import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/dashboard/application/dashboard_controller.dart';
+import 'package:bastide/features/dashboard/application/dashboard_habits_provider.dart';
+import 'package:bastide/features/dashboard/presentation/category_habits.dart';
+import 'package:bastide/features/transactions/application/transactions_controller.dart';
 import 'package:bastide/features/dashboard/domain/dashboard_summary.dart';
 import 'package:bastide/features/dashboard/domain/dashboard_trends.dart';
 import 'package:bastide/features/dashboard/presentation/category_spending.dart';
@@ -53,6 +56,7 @@ Widget _wrap({
       dashboardControllerProvider.overrideWith(
         () => FakeDashboardController(initialState: state),
       ),
+      dashboardHabitsProvider.overrideWith((ref) async => specHabits()),
     ],
     child: routed
         ? MaterialApp.router(
@@ -649,6 +653,7 @@ void main() {
             dashboardControllerProvider.overrideWith(
               () => FakeDashboardController(initialState: _state()),
             ),
+            dashboardHabitsProvider.overrideWith((ref) async => specHabits()),
             sidebarCollapsedProvider.overrideWith(FakeCollapsedSidebar.new),
             reviewCountProvider.overrideWith((ref) async => 0),
           ],
@@ -671,7 +676,48 @@ void main() {
       expect(find.byType(CategorySpending), findsOneWidget);
       expect(find.byType(MonthlySavings), findsOneWidget);
       expect(find.byType(RecentActivity), findsOneWidget);
+      expect(find.byType(CategoryHabits), findsOneWidget);
       expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('par rapport à vos habitudes', () {
+    testWidgets('sits on the left half of the bottom band', (tester) async {
+      await _pump(tester, _state());
+
+      final habits = tester.getRect(_byKey('dashboardHabits'));
+      final spending = tester.getRect(_byKey('dashboardCategorySpending'));
+      expect(habits.left, spending.left);
+      expect(habits.width, closeTo(spending.width, 1));
+      expect(habits.top, greaterThan(spending.bottom));
+      // « Activité récente » keeps the right half until #386.
+      expect(
+        tester.getRect(_byKey('dashboardRecentActivity')).left,
+        greaterThan(habits.right),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a row opens Transactions on its category and month', (
+      tester,
+    ) async {
+      _useDesktopSurface(tester);
+      await tester.pumpWidget(_wrap(state: _state(), routed: true));
+      await tester.pumpAndSettle();
+
+      await tester.tap(_byKey('dashboardHabitRow-c4'));
+      await tester.pumpAndSettle();
+
+      expect(
+        probedLocation(tester.widget(_byKey('routeProbe'))),
+        '/transactions',
+      );
+      final filters = ProviderScope.containerOf(
+        tester.element(_byKey('routeProbe')),
+      ).read(transactionFiltersProvider);
+      expect(filters.categoryId, 'c4');
+      expect(filters.dateFrom, DateTime(2026, 5));
+      expect(filters.dateTo, DateTime(2026, 5, 31));
     });
   });
 }
