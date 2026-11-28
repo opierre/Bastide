@@ -45,6 +45,7 @@ class RepereMeter extends StatelessWidget {
     this.markFraction,
     this.markLabel,
     this.semanticLabel,
+    this.reserveLabelSpace = true,
   });
 
   /// The value's position on the track; clamped to 0–1 for drawing.
@@ -60,6 +61,11 @@ class RepereMeter extends StatelessWidget {
 
   /// What a screen reader announces: the printed value, typically.
   final String? semanticLabel;
+
+  /// Whether a meter with a mark keeps [markReserve] above its track for the
+  /// label. Off for a column of meters whose marks a table header labels
+  /// once: each row then draws only the 12 px band, centred in its row.
+  final bool reserveLabelSpace;
 
   static const trackHeight = 4.0;
   static const markWidth = 2.0;
@@ -113,7 +119,7 @@ class RepereMeter extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (mark != null)
+          if (mark != null && reserveLabelSpace)
             SizedBox(
               // The mark itself rises (12 − 4) / 2 above the track, inside
               // the band the track is painted in.
