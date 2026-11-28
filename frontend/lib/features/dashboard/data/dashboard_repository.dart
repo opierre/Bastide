@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
+import '../domain/dashboard_habits.dart';
 import '../domain/dashboard_summary.dart';
 import '../domain/dashboard_trends.dart';
 import '../domain/upcoming_charges.dart';
@@ -50,6 +51,46 @@ class DashboardRepository {
           .toList(),
       currency: json['currency'] as String,
       currentMonth: DateTime(currentMonth.year, currentMonth.month),
+    );
+  }
+
+  /// « Par rapport à vos habitudes » for [month]: each category's spending
+  /// against its average over the months before it.
+  ///
+  /// [today] is the calendar date at the time of the call: when [month] is the
+  /// month in progress, the result carries how many of its days have passed.
+  Future<DashboardHabits> habits(
+    DateTime month, {
+    required DateTime today,
+  }) async {
+    final json =
+        await _apiClient.get(
+              '/dashboard/habits',
+              query: {'month': _monthParam.format(month)},
+            )
+            as Map<String, dynamic>;
+    final parsedMonth = _parseMonth(json['month'] as String);
+    final inProgress =
+        parsedMonth.year == today.year && parsedMonth.month == today.month;
+    return DashboardHabits(
+      month: parsedMonth,
+      daysElapsed: inProgress ? today.day : null,
+      monthsCounted: json['months_counted'] as int,
+      rows: (json['rows'] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .map(
+            (row) => CategoryHabit(
+              categoryId: row['category_id'] as String?,
+              name: row['name'] as String,
+              hue: row['hue'] as String,
+              amountMinor: row['amount_minor'] as int,
+              averageMinor: row['average_minor'] as int?,
+              gapMinor: row['gap_minor'] as int?,
+            ),
+          )
+          .toList(),
+      totalGapMinor: json['total_gap_minor'] as int?,
+      currency: json['currency'] as String,
     );
   }
 
