@@ -469,7 +469,7 @@
   "dashboardHabitsMore": "{amount} more than your average",
   "dashboardHabitsLess": "{amount} less than your average",
   "dashboardHabitsSame": "Same as your average",
-  "dashboardHabitsInProgress": "{month} is not over: these amounts compare {days, plural, one{{days} day} other{{days} days}} with a full month.",
+  "dashboardHabitsInProgress": "{month} is not over: these amounts compare {days, plural, one{{days} day} other{{days} days}} with a full month.",
   "dashboardHabitsCategory": "Category",
   "dashboardHabitsAverageOver": "{months}-month average",
   "dashboardHabitsGap": "Gap",

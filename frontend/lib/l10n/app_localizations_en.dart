@@ -1670,8 +1670,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: '$days days',
-      one: '$days day',
+      other: '$days days',
+      one: '$days day',
     );
     return '$month is not over: these amounts compare $_temp0 with a full month.';
   }

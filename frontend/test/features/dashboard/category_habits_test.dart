@@ -255,9 +255,7 @@ void main() {
       await _pump(tester, specHabits());
 
       expect(_byKey('dashboardHabitMeter-gifts'), findsNothing);
-      final note = tester.widget<Text>(
-        _byKey('dashboardHabitNoHistory-gifts'),
-      );
+      final note = tester.widget<Text>(_byKey('dashboardHabitNoHistory-gifts'));
       expect(note.data, 'Aucune dépense sur les mois précédents');
       expect(note.style?.color, AppColors.dark.textTertiary);
       expect(tester.widget<Text>(_byKey('dashboardHabitGap-gifts')).data, '—');
@@ -362,7 +360,7 @@ void main() {
       expect(find.text('No spending in the previous months'), findsOneWidget);
       expect(
         find.text(
-          'May is not over: these amounts compare 14 days with a full month.',
+          'May is not over: these amounts compare 14 days with a full month.',
         ),
         findsOneWidget,
       );
