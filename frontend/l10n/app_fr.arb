@@ -2072,6 +2072,69 @@
   "@dashboardCategoryNoSpending": {
     "description": "Note in « Dépenses par catégorie » for a month without any expense."
   },
+  "dashboardHabitsTitle": "Par rapport à vos habitudes",
+  "@dashboardHabitsTitle": {
+    "description": "Heading of the dashboard block reading each category's month against its own monthly average."
+  },
+  "dashboardHabitsMore": "{amount} de plus que votre moyenne",
+  "@dashboardHabitsMore": {
+    "description": "Right of the habits heading when the month spent more than usual in total; the amount is unsigned.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardHabitsLess": "{amount} de moins que votre moyenne",
+  "@dashboardHabitsLess": {
+    "description": "Right of the habits heading when the month spent less than usual in total; the amount is unsigned.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardHabitsSame": "Égal à votre moyenne",
+  "@dashboardHabitsSame": {
+    "description": "Right of the habits heading when the month's total gap to the averages is zero."
+  },
+  "dashboardHabitsInProgress": "{month} n’est pas terminé : ces montants comparent {days, plural, one{{days} jour} other{{days} jours}} à un mois entier.",
+  "@dashboardHabitsInProgress": {
+    "description": "Note under the habits heading when the selected month is the current one: its spending so far is read against full-month averages. The month is capitalized (« Mai »); days is today's day of the month.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardHabitsCategory": "Catégorie",
+  "@dashboardHabitsCategory": {
+    "description": "Header of the category column of the habits table."
+  },
+  "dashboardHabitsAverageOver": "moyenne sur {months} mois",
+  "@dashboardHabitsAverageOver": {
+    "description": "Header of the repère column of the habits table, centred over the average marks; months is how many months the averages cover (12 in the usual case). Lowercase: it labels the marks.",
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardHabitsGap": "Écart",
+  "@dashboardHabitsGap": {
+    "description": "Header of the gap column of the habits table: the month's spending minus the average."
+  },
+  "dashboardHabitsNoHistory": "Aucune dépense sur les mois précédents",
+  "@dashboardHabitsNoHistory": {
+    "description": "Shown in place of the repère on a habits row whose category had no spending in the months counted."
+  },
+  "dashboardHabitsError": "La comparaison avec vos habitudes n’a pas pu être chargée. Rien n’a été modifié.",
+  "@dashboardHabitsError": {
+    "description": "Error state of the habits block alone, when its data fails to load while the rest of the dashboard shows; « Réessayer » follows."
+  },
   "dashboardSavingsTrendTitle": "Épargne mensuelle",
   "@dashboardSavingsTrendTitle": {
     "description": "Title of the monthly savings chart (bar or line view)."
@@ -4482,6 +4545,40 @@
         "type": "String"
       }
     }
+  },
+  "dashboardUpcomingTitle": "À venir d’ici le {date}",
+  "@dashboardUpcomingTitle": {
+    "description": "Heading of the dashboard's « À venir » block: the recurring charges still due before the end of the current month. {date} is the month's last day, day and month in the locale's short form (« 31 mai »).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardUpcomingPriceRise": "{date} · hausse de {amount}",
+  "@dashboardUpcomingPriceRise": {
+    "description": "Date line of an « À venir » row whose price rose: the due date, then the unsigned rise (new amount − previous).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardUpcomingExpected": "Attendu le {date}",
+  "@dashboardUpcomingExpected": {
+    "description": "Date line of an « À venir » row whose charge is missed: the date it was expected on.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardUpcomingViewAll": "Tous les abonnements",
+  "@dashboardUpcomingViewAll": {
+    "description": "Link under the dashboard's « À venir » block, opening the Abonnements panel."
   },
   "allocationDatePick": "Choisir une date",
   "@allocationDatePick": {

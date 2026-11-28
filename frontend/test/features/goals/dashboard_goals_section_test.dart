@@ -2,6 +2,7 @@ import 'package:bastide/core/theme/app_theme.dart';
 import 'package:bastide/core/widgets/amount_text.dart';
 import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/features/dashboard/application/dashboard_controller.dart';
+import 'package:bastide/features/dashboard/application/dashboard_habits_provider.dart';
 import 'package:bastide/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:bastide/features/dashboard/presentation/goals_section.dart';
 import 'package:bastide/features/dashboard/presentation/recent_activity.dart';
@@ -32,6 +33,7 @@ Widget _wrap({required List<Goal> goals, Locale locale = const Locale('fr')}) {
           ),
         ),
       ),
+      dashboardHabitsProvider.overrideWith((ref) async => specHabits()),
       goalsControllerProvider.overrideWith(
         () => FakeGoalsController(initialGoals: goals),
       ),
@@ -56,7 +58,7 @@ String _richText(WidgetTester tester, Key key) =>
     tester.widget<Text>(find.byKey(key)).textSpan!.toPlainText();
 
 void main() {
-  testWidgets('Objectifs lists four goals beside the recent activity', (
+  testWidgets('Objectifs lists four goals above the recent activity', (
     tester,
   ) async {
     _useDesktopSurface(tester);
@@ -81,10 +83,12 @@ void main() {
       contains('64'),
     );
 
-    // The two sections share the row evenly.
-    final recent = tester.getSize(find.byType(RecentActivity)).width;
-    final goals = tester.getSize(find.byType(GoalsSection)).width;
-    expect(recent / goals, closeTo(1.0, 0.02));
+    // Until the bottom band takes its final shape (#386), the two share the
+    // right half, « Objectifs » on top.
+    final recent = tester.getRect(find.byType(RecentActivity));
+    final goals = tester.getRect(find.byType(GoalsSection));
+    expect(recent.width, closeTo(goals.width, 1));
+    expect(recent.top, greaterThan(goals.bottom));
   });
 
   testWidgets('a reached goal fills its repère in done', (tester) async {
@@ -102,16 +106,17 @@ void main() {
   });
 
   testWidgets('without goals the section is absent and activity takes the '
-      'full width', (tester) async {
+      'right half', (tester) async {
     _useDesktopSurface(tester);
     await tester.pumpWidget(_wrap(goals: const []));
     await tester.pumpAndSettle();
 
     expect(find.byType(GoalsSection), findsNothing);
-    // No shell in this harness: the content is the window less its margins.
+    // No shell in this harness: the content is the window less its margins,
+    // and « Par rapport à vos habitudes » holds the left half.
     expect(
       tester.getSize(find.byType(RecentActivity)).width,
-      closeTo(1440 - 64, 1),
+      closeTo((1440 - 64 - 40) / 2, 1),
     );
   });
 

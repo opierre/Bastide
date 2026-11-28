@@ -1,3 +1,4 @@
+import 'package:bastide/features/dashboard/domain/dashboard_habits.dart';
 import 'package:bastide/features/dashboard/domain/dashboard_summary.dart';
 import 'package:bastide/features/dashboard/domain/dashboard_trends.dart';
 
@@ -105,6 +106,77 @@ DashboardTrends specTrends() => DashboardTrends(
   currency: 'EUR',
   currentMonth: DateTime(2026, 5),
 );
+
+/// « Par rapport à vos habitudes » for May 2026 as the mockup's variant D
+/// draws it, plus one category without history. Ordered as the API orders
+/// them: largest gap first, the row without history last. The gaps add up
+/// to the mockup's « 102,99 € de plus que votre moyenne ».
+DashboardHabits specHabits({int? daysElapsed, int monthsCounted = 12}) =>
+    DashboardHabits(
+      month: DateTime(2026, 5),
+      monthsCounted: monthsCounted,
+      daysElapsed: daysElapsed,
+      rows: const [
+        CategoryHabit(
+          categoryId: 'c2',
+          name: 'category.food',
+          hue: 'cat2',
+          amountMinor: 48620,
+          averageMinor: 39380,
+          gapMinor: 9240,
+        ),
+        CategoryHabit(
+          categoryId: 'c5',
+          name: 'category.leisure',
+          hue: 'cat5',
+          amountMinor: 18945,
+          averageMinor: 12100,
+          gapMinor: 6845,
+        ),
+        CategoryHabit(
+          categoryId: 'c4',
+          name: 'category.transport',
+          hue: 'cat3',
+          amountMinor: 21490,
+          averageMinor: 26210,
+          gapMinor: -4720,
+        ),
+        CategoryHabit(
+          categoryId: 'c7',
+          name: 'category.health',
+          hue: 'cat6',
+          amountMinor: 6230,
+          averageMinor: 8850,
+          gapMinor: -2620,
+        ),
+        CategoryHabit(
+          categoryId: 'c6',
+          name: 'category.subscriptions',
+          hue: 'cat4',
+          amountMinor: 7495,
+          averageMinor: 6696,
+          gapMinor: 799,
+        ),
+        CategoryHabit(
+          categoryId: 'c3',
+          name: 'category.other',
+          hue: 'cat0',
+          amountMinor: 23655,
+          averageMinor: 22900,
+          gapMinor: 755,
+        ),
+        CategoryHabit(
+          categoryId: 'gifts',
+          name: 'Cadeaux',
+          hue: 'cat7',
+          amountMinor: 3490,
+          averageMinor: null,
+          gapMinor: null,
+        ),
+      ],
+      totalGapMinor: 10299,
+      currency: 'EUR',
+    );
 
 /// The four activity rows exactly as `docs/design/04-dashboard.md` tabulates them.
 List<RecentTransaction> specRecent() => [

@@ -3,8 +3,10 @@ import 'package:intl/intl.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_client_provider.dart';
+import '../domain/dashboard_habits.dart';
 import '../domain/dashboard_summary.dart';
 import '../domain/dashboard_trends.dart';
+import '../domain/upcoming_charges.dart';
 import '../../../core/logos/logo_ref.dart';
 
 final _monthParam = DateFormat('yyyy-MM');
@@ -49,6 +51,46 @@ class DashboardRepository {
           .toList(),
       currency: json['currency'] as String,
       currentMonth: DateTime(currentMonth.year, currentMonth.month),
+    );
+  }
+
+  /// « Par rapport à vos habitudes » for [month]: each category's spending
+  /// against its average over the months before it.
+  ///
+  /// [today] is the calendar date at the time of the call: when [month] is the
+  /// month in progress, the result carries how many of its days have passed.
+  Future<DashboardHabits> habits(
+    DateTime month, {
+    required DateTime today,
+  }) async {
+    final json =
+        await _apiClient.get(
+              '/dashboard/habits',
+              query: {'month': _monthParam.format(month)},
+            )
+            as Map<String, dynamic>;
+    final parsedMonth = _parseMonth(json['month'] as String);
+    final inProgress =
+        parsedMonth.year == today.year && parsedMonth.month == today.month;
+    return DashboardHabits(
+      month: parsedMonth,
+      daysElapsed: inProgress ? today.day : null,
+      monthsCounted: json['months_counted'] as int,
+      rows: (json['rows'] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .map(
+            (row) => CategoryHabit(
+              categoryId: row['category_id'] as String?,
+              name: row['name'] as String,
+              hue: row['hue'] as String,
+              amountMinor: row['amount_minor'] as int,
+              averageMinor: row['average_minor'] as int?,
+              gapMinor: row['gap_minor'] as int?,
+            ),
+          )
+          .toList(),
+      totalGapMinor: json['total_gap_minor'] as int?,
+      currency: json['currency'] as String,
     );
   }
 
@@ -105,6 +147,44 @@ class DashboardRepository {
   String _transactionLabel(Map<String, dynamic> json) {
     final merchant = _merchant(json);
     return merchant.isEmpty ? json['description_clean'] as String : merchant;
+  }
+
+  /// The recurring charges still due before the end of the current month, and
+  /// the missed ones, for « À venir ». Reads `/recurring/upcoming` directly
+  /// rather than through the recurring feature, as [recentTransactions] reads
+  /// `/transactions`. The server picks the month from its own clock: the block
+  /// never follows the month selector.
+  Future<UpcomingCharges> upcoming() async {
+    final json =
+        await _apiClient.get('/recurring/upcoming') as Map<String, dynamic>;
+    return UpcomingCharges(
+      through: DateTime.parse(json['through'] as String),
+      totalMinor: json['total_minor'] as int,
+      due: [
+        for (final entry
+            in (json['charges'] as List<dynamic>).cast<Map<String, dynamic>>())
+          UpcomingDue(
+            seriesId: entry['series_id'] as String,
+            label: entry['label'] as String,
+            amountMinor: entry['amount_minor'] as int,
+            logo: LogoRef.fromJson(entry),
+            dueOn: DateTime.parse(entry['due_on'] as String),
+            priceIncreaseMinor: entry['price_increase_minor'] as int?,
+          ),
+      ],
+      missed: [
+        for (final entry
+            in (json['missed'] as List<dynamic>).cast<Map<String, dynamic>>())
+          UpcomingMissed(
+            seriesId: entry['series_id'] as String,
+            label: entry['label'] as String,
+            amountMinor: entry['amount_minor'] as int,
+            logo: LogoRef.fromJson(entry),
+            expectedOn: DateTime.parse(entry['expected_on'] as String),
+          ),
+      ],
+      currency: json['currency'] as String,
+    );
   }
 
   /// The first-of-month for the most recent transaction, or `null` if the user has none yet —

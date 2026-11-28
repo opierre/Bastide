@@ -1650,6 +1650,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardCategoryNoSpending => 'No spending this month.';
 
   @override
+  String get dashboardHabitsTitle => 'Compared with your habits';
+
+  @override
+  String dashboardHabitsMore(String amount) {
+    return '$amount more than your average';
+  }
+
+  @override
+  String dashboardHabitsLess(String amount) {
+    return '$amount less than your average';
+  }
+
+  @override
+  String get dashboardHabitsSame => 'Same as your average';
+
+  @override
+  String dashboardHabitsInProgress(String month, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '$days day',
+    );
+    return '$month is not over: these amounts compare $_temp0 with a full month.';
+  }
+
+  @override
+  String get dashboardHabitsCategory => 'Category';
+
+  @override
+  String dashboardHabitsAverageOver(int months) {
+    return '$months-month average';
+  }
+
+  @override
+  String get dashboardHabitsGap => 'Gap';
+
+  @override
+  String get dashboardHabitsNoHistory => 'No spending in the previous months';
+
+  @override
+  String get dashboardHabitsError =>
+      'The comparison with your habits could not be loaded. Nothing was changed.';
+
+  @override
   String get dashboardSavingsTrendTitle => 'Monthly savings';
 
   @override
@@ -3540,6 +3585,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String dashboardGoalsTarget(String target) {
     return '/ $target';
   }
+
+  @override
+  String dashboardUpcomingTitle(String date) {
+    return 'Due by $date';
+  }
+
+  @override
+  String dashboardUpcomingPriceRise(String date, String amount) {
+    return '$date · up $amount';
+  }
+
+  @override
+  String dashboardUpcomingExpected(String date) {
+    return 'Expected on $date';
+  }
+
+  @override
+  String get dashboardUpcomingViewAll => 'All subscriptions';
 
   @override
   String get allocationDatePick => 'Pick a date';

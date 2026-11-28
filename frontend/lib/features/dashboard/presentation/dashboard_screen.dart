@@ -10,21 +10,27 @@ import '../../../l10n/app_localizations.dart';
 import '../../goals/application/goals_controller.dart';
 import '../../goals/presentation/goals_screen.dart';
 import '../../imports/presentation/imports_screen.dart';
+import '../../recurring/application/subscriptions_controller.dart';
+import '../../recurring/presentation/subscriptions_screen.dart';
 import '../../transactions/application/transactions_controller.dart';
 import '../../transactions/presentation/transactions_screen.dart';
 import '../application/dashboard_controller.dart';
+import '../application/upcoming_charges_provider.dart';
 import '../domain/dashboard_summary.dart';
+import 'category_habits.dart';
 import 'category_spending.dart';
 import 'goals_section.dart';
 import 'monthly_savings.dart';
 import 'reading_line.dart';
 import 'recent_activity.dart';
+import 'upcoming_charges_section.dart';
 
 /// « Tableau de bord », the « Lecture du mois » (`docs/design/04-dashboard.md`):
 /// five blocks 24 px apart in the content region. The reading line, a
 /// hairline, « Dépenses par catégorie » beside « Épargne mensuelle », a
-/// hairline, then « Activité récente » beside « Objectifs ». Sections, not
-/// cards: nothing here is framed.
+/// hairline, then « Par rapport à vos habitudes » beside « Objectifs » and
+/// « Activité récente », and « À venir » while charges remain this month.
+/// Sections, not cards: nothing here is framed.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -92,11 +98,24 @@ class _DashboardContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Up to four active goals, or nothing: a goals load that has not landed or
-    // has failed leaves « Activité récente » on the full width rather than
+    // has failed leaves « Activité récente » the whole right half rather than
     // putting an error about a side section on the dashboard.
     final goals =
         ref.watch(goalsControllerProvider).value?.topGoals ?? const [];
+    // The same for « À venir », which also stays away while there is nothing
+    // left to charge this month.
+    final upcoming = ref.watch(upcomingChargesProvider).value;
+    final showUpcoming = upcoming != null && !upcoming.isEmpty;
     final summary = state.summary;
+
+    void openCategory(String? categoryId, DateTime month) {
+      focusTransactionsOnCategory(
+        ref.read(transactionFiltersProvider.notifier),
+        categoryId: categoryId,
+        month: month,
+      );
+      context.go(TransactionsScreen.path);
+    }
 
     final charts = SizedBox(
       height: _chartsBlockHeight,
@@ -106,14 +125,8 @@ class _DashboardContent extends ConsumerWidget {
           Expanded(
             child: CategorySpending(
               summary: summary,
-              onCategoryTap: (categoryId) {
-                focusTransactionsOnCategory(
-                  ref.read(transactionFiltersProvider.notifier),
-                  categoryId: categoryId,
-                  month: state.month,
-                );
-                context.go(TransactionsScreen.path);
-              },
+              onCategoryTap: (categoryId) =>
+                  openCategory(categoryId, state.month),
             ),
           ),
           const SizedBox(width: AppSpacing.gutter),
@@ -122,26 +135,49 @@ class _DashboardContent extends ConsumerWidget {
       ),
     );
 
+    // « Par rapport à vos habitudes » on the left half, as the spec places
+    // it. Until the bottom band takes its final shape (#386), the right half
+    // stacks « Objectifs » over « Activité récente ».
     final bottom = Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Expanded(child: DashboardHabitsBlock(onCategoryTap: openCategory)),
+        const SizedBox(width: AppSpacing.gutter),
         Expanded(
-          child: RecentActivity(
-            transactions: state.recent,
-            onViewAll: () => context.go(TransactionsScreen.path),
-            onOpen: (transaction) => context.go(
-              TransactionsScreen.location(operationId: transaction.id),
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (goals.isNotEmpty) ...[
+                GoalsSection(
+                  goals: goals,
+                  onViewAll: () => context.go(GoalsScreen.path),
+                ),
+                const SizedBox(height: AppSpacing.section),
+              ],
+              Expanded(
+                child: RecentActivity(
+                  transactions: state.recent,
+                  onViewAll: () => context.go(TransactionsScreen.path),
+                  onOpen: (transaction) => context.go(
+                    TransactionsScreen.location(operationId: transaction.id),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        if (goals.isNotEmpty) ...[
+        if (showUpcoming) ...[
           const SizedBox(width: AppSpacing.gutter),
           Expanded(
             child: Align(
               alignment: Alignment.topCenter,
-              child: GoalsSection(
-                goals: goals,
-                onViewAll: () => context.go(GoalsScreen.path),
+              child: UpcomingChargesSection(
+                upcoming: upcoming,
+                onViewAll: () => context.go(SubscriptionsScreen.path),
+                onOpen: (seriesId) {
+                  ref.read(selectedSeriesProvider.notifier).open(seriesId);
+                  context.go(SubscriptionsScreen.path);
+                },
               ),
             ),
           ),
