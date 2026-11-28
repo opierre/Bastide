@@ -112,6 +112,7 @@ details?}}`. Model names refer to the Pydantic schemas in `backend/app/features/
 | Method | Path | Query | Body | Response |
 |--------|------|-------|------|----------|
 | `GET` | `/dashboard/summary` | `month` |  | 200 `DashboardSummary` |
+| `GET` | `/dashboard/habits` | `month` |  | 200 `DashboardHabits` |
 | `GET` | `/dashboard/trends` | `month` |  | 200 `DashboardTrends` |
 
 ## settings
