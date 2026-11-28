@@ -6,13 +6,14 @@ import 'package:bastide/core/widgets/app_card.dart';
 import 'package:bastide/core/widgets/app_segmented.dart';
 import 'package:bastide/core/widgets/app_shell.dart';
 import 'package:bastide/core/widgets/bar_charts.dart';
-import 'package:bastide/core/widgets/institution_avatar.dart';
 import 'package:bastide/core/widgets/primary_button.dart';
 import 'package:bastide/core/widgets/repere_meter.dart';
 import 'package:bastide/core/widgets/state_views.dart';
 import 'package:bastide/core/widgets/status_text.dart';
 import 'package:bastide/features/dashboard/application/dashboard_controller.dart';
 import 'package:bastide/features/dashboard/application/dashboard_habits_provider.dart';
+import 'package:bastide/features/dashboard/application/upcoming_charges_provider.dart';
+import 'package:bastide/features/goals/application/goals_controller.dart';
 import 'package:bastide/features/dashboard/presentation/category_habits.dart';
 import 'package:bastide/features/transactions/application/transactions_controller.dart';
 import 'package:bastide/features/dashboard/domain/dashboard_summary.dart';
@@ -21,7 +22,6 @@ import 'package:bastide/features/dashboard/presentation/category_spending.dart';
 import 'package:bastide/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:bastide/features/dashboard/presentation/monthly_savings.dart';
 import 'package:bastide/features/dashboard/presentation/reading_line.dart';
-import 'package:bastide/features/dashboard/presentation/recent_activity.dart';
 import 'package:bastide/features/transactions/application/review_count_provider.dart';
 import 'package:bastide/l10n/app_localizations.dart';
 import 'package:flutter/gestures.dart';
@@ -33,16 +33,17 @@ import 'package:lucide_icons_flutter/lucide_icons_300.dart';
 import '../../support/route_probe.dart';
 import '../../support/dashboard_fixtures.dart';
 import '../../support/fake_dashboard_controller.dart';
+import '../../support/goals_fixtures.dart';
 
 DashboardState _state({
   DashboardSummary? summary,
   DashboardTrends? trends,
-  List<RecentTransaction>? recent,
+  bool hasTransactions = true,
 }) => DashboardState(
   month: DateTime(2026, 5),
   summary: summary ?? specSummary(),
   trends: trends ?? specTrends(),
-  recent: recent ?? specRecent(),
+  hasTransactions: hasTransactions,
 );
 
 Widget _wrap({
@@ -57,6 +58,14 @@ Widget _wrap({
         () => FakeDashboardController(initialState: state),
       ),
       dashboardHabitsProvider.overrideWith((ref) async => specHabits()),
+      // No side block: the band's layouts are covered in
+      // `dashboard_band_test.dart`.
+      goalsControllerProvider.overrideWith(
+        () => FakeGoalsController(initialGoals: const []),
+      ),
+      upcomingChargesProvider.overrideWith(
+        (ref) async => throw StateError('offline'),
+      ),
     ],
     child: routed
         ? MaterialApp.router(
@@ -106,20 +115,6 @@ Finder _byKey(String key) => find.byKey(Key(key));
 void main() {
   BuildContext ctx(WidgetTester tester) =>
       tester.element(find.byType(DashboardScreen));
-
-  testWidgets('a recent activity row opens Transactions on it', (tester) async {
-    _useDesktopSurface(tester);
-    await tester.pumpWidget(_wrap(state: _state(), routed: true));
-    await tester.pumpAndSettle();
-
-    await tester.tap(_byKey('dashboardRecentRow-t1'));
-    await tester.pumpAndSettle();
-
-    expect(
-      probedLocation(tester.widget(_byKey('routeProbe'))),
-      '/transactions?operation=t1',
-    );
-  });
 
   group('reading line', () {
     testWidgets('leads with the savings rate, then income, expenses, net', (
@@ -477,79 +472,9 @@ void main() {
     });
   });
 
-  group('activité récente', () {
-    testWidgets('a header-less table of 36 px rows', (tester) async {
-      await _pump(tester, _state());
-
-      expect(find.byType(RecentActivity), findsOneWidget);
-      expect(
-        tester.getSize(_byKey('dashboardRecentRow-t1')).height,
-        AppSizes.tableRow,
-      );
-      expect(find.text('BNP Compte courant'), findsNWidgets(3));
-      expect(find.text('Toutes les transactions'), findsOneWidget);
-    });
-
-    testWidgets('as many rows as fit, six at 900 px', (tester) async {
-      final many = [
-        for (var i = 0; i < 12; i++)
-          RecentTransaction(
-            id: 'r$i',
-            label: 'Café du Port',
-            accountLabel: 'Compte courant',
-            bookedDate: DateTime(2026, 5, 20 - i),
-            amountMinor: -420,
-            currency: 'EUR',
-          ),
-      ];
-      await _pump(tester, _state(recent: many));
-
-      final shown = find.byWidgetPredicate(
-        (w) =>
-            w.key is ValueKey<String> &&
-            (w.key! as ValueKey<String>).value.startsWith(
-              'dashboardRecentRow-',
-            ),
-      );
-      expect(shown.evaluate().length, inInclusiveRange(5, 8));
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('a raw bank label is set in Geist Mono behind « ? »', (
-      tester,
-    ) async {
-      await _pump(
-        tester,
-        _state(
-          recent: [
-            RecentTransaction(
-              id: 'raw',
-              label: 'CB CAFE DU PORT 12/05',
-              accountLabel: 'Compte courant',
-              bookedDate: DateTime(2026, 5, 12),
-              amountMinor: -512,
-              currency: 'EUR',
-              isRawLabel: true,
-            ),
-          ],
-        ),
-      );
-
-      final label = tester.widget<Text>(find.text('CB CAFE DU PORT 12/05'));
-      expect(label.style?.fontFamily, AppFonts.mono);
-      final avatar = tester.widget<InstitutionAvatar>(
-        find.descendant(
-          of: _byKey('dashboardRecentRow-raw'),
-          matching: find.byType(InstitutionAvatar),
-        ),
-      );
-      expect(avatar.name, isEmpty);
-    });
-  });
-
   group('states', () {
     testWidgets('no transaction at all: the empty state', (tester) async {
-      await _pump(tester, _state(recent: const []));
+      await _pump(tester, _state(hasTransactions: false));
 
       expect(find.byType(EmptyStateView), findsOneWidget);
       expect(find.text('Aucune donnée pour ce mois'), findsOneWidget);
@@ -582,9 +507,8 @@ void main() {
         expect(_byKey('dashboardReadingTrend-$id'), findsNothing);
       }
       expect(find.text('Aucune dépense ce mois.'), findsOneWidget);
-      // The chart and the activity keep their own ranges.
+      // The savings chart keeps its own range.
       expect(find.byType(SignedBarChart), findsOneWidget);
-      expect(find.byType(RecentActivity), findsOneWidget);
     });
 
     testWidgets('loading draws the silhouette, not a spinner', (tester) async {
@@ -608,7 +532,19 @@ void main() {
       await tester.pump();
 
       expect(_byKey('dashboardLoadingIndicator'), findsOneWidget);
-      expect(find.byType(SkeletonBlock), findsNWidgets(5));
+      // The reading line, the two charts, then the band: the habits block
+      // on the left half, « Objectifs » beside « À venir » on the right.
+      expect(find.byType(SkeletonBlock), findsNWidgets(6));
+      final habits = tester.getRect(_byKey('dashboardSkeletonHabits'));
+      final goals = tester.getRect(_byKey('dashboardSkeletonGoals'));
+      final upcoming = tester.getRect(_byKey('dashboardSkeletonUpcoming'));
+      expect(goals.left, greaterThan(habits.right));
+      expect(upcoming.left, greaterThan(goals.right));
+      expect(goals.top, habits.top);
+      expect(upcoming.top, habits.top);
+      expect(goals.width, closeTo(upcoming.width, 1));
+      expect(habits.width, closeTo(goals.width * 2 + AppSpacing.gutter, 1));
+      expect(goals.height, lessThan(habits.height));
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
@@ -628,7 +564,6 @@ void main() {
       expect(find.text('Spending by category'), findsOneWidget);
       expect(find.text('Monthly savings'), findsOneWidget);
       expect(find.text('on average over 12\u00A0months'), findsOneWidget);
-      expect(find.text('All transactions'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -675,26 +610,19 @@ void main() {
       expect(find.byType(ReadingLine), findsOneWidget);
       expect(find.byType(CategorySpending), findsOneWidget);
       expect(find.byType(MonthlySavings), findsOneWidget);
-      expect(find.byType(RecentActivity), findsOneWidget);
       expect(find.byType(CategoryHabits), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   });
 
   group('par rapport à vos habitudes', () {
-    testWidgets('sits on the left half of the bottom band', (tester) async {
+    testWidgets('sits under the charts, from the left edge', (tester) async {
       await _pump(tester, _state());
 
       final habits = tester.getRect(_byKey('dashboardHabits'));
       final spending = tester.getRect(_byKey('dashboardCategorySpending'));
       expect(habits.left, spending.left);
-      expect(habits.width, closeTo(spending.width, 1));
       expect(habits.top, greaterThan(spending.bottom));
-      // « Activité récente » keeps the right half until #386.
-      expect(
-        tester.getRect(_byKey('dashboardRecentActivity')).left,
-        greaterThan(habits.right),
-      );
       expect(tester.takeException(), isNull);
     });
 

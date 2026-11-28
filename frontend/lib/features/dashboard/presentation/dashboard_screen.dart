@@ -14,22 +14,22 @@ import '../../recurring/application/subscriptions_controller.dart';
 import '../../recurring/presentation/subscriptions_screen.dart';
 import '../../transactions/application/transactions_controller.dart';
 import '../../transactions/presentation/transactions_screen.dart';
+import '../application/dashboard_band.dart';
 import '../application/dashboard_controller.dart';
-import '../application/upcoming_charges_provider.dart';
 import '../domain/dashboard_summary.dart';
+import '../domain/upcoming_charges.dart';
 import 'category_habits.dart';
 import 'category_spending.dart';
 import 'goals_section.dart';
 import 'monthly_savings.dart';
 import 'reading_line.dart';
-import 'recent_activity.dart';
 import 'upcoming_charges_section.dart';
 
 /// « Tableau de bord », the « Lecture du mois » (`docs/design/04-dashboard.md`):
 /// five blocks 24 px apart in the content region. The reading line, a
 /// hairline, « Dépenses par catégorie » beside « Épargne mensuelle », a
-/// hairline, then « Par rapport à vos habitudes » beside « Objectifs » and
-/// « Activité récente », and « À venir » while charges remain this month.
+/// hairline, then the bottom band: « Par rapport à vos habitudes » on the
+/// left half, « Objectifs » beside « À venir » on the right half.
 /// Sections, not cards: nothing here is framed.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -83,12 +83,18 @@ const _chartsBlockHeight =
 /// « Épargne mensuelle » sets its height).
 const _headingBand = AppSpacing.xxl;
 
-/// Below this height the bottom sections no longer fit with a useful number
-/// of rows, so the panel scrolls instead of squeezing them.
+/// The height of « Objectifs » and « À venir » at their fullest: a heading
+/// band and four 48 px rows.
+const _sideBlockHeight =
+    _headingBand + UpcomingCharges.maxRows * AppSizes.tableRowTwoLines;
+
+/// Below this height the bottom band no longer fits with a useful number of
+/// rows, so the panel scrolls instead of squeezing it.
 const _minFillHeight = 640.0;
 
-/// The bottom sections' height when the panel scrolls: a heading and six rows.
-const _scrolledBottomHeight = _headingBand + 6 * AppSizes.tableRow;
+/// The bottom band's height when the panel scrolls: room for the side blocks
+/// at their fullest, which also gives the habits table six rows.
+const _scrolledBottomHeight = _sideBlockHeight + AppSpacing.lg;
 
 class _DashboardContent extends ConsumerWidget {
   const _DashboardContent({required this.state});
@@ -97,15 +103,7 @@ class _DashboardContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Up to four active goals, or nothing: a goals load that has not landed or
-    // has failed leaves « Activité récente » the whole right half rather than
-    // putting an error about a side section on the dashboard.
-    final goals =
-        ref.watch(goalsControllerProvider).value?.topGoals ?? const [];
-    // The same for « À venir », which also stays away while there is nothing
-    // left to charge this month.
-    final upcoming = ref.watch(upcomingChargesProvider).value;
-    final showUpcoming = upcoming != null && !upcoming.isEmpty;
+    final band = ref.watch(dashboardBandProvider);
     final summary = state.summary;
 
     void openCategory(String? categoryId, DateTime month) {
@@ -135,55 +133,58 @@ class _DashboardContent extends ConsumerWidget {
       ),
     );
 
-    // « Par rapport à vos habitudes » on the left half, as the spec places
-    // it. Until the bottom band takes its final shape (#386), the right half
-    // stacks « Objectifs » over « Activité récente ».
-    final bottom = Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(child: DashboardHabitsBlock(onCategoryTap: openCategory)),
-        const SizedBox(width: AppSpacing.gutter),
-        Expanded(
-          child: Column(
+    Widget goals({required bool compact}) => GoalsSection(
+      goals: band.goals,
+      compact: compact,
+      onViewAll: () => context.go(GoalsScreen.path),
+      onOpen: (goalId) {
+        ref.read(selectedGoalProvider.notifier).select(goalId);
+        context.go(GoalsScreen.path);
+      },
+    );
+
+    Widget upcoming(UpcomingCharges upcoming) => UpcomingChargesSection(
+      upcoming: upcoming,
+      onViewAll: () => context.go(SubscriptionsScreen.path),
+      onOpen: (seriesId) {
+        ref.read(selectedSeriesProvider.notifier).open(seriesId);
+        context.go(SubscriptionsScreen.path);
+      },
+    );
+
+    final habits = DashboardHabitsBlock(onCategoryTap: openCategory);
+    // The right half of the band, laid out by what it has to show (`04`
+    // « États »); `null` when both side blocks are hidden.
+    final Widget? right = switch (band.layout) {
+      DashboardBandLayout.goalsAndUpcoming => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: goals(compact: true)),
+          const SizedBox(width: AppSpacing.gutter),
+          Expanded(child: upcoming(band.upcoming!)),
+        ],
+      ),
+      DashboardBandLayout.goalsOnly => goals(compact: false),
+      DashboardBandLayout.upcomingOnly => upcoming(band.upcoming!),
+      DashboardBandLayout.habitsOnly => null,
+    };
+
+    final bottom = right == null
+        ? habits
+        : Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (goals.isNotEmpty) ...[
-                GoalsSection(
-                  goals: goals,
-                  onViewAll: () => context.go(GoalsScreen.path),
-                ),
-                const SizedBox(height: AppSpacing.section),
-              ],
+              Expanded(child: habits),
+              const SizedBox(width: AppSpacing.gutter),
               Expanded(
-                child: RecentActivity(
-                  transactions: state.recent,
-                  onViewAll: () => context.go(TransactionsScreen.path),
-                  onOpen: (transaction) => context.go(
-                    TransactionsScreen.location(operationId: transaction.id),
-                  ),
+                child: Align(
+                  key: const Key('dashboardBandRight'),
+                  alignment: AlignmentDirectional.topStart,
+                  child: right,
                 ),
               ),
             ],
-          ),
-        ),
-        if (showUpcoming) ...[
-          const SizedBox(width: AppSpacing.gutter),
-          Expanded(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: UpcomingChargesSection(
-                upcoming: upcoming,
-                onViewAll: () => context.go(SubscriptionsScreen.path),
-                onOpen: (seriesId) {
-                  ref.read(selectedSeriesProvider.notifier).open(seriesId);
-                  context.go(SubscriptionsScreen.path);
-                },
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
+          );
 
     List<Widget> top() => [
       ReadingLine(summary: summary, month: state.month),
@@ -255,7 +256,9 @@ class _EmptyState extends StatelessWidget {
 const _readingLineSilhouette = 132.0;
 
 /// The silhouette of the five blocks, in `hover` blocks pulsing together, so
-/// nothing moves when the data lands (`00` §7).
+/// nothing moves when the data lands (`00` §7). The bottom band is drawn in
+/// its full shape: the habits block on the left half, « Objectifs » and
+/// « À venir » side by side on the right half, at their fullest height.
 class _DashboardSkeleton extends StatelessWidget {
   const _DashboardSkeleton({super.key});
 
@@ -284,10 +287,37 @@ class _DashboardSkeleton extends StatelessWidget {
           SizedBox(height: AppSpacing.section),
           Expanded(
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: SkeletonBlock(height: double.infinity)),
+                Expanded(
+                  child: SkeletonBlock(
+                    key: Key('dashboardSkeletonHabits'),
+                    height: double.infinity,
+                  ),
+                ),
                 SizedBox(width: AppSpacing.gutter),
-                Expanded(child: SkeletonBlock(height: double.infinity)),
+                Expanded(
+                  child: SizedBox(
+                    height: _sideBlockHeight,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: SkeletonBlock(
+                            key: Key('dashboardSkeletonGoals'),
+                            height: double.infinity,
+                          ),
+                        ),
+                        SizedBox(width: AppSpacing.gutter),
+                        Expanded(
+                          child: SkeletonBlock(
+                            key: Key('dashboardSkeletonUpcoming'),
+                            height: double.infinity,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

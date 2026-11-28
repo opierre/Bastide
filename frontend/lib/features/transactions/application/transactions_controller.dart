@@ -92,8 +92,7 @@ class TransactionFilters {
   /// Set from an import history row; shown as a removable chip.
   final ImportBatchFilter? importBatch;
 
-  /// Set from a deep link (a dashboard « Activité récente » row, an account's
-  /// « Opérations » row): the list holds that one operation and nothing else.
+  /// Set from a deep link (an account's « Opérations » row): the list holds that one operation and nothing else.
   /// Shown as a removable chip; any other filter lifts it.
   final String? operationId;
   final String q;

@@ -35,8 +35,8 @@ class SelectedTransaction extends Notifier<String?> {
 final selectedTransactionProvider =
     NotifierProvider<SelectedTransaction, String?>(SelectedTransaction.new);
 
-/// Opens Transactions on one operation, from a deep link (a dashboard
-/// « Activité récente » row, an account's « Opérations » row).
+/// Opens Transactions on one operation, from a deep link (an account's
+/// « Opérations » row).
 ///
 /// The list is narrowed to that one operation, whatever the filters were, and
 /// it is selected for the inspector: the row the user clicked, without the

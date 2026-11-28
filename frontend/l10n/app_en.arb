@@ -477,8 +477,6 @@
   "dashboardHabitsError": "The comparison with your habits could not be loaded. Nothing was changed.",
   "dashboardSavingsTrendTitle": "Monthly savings",
   "dashboardSavingsTrendAverage": "on average over 12\u00A0months",
-  "dashboardRecentActivityTitle": "Recent activity",
-  "dashboardViewAllTransactions": "All transactions",
   "dashboardEmptyTitle": "No data for this month",
   "dashboardEmptyBody": "Import an OFX or QFX statement to see your income, your spending and your savings rate.",
   "dashboardGoToImports": "Go to imports",

@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-import '../../../core/logos/logo_ref.dart';
-
 /// One month on the savings chart.
 @immutable
 class SavingsPoint {
@@ -74,42 +72,4 @@ class DashboardTrends {
     final remainder = total.remainder(count);
     return remainder.abs() * 2 >= count ? quotient + total.sign : quotient;
   }
-}
-
-/// One row of « Activité récente ».
-///
-/// A flattened view rather than the transactions feature's `Transaction`: this row shows only
-/// a label, its account, a date and an amount, and the account *name* is resolved here so the
-/// widget never has to hold an id-to-name map (see the flutter-frontend skill's no-logic-in-
-/// widgets rule).
-@immutable
-class RecentTransaction {
-  const RecentTransaction({
-    required this.id,
-    required this.label,
-    required this.accountLabel,
-    required this.bookedDate,
-    required this.amountMinor,
-    required this.currency,
-    this.logo,
-    this.isRawLabel = false,
-  });
-
-  final String id;
-
-  /// The merchant if there is one, else the cleaned description.
-  final String label;
-
-  /// « BNP Compte courant »: the institution and the account it holds.
-  final String accountLabel;
-  final DateTime bookedDate;
-  final int amountMinor;
-  final String currency;
-
-  /// The rule logo the chip shows instead of the monogram; `null` for none.
-  final LogoRef? logo;
-
-  /// Whether [label] is the bank's raw description rather than a recognised
-  /// merchant: set in Geist Mono, behind the « ? » monogram (`00` §7).
-  final bool isRawLabel;
 }

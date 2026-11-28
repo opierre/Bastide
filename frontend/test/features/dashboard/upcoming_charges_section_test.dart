@@ -101,7 +101,7 @@ Widget _wrap({
             month: DateTime(2026, 5),
             summary: specSummary(),
             trends: specTrends(),
-            recent: specRecent(),
+            hasTransactions: true,
           ),
         ),
       ),
