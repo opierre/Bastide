@@ -2695,6 +2695,66 @@ abstract class AppLocalizations {
   /// **'Aucune dépense ce mois.'**
   String get dashboardCategoryNoSpending;
 
+  /// Heading of the dashboard block reading each category's month against its own monthly average.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par rapport à vos habitudes'**
+  String get dashboardHabitsTitle;
+
+  /// Right of the habits heading when the month spent more than usual in total; the amount is unsigned.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} de plus que votre moyenne'**
+  String dashboardHabitsMore(String amount);
+
+  /// Right of the habits heading when the month spent less than usual in total; the amount is unsigned.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} de moins que votre moyenne'**
+  String dashboardHabitsLess(String amount);
+
+  /// Right of the habits heading when the month's total gap to the averages is zero.
+  ///
+  /// In fr, this message translates to:
+  /// **'Égal à votre moyenne'**
+  String get dashboardHabitsSame;
+
+  /// Note under the habits heading when the selected month is the current one: its spending so far is read against full-month averages. The month is capitalized (« Mai »); days is today's day of the month.
+  ///
+  /// In fr, this message translates to:
+  /// **'{month} n’est pas terminé : ces montants comparent {days, plural, one{{days} jour} other{{days} jours}} à un mois entier.'**
+  String dashboardHabitsInProgress(String month, int days);
+
+  /// Header of the category column of the habits table.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get dashboardHabitsCategory;
+
+  /// Header of the repère column of the habits table, centred over the average marks; months is how many months the averages cover (12 in the usual case). Lowercase: it labels the marks.
+  ///
+  /// In fr, this message translates to:
+  /// **'moyenne sur {months} mois'**
+  String dashboardHabitsAverageOver(int months);
+
+  /// Header of the gap column of the habits table: the month's spending minus the average.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écart'**
+  String get dashboardHabitsGap;
+
+  /// Shown in place of the repère on a habits row whose category had no spending in the months counted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune dépense sur les mois précédents'**
+  String get dashboardHabitsNoHistory;
+
+  /// Error state of the habits block alone, when its data fails to load while the rest of the dashboard shows; « Réessayer » follows.
+  ///
+  /// In fr, this message translates to:
+  /// **'La comparaison avec vos habitudes n’a pas pu être chargée. Rien n’a été modifié.'**
+  String get dashboardHabitsError;
+
   /// Title of the monthly savings chart (bar or line view).
   ///
   /// In fr, this message translates to:
