@@ -6,10 +6,11 @@ exist: add it here first, then to `frontend/lib/core/theme/tokens.dart`.
 - **Order of authority:** this file, then the panel spec (`02` to `18`), then the mockup.
   Where the mockup and a written spec disagree, the written spec wins. Known differences are
   listed in §15.
-- **Mockup:** `docs/design/proposal_v6/index.html`, opened in a browser. Each spec names its
-  screen as `#panel=<id>`. Every figure, name and date in the mockup is invented. v6 repeats
-  `proposal_v5` and adds every modal (`#panel=m-frame` and one page per feature) and the
-  window controls (`#panel=window`).
+- **Mockup:** `docs/design/proposal_v7/index.html`, opened in a browser. Each spec names its
+  screen as `#panel=<id>`. Every figure, name and date in the mockup is invented. v7 repeats
+  `proposal_v6` and replaces the dashboard with five variants (`#panel=dashboard&variant=A`
+  to `E`); `04-dashboard.md` specifies D. v6 repeated `proposal_v5` and added every modal
+  (`#panel=m-frame` and one page per feature) and the window controls (`#panel=window`).
 - **Reference frame:** 1440 × 900. French copy sizes every box; English uses the same geometry.
 - This file replaces `00-shared-design-block.md` (v1: iris gradient, navy ground, grain). The v1
   text is in the git history and no longer applies.
@@ -287,7 +288,7 @@ Disabled is 45 % opacity and not focusable.
 
 ### Modal
 
-Mockup: `proposal_v6/index.html#panel=m-frame`, then one page per feature.
+Mockup: `proposal_v7/index.html#panel=m-frame`, then one page per feature.
 
 - **Frame:** `surface`, radius 12, `shadow`, no border, centred on `scrim`; at most the window
   height minus 24 px above and below.
@@ -384,6 +385,7 @@ One component for every value read against a reference.
 | Use | Scale | Mark |
 |---|---|---|
 | Savings rate (Dashboard) | 0 to 2 × the goal | the goal |
+| Category against its average (Dashboard) | 0 to 2 × the average | the average, labelled once in the column header (`over` from 120 %) |
 | Goal progress | 0 to target | none (the end of the track is the target) |
 | Debt ratio (Crédits) | 0–60 % | 35 % |
 | Debt ratio (Simulateur) | 0–70 % | 35 % |
@@ -577,6 +579,16 @@ Layout values that belong to one panel. Each comes from that panel's spec (or it
 frame where the spec is silent) and lives in `tokens.dart` under the class named in the
 heading. A new panel value is added here and to its spec, then to `tokens.dart`; a value two
 panels share moves to §4.
+
+### Tableau de bord: `AppDashboard` (`04-dashboard.md`)
+
+| Value | Token | Use |
+|---|---|---|
+| 130 / 90 / 96 px | `habitsCategoryColumn`, `habitsMonthColumn`, `habitsGapColumn` | « Par rapport à vos habitudes » columns; the repère takes the rest |
+| 48 px | `compactRow` | The two-line rows of « Objectifs » and « À venir » on a quarter of the width |
+| 2 / 12 px | `compactLineGap`, `compactMeterGap` | Between a compact row's two lines; between its repère and « saved / target » |
+| 150 px | `upcomingLabelMaxWidth` | The widest an « À venir » label gets before its ellipsis |
+| 150 / 190 / 44 px | `goalNameColumn`, `goalAmountColumn`, `goalPercentColumn` | One-line « Objectifs » rows when the block takes the whole right half |
 
 ### Objectifs: `AppGoalBanner` (`11-goals.md` §Inspector pane)
 

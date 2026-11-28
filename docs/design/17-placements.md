@@ -98,7 +98,7 @@ Flush panel, two panes: **list** (flexible, padding 24 32) · **inspector** (440
    in `text`; a declared value unsigned in `textSecondary`. A row opens its edit modal.
 
 ### Modals (all 440 px)
-Mockup: `proposal_v6/index.html#panel=m-investments`. Editing a placement puts the ghost
+Mockup: `proposal_v7/index.html#panel=m-investments`. Editing a placement puts the ghost
 « Supprimer » on the left of the footer; its destructive confirmation says the history goes.
 Clôturer keeps the ink primary: nothing is lost.
 - **Nouveau placement / Modifier:** Nom · Enveloppe (select from the catalogue) ·
