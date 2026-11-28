@@ -211,6 +211,52 @@ class RecurringSummary(BaseModel):
     currency: str
 
 
+class UpcomingCharge(BaseModel):
+    """A charge still due this month, ready to print — « 22 mai · −17,99 € »."""
+
+    series_id: str
+    label: str
+    #: Signed, like every other amount here.
+    amount_minor: int
+    due_on: date
+    #: Signed step of a recent price rise (negative on an outflow that grew), the same signal as
+    #: the summary's `price_increases`; `None` when the price has not risen recently.
+    price_increase_minor: int | None = None
+    #: The rule whose logo the series shows, as on `SeriesRead`; ``None`` shows the monogram.
+    logo_rule_id: str | None = None
+    logo_updated_at: datetime | None = None
+
+
+class UpcomingMissedCharge(BaseModel):
+    """A missed charge, by the summary's `missed` rule, printed as « Attendu le 5 mai »."""
+
+    series_id: str
+    label: str
+    #: Signed. Shown, but never counted in `UpcomingCharges.total_minor`.
+    amount_minor: int
+    expected_on: date
+    days_late: int
+    logo_rule_id: str | None = None
+    logo_updated_at: datetime | None = None
+
+
+class UpcomingCharges(BaseModel):
+    """The dashboard's « À venir »: what the active series will still charge this month.
+
+    Always the current month, whatever month the dashboard shows.
+    """
+
+    #: The last day of the current month, the end of the window.
+    through: date
+    #: Every charge in `charges`, summed. Signed, so negative; missed charges are left out.
+    total_minor: int
+    #: Due from today to `through` included, soonest first.
+    charges: list[UpcomingCharge]
+    #: Overdue past their tolerance with no charge since, oldest first.
+    missed: list[UpcomingMissedCharge]
+    currency: str
+
+
 class MergeSuggestionRead(BaseModel):
     """Two series that look like one subscription under two labels.
 

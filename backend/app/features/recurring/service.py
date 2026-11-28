@@ -18,6 +18,7 @@ from statistics import median_low
 from sqlalchemy.orm import Session
 
 from app.core.errors import ConflictError, NotFoundError, ValidationError
+from app.core.months import last_of_month, month_index
 from app.features.accounts.service import AccountService
 from app.features.accounts.settlement_rule import CARD_SETTLEMENT_CATEGORY_KEY
 from app.features.categories.repository import CategoryRepository
@@ -66,6 +67,37 @@ class PreviewResult:
     #: With `series`: the charges it does not hold yet, oldest first. Empty when the
     #: transaction is already one of its occurrences.
     addable: tuple[Transaction, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class DueCharge:
+    """A series charging before the end of the month, with its recent price rise if any."""
+
+    series: RecurringSeries
+    #: Signed step, negative on an outflow that grew; `None` when the price has not risen lately.
+    price_increase_minor: int | None
+
+
+@dataclass(frozen=True, slots=True)
+class OverdueCharge:
+    """A series whose charge went missing, with the summary's verdict on it."""
+
+    series: RecurringSeries
+    missed: MissedCharge
+
+
+@dataclass(frozen=True, slots=True)
+class UpcomingResult:
+    """What is still due this month. The series travel along so the route can add their logos."""
+
+    #: The last day of the current month.
+    through: date
+    #: The due charges summed, signed; missed charges are not in it.
+    total_minor: int
+    #: Soonest first.
+    due: tuple[DueCharge, ...]
+    #: Oldest first.
+    missed: tuple[OverdueCharge, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -890,6 +922,38 @@ class RecurringService:
             price_increases=_price_increases(active, today),
             missed=self._missed(user_id, active, today),
             currency=currency,
+        )
+
+    def upcoming(self, user_id: str, today: date) -> UpcomingResult:
+        """The charges the active series still expect this month, and the missed ones.
+
+        The same series and the same signals as `summary`: archived, dismissed and cancelled
+        series count nowhere, and the price rise and missed charge follow its rules. A charge is
+        due when its series' next expected date falls between ``today`` and the last day of
+        ``today``'s month, both included. An irregular series has no expected date to fall there.
+        """
+        active = [
+            row
+            for row in self._repository.list_for_user(user_id, archived=False)
+            if row.status in ACTIVE_STATUSES
+        ]
+        through = last_of_month(month_index(today))
+        rises = {rise.series_id: rise.delta_minor for rise in _price_increases(active, today)}
+        due = tuple(
+            DueCharge(series=row, price_increase_minor=rises.get(row.id))
+            for row in active
+            if row.cadence != "irregular" and today <= row.next_expected_date <= through
+        )
+        by_id = {row.id: row for row in active}
+        missed = tuple(
+            OverdueCharge(series=by_id[charge.series_id], missed=charge)
+            for charge in self._missed(user_id, active, today)
+        )
+        return UpcomingResult(
+            through=through,
+            total_minor=sum(charge.series.expected_amount_minor for charge in due),
+            due=due,
+            missed=missed,
         )
 
     def _missed(

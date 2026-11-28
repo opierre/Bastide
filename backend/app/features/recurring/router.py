@@ -33,6 +33,9 @@ from app.features.recurring.schemas import (
     SeriesRead,
     SeriesStatus,
     SeriesUpdate,
+    UpcomingCharge,
+    UpcomingCharges,
+    UpcomingMissedCharge,
 )
 from app.features.recurring.service import RecurringDetectionService, RecurringService
 from app.features.rules.deps import get_logo_resolver
@@ -207,6 +210,53 @@ async def get_summary(
     clock — the same arrangement as the dashboard's trends.
     """
     return service.summary(user.id, user.currency, date.today())
+
+
+@router.get("/upcoming", response_model=UpcomingCharges)
+async def get_upcoming(
+    service: Annotated[RecurringService, Depends(_service)],
+    logos: Annotated[RuleLogoResolver, Depends(get_logo_resolver)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> UpcomingCharges:
+    """The charges still due from today to the end of the current month, and the missed ones.
+
+    Active series only, by the same rules as `/recurring/summary`. `total_minor` sums the due
+    charges and leaves the missed ones out. Declared above `/{series_id}` and takes
+    `date.today()` here, as `/recurring/summary` does.
+    """
+    result = service.upcoming(user.id, date.today())
+    latest = service.latest_charges(
+        [charge.series for charge in result.due] + [charge.series for charge in result.missed]
+    )
+    charges = [
+        UpcomingCharge(
+            series_id=charge.series.id,
+            label=charge.series.label,
+            amount_minor=charge.series.expected_amount_minor,
+            due_on=charge.series.next_expected_date,
+            price_increase_minor=charge.price_increase_minor,
+        )
+        for charge in result.due
+    ]
+    missed = [
+        UpcomingMissedCharge(
+            series_id=charge.series.id,
+            label=charge.series.label,
+            amount_minor=charge.series.expected_amount_minor,
+            expected_on=charge.missed.expected_on,
+            days_late=charge.missed.days_late,
+        )
+        for charge in result.missed
+    ]
+    for row in [*charges, *missed]:
+        logos.fill(row, latest.get(row.series_id))
+    return UpcomingCharges(
+        through=result.through,
+        total_minor=result.total_minor,
+        charges=charges,
+        missed=missed,
+        currency=user.currency,
+    )
 
 
 @router.get("/merge-suggestions", response_model=list[MergeSuggestionRead])
