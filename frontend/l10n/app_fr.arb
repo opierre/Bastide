@@ -4483,6 +4483,40 @@
       }
     }
   },
+  "dashboardUpcomingTitle": "À venir d’ici le {date}",
+  "@dashboardUpcomingTitle": {
+    "description": "Heading of the dashboard's « À venir » block: the recurring charges still due before the end of the current month. {date} is the month's last day, day and month in the locale's short form (« 31 mai »).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardUpcomingPriceRise": "{date} · hausse de {amount}",
+  "@dashboardUpcomingPriceRise": {
+    "description": "Date line of an « À venir » row whose price rose: the due date, then the unsigned rise (new amount − previous).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardUpcomingExpected": "Attendu le {date}",
+  "@dashboardUpcomingExpected": {
+    "description": "Date line of an « À venir » row whose charge is missed: the date it was expected on.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardUpcomingViewAll": "Tous les abonnements",
+  "@dashboardUpcomingViewAll": {
+    "description": "Link under the dashboard's « À venir » block, opening the Abonnements panel."
+  },
   "allocationDatePick": "Choisir une date",
   "@allocationDatePick": {
     "description": "Tooltip on the calendar button of the allocation modal's date field."

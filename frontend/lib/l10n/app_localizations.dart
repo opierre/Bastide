@@ -5585,6 +5585,30 @@ abstract class AppLocalizations {
   /// **'/ {target}'**
   String dashboardGoalsTarget(String target);
 
+  /// Heading of the dashboard's « À venir » block: the recurring charges still due before the end of the current month. {date} is the month's last day, day and month in the locale's short form (« 31 mai »).
+  ///
+  /// In fr, this message translates to:
+  /// **'À venir d’ici le {date}'**
+  String dashboardUpcomingTitle(String date);
+
+  /// Date line of an « À venir » row whose price rose: the due date, then the unsigned rise (new amount − previous).
+  ///
+  /// In fr, this message translates to:
+  /// **'{date} · hausse de {amount}'**
+  String dashboardUpcomingPriceRise(String date, String amount);
+
+  /// Date line of an « À venir » row whose charge is missed: the date it was expected on.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attendu le {date}'**
+  String dashboardUpcomingExpected(String date);
+
+  /// Link under the dashboard's « À venir » block, opening the Abonnements panel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les abonnements'**
+  String get dashboardUpcomingViewAll;
+
   /// Tooltip on the calendar button of the allocation modal's date field.
   ///
   /// In fr, this message translates to:

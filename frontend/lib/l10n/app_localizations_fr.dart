@@ -3566,6 +3566,24 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String dashboardUpcomingTitle(String date) {
+    return 'À venir d’ici le $date';
+  }
+
+  @override
+  String dashboardUpcomingPriceRise(String date, String amount) {
+    return '$date · hausse de $amount';
+  }
+
+  @override
+  String dashboardUpcomingExpected(String date) {
+    return 'Attendu le $date';
+  }
+
+  @override
+  String get dashboardUpcomingViewAll => 'Tous les abonnements';
+
+  @override
   String get allocationDatePick => 'Choisir une date';
 
   @override
